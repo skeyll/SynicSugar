@@ -39,4 +39,4 @@ SynicSugar is a free cost and a easy use. However, it is not perfect.
 While it has standard host-migration, re-connection, and good basic matchmake, p2p cannot completely prevent cheating and full-mesh cannot send to more peers over the fps in a second. SynicSugar is suited for action and battle games in a small group.
 If you create a large scale MMO or BattleRoyale, you can use [Mirror](https://github.com/MirrorNetworking/Mirror). The library to use dedicated server is able to connect hundreds of player. It is also possible to use EOS as a free relay. [Mirage](https://github.com/MirageNet/Mirage) is Mirror with UniTask.
 If you need more various API and support, you can select PhotonFusion. The ExitGames's service has provided relays and network SDK for Unity community in many years. Photon is similar to SynicSugar in that it doesn't require managing a server, but the client-host architecture supports over 100 person pvp.
-Appropriate netcode depends on the game and development team. ![image](https://user-images.githubusercontent.com/50002207/230055772-524b23f3-59ad-43b8-ac0d-27e58ef319b9.png)
+Appropriate netcode depends on the game and development team.
