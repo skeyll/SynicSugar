@@ -1,0 +1,17 @@
+{
+    "name": "net.skeyll.synicsugar",
+    "displayName": "SynicSugar",
+    "version": "0.0.3",
+    "unity": "2021.3",
+    "description": "No cost and no CCU Limit Netcode for Unity.",
+    "keywords": ["Netcode", "EOS", "p2p"],
+    "license": "MIT",
+    "changelogUrl": "https://github.com/skeyll/SynicSugar/releases",
+    "licensesUrl": "https://github.com/skeyll/SynicSugar/main/LICENSE",
+    "dependencies": {
+      "com.unity.nuget.mono-cecil": "1.11.4",
+      "com.playeveryware.eos": "2.2.0",
+      "com.cysharp.unitask": "2.0.31",
+      "com.cysharp.memorypack": "1.9.13"
+    }
+  }

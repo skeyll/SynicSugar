@@ -1,0 +1,78 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+	<LangVersion>9.0</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="AdditionalCommonsTemplate.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>AdditionalCommonsTemplate.tt</DependentUpon>
+    </None>
+    <None Include="AttributeTemplate.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>AttributeTemplate.tt</DependentUpon>
+    </None>
+    <None Include="CoreTemplate.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>CoreTemplate.tt</DependentUpon>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis" Version="3.9.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="3.9.0" />
+    <PackageReference Include="System.CodeDom" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="AttributeTemplate.tt">
+	  <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>AttributeTemplate.cs</LastGenOutput>
+    </None>
+    <None Update="CoreTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>CoreTemplate.cs</LastGenOutput>
+    </None>
+    <None Update="AdditionalPlayerTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>AdditionalPlayerTemplate.cs</LastGenOutput>
+    </None>
+    <None Update="AdditionalCommonsTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>AdditionalCommonsTemplate.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="AdditionalCommonsTemplate.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>AdditionalCommonsTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Update="AdditionalPlayerTemplate.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>AdditionalPlayerTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Update="AttributeTemplate.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>AttributeTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Update="CoreTemplate.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>CoreTemplate.tt</DependentUpon>
+    </Compile>
+  </ItemGroup>
+	
+</Project>
