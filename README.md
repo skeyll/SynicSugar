@@ -1,4 +1,5 @@
 # SynicSugar
+![https://github.com/skeyll/SynicSugar/blob/main/LICENSE](https://img.shields.io/github/license/skeyll/SynicSugar) ![Unity](https://img.shields.io/badge/Unity-2021.3%2B-blue)
 ### What is SynicSugar?
 SynicSugar is the syntax sugar to synchronize a game via the internet. The introduce and the process is super sonic. The goal is an easy online-game dev for everyone!
 
@@ -95,4 +96,4 @@ While it has standard host-migration, re-connection, and good basic matchmake, p
  
  If you need more various API and support, you can select PhotonFusion. The ExitGames's service has provided relays and network SDK for Unity community in many years. Photon is similar to SynicSugar in that it doesn't require managing a server, but the client-host architecture supports over 100 person pvp.
  
- Appropriate netcode depends on the game and development team. Your choice determines the path.
+ Appropriate netcode depends on the game and team. Your choice determines the path.
