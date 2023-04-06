@@ -22,7 +22,7 @@ public partial class Player {
     }
     [Rpc] 
     public void Heal(HealInfo info){
-         Debug.log($"{OwnerId} heal {info.target} {info.amount}");
+         Debug.log($"{OwnerUserId} heal {info.target} {info.amount}");
     }
 }    
 [MemoryPackable]
