@@ -21,14 +21,20 @@ public partial class Player {
          Debug.log("Hi");
     }
     [Rpc] 
-    public void Heal(UserId id){
-         Debug.log("Hi");
+    public void Heal(HealInfo info){
+         Debug.log($"{OwnerId} heal {info.target} {info.amount}");
     }
 }    
 [MemoryPackable]
 public partial class Skill {
     public string Name;
+    public bool isValid;
     public int Damage;
+}
+[MemoryPackable]
+public partial class HealInfo {
+    public UserId target;
+    public int amount;
 }
 ```
 ```csharp
