@@ -38,7 +38,7 @@ jobs:
         env:
            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-           tag_name: ${{ event.inputs.tag }}
+           tag_name: ${{ github.event.inputs.tag }}
            release_name: v${{ github.event.inputs.tag }}
            
       - name: Download package
