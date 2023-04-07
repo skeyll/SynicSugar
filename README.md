@@ -1,6 +1,5 @@
 # SynicSugar
 ![https://github.com/skeyll/SynicSugar/blob/main/LICENSE](https://img.shields.io/github/license/skeyll/SynicSugar) ![Unity](https://img.shields.io/badge/Unity-2021.3%2B-blue)
-### What is SynicSugar?
 SynicSugar is the syntax sugar to synchronize a game via the internet. The introduce and the process is super sonic. The goal is an easy online-game dev for everyone!
 
 ```csharp
@@ -75,15 +74,30 @@ public partial class GameSystem : MonoBehaviour {
  Large dependencies is for performance. SynicSugar is a full-mesh p2p. All peers connect with each other instead of 1-to-many like dedicated server and client-server model. If we want to sync data with 63 peer in a full-mesh, we need to send data 63 times. Individual connection is fast but the whole is costly. So the core needs faster.
 
 ### Getting started
-1.Install SynicSugar and dependent librarys via OpenUPM or import asset package (that contains dependencies)  in SynicSugar/release.
+##### 1.Install SynicSugar and dependent librarys via OpenUPM or import asset package in SynicSugar/release.
+1. Rigister some package with OpenUPM
+ Edit-ProjectSetting-PackageManager
+ Name:OpenUPM
+ URL: https://package.openupm.com
+ Scope(s): com.cysharp.unitask
+           com.playeveryware.eos
+           com.cysharp.memorypack
+![image](https://user-images.githubusercontent.com/50002207/230567095-04cfbfcc-f1c9-4b0d-9088-2fbfc08da8f8.png)
 
-2.Get some tokens for EOS. About more, please check the eos document or the plugin page. SynicSugar doesn't need EOS store brand. App credential needs p2p.
+2. Install these packages
+　These registered packages can be imported from Window/PackageManager/MyRegistries. SynicSugar will probably work with the latest version of these packages, but has been developed using the following versions:
+ * Epic Online Services Plugin for Unity: 2.2.0
+ * UniTask: 2.0.31
+ * MemoryPack: 1.9.13
+ 
 
-3.auth
+##### 2.Get some tokens for EOS. About more, please check the eos document or the plugin page. SynicSugar doesn't need EOS store brand. App credential needs p2p.
 
-4.matchmake
+##### 3.auth
 
-5.p2p connect
+##### 4.matchmake
+
+##### 5.p2p connect
 
 ### Warning
 The Rpc process (like SynicSugarRpcxxx) also are generated now. However, I'll change the such send method to insert of IL weaving to prevent unintentional bugs and cheating. You can call the Rpc process manually, but it may change.
