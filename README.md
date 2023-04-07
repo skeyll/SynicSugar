@@ -1,7 +1,7 @@
 # SynicSugar
 ![https://github.com/skeyll/SynicSugar/blob/main/LICENSE](https://img.shields.io/github/license/skeyll/SynicSugar) ![Unity](https://img.shields.io/badge/Unity-2021.3%2B-blue)
 
-SynicSugar is the syntax sugar to synchronize a game via the internet. The introduce and the process is super sonic. The goal is an easy online-game dev for everyone!
+SynicSugar is the syntax sugar to synchronize a game via the internet.　The backend is EOS and there is no charge for use. The goal is an easy online-game dev for everyone!
 
 ## Feature
 - Max 64 peers full-mesh connction
@@ -97,6 +97,10 @@ public partial class GameSystem : MonoBehaviour {
  * Epic Online Services Plugin for Unity: 2.2.0
  * UniTask: 2.0.31
  * MemoryPack: 1.9.13
+ 
+ MemoryPack needs "System.Runtime.CompilerServices.Unsafe/6.0.0", so ðownload nuget package from https://www.nuget.org/package/System.Runtime.CompilerServices.Unsafe/6.0.0 's DownloadPackage.
+ 
+ The required file is lib/netstandard2.0/System.Runtime.CompilerServices.Unsafe.dll. Import it into anywhere in your project.
  
 
 ### 2.Get some tokens for EOS. About more, please check the eos document or the plugin page. SynicSugar doesn't need EOS store brand. App credential needs p2p.
