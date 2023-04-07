@@ -18,6 +18,8 @@ jobs:
 
       - name: Build
         uses: game-ci/unity-builder@v2
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
           unityVersion: 2021.3.20.f1
           buildMethod: SynicSugar.Build.BuildUnityPackage     
