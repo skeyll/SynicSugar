@@ -30,10 +30,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Get tag
-      - run: echo "GIT_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+        run: echo "GIT_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
       
       - name: Create release
-      - uses: actions/create-release@v1
+        uses: actions/create-release@v1
         id: create_release
         env:
            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -41,9 +41,8 @@ jobs:
            tag_name: ${{ env.GIT_TAG }}
            release_name: v${{ env.GIT_TAG }}
            
-      - name: Upload artifact package to Release
-      - uses: actions/download-artifact@v2-preview
-      - uses: actions/upload-release-asset@v1
+      - name: Download package
+        uses: actions/download-artifact@v2
         env:
            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -52,3 +51,9 @@ jobs:
            asset_name: SynicSugar.${{ env.GIT_TAG }}.unitypackage
            asset_content_type: application/octet-stream
            path: build
+           
+      - name: Upload package
+        uses: actions/upload-artifact@v2
+        with:
+          name: SynciSugar.${{ env.GIT_TAG }}.unitypackage
+          path: build
