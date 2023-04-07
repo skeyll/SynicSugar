@@ -1,0 +1,54 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      sub:
+        description: 'tag'
+        required: false
+        type: string
+        default: 0.0.0
+jobs:
+  Build:
+    name: Build .unitypacage with Unity.
+    runs-on: ubuntu-latest
+    container:
+      image: gableroux/unity3d:2021.3.20f1-linux-il2cpp
+    timeout-minutes: 100
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set tag
+        run: echo "GIT_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+      
+      - name: Export unitypackage
+        run: $UNITY_BIN -quit -batchmode -nographics -logFile /dev/stdout -exportPackage Assets/SynicSugar SynicSugar.${{ env.GIT_TAG }}.unitypackage -projectPath ./
+        working-directory: SynicSugar
+
+  Upload:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get tag
+      - run: echo "GIT_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+      
+      - name: Create release
+      - uses: actions/create-release@v1
+        id: create_release
+        env:
+           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+           tag_name: ${{ env.GIT_TAG }}
+           release_name: v${{ env.GIT_TAG }}
+           
+      - name: Upload artifact package to Release
+      - uses: actions/download-artifact@v2-preview
+      - uses: actions/upload-release-asset@v1
+        env:
+           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+           upload_url: ${{ steps.create_release.outputs.upload_url }}
+           asset_path: ./SynicSugar.${{ env.GIT_TAG }}.unitypackage
+           asset_name: SynicSugar.${{ env.GIT_TAG }}.unitypackage
+           asset_content_type: application/octet-stream
+           path: build
