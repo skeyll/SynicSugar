@@ -3,6 +3,14 @@
 
 SynicSugar is the syntax sugar to synchronize a game via the internet. The introduce and the process is super sonic. The goal is an easy online-game dev for everyone!
 
+## Feature
+- Max 64 peers full-mesh connction
+- No cost and No CCU Limit
+- MatchMake with your conditions
+- Host-Migration
+- Re-connect to a disconnected match
+- Cross-platform connction (Android, iOS, Windows, and Console)
+
 ```csharp
 using SynicSugar.P2P;
 using MemoryPack;
@@ -55,15 +63,6 @@ public partial class GameSystem : MonoBehaviour {
 }
 ```
 
-## Feature
-- Max 64 peers connction
-- MatchMake with your conditions
-- Host-Migration
-- Re-connect to a disconnected match
-- Full-Mesh connct 
-- Cross-platform connction (Android, iOS, Windows, Console)
-- No cost and No CCU Limit
-
 ## Requirement
 - Unity 2021-3 or later
 - [UniTask](https://github.com/Cysharp/UniTask)
@@ -76,16 +75,24 @@ public partial class GameSystem : MonoBehaviour {
 
 ## Getting started
 ### 1.Install SynicSugar and dependent librarys via OpenUPM or import asset package in SynicSugar/release.
+
 1. Rigister some package with OpenUPM
+
  Edit-ProjectSetting-PackageManager
- Name:OpenUPM
+ 
+ Name: OpenUPM
+ 
  URL: https://package.openupm.com
- Scope(s): com.cysharp.unitask
-           com.playeveryware.eos
-           com.cysharp.memorypack
+ 
+ Scope(s):
+* com.cysharp.unitask
+* com.playeveryware.eos
+* com.cysharp.memorypack
+           
 ![image](https://user-images.githubusercontent.com/50002207/230567095-04cfbfcc-f1c9-4b0d-9088-2fbfc08da8f8.png)
 
 2. Install these packages
+
 　These registered packages can be imported from Window/PackageManager/MyRegistries. SynicSugar will probably work with the latest version of these packages, but has been developed using the following versions:
  * Epic Online Services Plugin for Unity: 2.2.0
  * UniTask: 2.0.31
