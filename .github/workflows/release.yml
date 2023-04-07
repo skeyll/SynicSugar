@@ -25,7 +25,7 @@ jobs:
       - name: Upload
         uses: actions/upload-artifact@v2
         with:
-          name: SynicSugar.${{ event.inputs.tag }}.unitypackage
+          name: SynicSugar.${{ github.event.inputs.tag }}.unitypackage
           path: build
 
   CreateRelease:
@@ -39,7 +39,7 @@ jobs:
            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
            tag_name: ${{ event.inputs.tag }}
-           release_name: v${{ event.inputs.tag }}
+           release_name: v${{ github.event.inputs.tag }}
            
       - name: Download package
         uses: actions/download-artifact@v2
@@ -47,13 +47,13 @@ jobs:
            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
            upload_url: ${{ steps.create_release.outputs.upload_url }}
-           asset_path: ./SynicSugar.${{ event.inputs.tag }}.unitypackage
-           asset_name: SynicSugar.${{ event.inputs.tag }}.unitypackage
+           asset_path: ./SynicSugar.${{ github.event.inputs.tag }}.unitypackage
+           asset_name: SynicSugar.${{ github.event.inputs.tag }}.unitypackage
            asset_content_type: application/octet-stream
            path: build
            
       - name: Upload package
         uses: actions/upload-artifact@v2
         with:
-          name: SynciSugar.${{ env.GIT_TAG }}.unitypackage
+          name: SynciSugar.${{ github.event.inputs.tag }}.unitypackage
           path: build
