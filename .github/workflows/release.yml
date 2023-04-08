@@ -26,9 +26,16 @@ jobs:
       - name: Setup dotnet
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '6.0.x'     
-      - name: Install dependencies
-        run: dotnet add package System.Runtime.CompilerServices.Unsafe --version 6.0.0
+          dotnet-version: '6.0'
+      - name: Download dependency
+        run: |
+          mkdir -p temp
+          curl -L -o ./temp/System.Runtime.CompilerServices.Unsafe.dll https://www.nuget.org/api/v2/package/System.Runtime.CompilerServices.Unsafe/6.0.0/lib/netstandard2.0/System.Runtime.CompilerServices.Unsafe.dll
+      - name: Change dll path
+        run: |
+          mkdir -p /path/to/project/Assets
+          cp ./temp/System.Runtime.CompilerServices.Unsafe.dll /path/to/project/Assets/Plugins     
+          cd /path/to/project
 
       - name: Build
         uses: game-ci/unity-builder@v2
