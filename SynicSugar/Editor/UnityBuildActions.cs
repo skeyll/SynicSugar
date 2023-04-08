@@ -13,14 +13,13 @@ namespace SynicSugar.Build {
         }
 
         public static string ExportPackage (string exportPath) {
-            // Ensure export path.
             var dir = new FileInfo(exportPath).Directory;
             if (dir != null && !dir.Exists) {
                 dir.Create();
             }
  
             AssetDatabase.ExportPackage(
-                $"Assets/{k_PackagePath}",
+                $"SynicSugar/Assets/{k_PackagePath}",
                 exportPath,
                 ExportPackageOptions.Recurse
             );
