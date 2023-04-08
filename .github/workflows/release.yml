@@ -18,11 +18,9 @@ jobs:
         
       - name: Cache Library
         uses: actions/cache@v3
-        env:
-          PATH: SynicSugar/
         with:
           path: Library
-          key: Library-${{ hashFiles(${{ env.PATH }}'Packages/**',${{ env.PATH }}'ProjectSettings/**') }}
+          key: Library-${{ hashFiles('SynicSugar/Packages/**', 'SynicSugar/ProjectSettings/**') }}
           restore-keys: Library-
 
       - name: Build
