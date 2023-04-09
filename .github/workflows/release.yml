@@ -10,7 +10,7 @@ on:
 jobs:
   Build:
     name: Build .unitypacage with Unity.
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     timeout-minutes: 100
     steps:
       - name: Checkout Repository
@@ -65,5 +65,5 @@ jobs:
       - name: Upload package
         uses: actions/upload-artifact@v2
         with:
-          name: SynciSugar.${{ github.event.inputs.tag }}.unitypackage
+          name: SynciSugar.${{ github.event.inputs.tag }}_Win64.unitypackage
           path: build
