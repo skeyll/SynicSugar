@@ -22,19 +22,6 @@ jobs:
           path: Library
           key: Library-${{ hashFiles('SynicSugar/Packages/**', 'SynicSugar/ProjectSettings/**') }}
           restore-keys: Library-
-          
-      - name: Setup dotnet
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: '6.0'
-      - name: Download dependency
-        run: |
-          mkdir -p temp
-          curl -L -o ./temp/System.Runtime.CompilerServices.Unsafe.dll https://www.nuget.org/api/v2/package/System.Runtime.CompilerServices.Unsafe/6.0.0/lib/netstandard2.0/System.Runtime.CompilerServices.Unsafe.dll
-      - name: Change dll path
-        run: |
-          mkdir -p /github/workspace/SynicSugar/Library/PackageCache/
-          cp ./temp/System.Runtime.CompilerServices.Unsafe.dll  /github/workspace/SynicSugar/Library/PackageCache/
 
       - name: Build
         uses: game-ci/unity-builder@v2
