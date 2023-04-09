@@ -26,7 +26,7 @@ jobs:
       - name: Extract dependencies
         run: |
           mkdir -p temp/extracted
-          tar -xzf -q ./temp/com.playeveryware.eos.tgz -C ./temp/extracted
+          tar -xzf ./temp/com.playeveryware.eos.tgz -C ./temp/extracted
           unzip -q ./temp/com.cysharp.unitask.zip -d ./temp/extracted
           unzip -q ./temp/com.cysharp.memorypack.zip -d ./temp/extracted
       - name: Copy plugin files
