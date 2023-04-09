@@ -1,1 +1,77 @@
 
+name: ZipRelease
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'tag'
+        required: false
+        type: string
+        default: 0.0.0
+jobs:
+  Zip:
+    name: Download dependencies and zip repo
+    runs-on: ubuntu-latest
+    timeout-minutes: 100
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+  
+      - name: Download dependencies
+        run: |
+          mkdir -p temp
+          curl -L -o ./temp/com.playeveryware.eos.tgz https://github.com/PlayEveryWare/eos_plugin_for_unity_upm/releases/download/v2.2.0/com.playeveryware.eos-2.2.0.tgz
+          curl -L -o ./temp/com.cysharp.unitask.zip https://github.com/Cysharp/UniTask/releases/download/2.0.31/UniTask.2.0.31.unitypackage
+          curl -L -o ./temp/com.cysharp.memorypack.zip https://github.com/Cysharp/MemoryPools/releases/download/1.9.13/MemoryPools.1.9.13.unitypackage
+      - name: Extract dependencies
+        run: |
+          mkdir -p temp/extracted
+          tar -xzf -q ./temp/com.playeveryware.eos.tgz -d ./temp/extracted
+          unzip -q ./temp/com.cysharp.unitask.zip -d ./temp/extracted
+          unzip -q ./temp/com.cysharp.memorypack.zip -d ./temp/extracted
+      - name: Copy plugin files
+        run: |
+          mkdir -p ./SynicSugar/SynicSugar/Assets/SynicSugar/Plugins/
+          cp -r ./temp/extracted/Assets/Plugins/* ./SynicSugar/SynicSugar/Assets/SynicSugar/Plugins/
+      - name: Archive project
+        run: |
+          mkdir -p temp/archive
+          cp -r ./SynicSugar/SynicSugar ./temp/archive/
+          cd ./temp/archive
+          zip -r ../SynicSugar.zip ./      
+      
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: SynicSugar.${{ github.event.inputs.tag }}.zip
+          path: temp/SynicSugar.zip
+
+  CreateRelease:
+    needs: Zip
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create release
+        uses: actions/create-release@v1
+        id: create_release
+        env:
+           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+           tag_name: ${{ github.event.inputs.tag }}
+           release_name: v${{ github.event.inputs.tag }}
+           
+      - name: Download package
+        uses: actions/download-artifact@v2
+        env:
+           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+           upload_url: ${{ steps.create_release.outputs.upload_url }}
+           download_url: ${{ steps.create_release.outputs.upload_url }}/SynicSugar.${{ github.event.inputs.tag }}.zip
+           asset_name: SynicSugar.${{ github.event.inputs.tag }}.zip
+           asset_content_type: application/octet-stream
+           path: temp/SynicSugar.zip
+           
+      - name: Upload package
+        uses: actions/upload-artifact@v2
+        with:
+          name: SynciSugar.${{ github.event.inputs.tag }}.zip
+          path: temp/SynicSugar.zip
