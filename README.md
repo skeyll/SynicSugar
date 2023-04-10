@@ -5,8 +5,8 @@ SynicSugar is the syntax sugar to synchronize a game via the internet. The backe
 
 
 ## Feature
-- Max 64 peers full-mesh connction
-- No cost and No CCU Limit
+- Max 64 peers full-mesh connect
+- No Use Cost and No CCU Limit
 - MatchMake with your conditions
 - Host-Migration
 - Re-connect to a disconnected match
@@ -31,7 +31,7 @@ public partial class Player {
     public void GreetTarget(UserId id){
          Debug.log("Hi");
     }
-    [Rpc] 
+    [Rpc] //Can pass multiple data class with MemoryPack
     public void Heal(HealInfo info){
          Debug.log($"{OwnerUserId} heal {info.target} {info.amount}");
     }
@@ -53,7 +53,7 @@ using SynicSugar.P2P;
 using UnityEngine;
 [NetworkCommons]
 public partial class GameSystem : MonoBehaviour {
-    //Sync Host's value
+    //Sync Host's value by 500ms
     [SyncVar(true, 500)] public float currentTime;
     [SyncVar] Vector3 enemyPos;
     
@@ -70,7 +70,7 @@ public partial class GameSystem : MonoBehaviour {
 - [MemoryPack](https://github.com/Cysharp/MemoryPack)
 - [eos_plugin_for_unity](https://github.com/PlayEveryWare/eos_plugin_for_unity)
 
- SynicSugar uses SourceGenerator in RoslynGenerator supported by 2021.3 or later. SourceGenerator generates almost all codes for p2p connect on compile automatically.
+ SynicSugar uses Roslyn SourceGenerator supported after 2021.3. SourceGenerator generates almost all codes for p2p connect on compile automatically.
  
  Large dependencies is for performance. SynicSugar is a full-mesh p2p. All peers connect with each other instead of 1-to-many like dedicated server and client-server model. If we want to sync data with 63 peer in a full-mesh, we need to send data 63 times. Individual connection is fast but the whole is costly. So the core needs faster.
 
@@ -109,7 +109,7 @@ To install as upm
 
 Please check [the eos document](https://dev.epicgames.com/ja/news/how-to-set-up-epic-online-services-eos) or [the plugin page](https://github.com/PlayEveryWare/eos_plugin_for_unity). SynicSugar doesn't need EOS store brand.
 
-About app credential, you can use Peer2Peer as ClientPolicy. The minimum policies are as follows.
+About app credential, you can use Peer2Peer as ClientPolicy. The minimum is as follows.
 ![image](https://user-images.githubusercontent.com/50002207/230758754-4333b431-48fe-4539-aa97-20c6f86d68ae.png)
 
 
@@ -119,14 +119,14 @@ To authenticate EOS and manage the tick, EOSManager is needed. Therefore, first 
 
 ![image](https://user-images.githubusercontent.com/50002207/230759934-0d32e507-7194-4783-8b6c-c666d0685b50.png)
 
-SynicSugar processes are written in UniTask's Async/Await. If the authentication succeeds, it returns True, False if it fails.
+SynicSugar are written in UniTask's Async/Await. If the authentication succeeds, it returns True.
 ```csharp
 using Cysharp.Threading.Tasks;
 using System.Threading;
 using SynicSugar.Auth;
 public class YourLoginClass : MonoBehaviour {
     async UniTask LoginWithDeviceID(){
-        cancellationToken = new CancellationTokenSource();
+        CancellationTokenSource cancellationToken = new CancellationTokenSource();
         bool isSuccess = await EOSAuthentication.Instance.LoginWithDeviceID(cancellationToken);
 
         if(isSuccess){
@@ -144,11 +144,13 @@ using System.Threading;
 using SynicSugar.Auth;
 public class YourLoginClass : MonoBehaviour {
     public void LoginWithDeviceID(){
+        CancellationTokenSource cancellationToken = new CancellationTokenSource();
+        
         EOSAuthentication.Instance.LoginWithDeviceID(cancellationToken);
-        // or Explicitly ignore AsyncAwait
+        // or Explicitly ignore AsyncAwait. Get more performance in IL.
         // EOSAuthentication.Instance.LoginWithDeviceID(cancellationToken).Forget();
         
-        //Continue to process without waiting for authentication.
+        //Continue to process not to wait.
         // ...
     }
  }
@@ -160,8 +162,10 @@ public class YourLoginClass : MonoBehaviour {
 You need EOSp2pManager for matchmaking and P2P communication. Please add the SynicSugar/Core/Prefabs/EOSp2pManager.prefab to the Matching scene. You can also  create this from script. This object is a singleton and won't be destroyed until explicitly disposed of.
 
 ```csharp
+using UnityEngine;
 using SynicSugar.MatchMake;
 public class MatchMaker : MonoBehaviour {
+    GameObject matchmakeContainer;
     void Awake(){
         if(MatchMakeManager.Instance == null){
             matchmakeContainer = Instantiate(matchmakePrefab);
@@ -181,17 +185,22 @@ using SynicSugar.MatchMake;
 public class MatchMakeConditions : MonoBehaviour {
     public Lobby GetLobbyCondition(){
         //Create conditions
-        Lobby lobbyCondition = EOSLobbyExtenstions.GenerateLobby(mode.ToString(), region.ToString());
+        Lobby lobbyCondition = EOSLobbyExtenstions.GenerateLobby("Rank", "ASIA");
         
         lobbyCondition.MaxLobbyMembers = 2; //2-64
         
         //Add conditions as attributes.
         //The limit of conditions is 100.
+        //Need "Key", "Value", and "ComparisonOption"
         LobbyAttribute attribute = new LobbyAttribute();
         attribute.Key = "Level";
         attribute.SetValue(1); //Can use int, string, double, bool
         attribute.comparisonOption = Epic.OnlineServices.ComparisonOp.Equal; // https://dev.epicgames.com/docs/en-US/game-services/lobbies#comparison-operators
         lobbyCondition.Attributes.Add(attribute);
+        
+        //attribute = new LobbyAttribute();
+        //attribute.Key = "SeaMap";
+        //...
         
         return lobbyCondition;
     }
