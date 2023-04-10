@@ -385,3 +385,6 @@ SynicSugar.SourceGenerator/obj/*
 
 *.keystore
 .DS_Store
+
+# for sample
+!SynicSugar/Assets/**/*~
