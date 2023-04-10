@@ -5,7 +5,7 @@
   "version": "0.0.31",
   "unity": "2021.3",
   "description": "No cost and no CCU Limit Netcode for Unity.",
-  "keywords": ["Netcode", "EOS", "p2p"],
+  "keywords": ["Network", "Services"],
   "license": "MIT",
   "changelogUrl": "https://github.com/skeyll/SynicSugar/releases",
   "licensesUrl": "https://github.com/skeyll/SynicSugar/main/LICENSE",
