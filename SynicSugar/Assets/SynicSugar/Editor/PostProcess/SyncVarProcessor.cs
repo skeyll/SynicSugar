@@ -16,7 +16,7 @@ namespace SynicSugar.PostProcess {
             int count = 0;
             //Process
             foreach (var typeDef in module.Types) {
-                Dictionary<string, Instruction> instructions = new Dictionary<string, Instruction>();
+                Dictionary<string, List<Instruction> >instructions = new Dictionary<string, List<Instruction>>();
                 foreach (var method in typeDef.Methods) {
                     try {
                         var processor = method.Body.GetILProcessor();
@@ -33,14 +33,19 @@ namespace SynicSugar.PostProcess {
                                     if(method.Name == $"SetLocal{syncVar}" || method.Name == ($"set_Sync{syncVar}")){
                                         continue;
                                     }
-                                    instructions.Add(syncVar, instruction);
+                                    if(!instructions.ContainsKey(syncVar)){
+                                        instructions.Add(syncVar, new List<Instruction>());
+                                    }
+                                    count++;
+                                    instructions[syncVar].Add(instruction);
                                 }
                             }
                         }
                         foreach(var instruction in instructions){
-                            processor.Replace(instruction.Value, processor.Create(OpCodes.Callvirt, syncvarDic[instruction.Key]));
+                            foreach(var i in instruction.Value){
+                                processor.Replace(i, processor.Create(OpCodes.Callvirt, syncvarDic[instruction.Key]));
+                            }
                         }
-                        count += instructions.Count;
                     }
                     catch (Exception e){
                         logger.Error($"SynicSugar failed to weave for syncVar in {typeDef.Name}. : {e} {e.Message}\n{e.StackTrace}");
