@@ -96,7 +96,7 @@ public partial class GameSystem : MonoBehaviour {
 
 
 2. Install these packages  
-　These registered packages can be imported from **Window/PackageManager/MyRegistries**. SynicSugar will probably work with the latest version of these packages, but SynicSugar v0.0.3 has been developed using the following:  
+　These packages can be imported from **Window/PackageManager/MyRegistries**. Importing SynicSugar will automatically import the other required librarys. If you are using another version in your project, that one will probably work. However, SynicSugar has been developed using the following:  
  * Epic Online Services Plugin for Unity: 2.2.0  
  * UniTask: 2.0.31  
  * MemoryPack: 1.9.13  
@@ -105,7 +105,7 @@ public partial class GameSystem : MonoBehaviour {
  3. Import the rest (Skip if downloading as unitypackage.)  
 Import what is not in OpenUPM.  
 - Mono.Cecil  
-Ender **com.unity.nuget.mono-cecil** in **Edit/ProjectSetting/PackageManager/+/Add package from git URL**.  
+Enter **com.unity.nuget.mono-cecil** in **Edit/ProjectSetting/PackageManager/+/Add package from git URL**.  
 
 ![image](https://user-images.githubusercontent.com/50002207/231324146-292634b7-3d42-420d-a20c-37f5fc0ad688.png)
 
