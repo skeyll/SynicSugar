@@ -2,7 +2,7 @@
 {
   "name": "net.skeyll.synicsugar",
   "displayName": "SynicSugar",
-  "version": "0.0.33",
+  "version": "0.0.34",
   "unity": "2021.3",
   "description": "No cost and no CCU Limit Netcode for Unity.",
   "keywords": ["Network", "Services"],
@@ -17,7 +17,7 @@
   },
   "samples": [
     {
-        "displayName": "Samples",
+        "displayName": "NetworkSamples",
         "description": "SampleScene",
         "path": "Samples~/GameSample"
     }
