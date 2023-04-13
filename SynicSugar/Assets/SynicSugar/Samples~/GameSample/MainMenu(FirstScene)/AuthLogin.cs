@@ -1,25 +1,11 @@
 using Cysharp.Threading.Tasks;
 using System.Threading;
 using SynicSugar.Auth;
-using UnityEngine.UI;
 using UnityEngine;
 
 namespace  SynicSugar.Samples {
     public class AuthLogin : MonoBehaviour {
         [SerializeField] GameObject modeSelectCanvas;
-        CancellationTokenSource cancellationToken;
-        [SerializeField] GameObject authPrefab;
-        GameObject authContainer;
-        void Start() {
-            if(EOSAuthentication.Instance == null){
-                authContainer = Instantiate(authPrefab);
-            }
-        }
-        void OnDestroy(){
-            if(cancellationToken != null){
-                cancellationToken.Cancel();
-            }
-        }
         /// <summary>
         /// For button event
         /// </summary>
@@ -28,9 +14,9 @@ namespace  SynicSugar.Samples {
         }
         public async UniTask LoginWithDeviceIDRequest(){
             this.gameObject.SetActive(false);
-            cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = new CancellationTokenSource();
             EOSDebug.Instance.Log("Trt to connect EOS with deviceID.");
-            bool isSuccess = await EOSAuthentication.Instance.LoginWithDeviceID(cancellationToken);
+            bool isSuccess = await EOSAuthentication.LoginWithDeviceID(cancellationToken);
 
             if(isSuccess){
                 modeSelectCanvas.SetActive(true);
@@ -48,7 +34,7 @@ namespace  SynicSugar.Samples {
         }
         public async UniTask LoginWithDevToolRequest(){
             this.gameObject.SetActive(false);
-            cancellationToken = new CancellationTokenSource();
+            CancellationTokenSource cancellationToken = new CancellationTokenSource();
             EOSDebug.Instance.Log("Trt to connect EOS with DevTool");
             bool isSuccess = await DevLogin.Instance.LoginWithDevelopperLogin(cancellationToken);
 
