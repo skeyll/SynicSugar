@@ -389,3 +389,4 @@ SynicSugar.SourceGenerator/obj/*
 # for sample
 !SynicSugar/Assets/**/*~
 !SynicSugar/Assets/**/*~/*/Debug
+*~.meta
