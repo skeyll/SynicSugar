@@ -23,9 +23,9 @@ namespace SynicSugar.Test {
 
             intTest += 1;
 
-            intTest += 1;
+            // intTest += 1;
 
-            intTest = 53251;
+            // intTest = 53251;
         }
 
         [TargetRpc]
@@ -34,7 +34,7 @@ namespace SynicSugar.Test {
             noSyncData += 1;
 
             intTest += 1;
-            intTest += 1;
+            // intTest += 1;
         }
     }
 

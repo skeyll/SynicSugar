@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "com.cysharp.memorypack": "1.9.13",
-    "com.cysharp.unitask": "2.0.31",
+    "com.cysharp.unitask": "2.3.1",
     "com.playeveryware.eos": "2.2.0",
     "com.unity.collab-proxy": "2.0.1",
     "com.unity.feature.2d": "1.0.0",
