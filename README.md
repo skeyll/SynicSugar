@@ -135,7 +135,7 @@ using SynicSugar.Auth;
 public class YourLoginClass : MonoBehaviour {
     async UniTask LoginWithDeviceID(){
         CancellationTokenSource cancellationToken = new CancellationTokenSource();
-        bool isSuccess = await EOSAuthentication.Instance.LoginWithDeviceID(cancellationToken);
+        bool isSuccess = await EOSAuthentication.LoginWithDeviceID(cancellationToken);
 
         if(isSuccess){
             //Success
@@ -255,15 +255,6 @@ If you want to synchronize a structure, you need to serialize it with [MemoryPac
 
 
 ## Warning
-The Rpc process (like SynicSugarRpcxxx) also are generated now. However, I'll change the such send method to insert of IL weaving to prevent unintentional bugs and cheating. You can call the Rpc process manually, but it may change.
+ The Rpc process (like SynicSugarRpcxxx) also are generated now. However, I'll change the such send method to insert of IL weaving to prevent unintentional bugs and cheating. You can call the Rpc process manually, but it may change.
 
-
-## Which netcode is best?
- SynicSugar is a free cost and a easy use. However, it is not perfect. 
-While it has standard host-migration, re-connection, and good basic matchmake, p2p cannot completely prevent cheating and full-mesh cannot send to more peers over the fps in a second. SynicSugar is suited for action and battle games in a small group.
-
- If you create a large scale MMO or BattleRoyale, you can use [Mirror](https://github.com/MirrorNetworking/Mirror). The library to use dedicated server is able to connect hundreds of player. It is also possible to use EOS as a free relay. [Mirage](https://github.com/MirageNet/Mirage) is Mirror with UniTask.
- 
- If you need more various API and support, you can select PhotonFusion. The ExitGames's service has provided relays and network SDK for Unity community in many years. Photon is similar to SynicSugar in that it doesn't require managing a server, but the client-host architecture supports over 100 person pvp.
- 
- Appropriate netcode depends on the game and team. Your choice determines the road.
+ In addition, SynicSugar is still in α. So, this will be updated with the my developping game.
