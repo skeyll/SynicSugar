@@ -3,7 +3,7 @@ using UnityEngine.UI;
 using SynicSugar.P2P;
 using MemoryPack;
 namespace  SynicSugar.Samples {
-    [NetworkPlayer]
+    [NetworkPlayer(true)]
     public partial class TankPlayer : MonoBehaviour {
         public enum CurrentState{
             Stay, Move
