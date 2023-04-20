@@ -2,7 +2,7 @@
 {
   "name": "net.skeyll.synicsugar",
   "displayName": "SynicSugar",
-  "version": "0.0.35",
+  "version": "0.0.4",
   "unity": "2021.3",
   "description": "No cost and no CCU Limit Netcode for Unity.",
   "keywords": ["Network", "Services"],
