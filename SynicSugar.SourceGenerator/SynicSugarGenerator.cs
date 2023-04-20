@@ -21,9 +21,6 @@ namespace SynicSugar.Generator {
         }
 
         public void Execute(GeneratorExecutionContext context) {
-            var attributeTemplate = new AttributeTemplate().TransformText();
-            context.AddSource("NetworkPlayerAttribute.g.cs", attributeTemplate);
-
             if (!(context.SyntaxReceiver is SyntaxReceiver receiver)) return;
 
             try {
@@ -40,9 +37,13 @@ namespace SynicSugar.Generator {
                     //class
                     classesInfo.Add(new ClassInfo());
                     //Base Info
-                    var attributes = target.AttributeLists.SelectMany(al => al.Attributes);
-                    classesInfo[classI()].isNetworkPlayer = attributes.Any(a => a.Name.ToString() == NETWORKPLAYER);
-                    
+                    var networkAttributes = target.AttributeLists.SelectMany(al => al.Attributes).FirstOrDefault(a => a.Name.ToString() == NETWORKPLAYER || a.Name.ToString() == NETWORKCOMMONS);
+                    classesInfo[classI()].isNetworkPlayer = (networkAttributes.Name.ToString() == NETWORKPLAYER);
+                    // need GetInstance?
+                    if ((networkAttributes.ArgumentList?.Arguments.Count ?? 0) == 1){
+                        classesInfo[classI()].useGetInstance = (bool)(networkAttributes.ArgumentList.Arguments[0].Expression as LiteralExpressionSyntax).Token.Value;
+                    }
+
                     classesInfo[classI()].name = target.Identifier.ValueText;
                     classesInfo[classI()].nameSpace = GetNamespace(target);
                     if (!syncvars.ContainsKey($"{cb.GetFullName(classesInfo[classI()].nameSpace, classesInfo[classI()].name)}")){
@@ -134,10 +135,10 @@ namespace SynicSugar.Generator {
                     return;
                 }
                 //Set each detail data
-                StringBuilder EnumList = new StringBuilder();
+                StringBuilder SyncList = new StringBuilder();
                 StringBuilder PacketConvert = new StringBuilder();
                 foreach (var info in contentsInfo) {
-                    EnumList.Append($"{info.contentName}, ");
+                    SyncList.Append($"{info.contentName}, ");
 
                     if (info.isNetworkPlayer) {
                         switch (info.type) {
@@ -167,14 +168,18 @@ namespace SynicSugar.Generator {
                         continue;
                     }
                 }
-                if (string.IsNullOrEmpty(EnumList.ToString())){
-                    EnumList.Append("None");
+                if (string.IsNullOrEmpty(SyncList.ToString())){
+                    SyncList.Append("None");
                 }
 
                 //Set base class data
+                //StringBuilder CommonsList = new StringBuilder();
+                //StringBuilder PlayerList = new StringBuilder();
                 StringBuilder Reference = new StringBuilder();
                 StringBuilder Register = new StringBuilder();
                 StringBuilder GetInstance = new StringBuilder();
+                StringBuilder PlayeInstance = new StringBuilder();
+                StringBuilder CommonsInstance = new StringBuilder();
                 StringBuilder GetInstanceAsObject = new StringBuilder();
                 StringBuilder AdditionalClass = new StringBuilder(HeaderNotes);
                 foreach (var info in classesInfo){
@@ -182,6 +187,8 @@ namespace SynicSugar.Generator {
                         Reference.Append(cb.CreatePlayerReference(info.nameSpace, info.name));
                         Register.Append(cb.CreatePlayerRegisterInstance(info.nameSpace, info.name));
                         GetInstance.Append(cb.CreateGetInstance(info.nameSpace, info.name));
+                        PlayeInstance.Append(cb.CreateGetPlayerInstance(info.nameSpace, info.name, info.useGetInstance));
+
                         GetInstanceAsObject.Append(cb.CreateGetInstanceAsObject(info.nameSpace, info.name));
 
                         var pt = new AdditionalPlayerTemplate();
@@ -189,25 +196,30 @@ namespace SynicSugar.Generator {
                         pt.ClassName = info.name;
                         pt.SyncVar = syncvars[cb.GetFullName(info.nameSpace, info.name)].ToString();
                         pt.Rpcs = rpcs[cb.GetFullName(info.nameSpace, info.name)].ToString();
+                        pt.useGetInstance = info.useGetInstance;
                         AdditionalClass.Append(pt.TransformText());
                         continue;
                     }
                     Reference.Append(cb.CreateStateReference(info.nameSpace, info.name));
                     Register.Append(cb.CreateStateRegisterInstance(info.nameSpace, info.name));
+                    CommonsInstance.Append(cb.CreateGetCommonsInstance(info.nameSpace, info.name, info.useGetInstance));
 
                     var ct = new AdditionalCommonsTemplate();
                     ct.NameSpace = info.nameSpace;
                     ct.ClassName = info.name;
                     ct.SyncVar = syncvars[cb.GetFullName(info.nameSpace, info.name)].ToString();
                     ct.Rpcs = rpcs[cb.GetFullName(info.nameSpace, info.name)].ToString();
+                    ct.useGetInstance = info.useGetInstance;
                     AdditionalClass.Append(ct.TransformText());
                 }
 
-                var connectTemplate = new CoreTemplate() {
-                    EnumList = EnumList.ToString(),
+                var connectTemplate = new ConnecthubTemplate() {
+                    SyncList = SyncList.ToString(),
                     Register = Register.ToString(),
                     Reference = Reference.ToString(),
                     GetInstance = GetInstance.ToString(),
+                    PlayeInstance = PlayeInstance.ToString(),
+                    CommonsInstance = CommonsInstance.ToString(),
                     PacketConvert = PacketConvert.ToString(),
                     GetInstanceAsObject = GetInstanceAsObject.ToString()
                 }.TransformText();
@@ -220,7 +232,7 @@ namespace SynicSugar.Generator {
             }
         }
         public class ClassInfo {
-            public bool isNetworkPlayer;
+            public bool isNetworkPlayer, useGetInstance;
             public string nameSpace, name;
         }
         public class ContentInfo{

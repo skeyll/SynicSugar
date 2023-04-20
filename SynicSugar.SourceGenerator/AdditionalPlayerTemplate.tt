@@ -7,7 +7,7 @@
 <# if (!string.IsNullOrEmpty(NameSpace)) { #>
 namespace <#= NameSpace #> {
 <# } #>
-    public partial class <#= ClassName #> : INetworkOwner {
+    public partial class <#= ClassName #> : INetworkOwner<# if (useGetInstance) { #>, IGetPlayer <# } #>{
         UserId _ownerUserID;
         public UserId OwnerUserID {
             get { return _ownerUserID; }

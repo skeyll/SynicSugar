@@ -7,7 +7,7 @@
 <# if (!string.IsNullOrEmpty(NameSpace)) { #>
 namespace <#= NameSpace #> {
 <# } #>
-    public partial class <#= ClassName #> {
+    public partial class <#= ClassName #><# if (useGetInstance) { #> : IGetCommons <# } #> {
         [HideInInspector] public bool isRemotoCall;
         public bool isHost { get { return p2pManager.Instance.userIds.IsHost(); } }
         <#= SyncVar #>
