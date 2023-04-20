@@ -19,9 +19,9 @@ namespace SynicSugarGenerator
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "D:\ProgrammingData\SourceGenerator\SyncListGenerator\SyncListGenerator\CoreTemplate.tt"
+    #line 1 "D:\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "16.0.0.0")]
-    public partial class CoreTemplate : CoreTemplateBase
+    public partial class ConnecthubTemplate : ConnecthubTemplateBase
     {
 #line hidden
         /// <summary>
@@ -61,36 +61,52 @@ namespace SynicSugarGenerator
                     "lationToken: p2pManager.Instance.p2pToken.Token);\r\n            }\r\n        }\r\n\r\n " +
                     "       //(for elements)\r\n        public enum CHANNELLIST{\r\n            ");
             
-            #line 69 "D:\ProgrammingData\SourceGenerator\SyncListGenerator\SyncListGenerator\CoreTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(EnumList));
+            #line 69 "D:\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(SyncList));
             
             #line default
             #line hidden
             this.Write("\r\n        }\r\n        //Ref(for class)");
             
-            #line 71 "D:\ProgrammingData\SourceGenerator\SyncListGenerator\SyncListGenerator\CoreTemplate.tt"
+            #line 71 "D:\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Reference));
             
             #line default
             #line hidden
             this.Write("\r\n\r\n        //Register(for class)");
             
-            #line 73 "D:\ProgrammingData\SourceGenerator\SyncListGenerator\SyncListGenerator\CoreTemplate.tt"
+            #line 73 "D:\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Register));
             
             #line default
             #line hidden
-            this.Write("\r\n\r\n        //GetInstance(for class)");
+            this.Write("\r\n\r\n        //GetInstance(with class instance) Good performance in IL2cpp?");
             
-            #line 75 "D:\ProgrammingData\SourceGenerator\SyncListGenerator\SyncListGenerator\CoreTemplate.tt"
+            #line 75 "D:\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetInstance));
             
             #line default
             #line hidden
-            this.Write("\r\n\r\n        //GetInstanceAsObject(for class)\r\n        public object GetUserInstan" +
-                    "ceAsObject(UserId id, Type type){");
+            this.Write("\r\n        //GetInstance(with <type>) Bad performance in IL2cpp?\r\n        // For P" +
+                    "layer\r\n        public T GetUserInstance<T>(UserId id) where T : IGetPlayer {");
             
-            #line 78 "D:\ProgrammingData\SourceGenerator\SyncListGenerator\SyncListGenerator\CoreTemplate.tt"
+            #line 78 "D:\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(PlayeInstance));
+            
+            #line default
+            #line hidden
+            this.Write("\r\n            return default(T);\r\n        }\r\n        // For Commons\r\n        publ" +
+                    "ic T GetUserInstance<T>() where T : IGetCommons {");
+            
+            #line 82 "D:\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(CommonsInstance));
+            
+            #line default
+            #line hidden
+            this.Write("\r\n            return default(T);\r\n        }\r\n\r\n        //GetInstanceAsObject(for " +
+                    "class)\r\n        public object GetUserInstanceAsObject(UserId id, Type type){");
+            
+            #line 87 "D:\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetInstanceAsObject));
             
             #line default
@@ -99,7 +115,7 @@ namespace SynicSugarGenerator
                     "    public void ConvertFormPacket(SugarPacket packet){\r\n            switch((CHAN" +
                     "NELLIST)packet.ch){");
             
-            #line 84 "D:\ProgrammingData\SourceGenerator\SyncListGenerator\SyncListGenerator\CoreTemplate.tt"
+            #line 93 "D:\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(PacketConvert));
             
             #line default
@@ -116,7 +132,7 @@ namespace SynicSugarGenerator
     /// Base class for this transformation
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "16.0.0.0")]
-    public class CoreTemplateBase
+    public class ConnecthubTemplateBase
     {
         #region Fields
         private global::System.Text.StringBuilder generationEnvironmentField;

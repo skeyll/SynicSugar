@@ -11,15 +11,10 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>AdditionalCommonsTemplate.tt</DependentUpon>
     </None>
-    <None Include="AttributeTemplate.cs">
+    <None Include="ConnecthubTemplate.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>AttributeTemplate.tt</DependentUpon>
-    </None>
-    <None Include="CoreTemplate.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>CoreTemplate.tt</DependentUpon>
+      <DependentUpon>ConnecthubTemplate.tt</DependentUpon>
     </None>
   </ItemGroup>
 
@@ -30,13 +25,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="AttributeTemplate.tt">
-	  <Generator>TextTemplatingFilePreprocessor</Generator>
-      <LastGenOutput>AttributeTemplate.cs</LastGenOutput>
-    </None>
-    <None Update="CoreTemplate.tt">
+    <None Update="ConnecthubTemplate.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
-      <LastGenOutput>CoreTemplate.cs</LastGenOutput>
+      <LastGenOutput>ConnecthubTemplate.cs</LastGenOutput>
     </None>
     <None Update="AdditionalPlayerTemplate.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
@@ -63,10 +54,10 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>AdditionalPlayerTemplate.tt</DependentUpon>
     </Compile>
-    <Compile Update="AttributeTemplate.cs">
+    <Compile Update="ConnecthubTemplate.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>AttributeTemplate.tt</DependentUpon>
+      <DependentUpon>ConnecthubTemplate.tt</DependentUpon>
     </Compile>
     <Compile Update="CoreTemplate.cs">
       <DesignTime>True</DesignTime>

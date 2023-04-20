@@ -18,7 +18,7 @@ namespace SynicSugarGenerator
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "D:\ProgrammingData\SourceGenerator\SyncListGenerator\SyncListGenerator\AdditionalPlayerTemplate.tt"
+    #line 1 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "16.0.0.0")]
     public partial class AdditionalPlayerTemplate : AdditionalPlayerTemplateBase
     {
@@ -29,33 +29,47 @@ namespace SynicSugarGenerator
         public virtual string TransformText()
         {
             
-            #line 7 "D:\ProgrammingData\SourceGenerator\SyncListGenerator\SyncListGenerator\AdditionalPlayerTemplate.tt"
+            #line 7 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
  if (!string.IsNullOrEmpty(NameSpace)) { 
             
             #line default
             #line hidden
             this.Write("namespace ");
             
-            #line 8 "D:\ProgrammingData\SourceGenerator\SyncListGenerator\SyncListGenerator\AdditionalPlayerTemplate.tt"
+            #line 8 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(NameSpace));
             
             #line default
             #line hidden
             this.Write(" {\r\n");
             
-            #line 9 "D:\ProgrammingData\SourceGenerator\SyncListGenerator\SyncListGenerator\AdditionalPlayerTemplate.tt"
+            #line 9 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
  } 
             
             #line default
             #line hidden
             this.Write("    public partial class ");
             
-            #line 10 "D:\ProgrammingData\SourceGenerator\SyncListGenerator\SyncListGenerator\AdditionalPlayerTemplate.tt"
+            #line 10 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ClassName));
             
             #line default
             #line hidden
-            this.Write(@" : INetworkOwner {
+            this.Write(" : INetworkOwner");
+            
+            #line 10 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
+ if (useGetInstance) { 
+            
+            #line default
+            #line hidden
+            this.Write(", IGetPlayer ");
+            
+            #line 10 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
+ } 
+            
+            #line default
+            #line hidden
+            this.Write(@"{
         UserId _ownerUserID;
         public UserId OwnerUserID {
             get { return _ownerUserID; }
@@ -72,28 +86,28 @@ namespace SynicSugarGenerator
         }
         ");
             
-            #line 25 "D:\ProgrammingData\SourceGenerator\SyncListGenerator\SyncListGenerator\AdditionalPlayerTemplate.tt"
+            #line 25 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(SyncVar));
             
             #line default
             #line hidden
             this.Write("\r\n        ");
             
-            #line 26 "D:\ProgrammingData\SourceGenerator\SyncListGenerator\SyncListGenerator\AdditionalPlayerTemplate.tt"
+            #line 26 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Rpcs));
             
             #line default
             #line hidden
             this.Write("\r\n    }\r\n");
             
-            #line 28 "D:\ProgrammingData\SourceGenerator\SyncListGenerator\SyncListGenerator\AdditionalPlayerTemplate.tt"
+            #line 28 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
  if (!string.IsNullOrEmpty(NameSpace)) { 
             
             #line default
             #line hidden
             this.Write("}\r\n");
             
-            #line 30 "D:\ProgrammingData\SourceGenerator\SyncListGenerator\SyncListGenerator\AdditionalPlayerTemplate.tt"
+            #line 30 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
  } 
             
             #line default

@@ -80,6 +80,27 @@
             return {name}[id.ToString()];
         }}";
         }
+        internal string CreateGetPlayerInstance(string nameNamespace, string name, bool useGetInstance) {
+            if (!useGetInstance) {
+                return System.String.Empty;
+            }
+            return $@"
+            if(typeof(T) == typeof({GetFullName(nameNamespace, name)})){{
+                if (!{name}.ContainsKey(id.ToString())) {{
+                    return default(T);
+                }}
+                return (T)(object){name}[id.ToString()];
+            }}";
+        }
+        internal string CreateGetCommonsInstance(string nameNamespace, string name, bool useGetInstance) {
+            if (!useGetInstance) {
+                return System.String.Empty;
+            }
+            return $@"
+            if(typeof(T) == typeof({GetFullName(nameNamespace, name)})){{
+                return (T)(object){name};
+            }}";
+        }
         internal string CreateGetInstanceAsObject(string nameSpace, string name) {
             return $@"
             if(type == typeof({GetFullName(nameSpace, name)})){{

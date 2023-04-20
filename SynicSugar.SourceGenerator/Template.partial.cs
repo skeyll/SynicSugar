@@ -1,9 +1,11 @@
 ﻿namespace SynicSugarGenerator {
-    public partial class CoreTemplate {
-        internal string? EnumList;
+    public partial class ConnecthubTemplate {
+        internal string? SyncList;
         internal string? Register;
         internal string? Reference;
         internal string? GetInstance;
+        internal string? PlayeInstance;
+        internal string? CommonsInstance;
         internal string? GetInstanceAsObject;
         internal string? PacketConvert;
     }
@@ -12,11 +14,13 @@
         internal string? ClassName;
         internal string? SyncVar;
         internal string? Rpcs;
+        internal bool useGetInstance;
     }
     public partial class AdditionalCommonsTemplate {
         internal string? NameSpace;
         internal string? ClassName;
         internal string? SyncVar;
         internal string? Rpcs;
+        internal bool useGetInstance;
     }
 }
