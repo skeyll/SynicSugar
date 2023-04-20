@@ -21,7 +21,7 @@ namespace  SynicSugar.Samples {
             await UniTask.WaitWhile(() => string.IsNullOrEmpty(PlayerName), cancellationToken: token.Token);
             Debug.Log("Init Player2");
 
-            TankPlayer tankPlayer = ConnectHub.Instance.GetUserInstanceAsObject(OwnerUserID, typeof(TankPlayer)) as TankPlayer;
+            TankPlayer tankPlayer = ConnectHub.Instance.GetUserInstance<TankPlayer>(OwnerUserID);
             tankPlayer.SetNameText(PlayerName);
             tankPlayer.gameObject.SetActive(true);
         }
