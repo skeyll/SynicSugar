@@ -15,11 +15,10 @@ namespace  SynicSugar.Samples {
             localPlayer.SetOwnerID(p2pManager.Instance.userIds.LocalUserId);
             //Generate all player model
             SynicObject.AllSpawn(playerPrefab);
-
-            //Set Player Name(Sync)
-            localPlayer.PlayerName = TankPassedData.PlayerName;
             //After creating the instances for receive in local, start Packet Receiver.
             ConnectHub.Instance.StartPacketReceiver();
+            //Set Player Name(Sync)
+            localPlayer.PlayerName = TankPassedData.PlayerName;
         }
 
         public void ReturnToTitle(){
