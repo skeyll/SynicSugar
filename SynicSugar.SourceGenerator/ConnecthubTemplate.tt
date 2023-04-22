@@ -15,7 +15,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 namespace SynicSugar.P2P {
-    public sealed class ConnectHub {
+    internal sealed class ConnectHub {
         //Singleton
         private static Lazy<ConnectHub> instance = new Lazy<ConnectHub>();
         public static ConnectHub Instance => instance.Value;
