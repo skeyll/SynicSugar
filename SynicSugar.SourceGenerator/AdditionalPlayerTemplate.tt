@@ -19,6 +19,11 @@ namespace <#= NameSpace #> {
         public void SetOwnerID(UserId value){
             OwnerUserID = value;
         }
+        /// <summary>
+        /// Invalid in Awake
+        /// </summary>
+        public bool isOwner { get { return _ownerUserID == p2pManager.Instance.userIds.LocalUserId; } }
+
         public bool IsOwner(UserId id){
             return id == _ownerUserID;
         }

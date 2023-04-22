@@ -81,33 +81,38 @@ namespace SynicSugarGenerator
         public void SetOwnerID(UserId value){
             OwnerUserID = value;
         }
+        /// <summary>
+        /// Invalid in Awake
+        /// </summary>
+        public bool isOwner { get { return _ownerUserID == p2pManager.Instance.userIds.LocalUserId; } }
+
         public bool IsOwner(UserId id){
             return id == _ownerUserID;
         }
         ");
             
-            #line 25 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
+            #line 30 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(SyncVar));
             
             #line default
             #line hidden
             this.Write("\r\n        ");
             
-            #line 26 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
+            #line 31 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Rpcs));
             
             #line default
             #line hidden
             this.Write("\r\n    }\r\n");
             
-            #line 28 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
+            #line 33 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
  if (!string.IsNullOrEmpty(NameSpace)) { 
             
             #line default
             #line hidden
             this.Write("}\r\n");
             
-            #line 30 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
+            #line 35 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
  } 
             
             #line default
