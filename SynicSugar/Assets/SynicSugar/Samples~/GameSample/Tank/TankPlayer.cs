@@ -19,7 +19,7 @@ namespace  SynicSugar.Samples {
         }
         void Update(){
             //Change local player state
-            if(IsOwner(p2pManager.Instance.userIds.LocalUserId)){
+            if(isOwner){
                 if(!(Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D))){
                     if(currentState == CurrentState.Move){
                         Stop();

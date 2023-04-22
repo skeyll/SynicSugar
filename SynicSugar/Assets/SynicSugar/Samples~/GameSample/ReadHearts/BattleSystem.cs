@@ -133,7 +133,7 @@ namespace  SynicSugar.Samples {
         }
         public async void ExitGame(){
             p2pManager.Instance.EndConnection();
-            if(p2pManager.Instance.userIds.IsHost()){
+            if(isHost){
                 CancellationTokenSource cnsToken = new CancellationTokenSource();
                 await SynicSugar.MatchMake.MatchMakeManager.Instance.DestroyHostingLobby(cnsToken);
             }
