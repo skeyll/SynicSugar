@@ -16,8 +16,13 @@ namespace SynicSugar.PostProcess {
             int count = 0;
             //Process
             foreach (var typeDef in module.Types) {
-                Dictionary<string, List<Instruction> >instructions = new Dictionary<string, List<Instruction>>();
+                //Interface also has method, but the method has no Instructions.
+                //So, need to skip here.
+                if(typeDef.IsInterface){
+                    continue;
+                }
                 foreach (var method in typeDef.Methods) {
+                    Dictionary<string, List<Instruction> >instructions = new Dictionary<string, List<Instruction>>();
                     try {
                         var processor = method.Body.GetILProcessor();
                         instructions.Clear();
