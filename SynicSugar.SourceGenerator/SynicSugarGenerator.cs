@@ -223,7 +223,7 @@ namespace SynicSugar.Generator {
                     PacketConvert = PacketConvert.ToString(),
                     GetInstanceAsObject = GetInstanceAsObject.ToString()
                 }.TransformText();
-                context.AddSource("ConnectController.g.cs", connectTemplate);
+                context.AddSource("ConnectHub.g.cs", connectTemplate);
 
                 context.AddSource("SynicSugarAdditonalClass.g.cs", AdditionalClass.ToString());
             }
