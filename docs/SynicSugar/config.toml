@@ -1,0 +1,15 @@
+base_url = "https://blog.skeyll.net/"
+title = "SynicSugar"
+theme = "EasyDocs"
+compile_sass = true
+build_search_index = true
+
+DefaultContentLanguage = "en"
+
+[markdown]
+highlight_code = true
+highlight_theme = "visual-studio-dark"
+
+[extra]
+
+easydocs_heading_threshold = 5
