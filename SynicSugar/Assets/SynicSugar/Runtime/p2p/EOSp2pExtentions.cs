@@ -1,7 +1,7 @@
 using System;
 
 namespace SynicSugar.P2P {
-    public static class EOSp2pExtenstions {
+    internal static class EOSp2pExtenstions {
         /// <summary>
         /// Generate SocketName for p2p safety connect.
         /// </summary>
