@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 namespace SynicSugar.MatchMake {
     public class Lobby {
-        public string LobbyId;
+        internal string LobbyId;
         public ProductUserId LobbyOwner = new ProductUserId();
         //Basis
         public string LocalUserID;
@@ -38,17 +38,17 @@ namespace SynicSugar.MatchMake {
             }
         }
 
-        public List<LobbyMember> Members = new List<LobbyMember>();
+        internal List<LobbyMember> Members = new List<LobbyMember>();
 
         // Utility data
-        public bool _SearchResult = false;
-        public bool _BeingCreated = false;
+        internal bool _SearchResult = false;
+        internal bool _BeingCreated = false;
 
         /// <summary>
         /// Checks if Lobby Id is valid
         /// </summary>
         /// <returns>True if valid</returns>
-        public bool isValid(){
+        internal bool isValid(){
             return !string.IsNullOrEmpty(LobbyId);
         }
 
@@ -57,14 +57,14 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         /// <param name="userProductId">Specified <c>ProductUserId</c></param>
         /// <returns>True if specified user is owner</returns>
-        public bool isHost(ProductUserId userProductId){
+        internal bool isHost(ProductUserId userProductId){
             return userProductId == LobbyOwner;
         }
 
         /// <summary>
         /// Clears local cache of Lobby Id, owner, attributes and members
         /// </summary>
-        public void Clear(){
+        internal void Clear(){
             LobbyId = string.Empty;
             LobbyOwner = new ProductUserId();
             Attributes.Clear();
@@ -75,7 +75,7 @@ namespace SynicSugar.MatchMake {
         /// Initializing the given Lobby Id and caches all relevant attributes
         /// </summary>
         /// <param name="lobbyId">Specified Lobby Id</param>
-        public void InitFromLobbyHandle(string lobbyId){
+        internal void InitFromLobbyHandle(string lobbyId){
             if (string.IsNullOrEmpty(lobbyId)){
                 return;
             }
@@ -104,7 +104,7 @@ namespace SynicSugar.MatchMake {
         /// Initializing the given <c>LobbyDetails</c> handle and caches all relevant attributes
         /// </summary>
         /// <param name="lobbyId">Specified <c>LobbyDetails</c> handle</param>
-        public void InitFromLobbyDetails(LobbyDetails outLobbyDetailsHandle){
+        internal void InitFromLobbyDetails(LobbyDetails outLobbyDetailsHandle){
             // get owner
             var lobbyDetailsGetLobbyOwnerOptions = new LobbyDetailsGetLobbyOwnerOptions();
             ProductUserId newLobbyOwner = outLobbyDetailsHandle.GetLobbyOwner(ref lobbyDetailsGetLobbyOwnerOptions);
@@ -180,7 +180,7 @@ namespace SynicSugar.MatchMake {
     /// <summary>
     /// Class represents all Lobby Member properties
     /// </summary>
-    public class LobbyMember {
+    internal class LobbyMember {
         public ProductUserId ProductId;
         public Dictionary<string, LobbyAttribute> MemberAttributes = new Dictionary<string, LobbyAttribute>();
     }
@@ -192,11 +192,11 @@ namespace SynicSugar.MatchMake {
         
         public string Key;
         //Only one of the following properties will have valid data (depending on 'ValueType')
-        public bool? BOOLEAN { get; private set; }
-        public int? INT64 { get; private set; } = 0;
-        public double? DOUBLE { get; private set; } = 0.0;
-        public string STRING { get; private set; }
-        public AttributeType ValueType { get; private set; } = AttributeType.String;
+        internal bool? BOOLEAN { get; private set; }
+        internal int? INT64 { get; private set; } = 0;
+        internal double? DOUBLE { get; private set; } = 0.0;
+        internal string STRING { get; private set; }
+        internal AttributeType ValueType { get; private set; } = AttributeType.String;
         public ComparisonOp comparisonOption = ComparisonOp.Equal;
         /// <summary>
         /// Can use bool, int, double and string.

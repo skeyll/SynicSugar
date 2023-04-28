@@ -2,7 +2,7 @@ using Epic.OnlineServices;
 using Epic.OnlineServices.Lobby;
 using UnityEngine;
 namespace SynicSugar.MatchMake {
-    public static class EOSLobbyExtenstions {
+    internal static class EOSLobbyExtenstions {
         internal static AttributeData AsLobbyAttribute(this LobbyAttribute attribute){
             AttributeData data = new AttributeData();
             data.Key = attribute.Key;
@@ -36,29 +36,11 @@ namespace SynicSugar.MatchMake {
                 self.Visibility == other.Visibility;
         }
         /// <summary>
-        /// For search conditions.<br />
-        /// About attributes, use GenerateLobbyAttribute to set.
-        /// </summary>
-        /// <param name="mode">For BucletID</param>
-        /// <param name="region">For BucletID</param>
-        /// <param name="mapName">For BucletID</param>
-        /// <returns></returns>
-        public static Lobby GenerateLobby(string mode = "", string region = "",
-                                            string mapName = "", uint MaxPlayers = 2,
-                                            bool bPresenceEnabled = false){
-            Lobby lobby = new Lobby();
-            lobby.SetBucketID(new string[3]{ mode, region, mapName });
-            lobby.MaxLobbyMembers = MaxPlayers;
-            lobby.bPresenceEnabled = bPresenceEnabled;
-
-            return lobby;
-        }
-        /// <summary>
         /// 
         /// </summary>
         /// <param name="serverData"></param>
         /// <returns></returns>
-        public static LobbyAttribute GenerateLobbyAttribute(Epic.OnlineServices.Lobby.Attribute? serverData){
+        internal static LobbyAttribute GenerateLobbyAttribute(Epic.OnlineServices.Lobby.Attribute? serverData){
             LobbyAttribute data = new LobbyAttribute();
             AttributeData serverAttribute = (AttributeData)(serverData?.Data);
 

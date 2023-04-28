@@ -9,7 +9,7 @@ using SynicSugar.P2P;
 using UnityEngine;
 
 namespace SynicSugar.MatchMake {
-    public class EOSLobby {
+    internal class EOSLobby {
         Lobby CurrentLobby = new Lobby();
 
         // Search
@@ -28,10 +28,10 @@ namespace SynicSugar.MatchMake {
         string socketName = System.String.Empty;
 
         // Manager Callbacks
-        public delegate void OnLobbyCallback(Result result);
-        public delegate void OnLobbySearchCallback(Result result);
+        internal delegate void OnLobbyCallback(Result result);
+        internal delegate void OnLobbySearchCallback(Result result);
 
-        public EOSLobby(uint maxSearch, int timeout, bool allowUserBack){
+        internal EOSLobby(uint maxSearch, int timeout, bool allowUserBack){
             MAX_SEARCH_RESULT = maxSearch;
             //For Unitask
             timeoutMS = timeout * 1000;
@@ -47,7 +47,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="token"></param>
         /// <param name="saveFn">To save LobbyID. If null, save ID to local by PlayerPrefs</param>
         /// <returns>True on success. If false, EOS backend have something problem. So, when you call this process again, should wait for some time.</returns>
-        public async UniTask<bool> StartMatching(Lobby lobbyCondition, CancellationTokenSource token, Action saveFn = null){
+        internal async UniTask<bool> StartMatching(Lobby lobbyCondition, CancellationTokenSource token, Action saveFn = null){
             //Serach
             MatchMakeManager.Instance.matchState.stopAdditionalInput?.Invoke();
             MatchMakeManager.Instance.UpdateStateDescription(MatchState.Search);
@@ -69,6 +69,67 @@ namespace SynicSugar.MatchMake {
             }
             //If player cannot join lobby as a guest, creates a lobby as a host and waits for other player.
             //Create
+            MatchMakeManager.Instance.UpdateStateDescription(MatchState.Wait);
+            bool canCreate = await CreateLobby(lobbyCondition, token);
+            if(canCreate){
+                // Wait for other player to join
+                // Chagne these value via MamberStatusUpdate notification.
+                isMatchSuccess = false;
+                waitingMatch = true;
+                MatchMakeManager.Instance.matchState.acceptCancel?.Invoke();
+                await UniTask.WhenAny(UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token.Token), UniTask.Delay(timeoutMS, cancellationToken: token.Token));
+
+                if(isMatchSuccess){
+                    InitConnectConfig(ref p2pManager.Instance.userIds);
+                    p2pManager.Instance.OpenConnection();
+                    SaveLobbyId(saveFn);
+                    return true;
+                }
+            }
+            //Failed due to no-playing-user or server problems.
+            return false;
+        }
+        /// <summary>
+        /// Just search Lobby<br />
+        /// Recommend: StartMatching()
+        /// </summary>
+        /// <param name="lobbyCondition">Search condition. <c>MUST NOT</c> add the data not to open public.</param>
+        /// <param name="token"></param>
+        /// <param name="saveFn">To save LobbyID. If null, save ID to local by PlayerPrefs</param>
+        /// <returns>True on success. If false, EOS backend have something problem. So, when you call this process again, should wait for some time.</returns>
+        internal async UniTask<bool> StartJustSearch(Lobby lobbyCondition, CancellationTokenSource token, Action saveFn = null){
+            //Serach
+            MatchMakeManager.Instance.matchState.stopAdditionalInput?.Invoke();
+            MatchMakeManager.Instance.UpdateStateDescription(MatchState.Search);
+            bool canJoin = await JoinExistingLobby(lobbyCondition, token);
+            if(canJoin){
+                // Wait for SocketName to use p2p connection
+                // Chagne these value via MamberStatusUpdate notification.
+                isMatchSuccess = false;
+                waitingMatch = true;
+                MatchMakeManager.Instance.matchState.acceptCancel?.Invoke();
+                await UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token.Token);
+
+                if(isMatchSuccess){
+                    InitConnectConfig(ref p2pManager.Instance.userIds);
+                    p2pManager.Instance.OpenConnection();
+                    SaveLobbyId(saveFn);
+                }
+                return isMatchSuccess;
+            }
+            //Failed due to no-playing-user or server problems.
+            return false;
+        }
+        /// <summary>
+        /// Create lobby as host<br />
+        /// Recommend: StartMatching()
+        /// </summary>
+        /// <param name="lobbyCondition">Create and search condition. <c>MUST NOT</c> add the data not to open public.</param>
+        /// <param name="token"></param>
+        /// <param name="saveFn">To save LobbyID. If null, save ID to local by PlayerPrefs</param>
+        /// <returns>True on success. If false, EOS backend have something problem. So, when you call this process again, should wait for some time.</returns>
+        internal async UniTask<bool> StartJustCreate(Lobby lobbyCondition, CancellationTokenSource token, Action saveFn = null){
+            MatchMakeManager.Instance.matchState.stopAdditionalInput?.Invoke();
             MatchMakeManager.Instance.UpdateStateDescription(MatchState.Wait);
             bool canCreate = await CreateLobby(lobbyCondition, token);
             if(canCreate){
@@ -127,7 +188,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="token"></param>
         /// <param name="callback"></param>
         /// <returns></returns>
-        public async UniTask<bool> CreateLobby(Lobby lobbyCondition, CancellationTokenSource token , OnLobbyCallback callback = null){
+        async UniTask<bool> CreateLobby(Lobby lobbyCondition, CancellationTokenSource token , OnLobbyCallback callback = null){
             // Check if there is current session. Leave it.
             if (CurrentLobby.isValid()){
                 Debug.LogWarningFormat("Lobbies (Create Lobby): Leaving Current Lobby '{0}'", CurrentLobby.LobbyId);
@@ -374,7 +435,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="lobbyCondition"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        public async UniTask<bool> JoinExistingLobby(Lobby lobbyCondition, CancellationTokenSource token){
+        async UniTask<bool> JoinExistingLobby(Lobby lobbyCondition, CancellationTokenSource token){
             //Serach
             bool canRetrive = await RetriveLobbyByAttribute(lobbyCondition, token);
             if(!canRetrive){
@@ -665,7 +726,7 @@ namespace SynicSugar.MatchMake {
             var options = new AddNotifyLobbyUpdateReceivedOptions();
             return lobbyInterface.AddNotifyLobbyUpdateReceived(ref options, null, notificationFn);
         }
-        private void OnLobbyUpdateReceived(ref LobbyUpdateReceivedCallbackInfo data){
+        void OnLobbyUpdateReceived(ref LobbyUpdateReceivedCallbackInfo data){
             if(data.LobbyId != CurrentLobby.LobbyId){
                 Debug.LogError("Lobby Updated: this is other lobby's data.");
                 return;
@@ -683,7 +744,7 @@ namespace SynicSugar.MatchMake {
         }
 #endregion
 #region Modify
-        private void OnLobbyUpdated(string lobbyId, OnLobbyCallback LobbyUpdateCompleted = null){
+        void OnLobbyUpdated(string lobbyId, OnLobbyCallback LobbyUpdateCompleted = null){
             if (!string.IsNullOrEmpty(lobbyId) && CurrentLobby.LobbyId == lobbyId){
                 CurrentLobby.InitFromLobbyHandle(lobbyId);
 
@@ -695,7 +756,7 @@ namespace SynicSugar.MatchMake {
         /// <summary>
         /// Leave the Participating Lobby.
         /// Use this to leave sub-lobby to unrelated to the main-game. <br />
-        /// When battle is over, call DestroyLobby instead of this.
+        /// When battle is over, call DestroyLobby() instead of this.
         /// </summary>
         /// <param name="LeaveLobbyCompleted">Callback when leave lobby is completed</param>
         void LeaveLobby(OnLobbyCallback LeaveLobbyCompleted = null){
@@ -736,7 +797,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="token"></param>
         /// <param name="deleteFn">Delete LobbyID for re-connect</param>
         /// <returns>On destroy success, return true.</returns>
-        public async UniTask<bool> DestroyLobby(CancellationTokenSource token, Action deleteFn = null){
+        internal async UniTask<bool> DestroyLobby(CancellationTokenSource token, Action deleteFn = null){
             if(!CurrentLobby.isHost(EOSManager.Instance.GetProductUserId())){
                 Debug.LogError("Destroy Lobby: This is not Host.");
                 return false;
@@ -778,7 +839,7 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         /// <param name="userIds"></param>
         /// <returns></returns>
-        internal bool InitConnectConfig(ref UserIds userIds){
+        bool InitConnectConfig(ref UserIds userIds){
             //Crate copy handle
             LobbyInterface lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();
             CopyLobbyDetailsHandleOptions options = new CopyLobbyDetailsHandleOptions();
