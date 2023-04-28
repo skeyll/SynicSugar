@@ -7,7 +7,7 @@ namespace SynicSugar.P2P {
     /// <summary>
     /// Hold user ids in Room player.
     /// </summary>
-    public partial class UserIds {
+    public class UserIds {
         public UserId LocalUserId;
         public List<UserId> RemoteUserIds;
 

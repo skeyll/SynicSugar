@@ -30,7 +30,7 @@ namespace SynicSugar.P2P {
             P2PHandle = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface();
         }
 #endregion
-        public P2PInterface P2PHandle;
+        internal P2PInterface P2PHandle;
         [HideInInspector] public UserIds userIds = new UserIds();
         string _socketName;
         public string ScoketName { 
