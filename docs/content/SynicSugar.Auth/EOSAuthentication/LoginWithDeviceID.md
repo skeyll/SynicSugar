@@ -1,6 +1,6 @@
 +++
 title = "LoginWithDeviceID"
-weight = 1
+weight = 0
 +++
 ## LoginWithDeviceID
 public static async UniTask<bool> LoginWithDeviceID(CancellationTokenSource token)
