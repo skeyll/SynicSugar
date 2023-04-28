@@ -11,7 +11,8 @@ title = "SynicSugar"
 
 +++
 # What is SynicSugar?
-SynicSugar is the syntax sugar of netcode for Unity with Epic Online Services. The process is sonic by pre-generating and IL weaving codes for your project. The goal is an easy online game dev for everyone! SynicSugar will be optimized for small-party (action) game.
+SynicSugar is the syntax sugar of netcode for Unity with Epic Online Services. The process is sonic by pre-generating and IL weaving codes for your project. The goal is an easy online game dev for everyone! SynicSugar will be optimized for small-party (action) game. Can import from [Github](https://github.com/skeyll/SynicSugar)
+
 
 ```cs
 using SynicSugar.P2P;

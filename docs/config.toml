@@ -1,4 +1,4 @@
-base_url = "https://skeyll.github.io/SynicSugar"
+base_url = "https://skeyll.github.io/SynicSugar/"
 title = "SynicSugar"
 theme = "EasyDocs"
 compile_sass = true
