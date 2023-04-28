@@ -60,7 +60,9 @@ namespace SynicSugar.PostProcess {
             }
 
             sw.Stop();
-            logger.Warning($"SynicSugar has overwritten IL in {module.Assembly.Name.Name} for {count} SyncVar.({sw.Elapsed.TotalMilliseconds}ms)");
+            if(count > 0){
+                logger.Warning($"SynicSugar has overwritten IL in {module.Assembly.Name.Name} for {count} SyncVar.({sw.Elapsed.TotalMilliseconds}ms)");
+            }
             return true;
         }
 
