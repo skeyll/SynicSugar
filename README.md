@@ -2,8 +2,8 @@
 ![https://github.com/skeyll/SynicSugar/blob/main/LICENSE](https://img.shields.io/github/license/skeyll/SynicSugar) ![Unity](https://img.shields.io/badge/Unity-2021.3%2B-blue) [![openupm](https://img.shields.io/npm/v/net.skeyll.synicsugar?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/net.skeyll.synicsugar/)  
 SynicSugar is the syntax sugar to synchronize a game via the internet. The backend is EOS, so the server cost is free. The goal is an easy online-game dev for everyone!  
 
-For more detail is [here](https://skeyll.github.io/SynicSugar/).
-https://skeyll.github.io/SynicSugar/
+For more detail is [https://skeyll.github.io/SynicSugar/](https://skeyll.github.io/SynicSugar/).
+
 
 ## Feature
 - Max 64 peers full-mesh connect
@@ -103,7 +103,7 @@ public partial class GameSystem : MonoBehaviour {
 2. Install these packages  
 　These packages can be imported from **Window/PackageManager/MyRegistries**. Importing SynicSugar will automatically import the other required librarys. If you are using another version in your project, that one will probably work. However, SynicSugar has been developed using the following:  
  * Epic Online Services Plugin for Unity: 2.2.0  
- * UniTask: 2.0.31  
+ * UniTask: 2.3.1 
  * MemoryPack: 1.9.13  
  
  
@@ -126,3 +126,8 @@ About app credential, you can use Peer2Peer as ClientPolicy. The minimum is as f
 ![image](https://user-images.githubusercontent.com/50002207/230758754-4333b431-48fe-4539-aa97-20c6f86d68ae.png)
 
 
+## License
+ License is under MIT. I will not change it.
+
+## Contribute Guideline
+SynicSugar's concept is an easy online game development for everyone. Therefore, the development is also based on this policy. The target is online game for up to 64 people supported by EOS, but the main is small-party action game. If you want to create MMO, you can use Mirror. The roadmap is to expand the necessary functions for these games and improve performance. If you need any necessary features, please post it to Github Issue, or pull. Great thanks for all contributions!
