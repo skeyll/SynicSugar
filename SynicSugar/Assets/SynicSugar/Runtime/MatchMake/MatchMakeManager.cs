@@ -18,7 +18,7 @@ namespace SynicSugar.MatchMake {
             Instance = this;
             DontDestroyOnLoad(this);
 
-            eosLobby = new EOSLobby(maxSerchResult, matchTimeoutSec, AllowUserReconnect);
+            eosLobby = new EOSLobby(maxSearchResult, matchTimeoutSec, AllowUserReconnect);
         }
         void OnDestroy() {
             if( Instance == this ) {
@@ -27,25 +27,71 @@ namespace SynicSugar.MatchMake {
         }
 #endregion
         //Option
-        [SerializeField] uint maxSerchResult = 5;
+        [SerializeField] uint maxSearchResult = 5;
         [SerializeField] int matchTimeoutSec = 180;
         public bool AllowUserReconnect = true;
 
         EOSLobby eosLobby;
         public MatchGUIState matchState = new MatchGUIState();
+
+        /// <summary>
+        /// Set State from script
+        /// </summary>
+        /// <param name="state"></param>
         public void SetGUIState(MatchGUIState state){
             matchState = state;
         }
         /// <summary>
-        /// MatchMake player with conditions and get the data for p2p connect.
+        /// MatchMake player with conditions and get the data for p2p connect. <br />
+        /// Search a lobby, then if can't join, create a lobby as host.
         /// </summary>
         /// <param name="lobbyCondition">Crate by EOSLobbyExtenstions.GenerateLobby().</param>
         /// <param name="token">To cancel task</param>
         /// <param name="saveFn">To save lobby ID for recconect. If null, use Playerprefs</param>
         /// <returns></returns>
-        public async UniTask<bool> StartMatchMake(Lobby lobbyCondition, CancellationTokenSource token, Action saveFn = null ){
+        public async UniTask<bool> SearchAndCreateLobby(Lobby lobbyCondition, CancellationTokenSource token, Action saveFn = null ){
             //Match at Lobby
             bool canMatch = await eosLobby.StartMatching(lobbyCondition, token, saveFn);
+            if(!canMatch){
+                UpdateStateDescription(MatchState.Cancel);
+                return false;
+            }
+            
+            UpdateStateDescription(MatchState.Success);
+            return true;
+        }
+        
+        /// <summary>
+        /// Search lobby to join, then get the data for p2p connect. <br />
+        /// Recommend: SearchAndCreateLobby()
+        /// </summary>
+        /// <param name="lobbyCondition">Crate by EOSLobbyExtenstions.GenerateLobby().</param>
+        /// <param name="token">To cancel task</param>
+        /// <param name="saveFn">To save lobby ID for recconect. If null, use Playerprefs</param>
+        /// <returns></returns>
+        public async UniTask<bool> SearchLobby(Lobby lobbyCondition, CancellationTokenSource token, Action saveFn = null ){
+            //Match at Lobby
+            bool canMatch = await eosLobby.StartJustSearch(lobbyCondition, token, saveFn);
+            if(!canMatch){
+                UpdateStateDescription(MatchState.Cancel);
+                return false;
+            }
+            
+            UpdateStateDescription(MatchState.Success);
+            return true;
+        }
+        
+        /// <summary>
+        /// Create lobby and wait for other users, then get the data for p2p connect. <br />
+        /// Recommend: SearchAndCreateLobby()
+        /// </summary>
+        /// <param name="lobbyCondition">Crate by EOSLobbyExtenstions.GenerateLobby().</param>
+        /// <param name="token">To cancel task</param>
+        /// <param name="saveFn">To save lobby ID for recconect. If null, use Playerprefs</param>
+        /// <returns></returns>
+        public async UniTask<bool> CreateLobby(Lobby lobbyCondition, CancellationTokenSource token, Action saveFn = null ){
+            //Match at Lobby
+            bool canMatch = await eosLobby.StartJustCreate(lobbyCondition, token, saveFn);
             if(!canMatch){
                 UpdateStateDescription(MatchState.Cancel);
                 return false;
@@ -80,7 +126,29 @@ namespace SynicSugar.MatchMake {
 
             return canDestroy;
         }
-        public void UpdateStateDescription(MatchState state){
+        /// <summary>
+        /// For search conditions.<br />
+        /// About attributes, use GenerateLobbyAttribute to set.
+        /// </summary>
+        /// <param name="mode">For BucletID</param>
+        /// <param name="region">For BucletID</param>
+        /// <param name="mapName">For BucletID</param>
+        /// <returns></returns>
+        public static Lobby GenerateLobby(string mode = "", string region = "",
+                                            string mapName = "", uint MaxPlayers = 2,
+                                            bool bPresenceEnabled = false){
+            Lobby lobby = new Lobby();
+            lobby.SetBucketID(new string[3]{ mode, region, mapName });
+            lobby.MaxLobbyMembers = MaxPlayers;
+            lobby.bPresenceEnabled = bPresenceEnabled;
+
+            return lobby;
+        }
+        /// <summary>
+        /// Change State text
+        /// </summary>
+        /// <param name="state"></param>
+        internal void UpdateStateDescription(MatchState state){
             if(matchState.state == null){
                 return;
             }
@@ -93,6 +161,12 @@ namespace SynicSugar.MatchMake {
     }
     [System.Serializable]
     public class MatchGUIState {
+        public MatchGUIState(){
+
+        }
+        public MatchGUIState(Text uiText){
+            state = uiText;
+        }
         public Text state;
         //ex.
         // 1. Press [start match make] button.
@@ -103,7 +177,7 @@ namespace SynicSugar.MatchMake {
         public UnityEvent acceptCancel;
         //Diplay these on UI text.
         public string searchLobby, waitothers, tryconnect, success, fail, trycancel;
-        public string GetDiscription(MatchState state){
+        internal string GetDiscription(MatchState state){
             switch(state){
                 case MatchState.Search:
                 return searchLobby;
