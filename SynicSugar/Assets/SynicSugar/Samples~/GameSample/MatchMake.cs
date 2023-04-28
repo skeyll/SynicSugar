@@ -68,7 +68,7 @@ namespace  SynicSugar.Samples {
             matchCancellToken = new CancellationTokenSource();
 
             //Try MatchMaking
-            bool isSuccess = await MatchMakeManager.Instance.StartMatchMake(matchConditions.GetLobbyCondition(), matchCancellToken);
+            bool isSuccess = await MatchMakeManager.Instance.SearchAndCreateLobby(matchConditions.GetLobbyCondition(), matchCancellToken);
             
             if(!isSuccess){
                 EOSDebug.Instance.Log("Backend may have something problem.");
