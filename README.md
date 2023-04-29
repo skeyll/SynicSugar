@@ -127,7 +127,7 @@ About app credential, you can use Peer2Peer as ClientPolicy. The minimum is as f
 
 
 ## License
- License is under MIT. I will not change it.
+ License is under the MIT. I will never change it.
 
 ## Contribute Guideline
 SynicSugar's concept is an easy online game development for everyone. Therefore, the development is also based on this policy. The target is online game for up to 64 people supported by EOS, but the main is small-party action game. If you want to create MMO, you can use Mirror. The roadmap is to expand the necessary functions for these games and improve performance. If you need any necessary features, please post it to Github Issue, or pull. Great thanks for all contributions!
