@@ -5,7 +5,7 @@ weight = 10
 ## GenerateLobby
 public static Lobby GenerateLobby(string mode = "", string region = "",
                                             string mapName = "", uint MaxPlayers = 2,
-                                            bool bPresenceEnabled = false){
+                                            bool bPresenceEnabled = false)
 
 ### Description
 Create a lobby for search and hosting conditions in local. Generate by large conditions like as BucketID and lobby capacity, then set individual conditions with LobbyAttribute.
@@ -16,7 +16,7 @@ LobbyAttribute needs Key, Value, and ComparisonOption. Key is string. Value is b
 using SynicSugar.MatchMake;
 
 public class MatchMake : MonoBehaviour {
-    void Lobby GetLobbyCondition()
+    void Lobby GetLobbyCondition(){
         Lobby lobbyCondition = MatchMakeManager.GenerateLobby("Rank", "ASIA");
         
         LobbyAttribute attribute = new LobbyAttribute();
