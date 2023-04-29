@@ -1,15 +1,14 @@
 +++
-title = "StartMatchMake"
-weight = 5
+title = "CreateLobby"
+weight = 7
 +++
-## StartMatchMake
-public async UniTask<bool> StartMatchMake(Lobby lobbyCondition, CancellationTokenSource token, Action saveFn = null )
+## SearchLobby
+public async UniTask<bool> CreateLobby(Lobby lobbyCondition, CancellationTokenSource token, Action saveFn = null )
 
 ### Description
-Start MatchMake with conditions and get the data for p2p connect.
-At first, search and try to join. If can't, the user create lobby as host.
-If success and finish preparation p2p connect, return true. If not (by timeout or anything problem), return false.
+Create lobby as host, wait for others until timeoutSec. Fill the room, then get the data for p2p connect. 
 saveFn is for LobbyID. By default, LobbyID is saved by Playerprefs. If you want to save LobbyID in a different location, pass the save processs to 3rd argument.
+Recommend: [SearchAndCreateLobby()](../searchandcreatelobby)
 
 ```cs
 using System.Threading;
@@ -21,7 +20,7 @@ public class MatchMake : MonoBehaviour {
     async UniTask StartMatching(){
         CancellationTokenSource cancellToken = new CancellationTokenSource();
 
-        bool isSuccess = await MatchMakeManager.Instance.StartMatchMake(condition, cancellToken);
+        bool isSuccess = await MatchMakeManager.Instance.CreateLobby(condition, cancellToken);
         
         if(!isSuccess){
             //Failuer

@@ -1,6 +1,6 @@
 +++
 title = "ReconnectParticipatingLobby"
-weight = 6
+weight = 8
 +++
 ## ReconnectParticipatingLobby
 public async UniTask<bool> ReconnectParticipatingLobby(string LobbyID, CancellationTokenSource token)

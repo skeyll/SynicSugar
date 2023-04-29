@@ -1,6 +1,6 @@
 +++
 title = "DestroyHostingLobby"
-weight = 7
+weight = 9
 +++
 ## DestroyHostingLobby
 public async UniTask<bool> DestroyHostingLobby(CancellationTokenSource token, Action deleteFn = null){
