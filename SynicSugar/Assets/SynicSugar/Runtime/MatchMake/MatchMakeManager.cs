@@ -18,7 +18,7 @@ namespace SynicSugar.MatchMake {
             Instance = this;
             DontDestroyOnLoad(this);
 
-            eosLobby = new EOSLobby(maxSearchResult, matchTimeoutSec, AllowUserReconnect);
+            eosLobby = new EOSLobby(maxSearchResult, hostsTimeoutSec, AllowUserReconnect);
         }
         void OnDestroy() {
             if( Instance == this ) {
@@ -28,7 +28,10 @@ namespace SynicSugar.MatchMake {
 #endregion
         //Option
         [SerializeField] uint maxSearchResult = 5;
-        [SerializeField] int matchTimeoutSec = 180;
+        [SerializeField] int hostsTimeoutSec = 180;
+        #region Obsolete. Delete in future
+        [Obsolete] int matchTimeoutSec = 180;
+        #endregion
         public bool AllowUserReconnect = true;
 
         EOSLobby eosLobby;

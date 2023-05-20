@@ -19,7 +19,7 @@ namespace SynicSugar.P2P {
             }
             Instance = this;
             DontDestroyOnLoad(this);
-            SetReciveDelay(receiveDelay);
+            SetReciveDelay(receiveInterval);
         }
         void OnDestroy() {
             if( Instance == this ) {
@@ -46,30 +46,39 @@ namespace SynicSugar.P2P {
         ///Options 
         
         [Header("Delay of sending all users[ms]. Recommend: 3ms-")]
-        // If delay is too short that the sending buffer gets be full and the packet will be discarded.
-        public int delay_sendToAll = 3;
+        // If interval is too short that the sending buffer gets be full and the packet will be discarded.
+        public int interval_sendToAll = 3;
         [Header("No send new value for a some time after the value has send.[ms]")]
         // Recommend: 1000-3000ms.
         // Even if set shorten, network has lag by ping. So use synced value to modify local calculations.
         public int AutoSyncInterval = 1000;
-        public enum ReceiveDelay{
+        public enum ReceiveInterval{
             Large, Moderate, Small
         }
         [Header("delay[ms]/per recive:Small 10, Mod 25, Large 50")]
         // Cannot exceed the recive's fps of the app's.
         // Recommend is Moderate. (-8peers, mobile game, non large-party acion game)
-        public ReceiveDelay receiveDelay = ReceiveDelay.Moderate;
+        public ReceiveInterval receiveInterval = ReceiveInterval.Moderate;
         public int delay_receive { get; private set; } = 25;
         public PacketReliability packetReliability = PacketReliability.ReliableOrdered;
-        void SetReciveDelay(ReceiveDelay gap){
-            if(gap == ReceiveDelay.Large){
+        void SetReciveDelay(ReceiveInterval gap){
+            if(gap == ReceiveInterval.Large){
                 delay_receive = 50;
-            }else if(gap == ReceiveDelay.Moderate){
+            }else if(gap == ReceiveInterval.Moderate){
                 delay_receive = 25;
             }else{
                 delay_receive = 10;
             }
         }
+        #region obsolete. Delete in future
+        [HideInInspector, Obsolete] public int delay_sendToAll = 3;
+        [Obsolete]
+        public enum ReceiveDelay{
+            Large, Moderate, Small
+        }
+        [HideInInspector, Obsolete]
+        public ReceiveDelay receiveDelay = ReceiveDelay.Moderate;
+        #endregion
         /// <summary>
         /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll.
         /// Stop receiver, close all connects and cancel all events to receive.<br />

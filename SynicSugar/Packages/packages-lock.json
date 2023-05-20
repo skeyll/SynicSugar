@@ -15,7 +15,7 @@
       "url": "https://package.openupm.com"
     },
     "com.playeveryware.eos": {
-      "version": "2.2.0",
+      "version": "2.3.0",
       "depth": 0,
       "source": "registry",
       "dependencies": {

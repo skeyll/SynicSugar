@@ -31,7 +31,7 @@ namespace SynicSugar.P2P {
                 options.RemoteUserId = id.AsEpic;
                 result = p2pManager.Instance.P2PHandle.SendPacket(ref options);
 
-                await UniTask.Delay(p2pManager.Instance.delay_sendToAll);
+                await UniTask.Delay(p2pManager.Instance.interval_sendToAll);
                 if(result != Result.Success || p2pManager.Instance.p2pToken.IsCancellationRequested){
                     Debug.LogErrorFormat("Send Packet: can't send packet, code: {0}", result);
                     return;
