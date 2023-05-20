@@ -32,7 +32,7 @@ namespace  SynicSugar.Samples {
                 await SynicSugar.MatchMake.MatchMakeManager.Instance.DestroyHostingLobby(cnsToken);
             }
             GameModeSelect modeSelect = new GameModeSelect();
-            modeSelect.ChangeGameScene((int)GameModeSelect.GameScene.MainMenu);
+            modeSelect.ChangeGameScene(GameModeSelect.GameScene.MainMenu.ToString());
         }
     }
 }

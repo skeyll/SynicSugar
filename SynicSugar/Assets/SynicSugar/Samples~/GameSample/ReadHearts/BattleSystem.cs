@@ -138,7 +138,7 @@ namespace  SynicSugar.Samples {
                 await SynicSugar.MatchMake.MatchMakeManager.Instance.DestroyHostingLobby(cnsToken);
             }
             SynicSugar.Samples.GameModeSelect modeSelect = new SynicSugar.Samples.GameModeSelect();
-            modeSelect.ChangeGameScene(0); //Retrun MainMenu
+            modeSelect.ChangeGameScene(GameModeSelect.GameScene.MainMenu.ToString()); //Retrun MainMenu
         }
     }
 

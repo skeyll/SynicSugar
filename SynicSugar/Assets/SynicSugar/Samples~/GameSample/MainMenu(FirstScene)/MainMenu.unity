@@ -1447,7 +1447,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   modeSelectCanvas: {fileID: 837676601}
-  authPrefab: {fileID: 3185153052314359603, guid: cb96e9a79f01cba4099d764acaf39d05, type: 3}
 --- !u!114 &1040276508
 MonoBehaviour:
   m_ObjectHideFlags: 0
