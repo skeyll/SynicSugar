@@ -245,8 +245,8 @@ namespace SynicSugar.MatchMake {
         // 2. Make [start match make] disable not to press multiple times. -> stopAdditionalInput
         // 3. Change [start match make] text to [stop match make]. -> acceptCancel
         // 4. (On Success) Completely inactive [start match make]. -> stopAdditionalInput
-        public UnityEvent stopAdditionalInput;
-        public UnityEvent acceptCancel;
+        public UnityEvent stopAdditionalInput = new UnityEvent();
+        public UnityEvent acceptCancel = new UnityEvent();
         //Diplay these on UI text.
         public string searchLobby, waitothers, tryconnect, success, fail, trycancel;
         internal string GetDiscription(MatchState state){
