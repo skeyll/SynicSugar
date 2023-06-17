@@ -2,7 +2,7 @@
 {
   "name": "net.skeyll.synicsugar",
   "displayName": "SynicSugar",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "unity": "2021.3",
   "description": "No use cost and no CCU Limit Netcode with EpicOnlineServices.",
   "keywords": ["Network", "Services"],
@@ -11,7 +11,7 @@
   "changelogUrl": "https://github.com/skeyll/SynicSugar/releases",
   "licensesUrl": "https://github.com/skeyll/SynicSugar/main/LICENSE",
   "dependencies": {
-    "com.playeveryware.eos": "2.3.0",
+    "com.playeveryware.eos": "2.2.0",
     "com.cysharp.unitask": "2.3.1",
     "com.cysharp.memorypack": "1.9.13", 
     "com.unity.nuget.mono-cecil": "1.11.4"
