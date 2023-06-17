@@ -191,7 +191,9 @@ namespace SynicSugar.MatchMake {
         async UniTask<bool> CreateLobby(Lobby lobbyCondition, CancellationTokenSource token , OnLobbyCallback callback = null){
             // Check if there is current session. Leave it.
             if (CurrentLobby.isValid()){
+#if SYNICSUGAR_LOG
                 Debug.LogWarningFormat("Lobbies (Create Lobby): Leaving Current Lobby '{0}'", CurrentLobby.LobbyId);
+#endif
                 LeaveLobby(null);
             }
 
@@ -263,7 +265,9 @@ namespace SynicSugar.MatchMake {
         async UniTask<bool> AddSerachLobbyAttribute(Lobby lobbyCondition, CancellationTokenSource token, OnLobbyCallback callback = null){
             ProductUserId productUserId = EOSManager.Instance.GetProductUserId();
             if (!CurrentLobby.isHost(productUserId)){
+#if SYNICSUGAR_LOG
                 Debug.LogError("Change Lobby: This isn't lobby owner.");
+#endif
                 return false;
             }
 
@@ -348,7 +352,9 @@ namespace SynicSugar.MatchMake {
         void SwitchLobbyAttribute(OnLobbyCallback callback = null){
             ProductUserId productUserId = EOSManager.Instance.GetProductUserId();
             if (!CurrentLobby.isHost(productUserId)){
-                Debug.LogError("Change Lobby: This isn't lobby owner.");
+#if SYNICSUGAR_LOG
+                Debug.LogError("Change Lobby: This user isn't lobby owner.");
+#endif
                 return;
             }
 
@@ -799,7 +805,9 @@ namespace SynicSugar.MatchMake {
         /// <returns>On destroy success, return true.</returns>
         internal async UniTask<bool> DestroyLobby(CancellationTokenSource token, Action deleteFn = null){
             if(!CurrentLobby.isHost(EOSManager.Instance.GetProductUserId())){
-                Debug.LogError("Destroy Lobby: This is not Host.");
+#if SYNICSUGAR_LOG
+                Debug.LogError("Destroy Lobby: This user is not Host.");
+#endif
                 return false;
             }
             DestroyLobbyOptions options = new DestroyLobbyOptions();
