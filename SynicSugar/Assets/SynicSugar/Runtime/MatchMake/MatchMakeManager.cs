@@ -2,8 +2,6 @@ using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.Events;
 
 namespace SynicSugar.MatchMake {
     public class MatchMakeManager : MonoBehaviour {
@@ -18,7 +16,7 @@ namespace SynicSugar.MatchMake {
             Instance = this;
             DontDestroyOnLoad(this);
 
-            eosLobby = new EOSLobby(maxSearchResult, matchTimeoutSec, AllowUserReconnect);
+            eosLobby = new EOSLobby(maxSearchResult, hostsTimeoutSec, AllowUserReconnect);
         }
         void OnDestroy() {
             if( Instance == this ) {
@@ -28,7 +26,7 @@ namespace SynicSugar.MatchMake {
 #endregion
         //Option
         [SerializeField] uint maxSearchResult = 5;
-        [SerializeField] int matchTimeoutSec = 180;
+        [SerializeField] int hostsTimeoutSec = 180;
         public bool AllowUserReconnect = true;
 
         EOSLobby eosLobby;
@@ -134,11 +132,29 @@ namespace SynicSugar.MatchMake {
         /// <param name="region">For BucletID</param>
         /// <param name="mapName">For BucletID</param>
         /// <returns></returns>
+        [Obsolete]
         public static Lobby GenerateLobby(string mode = "", string region = "",
                                             string mapName = "", uint MaxPlayers = 2,
                                             bool bPresenceEnabled = false){
             Lobby lobby = new Lobby();
             lobby.SetBucketID(new string[3]{ mode, region, mapName });
+            lobby.MaxLobbyMembers = MaxPlayers;
+            lobby.bPresenceEnabled = bPresenceEnabled;
+
+            return lobby;
+        }
+        /// <summary>
+        /// For search conditions.<br />
+        /// About attributes, use GenerateLobbyAttribute to set.
+        /// </summary>
+        /// <param name="bucketId">important condition like mode, region, map name</param>
+        /// <param name="MaxPlayers"></param>
+        /// <param name="bPresenceEnabled"></param>
+        /// <returns></returns>
+        public static Lobby GenerateLobby(string[] bucketId, uint MaxPlayers = 2,
+                                            bool bPresenceEnabled = false){
+            Lobby lobby = new Lobby();
+            lobby.SetBucketID(bucketId);
             lobby.MaxLobbyMembers = MaxPlayers;
             lobby.bPresenceEnabled = bPresenceEnabled;
 
@@ -156,43 +172,5 @@ namespace SynicSugar.MatchMake {
         }
     }
 #region Discriptions & Input Control
-    public enum MatchState {
-        Search, Wait, Connect, Success, Fail, Cancel
-    }
-    [System.Serializable]
-    public class MatchGUIState {
-        public MatchGUIState(){
-
-        }
-        public MatchGUIState(Text uiText){
-            state = uiText;
-        }
-        public Text state;
-        //ex.
-        // 1. Press [start match make] button.
-        // 2. Make [start match make] disable not to press multiple times. -> stopAdditionalInput
-        // 3. Change [start match make] text to [stop match make]. -> acceptCancel
-        // 4. (On Success) Completely inactive [start match make]. -> stopAdditionalInput
-        public UnityEvent stopAdditionalInput;
-        public UnityEvent acceptCancel;
-        //Diplay these on UI text.
-        public string searchLobby, waitothers, tryconnect, success, fail, trycancel;
-        internal string GetDiscription(MatchState state){
-            switch(state){
-                case MatchState.Search:
-                return searchLobby;
-                case MatchState.Wait:
-                return waitothers;
-                case MatchState.Connect:
-                return tryconnect;
-                case MatchState.Success:
-                return success;
-                case MatchState.Cancel:
-                return trycancel;
-            }
-            
-            return System.String.Empty;
-        }
-    }
 #endregion
 }

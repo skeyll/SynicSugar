@@ -18,7 +18,7 @@ namespace SynicSugarGenerator
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
+    #line 1 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "16.0.0.0")]
     public partial class AdditionalPlayerTemplate : AdditionalPlayerTemplateBase
     {
@@ -29,42 +29,42 @@ namespace SynicSugarGenerator
         public virtual string TransformText()
         {
             
-            #line 7 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
+            #line 7 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
  if (!string.IsNullOrEmpty(NameSpace)) { 
             
             #line default
             #line hidden
             this.Write("namespace ");
             
-            #line 8 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
+            #line 8 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(NameSpace));
             
             #line default
             #line hidden
             this.Write(" {\r\n");
             
-            #line 9 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
+            #line 9 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
  } 
             
             #line default
             #line hidden
             this.Write("    public partial class ");
             
-            #line 10 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
+            #line 10 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ClassName));
             
             #line default
             #line hidden
             this.Write(" : INetworkOwner");
             
-            #line 10 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
+            #line 10 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
  if (useGetInstance) { 
             
             #line default
             #line hidden
             this.Write(", IGetPlayer ");
             
-            #line 10 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
+            #line 10 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
  } 
             
             #line default
@@ -82,37 +82,46 @@ namespace SynicSugarGenerator
             OwnerUserID = value;
         }
         /// <summary>
-        /// Invalid in Awake
+        /// Is this the instance's local? Invalid in Awake. 
         /// </summary>
-        public bool isOwner { get { return _ownerUserID == p2pManager.Instance.userIds.LocalUserId; } }
+        public bool isLocal { get { return _ownerUserID == p2pManager.Instance.userIds.LocalUserId; } }
+        
+        /// <summary>
+        /// Is this the id's instance? Invalid in Awake. 
+        /// </summary>
+        public bool ThisOwnerIs(UserId id){
+            return id == _ownerUserID;
+        }
 
+        [HideInInspector, Obsolete]  public bool isOwner { get { return _ownerUserID == p2pManager.Instance.userIds.LocalUserId; } }
+        [Obsolete]
         public bool IsOwner(UserId id){
             return id == _ownerUserID;
         }
         ");
             
-            #line 30 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
+            #line 39 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(SyncVar));
             
             #line default
             #line hidden
             this.Write("\r\n        ");
             
-            #line 31 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
+            #line 40 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Rpcs));
             
             #line default
             #line hidden
             this.Write("\r\n    }\r\n");
             
-            #line 33 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
+            #line 42 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
  if (!string.IsNullOrEmpty(NameSpace)) { 
             
             #line default
             #line hidden
             this.Write("}\r\n");
             
-            #line 35 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
+            #line 44 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
  } 
             
             #line default

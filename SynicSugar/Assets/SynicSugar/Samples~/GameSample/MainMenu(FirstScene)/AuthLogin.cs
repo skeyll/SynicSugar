@@ -6,6 +6,7 @@ using UnityEngine;
 namespace  SynicSugar.Samples {
     public class AuthLogin : MonoBehaviour {
         [SerializeField] GameObject modeSelectCanvas;
+        [SerializeField] bool needResultDetail;
         /// <summary>
         /// For button event
         /// </summary>
@@ -16,13 +17,29 @@ namespace  SynicSugar.Samples {
             this.gameObject.SetActive(false);
             CancellationTokenSource cancellationToken = new CancellationTokenSource();
             EOSDebug.Instance.Log("Trt to connect EOS with deviceID.");
-            bool isSuccess = await EOSAuthentication.LoginWithDeviceID(cancellationToken);
 
-            if(isSuccess){
-                modeSelectCanvas.SetActive(true);
-                EOSDebug.Instance.Log("SUCCESS EOS AUTHENTHICATION!.");
-                return;
+            if(needResultDetail){
+                string result = await EOSAuthentication.LoginWithDeviceID(cancellationToken, true);
+      
+                EOSDebug.Instance.Log($"Login Result is {result}");
+                    
+                if(result == "Success"){
+                    modeSelectCanvas.SetActive(true);
+                    EOSDebug.Instance.Log("SUCCESS EOS AUTHENTHICATION!.");
+                    return;
+                }
+            }else{
+                //Just result true or false
+                bool isSuccess = await EOSAuthentication.LoginWithDeviceID(cancellationToken);
+                EOSDebug.Instance.Log($"DeviceLogin: {isSuccess}");
+
+                if(isSuccess){
+                    modeSelectCanvas.SetActive(true);
+                    EOSDebug.Instance.Log("SUCCESS EOS AUTHENTHICATION!.");
+                    return;
+                }
             }
+            //False
             this.gameObject.SetActive(true);
             EOSDebug.Instance.Log("Fault EOS authentication.");
         }

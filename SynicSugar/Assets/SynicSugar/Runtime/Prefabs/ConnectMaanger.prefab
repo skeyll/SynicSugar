@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 1127570235843273856}
   - component: {fileID: -6934453671945530594}
   m_Layer: 0
-  m_Name: EOSp2pManager
+  m_Name: ConnectMaanger
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

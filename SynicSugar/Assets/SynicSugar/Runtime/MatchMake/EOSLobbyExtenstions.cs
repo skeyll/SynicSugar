@@ -60,7 +60,7 @@ namespace SynicSugar.MatchMake {
                     data.SetValue(serverAttribute.Value.AsUtf8);
                     break;
                 default:
-                Debug.Log("<color=red>ERROR: Can't set attribute. Please confirm the type.</color>");
+                Debug.LogError("ERROR: Can't set attribute. Please confirm the type.");
                 return null;
             }
 

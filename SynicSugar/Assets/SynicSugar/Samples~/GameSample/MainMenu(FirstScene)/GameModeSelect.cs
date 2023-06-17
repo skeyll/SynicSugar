@@ -5,8 +5,8 @@ namespace SynicSugar.Samples{
     public enum GameScene {
         MainMenu, TankMatchMake, Tank, ReadHearts
     }
-    public void ChangeGameScene(int sceneIndex){
-		  SceneManager.LoadScene(((GameScene)sceneIndex).ToString());
+    public void ChangeGameScene(string scene){
+		  SceneManager.LoadScene(scene);
     }
   }
 }

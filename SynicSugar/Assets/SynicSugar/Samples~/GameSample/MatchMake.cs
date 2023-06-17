@@ -82,7 +82,7 @@ namespace  SynicSugar.Samples {
                 startGame.gameObject.SetActive(true);
             }else{ //For Tank
                 GameModeSelect modeSelect = new GameModeSelect();
-                modeSelect.ChangeGameScene((int)GameModeSelect.GameScene.Tank);
+                modeSelect.ChangeGameScene(GameModeSelect.GameScene.Tank.ToString());
             }
         }
         /// <summary>

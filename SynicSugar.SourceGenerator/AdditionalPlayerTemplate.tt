@@ -20,10 +20,19 @@ namespace <#= NameSpace #> {
             OwnerUserID = value;
         }
         /// <summary>
-        /// Invalid in Awake
+        /// Is this the instance's local? Invalid in Awake. 
         /// </summary>
-        public bool isOwner { get { return _ownerUserID == p2pManager.Instance.userIds.LocalUserId; } }
+        public bool isLocal { get { return _ownerUserID == p2pManager.Instance.userIds.LocalUserId; } }
+        
+        /// <summary>
+        /// Is this the id's instance? Invalid in Awake. 
+        /// </summary>
+        public bool ThisOwnerIs(UserId id){
+            return id == _ownerUserID;
+        }
 
+        [HideInInspector, Obsolete]  public bool isOwner { get { return _ownerUserID == p2pManager.Instance.userIds.LocalUserId; } }
+        [Obsolete]
         public bool IsOwner(UserId id){
             return id == _ownerUserID;
         }
