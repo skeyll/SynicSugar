@@ -9,12 +9,12 @@ EditorBuildSettings:
     path: Assets/SynicSugar/Samples/GameSample/MainMenu(FirstScene)/MainMenu.unity
     guid: 2cda990e2423bbf4892e6590ba056729
   - enabled: 1
-    path: Assets/Samples/GameSample/Tank/Tank.unity
+    path: Assets/SynicSugar/Samples/GameSample/Tank/Tank.unity
     guid: e489e0daa00ee834494f31886f01f045
   - enabled: 1
-    path: Assets/Samples/GameSample/Tank/TankMatchMake.unity
+    path: Assets/SynicSugar/Samples/GameSample/Tank/TankMatchMake.unity
     guid: 14e171b915e54134cba1797548ac64b2
   - enabled: 1
-    path: Assets/Samples/GameSample/ReadHearts/ReadHearts.unity
+    path: Assets/SynicSugar/Samples/GameSample/ReadHearts/ReadHearts.unity
     guid: edef94a35ca4502489f903b15dc6fe95
   m_configObjects: {}
