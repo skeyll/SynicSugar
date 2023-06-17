@@ -34,10 +34,12 @@ namespace SynicSugar.MatchMake {
         public uint AvailableSlots = 0;
         public void SetBucketID(string[] conditions){
             BucketId = System.String.Empty;
+            if(conditions.Length == 0){
+                BucketId = "NONE";
+                return;
+            }
             for(int i = 0; i < conditions.Length; i++){
-                if(conditions[i] != ""){
-                    BucketId += i == 0 ? conditions[i] : (":" + conditions[i]);
-                }
+                BucketId += i == 0 ? conditions[i] : (":" + conditions[i]);
             }
         }
 
