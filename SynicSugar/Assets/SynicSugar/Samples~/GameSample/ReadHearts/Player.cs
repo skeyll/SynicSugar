@@ -22,7 +22,8 @@ namespace SynicSugar.Samples {
             }
         }
         void Start(){
-            if(isLocalPlayer){
+            //API's "isLocal" is enabled after the ID is set to the instance.
+            if(isLocalPlayer){ 
                 SetOwnerID(p2pManager.Instance.userIds.LocalUserId);
                 BattleSystem.Instance.player = this;
             }else{

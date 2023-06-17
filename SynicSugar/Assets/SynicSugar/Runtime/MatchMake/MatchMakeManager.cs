@@ -29,9 +29,6 @@ namespace SynicSugar.MatchMake {
         //Option
         [SerializeField] uint maxSearchResult = 5;
         [SerializeField] int hostsTimeoutSec = 180;
-        #region Obsolete. Delete in future
-        [Obsolete] int matchTimeoutSec = 180;
-        #endregion
         public bool AllowUserReconnect = true;
 
         EOSLobby eosLobby;
