@@ -7,6 +7,8 @@ using UnityEngine;
 //TODO: The no understanding of Assembly caused the snarky struct.
 //Ideally, the library's API should be here.
 //I can not use some method like ConnectHub in Assembly-CSharp from sub-Assembly, SynicSugar.dll.
+//--23.06.21
+//What libray user dosen't need should be moved to another Class for Readability?
 namespace SynicSugar.P2P {
     public class p2pManager : MonoBehaviour {
 #region Singleton
@@ -45,21 +47,34 @@ namespace SynicSugar.P2P {
         public CancellationTokenSource p2pToken;
         ///Options 
         
-        [Header("Delay of sending all users[ms]. Recommend: 3ms-")]
-        // If interval is too short that the sending buffer gets be full and the packet will be discarded.
+        [Header("Interval of sending each users[ms]. Recommend: 3ms-")]
+        /// <summary>
+        /// Interval ms on sending to each user in Rpc. </ br>
+        /// If interval is too short and the sending buffer becomes full, the next packets will be discarded.</ br>
+        /// Recommend: 3ms-
+        /// </summary>
         public int interval_sendToAll = 3;
         [Header("No send new value for a some time after the value has send.[ms]")]
-        // Recommend: 1000-3000ms.
-        // Even if set shorten, network has lag by ping. So use synced value to modify local calculations.
-        public int AutoSyncInterval = 1000;
+        /// <summary>
+        /// Interval ms that a SyncVar dosen't been send even if the value changes after send that SyncVar.</ br>
+        /// If set short value, may get congesting the band.</ br>
+        /// Recommend: 1000-3000ms.
+        /// </summary>
+        public int autoSyncInterval = 1000;
         public enum ReceiveInterval{
             Large, Moderate, Small
         }
         [Header("delay[ms]/per recive:Small 10, Mod 25, Large 50")]
-        // Cannot exceed the recive's fps of the app's.
-        // Recommend is Moderate. (-8peers, mobile game, non large-party acion game)
+        /// <summary>
+        /// Frequency of calling PacketReceiver. [Small 10ms, Moderate 25ms, Large 50ms]</ br>
+        /// Cannot exceed the recive's fps of the app's. </ br>
+        /// Recommend: Moderate. (-8peers, mobile game, non large-party acion game)
+        /// </summary>
         public ReceiveInterval receiveInterval = ReceiveInterval.Moderate;
         public int delay_receive { get; private set; } = 25;
+        /// <summary>
+        /// Quality of connection
+        /// </summary>
         public PacketReliability packetReliability = PacketReliability.ReliableOrdered;
         void SetReciveDelay(ReceiveInterval gap){
             if(gap == ReceiveInterval.Large){
@@ -70,7 +85,7 @@ namespace SynicSugar.P2P {
                 delay_receive = 10;
             }
         }
-        #region obsolete. Delete in future
+    #region obsolete. Delete in future
         [HideInInspector, Obsolete] public int delay_sendToAll = 3;
         [Obsolete]
         public enum ReceiveDelay{
@@ -78,8 +93,8 @@ namespace SynicSugar.P2P {
         }
         [HideInInspector, Obsolete]
         public ReceiveDelay receiveDelay = ReceiveDelay.Moderate;
-        #endregion
-    #region Stop Receiver At Once (Deprecation for game?)
+    #endregion
+    #region Stop Receiver At Once (Experimental, Not recommend for game?)
         /// <summary>
         /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll. </ br>
         /// Stop packet receeiveing to buffer. Packets are discarded while stopped.
@@ -93,8 +108,8 @@ namespace SynicSugar.P2P {
         /// Prepare to receive in advance. If user sent packets, it can open to get packets for a socket id without this.
         /// </summary>
         public void ReStartPacketReceiving(){
-            p2pToken = new CancellationTokenSource();
             OpenConnection();
+            p2pToken = new CancellationTokenSource();
         }
     #endregion
         /// <summary>

@@ -147,14 +147,14 @@ namespace SynicSugar.MatchMake {
         /// For search conditions.<br />
         /// About attributes, use GenerateLobbyAttribute to set.
         /// </summary>
-        /// <param name="bucketId">important condition like mode, region, map name</param>
+        /// <param name="bucket">important condition like mode, region, map name</param>
         /// <param name="MaxPlayers"></param>
         /// <param name="bPresenceEnabled"></param>
         /// <returns></returns>
-        public static Lobby GenerateLobby(string[] bucketId, uint MaxPlayers = 2,
+        public static Lobby GenerateLobby(string[] bucket, uint MaxPlayers = 2,
                                             bool bPresenceEnabled = false){
             Lobby lobby = new Lobby();
-            lobby.SetBucketID(bucketId);
+            lobby.SetBucketID(bucket);
             lobby.MaxLobbyMembers = MaxPlayers;
             lobby.bPresenceEnabled = bPresenceEnabled;
 
@@ -171,6 +171,4 @@ namespace SynicSugar.MatchMake {
             matchState.state.text = matchState.GetDiscription(state);
         }
     }
-#region Discriptions & Input Control
-#endregion
 }
