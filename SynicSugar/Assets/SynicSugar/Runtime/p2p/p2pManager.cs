@@ -79,8 +79,26 @@ namespace SynicSugar.P2P {
         [HideInInspector, Obsolete]
         public ReceiveDelay receiveDelay = ReceiveDelay.Moderate;
         #endregion
+    #region Stop Receiver At Once (Deprecation for game?)
         /// <summary>
-        /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll.
+        /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll. </ br>
+        /// Stop packet receeiveing to buffer. Packets are discarded while stopped.
+        /// </summary>
+        public void PausePacketReceiving(){
+            p2pToken.Cancel();
+            CloseConnection();
+        }
+        /// <summary>
+        /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll. </ br>
+        /// Prepare to receive in advance. If user sent packets, it can open to get packets for a socket id without this.
+        /// </summary>
+        public void ReStartPacketReceiving(){
+            p2pToken = new CancellationTokenSource();
+            OpenConnection();
+        }
+    #endregion
+        /// <summary>
+        /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll.</ br>
         /// Stop receiver, close all connects and cancel all events to receive.<br />
         /// To exit the current lobby.
         /// </summary>
