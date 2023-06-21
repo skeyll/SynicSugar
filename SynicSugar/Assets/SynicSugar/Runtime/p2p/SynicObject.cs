@@ -13,10 +13,10 @@ namespace SynicSugar.P2P {
         public static List<GameObject> AllSpawn(GameObject original){
             List<GameObject> objcs = new List<GameObject>();
             //Local User
-            objcs.Add(Instantiate(p2pManager.Instance.userIds.LocalUserId, original));
+            objcs.Add(Instantiate(p2pConfig.Instance.userIds.LocalUserId, original));
 
             //Remote Users
-            foreach(UserId id in p2pManager.Instance.userIds.RemoteUserIds){
+            foreach(UserId id in p2pConfig.Instance.userIds.RemoteUserIds){
                 objcs.Add(Instantiate(id, original));
             }
             return objcs; 
@@ -24,44 +24,44 @@ namespace SynicSugar.P2P {
         public static List<GameObject> AllSpawn(GameObject original, Transform parent){     
             List<GameObject> objcs = new List<GameObject>();
             //Local User
-            objcs.Add(Instantiate(p2pManager.Instance.userIds.LocalUserId, original, parent));
+            objcs.Add(Instantiate(p2pConfig.Instance.userIds.LocalUserId, original, parent));
 
             //Remote Users
-            foreach(UserId id in p2pManager.Instance.userIds.RemoteUserIds){
-                objcs.Add(Instantiate(p2pManager.Instance.userIds.LocalUserId, original, parent));
+            foreach(UserId id in p2pConfig.Instance.userIds.RemoteUserIds){
+                objcs.Add(Instantiate(p2pConfig.Instance.userIds.LocalUserId, original, parent));
             }
             return objcs;
         }
         public static List<GameObject> AllSpawn(GameObject original, Transform parent, bool instantiateInWorldSpace){
             List<GameObject> objcs = new List<GameObject>();
             //Local User
-            objcs.Add(Instantiate(p2pManager.Instance.userIds.LocalUserId, original, parent, instantiateInWorldSpace));
+            objcs.Add(Instantiate(p2pConfig.Instance.userIds.LocalUserId, original, parent, instantiateInWorldSpace));
 
             //Remote Users
-            foreach(UserId id in p2pManager.Instance.userIds.RemoteUserIds){
-                objcs.Add(Instantiate(p2pManager.Instance.userIds.LocalUserId, original, parent, instantiateInWorldSpace));
+            foreach(UserId id in p2pConfig.Instance.userIds.RemoteUserIds){
+                objcs.Add(Instantiate(p2pConfig.Instance.userIds.LocalUserId, original, parent, instantiateInWorldSpace));
             }
             return objcs;
         }
         public static List<GameObject> AllSpawn(GameObject original, Vector3 position, Quaternion rotation){
             List<GameObject> objcs = new List<GameObject>();
             //Local User
-            objcs.Add(Instantiate(p2pManager.Instance.userIds.LocalUserId, original, position, rotation));
+            objcs.Add(Instantiate(p2pConfig.Instance.userIds.LocalUserId, original, position, rotation));
 
             //Remote Users
-            foreach(UserId id in p2pManager.Instance.userIds.RemoteUserIds){
-                objcs.Add(Instantiate(p2pManager.Instance.userIds.LocalUserId, original, position, rotation));
+            foreach(UserId id in p2pConfig.Instance.userIds.RemoteUserIds){
+                objcs.Add(Instantiate(p2pConfig.Instance.userIds.LocalUserId, original, position, rotation));
             }
             return objcs;
         }
         public static List<GameObject> AllSpawn(GameObject original, Vector3 position, Quaternion rotation, Transform parent){
             List<GameObject> objcs = new List<GameObject>();
             //Local User
-            objcs.Add(Instantiate(p2pManager.Instance.userIds.LocalUserId, original, position, rotation, parent));
+            objcs.Add(Instantiate(p2pConfig.Instance.userIds.LocalUserId, original, position, rotation, parent));
             
             //Remote Users
-            foreach(UserId id in p2pManager.Instance.userIds.RemoteUserIds){
-                objcs.Add(Instantiate(p2pManager.Instance.userIds.LocalUserId, original, position, rotation, parent));
+            foreach(UserId id in p2pConfig.Instance.userIds.RemoteUserIds){
+                objcs.Add(Instantiate(p2pConfig.Instance.userIds.LocalUserId, original, position, rotation, parent));
             }
             return objcs;
         }

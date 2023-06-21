@@ -10,18 +10,16 @@ using UnityEngine;
 //--23.06.21
 //What libray user dosen't need should be moved to another Class for Readability?
 namespace SynicSugar.P2P {
-    public class p2pManager : MonoBehaviour {
+    public class p2pHubWithOtherAssembly : MonoBehaviour {
 #region Singleton
-        private p2pManager(){}
-        public static p2pManager Instance { get; private set; }
+        private p2pHubWithOtherAssembly(){}
+        public static p2pHubWithOtherAssembly Instance { get; private set; }
         void Awake() {
             if( Instance != null ) {
                 Destroy( this.gameObject );
                 return;
             }
             Instance = this;
-            DontDestroyOnLoad(this);
-            SetReciveDelay(receiveInterval);
         }
         void OnDestroy() {
             if( Instance == this ) {
@@ -33,7 +31,6 @@ namespace SynicSugar.P2P {
         }
 #endregion
         internal P2PInterface P2PHandle;
-        [HideInInspector] public UserIds userIds = new UserIds();
         string _socketName;
         public string ScoketName { 
             get { return _socketName; }
@@ -45,55 +42,6 @@ namespace SynicSugar.P2P {
 
         ulong RequestNotifyId;
         public CancellationTokenSource p2pToken;
-        ///Options 
-        
-        [Header("Interval of sending each users[ms]. Recommend: 3ms-")]
-        /// <summary>
-        /// Interval ms on sending to each user in Rpc. </ br>
-        /// If interval is too short and the sending buffer becomes full, the next packets will be discarded.</ br>
-        /// Recommend: 3ms-
-        /// </summary>
-        public int interval_sendToAll = 3;
-        [Header("No send new value for a some time after the value has send.[ms]")]
-        /// <summary>
-        /// Interval ms that a SyncVar dosen't been send even if the value changes after send that SyncVar.</ br>
-        /// If set short value, may get congesting the band.</ br>
-        /// Recommend: 1000-3000ms.
-        /// </summary>
-        public int autoSyncInterval = 1000;
-        public enum ReceiveInterval{
-            Large, Moderate, Small
-        }
-        [Header("delay[ms]/per recive:Small 10, Mod 25, Large 50")]
-        /// <summary>
-        /// Frequency of calling PacketReceiver. [Small 10ms, Moderate 25ms, Large 50ms]</ br>
-        /// Cannot exceed the recive's fps of the app's. </ br>
-        /// Recommend: Moderate. (-8peers, mobile game, non large-party acion game)
-        /// </summary>
-        public ReceiveInterval receiveInterval = ReceiveInterval.Moderate;
-        public int delay_receive { get; private set; } = 25;
-        /// <summary>
-        /// Quality of connection
-        /// </summary>
-        public PacketReliability packetReliability = PacketReliability.ReliableOrdered;
-        void SetReciveDelay(ReceiveInterval gap){
-            if(gap == ReceiveInterval.Large){
-                delay_receive = 50;
-            }else if(gap == ReceiveInterval.Moderate){
-                delay_receive = 25;
-            }else{
-                delay_receive = 10;
-            }
-        }
-    #region obsolete. Delete in future
-        [HideInInspector, Obsolete] public int delay_sendToAll = 3;
-        [Obsolete]
-        public enum ReceiveDelay{
-            Large, Moderate, Small
-        }
-        [HideInInspector, Obsolete]
-        public ReceiveDelay receiveDelay = ReceiveDelay.Moderate;
-    #endregion
     #region Stop Receiver At Once (Experimental, Not recommend for game?)
         /// <summary>
         /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll. </ br>
@@ -128,13 +76,13 @@ namespace SynicSugar.P2P {
         public SugarPacket GetPacketFromBuffer(){
             //Set options
             ReceivePacketOptions options = new ReceivePacketOptions(){
-                LocalUserId = userIds.LocalUserId.AsEpic,
+                LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
                 MaxDataSizeBytes = 4096,
                 RequestedChannel = null
             };
             //Next packet size
             var getNextReceivedPacketSizeOptions = new GetNextReceivedPacketSizeOptions {
-                LocalUserId = userIds.LocalUserId.AsEpic,
+                LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
                 RequestedChannel = null
             };
 
@@ -206,7 +154,7 @@ namespace SynicSugar.P2P {
         void CloseConnection (){
             UnsubscribeFromConnectionRequest();
             var closeOptions = new CloseConnectionsOptions(){
-                LocalUserId = userIds.LocalUserId.AsEpic,
+                LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
                 SocketId = SocketId
             };
             Result result = P2PHandle.CloseConnections(ref closeOptions);

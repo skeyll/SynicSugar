@@ -61,8 +61,8 @@ namespace SynicSugar.MatchMake {
                 await UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token.Token);
 
                 if(isMatchSuccess){
-                    InitConnectConfig(ref p2pManager.Instance.userIds);
-                    p2pManager.Instance.OpenConnection();
+                    InitConnectConfig(ref p2pConfig.Instance.userIds);
+                    p2pHubWithOtherAssembly.Instance.OpenConnection();
                     SaveLobbyId(saveFn);
                 }
                 return isMatchSuccess;
@@ -80,8 +80,8 @@ namespace SynicSugar.MatchMake {
                 await UniTask.WhenAny(UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token.Token), UniTask.Delay(timeoutMS, cancellationToken: token.Token));
 
                 if(isMatchSuccess){
-                    InitConnectConfig(ref p2pManager.Instance.userIds);
-                    p2pManager.Instance.OpenConnection();
+                    InitConnectConfig(ref p2pConfig.Instance.userIds);
+                    p2pHubWithOtherAssembly.Instance.OpenConnection();
                     SaveLobbyId(saveFn);
                     return true;
                 }
@@ -111,8 +111,8 @@ namespace SynicSugar.MatchMake {
                 await UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token.Token);
 
                 if(isMatchSuccess){
-                    InitConnectConfig(ref p2pManager.Instance.userIds);
-                    p2pManager.Instance.OpenConnection();
+                    InitConnectConfig(ref p2pConfig.Instance.userIds);
+                    p2pHubWithOtherAssembly.Instance.OpenConnection();
                     SaveLobbyId(saveFn);
                 }
                 return isMatchSuccess;
@@ -141,8 +141,8 @@ namespace SynicSugar.MatchMake {
                 await UniTask.WhenAny(UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token.Token), UniTask.Delay(timeoutMS, cancellationToken: token.Token));
 
                 if(isMatchSuccess){
-                    InitConnectConfig(ref p2pManager.Instance.userIds);
-                    p2pManager.Instance.OpenConnection();
+                    InitConnectConfig(ref p2pConfig.Instance.userIds);
+                    p2pHubWithOtherAssembly.Instance.OpenConnection();
                     SaveLobbyId(saveFn);
                     return true;
                 }
@@ -174,8 +174,8 @@ namespace SynicSugar.MatchMake {
                 EOSManager.Instance.GetEOSLobbyInterface().RemoveNotifyLobbyMemberStatusReceived(handle);
             });
             
-            InitConnectConfig(ref p2pManager.Instance.userIds);
-            p2pManager.Instance.userIds.isJustReconnected = true;
+            InitConnectConfig(ref p2pConfig.Instance.userIds);
+            p2pConfig.Instance.userIds.isJustReconnected = true;
             return true;
         }
 //Host
@@ -709,16 +709,16 @@ namespace SynicSugar.MatchMake {
             //In game
             // Hosts changed?
             if (data.CurrentStatus == LobbyMemberStatus.Promoted){
-                p2pManager.Instance.userIds.HostUserId = new UserId(data.TargetUserId);
+                p2pConfig.Instance.userIds.HostUserId = new UserId(data.TargetUserId);
 
                 if(!CurrentLobby.isHost(productUserId)){
                     //Guest Don't need to hold user id 
-                    p2pManager.Instance.userIds.LeftUsers = new List<UserId>();
+                    p2pConfig.Instance.userIds.LeftUsers = new List<UserId>();
                 }
             }
 
             if(data.CurrentStatus == LobbyMemberStatus.Disconnected){
-                p2pManager.Instance.userIds.MoveTargetUserIdToLefts(data.TargetUserId);
+                p2pConfig.Instance.userIds.MoveTargetUserIdToLefts(data.TargetUserId);
             }
         }
         /// <summary>
@@ -891,7 +891,7 @@ namespace SynicSugar.MatchMake {
                 lobbyHandle.Release();
                 return false;
             }
-            p2pManager.Instance.ScoketName = EOSLobbyExtenstions.GenerateLobbyAttribute(socket).STRING;
+            p2pHubWithOtherAssembly.Instance.ScoketName = EOSLobbyExtenstions.GenerateLobbyAttribute(socket).STRING;
             //For options
             userIds.HostUserId = new UserId(CurrentLobby.LobbyOwner);
             userIds.LeftUsers = new List<UserId>();

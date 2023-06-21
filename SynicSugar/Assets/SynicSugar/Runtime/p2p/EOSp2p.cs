@@ -19,7 +19,7 @@ namespace SynicSugar.P2P {
         public static async UniTaskVoid SendPacketToAll(byte ch, byte[] value){
             SendPacketOptions options = new SendPacketOptions(){
                 LocalUserId = EOSManager.Instance.GetProductUserId(),
-                SocketId = p2pManager.Instance.SocketId,
+                SocketId = p2pHubWithOtherAssembly.Instance.SocketId,
                 Channel = ch,
                 AllowDelayedDelivery = true,
                 Reliability = PacketReliability.ReliableOrdered,
@@ -27,12 +27,12 @@ namespace SynicSugar.P2P {
             };
 
             Result result;
-            foreach(var id in p2pManager.Instance.userIds.RemoteUserIds){
+            foreach(var id in p2pConfig.Instance.userIds.RemoteUserIds){
                 options.RemoteUserId = id.AsEpic;
-                result = p2pManager.Instance.P2PHandle.SendPacket(ref options);
+                result = p2pHubWithOtherAssembly.Instance.P2PHandle.SendPacket(ref options);
 
-                await UniTask.Delay(p2pManager.Instance.interval_sendToAll);
-                if(result != Result.Success || p2pManager.Instance.p2pToken.IsCancellationRequested){
+                await UniTask.Delay(p2pConfig.Instance.interval_sendToAll);
+                if(result != Result.Success || p2pHubWithOtherAssembly.Instance.p2pToken.IsCancellationRequested){
                     Debug.LogErrorFormat("Send Packet: can't send packet, code: {0}", result);
                     return;
                 }
@@ -48,14 +48,14 @@ namespace SynicSugar.P2P {
             SendPacketOptions options = new SendPacketOptions(){
                 LocalUserId = EOSManager.Instance.GetProductUserId(),
                 RemoteUserId = targetId.AsEpic,
-                SocketId = p2pManager.Instance.SocketId,
+                SocketId = p2pHubWithOtherAssembly.Instance.SocketId,
                 Channel = ch,
                 AllowDelayedDelivery = true,
-                Reliability = p2pManager.Instance.packetReliability,
+                Reliability = p2pConfig.Instance.packetReliability,
                 Data = new ArraySegment<byte>(value != null ? value : Array.Empty<byte>())
             };
 
-            Result result = p2pManager.Instance.P2PHandle.SendPacket(ref options);
+            Result result = p2pHubWithOtherAssembly.Instance.P2PHandle.SendPacket(ref options);
 
             if(result != Result.Success){
                 Debug.LogErrorFormat("Send Packet: can't send packet, code: {0}", result);
