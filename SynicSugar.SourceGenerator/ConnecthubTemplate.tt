@@ -25,42 +25,69 @@ namespace SynicSugar.P2P {
         public void DisposeInstance(){
             instance = null;
         }
+        //Start
 
         /// <summary>
         /// Start the packet receiver. Call after creating the Network Instance required for reception.
         /// </summary>
         // Default Relay Setting is AllowRelay. To change this, get NatType.
         public void StartPacketReceiver(){
-            if(p2pManager.Instance.p2pToken == null || p2pManager.Instance.p2pToken.IsCancellationRequested){
-                p2pManager.Instance.p2pToken = new CancellationTokenSource();
+            if(p2pHubWithOtherAssembly.Instance.p2pToken == null || p2pHubWithOtherAssembly.Instance.p2pToken.IsCancellationRequested){
+                p2pHubWithOtherAssembly.Instance.p2pToken = new CancellationTokenSource();
                 RecivePacket().Forget();
             }
         }
+        //Pause receiver
         /// <summary>
-        /// Pause to get a packet from the buffer.<br />
-        /// *Receiving to the receive buffer is continue. If the packet is over the buffer, subsequent packets are discarded.
+        /// Pause getting a packet from the buffer. To re-start, call StartPacketReceiver().<br />
+        /// *Packet receiving to the buffer is continue. If the packet is over the buffer, subsequent packets are discarded.
         /// </summary>
-        public void PausePacketReceiver(){
-            if(p2pManager.Instance.p2pToken != null && !p2pManager.Instance.p2pToken.IsCancellationRequested){
-                p2pManager.Instance.p2pToken.Cancel();
+        public void PauseGettingPacket(){
+            if(p2pHubWithOtherAssembly.Instance.p2pToken != null && !p2pHubWithOtherAssembly.Instance.p2pToken.IsCancellationRequested){
+                p2pHubWithOtherAssembly.Instance.p2pToken.Cancel();
             }
         }
+
+        //Pause Recive buffer
         /// <summary>
-        /// Stop receiver, close all connects and cancel all events to receive.<br />
-        /// Then, exit the current lobby.
+        /// Pause receiving a packet to the receive buffer. To re-start, call ReStartPacketReceiving(). </ br>
+        /// After call this, packets will have been discarded until connection will re-open.
         /// </summary>
+        public void PausePacketReceiving(){
+            p2pHubWithOtherAssembly.Instance.PausePacketReceiving();
+        }
+        /// <summary>
+        /// Prepare to receive packets in advance. If user sent a packet, it can also open connection to get packets without this.
+        /// </summary>
+        public void ReStartPacketReceiving(){
+            p2pHubWithOtherAssembly.Instance.ReStartPacketReceiving();
+            RecivePacket().Forget();
+        }
+
+        /// <summary>
+        /// Stop receiver, close all connects and cancel all events to receive. Then, exit the current lobby.<br />
+        /// Fix to PauseGettingPacket for readability.
+        /// </summary>
+        [Obsolete]
         public void EndConnection(){
-            p2pManager.Instance.EndConnection();
+            p2pHubWithOtherAssembly.Instance.EndConnection();
+            DisposeInstance();
+        }
+        /// <summary>
+        /// Stop receiver, close all connects and cancel all events to receive, then exit the current lobby.
+        /// </summary>
+        public void CloseConnection(){
+            p2pHubWithOtherAssembly.Instance.EndConnection();
             DisposeInstance();
         }
         async UniTask RecivePacket(){
-            while(!p2pManager.Instance.p2pToken.IsCancellationRequested){
-                SugarPacket recivePacket = p2pManager.Instance.GetPacketFromBuffer();
+            while(!p2pHubWithOtherAssembly.Instance.p2pToken.IsCancellationRequested){
+                SugarPacket recivePacket = p2pHubWithOtherAssembly.Instance.GetPacketFromBuffer();
 
                 if(recivePacket != null){
                     ConnectHub.Instance.ConvertFormPacket(recivePacket);
                 }
-                await UniTask.Delay(p2pManager.Instance.delay_receive, cancellationToken: p2pManager.Instance.p2pToken.Token);
+                await UniTask.Delay(p2pConfig.Instance.delay_receive, cancellationToken: p2pHubWithOtherAssembly.Instance.p2pToken.Token);
             }
         }
 

@@ -84,7 +84,7 @@ namespace SynicSugarGenerator
         /// <summary>
         /// Is this the instance's local? Invalid in Awake. 
         /// </summary>
-        public bool isLocal { get { return _ownerUserID == p2pManager.Instance.userIds.LocalUserId; } }
+        public bool isLocal { get { return _ownerUserID == p2pConfig.Instance.userIds.LocalUserId; } }
         
         /// <summary>
         /// Is this the id's instance? Invalid in Awake. 
@@ -93,7 +93,7 @@ namespace SynicSugarGenerator
             return id == _ownerUserID;
         }
 
-        [HideInInspector, Obsolete]  public bool isOwner { get { return _ownerUserID == p2pManager.Instance.userIds.LocalUserId; } }
+        [HideInInspector, Obsolete]  public bool isOwner { get { return _ownerUserID == p2pConfig.Instance.userIds.LocalUserId; } }
         [Obsolete]
         public bool IsOwner(UserId id){
             return id == _ownerUserID;
