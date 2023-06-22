@@ -3,12 +3,10 @@ using Epic.OnlineServices;
 using Epic.OnlineServices.P2P;
 using System;
 using System.Threading;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
-//TODO: The no understanding of Assembly caused the snarky struct.
-//Ideally, the library's API should be here.
-//I can not use some method like ConnectHub in Assembly-CSharp from sub-Assembly, SynicSugar.dll.
-//--23.06.21
-//What libray user dosen't need should be moved to another Class for Readability?
+//We can't call the main-Assembly from own-assemblies.
+//So, use such processes through  this assembly .
 namespace SynicSugar.P2P {
     public class p2pConnectorForOtherAssembly : MonoBehaviour {
 #region Singleton
@@ -20,6 +18,7 @@ namespace SynicSugar.P2P {
                 return;
             }
             Instance = this;
+            SetIntervalSeconds(p2pConfig.Instance.receiveInterval);
         }
         void OnDestroy() {
             if( Instance == this ) {
@@ -42,17 +41,50 @@ namespace SynicSugar.P2P {
 
         ulong RequestNotifyId;
         public CancellationTokenSource p2pToken;
+        
+        /// <summary>
+        /// For internal process Use this 
+        /// </summary>
+        /// <value></value>
+        public int receiverInterval { get; private set; } = 25;
+        /// <summary>
+        /// Quality of connection
+        /// </summary>
+        public PacketReliability packetReliability = PacketReliability.ReliableOrdered;
+        void SetIntervalSeconds(p2pConfig.ReceiveInterval size){
+            if(size == p2pConfig.ReceiveInterval.Large){
+                receiverInterval = 50;
+            }else if(size == p2pConfig.ReceiveInterval.Moderate){
+                receiverInterval = 25;
+            }else{
+                receiverInterval = 10;
+            }
+        }
+
     #region Stop Receiver At Once (Experimental, Not recommend for game?)
         /// <summary>
-        /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll. </ br>
         /// Stop packet receeiveing to buffer. Packets are discarded while stopped.
         /// </summary>
-        public void PausePacketReceiving(){
-            p2pToken.Cancel();
+        /// <param name="isForced">If True, clear current packet queue. </ br>
+        /// If false, process current queue, then stop it.</param>
+        public async UniTask PausePacketReceiving(bool isForced, CancellationTokenSource cancelToken = default(CancellationTokenSource)){
             CloseConnection();
+
+            if(!isForced){
+                GetPacketQueueInfoOptions options = new GetPacketQueueInfoOptions();
+                PacketQueueInfo info = new PacketQueueInfo();
+
+                while (info.IncomingPacketQueueCurrentPacketCount <= 0){
+                    P2PHandle.GetPacketQueueInfo(ref options, out info);
+                    await UniTask.Delay(receiverInterval, cancellationToken: cancelToken.Token);
+                }
+
+                // await 
+            }
+
+            p2pToken.Cancel();
         }
         /// <summary>
-        /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll. </ br>
         /// Prepare to receive in advance. If user sent packets, it can open to get packets for a socket id without this.
         /// </summary>
         public void ReStartPacketReceiving(){
@@ -93,9 +125,32 @@ namespace SynicSugar.P2P {
             Result result = P2PHandle.ReceivePacket(ref options, out ProductUserId peerId, out SocketId socketId, out byte outChannel, dataSegment, out uint bytesWritten);
             
             if (result != Result.Success){
+#if SYNICSUGAR_LOG //This range is for performance since this is called every frame.
+                if(result == Result.InvalidParameters){
+                    Debug.LogErrorFormat("Get Packets: input was invalid: {0}", result);
+                }
+#endif
                 return null; //No packet
             }
             return new SugarPacket(){ ch = outChannel, UserID = peerId.ToString(), payload = dataSegment}; 
+        }
+        /// <summary>
+        /// Clear the packet queues.
+        /// Just for PausePacketXXX.
+        /// </summary>
+        void ClearPacketQueue(){
+            ClearPacketQueueOptions options = new ClearPacketQueueOptions(){
+                LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
+                // RemoteUserId = , Need this?
+                SocketId = SocketId
+            };
+            
+            Result result = P2PHandle.ClearPacketQueue(ref options);
+            
+            if (result != Result.Success){
+                Debug.LogErrorFormat("Clear Queue: can't clear packet queue, code: {0}", result);
+                return; //No packet
+            }
         }
 #region Notify(ConnectRquest)
         // MAYBE: Probably uint to determine if the request notification has been sent out, and since we allow reception for all SocketIDs (=SocketName), there is no need to call it multiple times.

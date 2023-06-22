@@ -1,10 +1,5 @@
 using Epic.OnlineServices.P2P;
 using UnityEngine;
-//TODO: The no understanding of Assembly caused the snarky struct.
-//Ideally, the library's API should be here.
-//I can not use some method like ConnectHub in Assembly-CSharp from sub-Assembly, SynicSugar.dll.
-//--23.06.21
-//What libray user dosen't need should be moved to another Class for Readability?
 namespace SynicSugar.P2P {
     public class p2pConfig : MonoBehaviour {
 #region Singleton
@@ -16,7 +11,6 @@ namespace SynicSugar.P2P {
                 return;
             }
             Instance = this;
-            SetReciveDelay(receiveInterval);
         }
         void OnDestroy() {
             if( Instance == this ) {
@@ -50,19 +44,9 @@ namespace SynicSugar.P2P {
         /// Recommend: Moderate. (-8peers, mobile game, non large-party acion game)
         /// </summary>
         public ReceiveInterval receiveInterval = ReceiveInterval.Moderate;
-        public int delay_receive { get; private set; } = 25;
         /// <summary>
         /// Quality of connection
         /// </summary>
         public PacketReliability packetReliability = PacketReliability.ReliableOrdered;
-        void SetReciveDelay(ReceiveInterval gap){
-            if(gap == ReceiveInterval.Large){
-                delay_receive = 50;
-            }else if(gap == ReceiveInterval.Moderate){
-                delay_receive = 25;
-            }else{
-                delay_receive = 10;
-            }
-        }
     }
 }
