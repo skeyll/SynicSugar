@@ -18,7 +18,7 @@ namespace SynicSugar.Samples{
 
         public Lobby GetLobbyCondition(){
             //Create conditions
-            Lobby lobbyCondition = MatchMakeManager.GenerateLobby(mode.ToString(), region.ToString());
+            Lobby lobbyCondition = MatchMakeManager.GenerateLobby(new string[2]{mode.ToString(), region.ToString()});
             
             lobbyCondition.MaxLobbyMembers = 2; //2-64
 
