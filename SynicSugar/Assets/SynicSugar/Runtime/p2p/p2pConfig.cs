@@ -33,7 +33,7 @@ namespace SynicSugar.P2P {
         /// Recommend: 3ms-
         /// </summary>
         public int interval_sendToAll = 3;
-        [Header("No send new value for a some time after the value has send.[ms]")]
+        [Header("Interval until sending next new value[ms]. Recommend: 1000-3000ms.")]
         /// <summary>
         /// Interval ms that a SyncVar dosen't been send even if the value changes after send that SyncVar.</ br>
         /// If set short value, may get congesting the band.</ br>
