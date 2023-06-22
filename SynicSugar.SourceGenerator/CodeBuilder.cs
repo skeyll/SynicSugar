@@ -144,9 +144,9 @@
             var preValue = {name};
 
             EOSp2p.SendPacketToAll((byte)ConnectHub.CHANNELLIST.{name}, MemoryPack.MemoryPackSerializer.Serialize({name})).Forget();
-            await UniTask.Delay({intervalTime}, cancellationToken: p2pHubWithOtherAssembly.Instance.p2pToken.Token);
+            await UniTask.Delay({intervalTime}, cancellationToken: p2pConnectorForOtherAssembly.Instance.p2pToken.Token);
             
-            if(p2pHubWithOtherAssembly.Instance.p2pToken.IsCancellationRequested){{
+            if(p2pConnectorForOtherAssembly.Instance.p2pToken.IsCancellationRequested){{
                 return;
             }}
             if(preValue == {name}){{

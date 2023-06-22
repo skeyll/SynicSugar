@@ -10,10 +10,10 @@ using UnityEngine;
 //--23.06.21
 //What libray user dosen't need should be moved to another Class for Readability?
 namespace SynicSugar.P2P {
-    public class p2pHubWithOtherAssembly : MonoBehaviour {
+    public class p2pConnectorForOtherAssembly : MonoBehaviour {
 #region Singleton
-        private p2pHubWithOtherAssembly(){}
-        public static p2pHubWithOtherAssembly Instance { get; private set; }
+        private p2pConnectorForOtherAssembly(){}
+        public static p2pConnectorForOtherAssembly Instance { get; private set; }
         void Awake() {
             if( Instance != null ) {
                 Destroy( this.gameObject );
@@ -65,7 +65,7 @@ namespace SynicSugar.P2P {
         /// Stop receiver, close all connects and cancel all events to receive.<br />
         /// To exit the current lobby.
         /// </summary>
-        public void EndConnection(){
+        public void LeaveSession(){
             p2pToken.Cancel();
             CloseConnection();
             Destroy(this.gameObject);

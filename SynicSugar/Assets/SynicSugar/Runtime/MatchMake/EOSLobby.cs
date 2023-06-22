@@ -62,7 +62,7 @@ namespace SynicSugar.MatchMake {
 
                 if(isMatchSuccess){
                     InitConnectConfig(ref p2pConfig.Instance.userIds);
-                    p2pHubWithOtherAssembly.Instance.OpenConnection();
+                    p2pConnectorForOtherAssembly.Instance.OpenConnection();
                     SaveLobbyId(saveFn);
                 }
                 return isMatchSuccess;
@@ -81,7 +81,7 @@ namespace SynicSugar.MatchMake {
 
                 if(isMatchSuccess){
                     InitConnectConfig(ref p2pConfig.Instance.userIds);
-                    p2pHubWithOtherAssembly.Instance.OpenConnection();
+                    p2pConnectorForOtherAssembly.Instance.OpenConnection();
                     SaveLobbyId(saveFn);
                     return true;
                 }
@@ -112,7 +112,7 @@ namespace SynicSugar.MatchMake {
 
                 if(isMatchSuccess){
                     InitConnectConfig(ref p2pConfig.Instance.userIds);
-                    p2pHubWithOtherAssembly.Instance.OpenConnection();
+                    p2pConnectorForOtherAssembly.Instance.OpenConnection();
                     SaveLobbyId(saveFn);
                 }
                 return isMatchSuccess;
@@ -142,7 +142,7 @@ namespace SynicSugar.MatchMake {
 
                 if(isMatchSuccess){
                     InitConnectConfig(ref p2pConfig.Instance.userIds);
-                    p2pHubWithOtherAssembly.Instance.OpenConnection();
+                    p2pConnectorForOtherAssembly.Instance.OpenConnection();
                     SaveLobbyId(saveFn);
                     return true;
                 }
@@ -891,7 +891,7 @@ namespace SynicSugar.MatchMake {
                 lobbyHandle.Release();
                 return false;
             }
-            p2pHubWithOtherAssembly.Instance.ScoketName = EOSLobbyExtenstions.GenerateLobbyAttribute(socket).STRING;
+            p2pConnectorForOtherAssembly.Instance.ScoketName = EOSLobbyExtenstions.GenerateLobbyAttribute(socket).STRING;
             //For options
             userIds.HostUserId = new UserId(CurrentLobby.LobbyOwner);
             userIds.LeftUsers = new List<UserId>();
