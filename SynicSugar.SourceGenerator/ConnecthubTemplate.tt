@@ -53,8 +53,10 @@ namespace SynicSugar.P2P {
         /// Pause receiving a packet to the receive buffer. To re-start, call ReStartPacketReceiving(). </ br>
         /// After call this, packets will have been discarded until connection will re-open.
         /// </summary>
-        public void PausePacketReceiving(){
-            p2pConnectorForOtherAssembly.Instance.PausePacketReceiving();
+        /// <param name="isForced">If True, force to stop and clear current packet queue. </ br>
+        /// If false, process current queue, then stop it.</param>
+        public async UniTask PausePacketReceiving(bool isForced, CancellationTokenSource cancelToken = default(CancellationTokenSource)){
+            await p2pConnectorForOtherAssembly.Instance.PausePacketReceiving(isForced, cancelToken);
         }
         /// <summary>
         /// Prepare to receive packets in advance. If user sent a packet, it can also open connection to get packets without this.
@@ -99,7 +101,7 @@ namespace SynicSugar.P2P {
                 if(recivePacket != null){
                     ConnectHub.Instance.ConvertFormPacket(recivePacket);
                 }
-                await UniTask.Delay(p2pConfig.Instance.delay_receive, cancellationToken: p2pConnectorForOtherAssembly.Instance.p2pToken.Token);
+                await UniTask.Delay(p2pConnectorForOtherAssembly.Instance.receiverInterval, cancellationToken: p2pConnectorForOtherAssembly.Instance.p2pToken.Token);
             }
         }
 
