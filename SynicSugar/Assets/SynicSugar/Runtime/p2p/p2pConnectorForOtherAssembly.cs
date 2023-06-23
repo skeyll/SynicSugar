@@ -18,7 +18,6 @@ namespace SynicSugar.P2P {
                 return;
             }
             Instance = this;
-            SetIntervalSeconds(p2pConfig.Instance.receiveInterval);
         }
         void OnDestroy() {
             if( Instance == this ) {
@@ -26,6 +25,7 @@ namespace SynicSugar.P2P {
             }
         }
         void Start(){
+            SetIntervalSeconds(p2pConfig.Instance.receiveInterval);
             P2PHandle = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface();
         }
 #endregion
@@ -47,10 +47,6 @@ namespace SynicSugar.P2P {
         /// </summary>
         /// <value></value>
         public int receiverInterval { get; private set; } = 25;
-        /// <summary>
-        /// Quality of connection
-        /// </summary>
-        public PacketReliability packetReliability = PacketReliability.ReliableOrdered;
         void SetIntervalSeconds(p2pConfig.ReceiveInterval size){
             if(size == p2pConfig.ReceiveInterval.Large){
                 receiverInterval = 50;
@@ -61,13 +57,13 @@ namespace SynicSugar.P2P {
             }
         }
 
-    #region Stop Receiver At Once (Experimental, Not recommend for game?)
+    #region Pause Session(Experimental, Not recommend for game?)
         /// <summary>
         /// Stop packet receeiveing to buffer. Packets are discarded while stopped.
         /// </summary>
         /// <param name="isForced">If True, clear current packet queue. </ br>
         /// If false, process current queue, then stop it.</param>
-        public async UniTask PausePacketReceiving(bool isForced, CancellationTokenSource cancelToken = default(CancellationTokenSource)){
+        public async UniTask PauseSession(bool isForced, CancellationTokenSource cancelToken = default(CancellationTokenSource)){
             CloseConnection();
 
             if(!isForced){
@@ -78,8 +74,8 @@ namespace SynicSugar.P2P {
                     P2PHandle.GetPacketQueueInfo(ref options, out info);
                     await UniTask.Delay(receiverInterval, cancellationToken: cancelToken.Token);
                 }
-
-                // await 
+            }else{
+                ClearPacketQueue();
             }
 
             p2pToken.Cancel();
@@ -87,7 +83,7 @@ namespace SynicSugar.P2P {
         /// <summary>
         /// Prepare to receive in advance. If user sent packets, it can open to get packets for a socket id without this.
         /// </summary>
-        public void ReStartPacketReceiving(){
+        public void ReStartSession(){
             OpenConnection();
             p2pToken = new CancellationTokenSource();
         }
@@ -141,16 +137,21 @@ namespace SynicSugar.P2P {
         void ClearPacketQueue(){
             ClearPacketQueueOptions options = new ClearPacketQueueOptions(){
                 LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
-                // RemoteUserId = , Need this?
                 SocketId = SocketId
             };
             
-            Result result = P2PHandle.ClearPacketQueue(ref options);
-            
-            if (result != Result.Success){
-                Debug.LogErrorFormat("Clear Queue: can't clear packet queue, code: {0}", result);
-                return; //No packet
+            foreach(var id in p2pConfig.Instance.userIds.RemoteUserIds){
+                options.RemoteUserId = id.AsEpic;
+
+                Result result = P2PHandle.ClearPacketQueue(ref options);
+                
+                if (result != Result.Success){
+                    Debug.LogErrorFormat("Clear Queue: can't clear packet queue, code: {0}", result);
+                    return;
+                }
             }
+            
+            Debug.Log("Clear Queue");
         }
 #region Notify(ConnectRquest)
         // MAYBE: Probably uint to determine if the request notification has been sent out, and since we allow reception for all SocketIDs (=SocketName), there is no need to call it multiple times.
