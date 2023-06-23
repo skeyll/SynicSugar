@@ -84,7 +84,10 @@ namespace SynicSugar.P2P {
         /// Prepare to receive in advance. If user sent packets, it can open to get packets for a socket id without this.
         /// </summary>
         public void ReStartSession(){
-            OpenConnection();
+            //MAYBE: This request work only for a new connection request, so, for former peers, we need to accept these by ourself.
+            SubscribeToConnectionRequest();
+            ReAcceptAllConenctions();
+
             p2pToken = new CancellationTokenSource();
         }
     #endregion
@@ -139,7 +142,7 @@ namespace SynicSugar.P2P {
                 LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
                 SocketId = SocketId
             };
-            
+
             foreach(var id in p2pConfig.Instance.userIds.RemoteUserIds){
                 options.RemoteUserId = id.AsEpic;
 
@@ -171,7 +174,7 @@ namespace SynicSugar.P2P {
             }
         }
         // Call from SubscribeToConnectionRequest.
-        // This function will only be called if the connection has not already been accepted.
+        // This function will only be called if the connection has not been accepted yet.
         void OnIncomingConnectionRequest(ref OnIncomingConnectionRequestInfo data){
             if (!(bool)data.SocketId?.SocketName.Equals(ScoketName)){
                 Debug.LogError("ConnectRequest: unknown socket id. This peer should be no lobby member.");
@@ -189,6 +192,9 @@ namespace SynicSugar.P2P {
             if (result != Result.Success){
                 Debug.LogErrorFormat("p2p connect request: error while accepting connection, code: {0}", result);
             }
+        #if SYNICSUGAR_LOG
+            Debug.Log("p2p connect request: Success Connect Request");
+        #endif
         }
         // Stop accepting new connect.
         // ??? Can unsubscribe this notify in game when this player can connect all other pears?
@@ -204,6 +210,28 @@ namespace SynicSugar.P2P {
     /// </summary>
     internal void OpenConnection(){
         SubscribeToConnectionRequest();
+    }
+    void ReAcceptAllConenctions(){
+        AcceptConnectionOptions options = new AcceptConnectionOptions(){
+                LocalUserId = EOSManager.Instance.GetProductUserId(),
+                SocketId = SocketId
+            };
+        Result result = Result.Success;
+        foreach(var id in p2pConfig.Instance.userIds.RemoteUserIds){
+            options.RemoteUserId = id.AsEpic;
+            result = P2PHandle.AcceptConnection(ref options);
+
+            if (result != Result.Success){
+                Debug.LogErrorFormat("Re-accept All Connections: error while accepting connection, code: {0} / id: {1}", result, id);
+                break;
+            }
+        }
+        if(result != Result.Success){
+            return;
+        }
+        #if SYNICSUGAR_LOG
+            Debug.Log("Re-accept All Connections: Success accept Connections");
+        #endif
     }
 #endregion
 #region Disconnect
