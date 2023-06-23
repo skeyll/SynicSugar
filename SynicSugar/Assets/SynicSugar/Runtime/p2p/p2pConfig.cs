@@ -1,5 +1,6 @@
 using Epic.OnlineServices.P2P;
 using UnityEngine;
+using System;
 namespace SynicSugar.P2P {
     public class p2pConfig : MonoBehaviour {
 #region Singleton
@@ -49,4 +50,11 @@ namespace SynicSugar.P2P {
         /// </summary>
         public PacketReliability packetReliability = PacketReliability.ReliableOrdered;
     }
+#region Obsolete
+    public class p2pManager {
+        private p2pManager(){}
+        [Obsolete("This is old. You can use p2pConfig.Instance.XXX().")]
+        public static p2pManager Instance { get; private set; }
+    }
+#endregion
 }

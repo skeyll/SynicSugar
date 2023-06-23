@@ -94,7 +94,7 @@ namespace SynicSugar.P2P {
         /// <summary>
         /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll.</ br>
         /// Stop receiver, close all connects and cancel all events to receive.<br />
-        /// To exit the current lobby.
+        /// To just leave from the current lobby.(This is not destroying it)
         /// </summary>
         public void LeaveSession(){
             p2pToken.Cancel();
