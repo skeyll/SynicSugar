@@ -34,7 +34,7 @@ namespace SynicSugar.P2P {
                 await UniTask.Delay(p2pConfig.Instance.interval_sendToAll);
                 if(result != Result.Success || p2pConnectorForOtherAssembly.Instance.p2pToken.IsCancellationRequested){
                     Debug.LogErrorFormat("Send Packet: can't send packet, code: {0}", result);
-                    return;
+                    break;
                 }
             }
         }
