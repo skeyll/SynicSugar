@@ -81,6 +81,8 @@ namespace SynicSugar.Samples {
         }
         public void RestartSession(){
             systemManager.currentState.text = "InGame";
+            stressCount = 0;
+            systemManager.chatText.text = System.String.Empty;
             ConnectHub.Instance.ReStartSession();
         }
         public void LeaveSession(){
