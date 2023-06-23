@@ -25,7 +25,7 @@ namespace  SynicSugar.Samples {
             AsyncReturnToTitle().Forget();
         }
         async UniTask AsyncReturnToTitle(){
-            ConnectHub.Instance.CloseConnection();
+            ConnectHub.Instance.CloseSession();
             //The last player close lobby.
             if(p2pConfig.Instance.userIds.IsHost() && p2pConfig.Instance.userIds.RemoteUserIds.Count == 0){
                 CancellationTokenSource cnsToken = new CancellationTokenSource();

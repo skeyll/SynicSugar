@@ -132,7 +132,7 @@ namespace  SynicSugar.Samples {
             }
         }
         public async void ExitGame(){
-            ConnectHub.Instance.CloseConnection();
+            ConnectHub.Instance.CloseSession();
             if(isHost){
                 CancellationTokenSource cnsToken = new CancellationTokenSource();
                 await SynicSugar.MatchMake.MatchMakeManager.Instance.DestroyHostingLobby(cnsToken);

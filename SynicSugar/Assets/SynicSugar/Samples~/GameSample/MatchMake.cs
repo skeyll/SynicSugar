@@ -78,7 +78,7 @@ namespace  SynicSugar.Samples {
 
             closeLobby.gameObject.SetActive(true);
 
-            if(startGame != null){ //For ReadHeart
+            if(startGame != null){ //For ReadHeart and Chat
                 startGame.gameObject.SetActive(true);
             }else{ //For Tank
                 GameModeSelect modeSelect = new GameModeSelect();

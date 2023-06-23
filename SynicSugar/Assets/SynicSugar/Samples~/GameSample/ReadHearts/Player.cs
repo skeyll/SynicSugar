@@ -53,7 +53,6 @@ namespace SynicSugar.Samples {
             status.AttackDamage = damage;
             currentTurn++;
         }
-
         public void DecideChat(){
             UpdateChat(p2pConfig.Instance.userIds.RemoteUserIds[0], new ChatContent(){ Name = chatName.text, Contents = chatContent.text });
         }

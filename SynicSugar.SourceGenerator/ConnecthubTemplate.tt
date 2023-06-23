@@ -42,7 +42,7 @@ namespace SynicSugar.P2P {
         /// Pause getting a packet from the buffer. To re-start, call StartPacketReceiver().<br />
         /// *Packet receiving to the buffer is continue. If the packet is over the buffer, subsequent packets are discarded.
         /// </summary>
-        public void PauseGettingPacket(){
+        public void PausetPacketReceiver(){
             if(p2pConnectorForOtherAssembly.Instance.p2pToken != null && !p2pConnectorForOtherAssembly.Instance.p2pToken.IsCancellationRequested){
                 p2pConnectorForOtherAssembly.Instance.p2pToken.Cancel();
             }
@@ -55,14 +55,14 @@ namespace SynicSugar.P2P {
         /// </summary>
         /// <param name="isForced">If True, force to stop and clear current packet queue. </ br>
         /// If false, process current queue, then stop it.</param>
-        public async UniTask PausePacketReceiving(bool isForced, CancellationTokenSource cancelToken = default(CancellationTokenSource)){
-            await p2pConnectorForOtherAssembly.Instance.PausePacketReceiving(isForced, cancelToken);
+        public async UniTask PauseSession(bool isForced, CancellationTokenSource cancelToken = default(CancellationTokenSource)){
+            await p2pConnectorForOtherAssembly.Instance.PauseSession(isForced, cancelToken);
         }
         /// <summary>
         /// Prepare to receive packets in advance. If user sent a packet, it can also open connection to get packets without this.
         /// </summary>
-        public void ReStartPacketReceiving(){
-            p2pConnectorForOtherAssembly.Instance.ReStartPacketReceiving();
+        public void ReStartSession(){
+            p2pConnectorForOtherAssembly.Instance.ReStartSession();
             RecivePacket().Forget();
         }
 
