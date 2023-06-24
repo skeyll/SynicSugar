@@ -691,6 +691,7 @@ namespace SynicSugar.MatchMake {
                 }
             }
             OnLobbyUpdated(data.LobbyId);
+            
             //For MatchMake on the first
             if(waitingMatch){ //This flag is shared by both host and guest, and is false after getting SocketName.
                 if(data.TargetUserId == productUserId && data.CurrentStatus == LobbyMemberStatus.Promoted){
@@ -708,18 +709,20 @@ namespace SynicSugar.MatchMake {
                 }
                 return;
             }
+
             //In game
             // Hosts changed?
             if (data.CurrentStatus == LobbyMemberStatus.Promoted){
                 p2pConfig.Instance.userIds.HostUserId = new UserId(data.TargetUserId);
 
                 if(!CurrentLobby.isHost(productUserId)){
+                    //MEMO: Now, if user disconnect from Lobby and then change hosts, the user become newbie.
                     //Guest Don't need to hold user id 
                     p2pConfig.Instance.userIds.LeftUsers = new List<UserId>();
                 }
-            }
-
-            if(data.CurrentStatus == LobbyMemberStatus.Disconnected){
+            }else if(data.CurrentStatus == LobbyMemberStatus.Left) {
+                p2pConfig.Instance.userIds.RemoveUserId(data.TargetUserId);
+            }else if(data.CurrentStatus == LobbyMemberStatus.Disconnected){
                 p2pConfig.Instance.userIds.MoveTargetUserIdToLefts(data.TargetUserId);
             }
         }
