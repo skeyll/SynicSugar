@@ -32,7 +32,7 @@ namespace  SynicSugar.Samples {
                 matchCancellToken.Cancel();
             }
         }
-        async UniTaskVoid Start(){
+        void Start(){
             //Try recconect
             string LobbyID = GetParticipatingLobbyID();
             matchCancellToken = new CancellationTokenSource();
@@ -99,7 +99,7 @@ namespace  SynicSugar.Samples {
             closeLobby.gameObject.SetActive(false);
 
             matchCancellToken = new CancellationTokenSource();
-            // bool isSuccess = await MatchMakeManager.Instance.DestroyHostingLobby(matchCancellToken);
+            bool isSuccess = await MatchMakeManager.Instance.StopCurrentMatchMake(matchCancellToken);
             
             startGame.gameObject.SetActive(false);
             startMatchMake.gameObject.SetActive(true);

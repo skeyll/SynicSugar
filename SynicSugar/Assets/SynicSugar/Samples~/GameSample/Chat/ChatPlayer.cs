@@ -85,15 +85,18 @@ namespace SynicSugar.Samples {
             systemManager.chatText.text = System.String.Empty;
             ConnectHub.Instance.RestartConnections();
         }
-        public void LeaveSession(){
+        public async void LeaveSession(){
             isStressTesting = false;
             systemManager.currentState.text = "Leave";
-            ConnectHub.Instance.ExitSession();
+            await ConnectHub.Instance.ExitSession();
+            systemManager.modeSelect.ChangeGameScene("MainMenu");
+
         }
-        public void CloseSession(){
+        public async void CloseSession(){
             isStressTesting = false;
             systemManager.currentState.text = "Close";
-            ConnectHub.Instance.CloseSession();
+            await ConnectHub.Instance.CloseSession();
+            systemManager.modeSelect.ChangeGameScene("MainMenu");
         }
     }
 }

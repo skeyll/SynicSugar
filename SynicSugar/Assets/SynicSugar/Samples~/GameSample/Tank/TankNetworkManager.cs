@@ -25,12 +25,9 @@ namespace  SynicSugar.Samples {
             AsyncReturnToTitle().Forget();
         }
         async UniTask AsyncReturnToTitle(){
-            ConnectHub.Instance.CloseSession();
-            //The last player close lobby.
-            if(p2pConfig.Instance.userIds.IsHost() && p2pConfig.Instance.userIds.RemoteUserIds.Count == 0){
-                CancellationTokenSource cnsToken = new CancellationTokenSource();
-                // await SynicSugar.MatchMake.MatchMakeManager.Instance.DestroyHostingLobby(cnsToken);
-            }
+            CancellationTokenSource cnsToken = new CancellationTokenSource();
+            await ConnectHub.Instance.CloseSession();
+            
             GameModeSelect modeSelect = new GameModeSelect();
             modeSelect.ChangeGameScene(GameModeSelect.GameScene.MainMenu.ToString());
         }

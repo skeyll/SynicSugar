@@ -5,6 +5,7 @@ using UnityEngine.UI;
 namespace SynicSugar.Samples {
     public class ChatSystemManager : MonoBehaviour {
         [SerializeField] GameObject matchmakeCanvas, chatCanvas;
+        public GameModeSelect modeSelect;
         public Text chatText, currentState;
         public InputField contentField;
         public GameObject chatPlayerPrefab, uiSetsPrefabs;
