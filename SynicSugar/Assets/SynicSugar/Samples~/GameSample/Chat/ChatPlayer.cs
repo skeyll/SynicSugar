@@ -77,18 +77,18 @@ namespace SynicSugar.Samples {
         public void PauseSession(){
             isStressTesting = false;
             systemManager.currentState.text = "Pause";
-            ConnectHub.Instance.PauseSession(true).Forget();
+            ConnectHub.Instance.PauseConnections(true).Forget();
         }
         public void RestartSession(){
             systemManager.currentState.text = "InGame";
             stressCount = 0;
             systemManager.chatText.text = System.String.Empty;
-            ConnectHub.Instance.ReStartSession();
+            ConnectHub.Instance.RestartConnections();
         }
         public void LeaveSession(){
             isStressTesting = false;
             systemManager.currentState.text = "Leave";
-            ConnectHub.Instance.LeaveSession();
+            ConnectHub.Instance.ExitSession();
         }
         public void CloseSession(){
             isStressTesting = false;

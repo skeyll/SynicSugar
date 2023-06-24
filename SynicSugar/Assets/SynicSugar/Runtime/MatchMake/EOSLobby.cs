@@ -787,6 +787,7 @@ namespace SynicSugar.MatchMake {
             lobbyInterface.LeaveLobby(ref options, LeaveLobbyCompleted, OnLeaveLobbyCompleted);
 
             await UniTask.WaitUntil(() => !waitLeave, cancellationToken: token.Token);
+            DeleteLobbyID();
 
             return canLeave;
         }
@@ -819,7 +820,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="token"></param>
         /// <param name="deleteFn">Delete LobbyID for re-connect</param>
         /// <returns>On destroy success, return true.</returns>
-        internal async UniTask<bool> DestroyLobby(CancellationTokenSource token, Action deleteFn = null){
+        internal async UniTask<bool> DestroyLobby(CancellationTokenSource token){
             if(!CurrentLobby.isHost(EOSManager.Instance.GetProductUserId())){
 #if SYNICSUGAR_LOG
                 Debug.LogError("Destroy Lobby: This user is not Host.");
@@ -838,7 +839,7 @@ namespace SynicSugar.MatchMake {
             
             await UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token.Token);
 
-            DeleteLobbyID(deleteFn);
+            DeleteLobbyID();
             LobbyMemberStatusNotification.Dispose();
             CurrentLobby.Clear();
 

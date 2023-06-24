@@ -73,6 +73,7 @@
         //GetInstance
         internal string CreateGetInstance(string nameNamespace, string name) {
             return $@"
+        [Obsolete]
         public {GetFullName(nameNamespace, name)} GetUserInstance(UserId id, {GetFullName(nameNamespace, name)} instanceType) {{
             if (!{name}.ContainsKey(id.ToString())) {{
                 return null;

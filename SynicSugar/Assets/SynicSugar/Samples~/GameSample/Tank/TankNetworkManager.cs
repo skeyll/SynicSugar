@@ -29,7 +29,7 @@ namespace  SynicSugar.Samples {
             //The last player close lobby.
             if(p2pConfig.Instance.userIds.IsHost() && p2pConfig.Instance.userIds.RemoteUserIds.Count == 0){
                 CancellationTokenSource cnsToken = new CancellationTokenSource();
-                await SynicSugar.MatchMake.MatchMakeManager.Instance.DestroyHostingLobby(cnsToken);
+                // await SynicSugar.MatchMake.MatchMakeManager.Instance.DestroyHostingLobby(cnsToken);
             }
             GameModeSelect modeSelect = new GameModeSelect();
             modeSelect.ChangeGameScene(GameModeSelect.GameScene.MainMenu.ToString());

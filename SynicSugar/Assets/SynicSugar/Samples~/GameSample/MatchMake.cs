@@ -99,7 +99,7 @@ namespace  SynicSugar.Samples {
             closeLobby.gameObject.SetActive(false);
 
             matchCancellToken = new CancellationTokenSource();
-            bool isSuccess = await MatchMakeManager.Instance.DestroyHostingLobby(matchCancellToken);
+            // bool isSuccess = await MatchMakeManager.Instance.DestroyHostingLobby(matchCancellToken);
             
             startGame.gameObject.SetActive(false);
             startMatchMake.gameObject.SetActive(true);

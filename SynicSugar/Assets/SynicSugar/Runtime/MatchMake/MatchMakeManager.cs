@@ -112,15 +112,30 @@ namespace SynicSugar.MatchMake {
 
             return canJoin;
         }
+        public async UniTask<bool> StopCurrentMatchMake(CancellationTokenSource token){
+            // bool canDestroy = await eosLobby.DestroyLobby(token, null);
+
+            // return canDestroy;
+            return false;
+        }
         /// <summary>
-        /// On the end of match and stopping match make, call this.
-        /// 
+        /// Leave the current lobby in Game.
         /// </summary>
         /// <param name="token"></param>
-        /// <param name="deleteFn">Delete LobbyID for reconnect. If null, use Playerprefs</param>
+        internal async UniTask<bool> ExitCurrentLobby(CancellationTokenSource token){
+            bool canDestroy = await eosLobby.LeaveLobby(token);
+
+            return canDestroy;
+        }
+        /// <summary>
+        /// Destroy the current lobby on the end of Game.
+        /// </summary>
+        /// <param name="token"></param>
         /// <returns>True on success. If user isn't host, return false.</returns>
-        public async UniTask<bool> DestroyHostingLobby(CancellationTokenSource token, Action deleteFn = null){
-            bool canDestroy = await eosLobby.DestroyLobby(token, deleteFn);
+        internal async UniTask<bool> CloseCurrentLobby(CancellationTokenSource token){
+            //Register the action to delete LobbyID for reconnect on Start or Constructer.
+
+            bool canDestroy = await eosLobby.DestroyLobby(token);
 
             return canDestroy;
         }

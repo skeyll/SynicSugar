@@ -135,7 +135,7 @@ namespace  SynicSugar.Samples {
             ConnectHub.Instance.CloseSession();
             if(isHost){
                 CancellationTokenSource cnsToken = new CancellationTokenSource();
-                await SynicSugar.MatchMake.MatchMakeManager.Instance.DestroyHostingLobby(cnsToken);
+                // await SynicSugar.MatchMake.MatchMakeManager.Instance.DestroyHostingLobby(cnsToken);
             }
             SynicSugar.Samples.GameModeSelect modeSelect = new SynicSugar.Samples.GameModeSelect();
             modeSelect.ChangeGameScene(GameModeSelect.GameScene.MainMenu.ToString()); //Retrun MainMenu

@@ -1,10 +1,11 @@
 using PlayEveryWare.EpicOnlineServices;
 using Epic.OnlineServices;
 using Epic.OnlineServices.P2P;
+using UnityEngine;
 using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using UnityEngine;
+using SynicSugar.MatchMake;
 //We can't call the main-Assembly from own-assemblies.
 //So, use such processes through  this assembly .
 namespace SynicSugar.P2P {
@@ -61,21 +62,22 @@ namespace SynicSugar.P2P {
         /// <summary>
         /// Stop packet receeiveing to buffer. Packets are discarded while stopped.
         /// </summary>
-        /// <param name="isForced">If True, clear current packet queue. </ br>
+        /// <param name="isForced">If True, stop and clear current packet queue. </ br>
         /// If false, process current queue, then stop it.</param>
-        public async UniTask PauseSession(bool isForced, CancellationTokenSource cancelToken = default(CancellationTokenSource)){
+        public async UniTask PauseConnections(bool isForced, CancellationTokenSource cancelToken = default(CancellationTokenSource)){
+            if(isForced){
+                ResetConnections();
+                return;
+            }
+            
             CloseConnection();
+            
+            GetPacketQueueInfoOptions options = new GetPacketQueueInfoOptions();
+            PacketQueueInfo info = new PacketQueueInfo();
 
-            if(!isForced){
-                GetPacketQueueInfoOptions options = new GetPacketQueueInfoOptions();
-                PacketQueueInfo info = new PacketQueueInfo();
-
-                while (info.IncomingPacketQueueCurrentPacketCount <= 0){
-                    P2PHandle.GetPacketQueueInfo(ref options, out info);
-                    await UniTask.Delay(receiverInterval, cancellationToken: cancelToken.Token);
-                }
-            }else{
-                ClearPacketQueue();
+            while (info.IncomingPacketQueueCurrentPacketCount <= 0){
+                P2PHandle.GetPacketQueueInfo(ref options, out info);
+                await UniTask.Delay(receiverInterval, cancellationToken: cancelToken.Token);
             }
 
             p2pToken.Cancel();
@@ -83,7 +85,7 @@ namespace SynicSugar.P2P {
         /// <summary>
         /// Prepare to receive in advance. If user sent packets, it can open to get packets for a socket id without this.
         /// </summary>
-        public void ReStartSession(){
+        public void RestartConnections(){
             //MAYBE: This request work only for a new connection request, so, for former peers, we need to accept these by ourself.
             SubscribeToConnectionRequest();
             ReAcceptAllConenctions();
@@ -93,14 +95,30 @@ namespace SynicSugar.P2P {
     #endregion
         /// <summary>
         /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll.</ br>
-        /// Stop receiver, close all connects and cancel all events to receive.<br />
+        /// Stop connections, exit current lobby.<br />
         /// To just leave from the current lobby.(This is not destroying it)
         /// </summary>
-        public void LeaveSession(){
-            p2pToken.Cancel();
-            CloseConnection();
+        public async UniTask<bool> ExitSession(CancellationTokenSource token){
+            ResetConnections();
+
             Destroy(this.gameObject);
+            return await MatchMakeManager.Instance.ExitCurrentLobby(token);
         }
+        /// <summary>
+        /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll.</ br>
+        /// Stop connections, exit current lobby.<br />
+        /// To just leave from the current lobby.(This is not destroying it)
+        /// </summary>
+        public async UniTask<bool> CloseSession(CancellationTokenSource token){
+            ResetConnections();
+            bool canLeave = true;
+            if(p2pConfig.Instance.userIds.IsHost()){
+                canLeave = await MatchMakeManager.Instance.CloseCurrentLobby(token);
+            }
+            Destroy(this.gameObject);
+            return canLeave;
+        }
+
         /// <summary>
         /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll.
         /// </summary>
@@ -153,8 +171,9 @@ namespace SynicSugar.P2P {
                     return;
                 }
             }
-            
-            Debug.Log("Clear Queue");
+        #if SYNICSUGAR_LOG
+            Debug.Log("Clear Queue: Finish!");
+        #endif
         }
 #region Notify(ConnectRquest)
         // MAYBE: Probably uint to determine if the request notification has been sent out, and since we allow reception for all SocketIDs (=SocketName), there is no need to call it multiple times.
@@ -210,6 +229,15 @@ namespace SynicSugar.P2P {
     /// </summary>
     internal void OpenConnection(){
         SubscribeToConnectionRequest();
+    }
+    //Reason: This order(Receiver, Connection, Que) is that if the RPC includes Rpc to reply, the connections are automatically re-started.
+    /// <summary>
+    /// Stop packet reciver, clse connections, then clear PacketQueue(incoming and outgoing).
+    /// </summary>
+    void ResetConnections(){
+        p2pToken.Cancel();
+        CloseConnection();
+        ClearPacketQueue();
     }
     void ReAcceptAllConenctions(){
         AcceptConnectionOptions options = new AcceptConnectionOptions(){
