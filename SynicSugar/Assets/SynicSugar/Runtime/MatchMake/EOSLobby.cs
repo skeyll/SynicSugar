@@ -194,7 +194,7 @@ namespace SynicSugar.MatchMake {
 #if SYNICSUGAR_LOG
                 Debug.LogWarningFormat("Lobbies (Create Lobby): Leaving Current Lobby '{0}'", CurrentLobby.LobbyId);
 #endif
-                LeaveLobby(null);
+                LeaveLobby().Forget();
             }
 
             //Lobby Option
@@ -652,7 +652,7 @@ namespace SynicSugar.MatchMake {
 
             // If has joined in other lobby
             if (CurrentLobby.isValid() && !string.Equals(CurrentLobby.LobbyId, data.LobbyId)){
-                LeaveLobby(null);
+                LeaveLobby().Forget();
             }
 
             CurrentLobby.InitFromLobbyHandle(data.LobbyId);
@@ -699,6 +699,8 @@ namespace SynicSugar.MatchMake {
                     //This local player manage lobby, So dosen't need update notify.
                     LobbyUpdateNotification.Dispose();
                 }
+                //Memo: Should we change the monitoring conditions to the number of Lobby members in SynicSugar 
+                //      instead of the number of Lobby members on the server in order to allow joining in gaming?
                 //Lobby is full. Stop additional member and change search attributes to SoketName.
                 if (CurrentLobby.isHost(productUserId) && CurrentLobby.MaxLobbyMembers == CurrentLobby.Members.Count){
                     SwitchLobbyAttribute();
@@ -759,28 +761,40 @@ namespace SynicSugar.MatchMake {
         }
 #endregion
 #region Leave
+        bool waitLeave, canLeave;
+        //SynicSugar does not expect user to be in more than one Lobby at the same time.
+        //So when joining in a new Lobby, the user needs to exit an old one.
+        //It is not necessary to synchronize in most situations and can add Forget().
+        //About Guests, when the lobby is Destroyed by Host, they Leave the lobby automatically.
         /// <summary>
-        /// Leave the Participating Lobby.
-        /// Use this to leave sub-lobby to unrelated to the main-game. <br />
-        /// When battle is over, call DestroyLobby() instead of this.
+        /// Leave the Participating Lobby.<br />
+        /// When a game is over, call DestroyLobby() instead of this. .
         /// </summary>
         /// <param name="LeaveLobbyCompleted">Callback when leave lobby is completed</param>
-        void LeaveLobby(OnLobbyCallback LeaveLobbyCompleted = null){
+        internal async UniTask<bool> LeaveLobby(CancellationTokenSource token = default(CancellationTokenSource), OnLobbyCallback LeaveLobbyCompleted = null){
             if (CurrentLobby == null || string.IsNullOrEmpty(CurrentLobby.LobbyId) || !EOSManager.Instance.GetProductUserId().IsValid()){
                 Debug.LogWarning("Leave Lobby: Not currently in a lobby.");
-                return;
+                return false;
             }
 
             LeaveLobbyOptions options = new LeaveLobbyOptions();
             options.LobbyId = CurrentLobby.LobbyId;
             options.LocalUserId = EOSManager.Instance.GetProductUserId();
 
+            waitLeave = true;
+            canLeave = false;
             LobbyInterface lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();
             lobbyInterface.LeaveLobby(ref options, LeaveLobbyCompleted, OnLeaveLobbyCompleted);
+
+            await UniTask.WaitUntil(() => !waitLeave, cancellationToken: token.Token);
+
+            return canLeave;
         }
         void OnLeaveLobbyCompleted(ref LeaveLobbyCallbackInfo data){
             if (data.ResultCode != Result.Success){
                 Debug.LogFormat("Leave Lobby: error code: {0}", data.ResultCode);
+                canLeave = false;
+                waitLeave = false;
                 return;
             }
 
@@ -788,6 +802,8 @@ namespace SynicSugar.MatchMake {
 
             CurrentLobby.Clear();
             LeaveLobbyCallback?.Invoke(Result.Success);
+            canLeave = true;
+            waitLeave = false;
         }
         void OnKickedFromLobby(string lobbyId){
             if (CurrentLobby.isValid() && CurrentLobby.LobbyId.Equals(lobbyId, StringComparison.OrdinalIgnoreCase)){
@@ -798,7 +814,7 @@ namespace SynicSugar.MatchMake {
 #endregion
 #region Destroy
         /// <summary>
-        /// When the game is over, call this. Guest leaves Lobby by update notify.
+        /// When a game is over, call this. Guest leaves Lobby by update notify.
         /// </summary>
         /// <param name="token"></param>
         /// <param name="deleteFn">Delete LobbyID for re-connect</param>
