@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace SynicSugar.MatchMake {
     public class MatchMakeManager : MonoBehaviour {
@@ -17,6 +18,10 @@ namespace SynicSugar.MatchMake {
             DontDestroyOnLoad(this);
 
             eosLobby = new EOSLobby(maxSearchResult, hostsTimeoutSec, AllowUserReconnect);
+            
+            if(saveLobbyId != null && deleteLobbyId != null){
+                eosLobby.RegisterLobbyIdEvent((() => saveLobbyId.Invoke()), (() => deleteLobbyId.Invoke()));
+            }
         }
         void OnDestroy() {
             if( Instance == this ) {
@@ -28,6 +33,9 @@ namespace SynicSugar.MatchMake {
         [SerializeField] uint maxSearchResult = 5;
         [SerializeField] int hostsTimeoutSec = 180;
         public bool AllowUserReconnect = true;
+        [SerializeField, Header("Save ID with this after MatchMaking. Save and Delete must be pair. </ br>We can also use RegisterLobbyIDFunctions(UnityEvent save, UnityEvent delete) to set.</ br> If not use, Playerprefs with the key eos_lobbyid is used as default action.")]
+        UnityEvent saveLobbyId;
+        [SerializeField] UnityEvent deleteLobbyId;
 
         EOSLobby eosLobby;
         public MatchGUIState matchState = new MatchGUIState();
@@ -38,6 +46,20 @@ namespace SynicSugar.MatchMake {
         /// <param name="state"></param>
         public void SetGUIState(MatchGUIState state){
             matchState = state;
+        }
+        /// <summary>
+        /// Register UnityEvent as Action to save and delete lobby Id for re-connect.<br />
+        /// We can use cloud and save assets for this, but these place to be saved and deleted must be in the same place. <br />
+        /// If it is not registered, it will be stored in the playerprefs with the key eos_lobbyid.
+        /// </summary>
+        /// <param name="save">void function</param>
+        /// <param name="delete">void function</param>
+        public void RegisterLobbyIDFunctions(UnityEvent save, UnityEvent delete){
+            if(save == null || delete == null){
+                Debug.LogError("RegisterLobbyIDFunctions: need both save and delete.");
+                return;
+            }
+            eosLobby.RegisterLobbyIdEvent((() => save.Invoke()), (() => delete.Invoke()));
         }
         /// <summary>
         /// MatchMake player with conditions and get the data for p2p connect. <br />

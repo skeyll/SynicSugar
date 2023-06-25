@@ -20,13 +20,14 @@ namespace SynicSugar.MatchMake {
         uint MAX_SEARCH_RESULT;
         int timeoutMS;
         bool allowRecoonect;
+        Action saveLobbyId, deleteLobbyId;
         //Notification
         NotifyEventHandle LobbyMemberStatusNotification;
         NotifyEventHandle LobbyUpdateNotification;
 
         bool isMatchSuccess;
         string socketName = System.String.Empty;
-
+        
         // Manager Callbacks
         internal delegate void OnLobbyCallback(Result result);
         internal delegate void OnLobbySearchCallback(Result result);
@@ -36,7 +37,10 @@ namespace SynicSugar.MatchMake {
             //For Unitask
             timeoutMS = timeout * 1000;
             allowRecoonect = allowUserBack;
-            
+        }
+        internal void RegisterLobbyIdEvent(Action save, Action delete){
+            saveLobbyId = save;
+            deleteLobbyId = delete;
         }
 
         /// <summary>
@@ -63,7 +67,7 @@ namespace SynicSugar.MatchMake {
                 if(isMatchSuccess){
                     InitConnectConfig(ref p2pConfig.Instance.userIds);
                     p2pConnectorForOtherAssembly.Instance.OpenConnection();
-                    SaveLobbyId(saveFn);
+                    SaveLobbyId();
                 }
                 return isMatchSuccess;
             }
@@ -82,7 +86,7 @@ namespace SynicSugar.MatchMake {
                 if(isMatchSuccess){
                     InitConnectConfig(ref p2pConfig.Instance.userIds);
                     p2pConnectorForOtherAssembly.Instance.OpenConnection();
-                    SaveLobbyId(saveFn);
+                    SaveLobbyId();
                     return true;
                 }
             }
@@ -113,7 +117,7 @@ namespace SynicSugar.MatchMake {
                 if(isMatchSuccess){
                     InitConnectConfig(ref p2pConfig.Instance.userIds);
                     p2pConnectorForOtherAssembly.Instance.OpenConnection();
-                    SaveLobbyId(saveFn);
+                    SaveLobbyId();
                 }
                 return isMatchSuccess;
             }
@@ -143,7 +147,7 @@ namespace SynicSugar.MatchMake {
                 if(isMatchSuccess){
                     InitConnectConfig(ref p2pConfig.Instance.userIds);
                     p2pConnectorForOtherAssembly.Instance.OpenConnection();
-                    SaveLobbyId(saveFn);
+                    SaveLobbyId();
                     return true;
                 }
             }
@@ -921,11 +925,11 @@ namespace SynicSugar.MatchMake {
         /// <summary>
         /// Save lobby data for player to connect unexpectedly left lobby like power off.
         /// </summary>
-        /// <param name="saveFn">When we use own process, give it as args.</param>
-        void SaveLobbyId(Action saveFn = null){
+        void SaveLobbyId(){
             if(!allowRecoonect){ return; }
-            if(saveFn != null){
-                saveFn.Invoke();
+
+            if(saveLobbyId != null && deleteLobbyId != null){
+                saveLobbyId.Invoke();
                 return;
             }
             PlayerPrefs.SetString("eos_lobbyid", CurrentLobby.LobbyId);
@@ -933,11 +937,11 @@ namespace SynicSugar.MatchMake {
         /// <summary>
         /// Delete save data for player not to connect the current lobby after the battle.
         /// </summary>
-        /// <param name="deleteFn">>When we use own process, give it as args.</param>
-        void DeleteLobbyID(Action deleteFn = null){
+        void DeleteLobbyID(){
             if(!allowRecoonect){ return; }
-            if(deleteFn != null){
-                deleteFn.Invoke();
+
+            if(saveLobbyId != null && deleteLobbyId != null){
+                deleteLobbyId.Invoke();
                 return;
             }
             PlayerPrefs.DeleteKey("eos_lobbyid");
