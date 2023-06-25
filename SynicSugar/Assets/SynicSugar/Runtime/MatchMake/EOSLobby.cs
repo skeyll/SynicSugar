@@ -785,7 +785,7 @@ namespace SynicSugar.MatchMake {
     /// Cancel MatcgMaking and leave the lobby.
     /// </summary>
     /// <param name="token"></param>
-    /// <returns></returns>
+    /// <returns>If true, user can leave or destroy the lobby. </returns>
     internal async UniTask<bool> CancelMatchMaking(CancellationTokenSource token = default(CancellationTokenSource)){
         if(!CurrentLobby.isValid()){
             Debug.LogError($"Cancel MatchMaking: this user has not participated a lobby.");
@@ -801,8 +801,10 @@ namespace SynicSugar.MatchMake {
         if(CurrentLobby.isHost()){
             if(CurrentLobby.Members.Count == 1){
                 bool canDestroy = await DestroyLobby(token);
-                matchingToken.Cancel();
-                if(!canDestroy){
+                
+                if(canDestroy){
+                    matchingToken.Cancel();
+                }else{
                     Debug.LogError($"Cancel MatchMaking: has something problem when destroying the lobby");
                 }
 
@@ -812,8 +814,9 @@ namespace SynicSugar.MatchMake {
 
         bool canLeave = await LeaveLobby(true, token);
         
-        matchingToken.Cancel();
-        if(!canLeave){
+        if(canLeave){
+            matchingToken.Cancel();
+        }else{
             Debug.LogError($"Cancel MatchMaking: has something problem when leave from the lobby");
         }
         return canLeave;
