@@ -33,7 +33,7 @@ namespace SynicSugar.MatchMake {
         [SerializeField] uint maxSearchResult = 5;
         [SerializeField] int hostsTimeoutSec = 180;
         public bool AllowUserReconnect = true;
-        [SerializeField, Header("Save ID with this after MatchMaking. Save and Delete must be pair. </ br>We can also use RegisterLobbyIDFunctions(UnityEvent save, UnityEvent delete) to set.</ br> If not use, Playerprefs with the key eos_lobbyid is used as default action.")]
+        [SerializeField, Header("Save ID with these events after MatchMaking. Save and Delete must be pair. <br>We can also use RegisterLobbyIDFunctions(UnityEvent save, UnityEvent delete) to set.<br> If not use, Playerprefs with the key eos_lobbyid is used as default action.")]
         UnityEvent saveLobbyId;
         [SerializeField] UnityEvent deleteLobbyId;
 
@@ -140,7 +140,7 @@ namespace SynicSugar.MatchMake {
             return canJoin;
         }
         public async UniTask<bool> StopCurrentMatchMake(CancellationTokenSource token){
-            // bool canDestroy = await eosLobby.DestroyLobby(token, null);
+            bool canDestroy = await eosLobby.LeaveLobby(false, token);
 
             // return canDestroy;
             return false;
@@ -150,7 +150,7 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         /// <param name="token"></param>
         internal async UniTask<bool> ExitCurrentLobby(CancellationTokenSource token){
-            bool canDestroy = await eosLobby.LeaveLobby(token);
+            bool canDestroy = await eosLobby.LeaveLobby(false, token);
 
             return canDestroy;
         }
