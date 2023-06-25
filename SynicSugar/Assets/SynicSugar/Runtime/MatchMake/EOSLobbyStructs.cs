@@ -11,7 +11,6 @@ namespace SynicSugar.MatchMake {
         internal string LobbyId;
         public ProductUserId LobbyOwner = new ProductUserId();
         //Basis
-        public string LocalUserID;
         uint _maxLobbyMembers;
         public uint MaxLobbyMembers { //2-64
             get { return _maxLobbyMembers;}
@@ -58,12 +57,11 @@ namespace SynicSugar.MatchMake {
         }
 
         /// <summary>
-        /// Checks if the specified <c>ProductUserId</c> is the current owner
+        /// Checks the local player is the lobby host or not.
         /// </summary>
-        /// <param name="userProductId">Specified <c>ProductUserId</c></param>
-        /// <returns>True if specified user is owner</returns>
-        internal bool isHost(ProductUserId userProductId){
-            return userProductId == LobbyOwner;
+        /// <returns>If true, the local user is lobby's Host</returns>
+        internal bool isHost(){
+            return EOSManager.Instance.GetProductUserId() == LobbyOwner;
         }
 
         /// <summary>
