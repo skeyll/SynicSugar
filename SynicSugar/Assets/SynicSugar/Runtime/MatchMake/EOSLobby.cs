@@ -781,7 +781,23 @@ namespace SynicSugar.MatchMake {
         }
 #endregion
 #region Cancel
+    /// <summary>
+    /// Cancel MatcgMaking and leave the lobby.
+    /// </summary>
+    /// <param name="token"></param>
+    /// <returns></returns>
     internal async UniTask<bool> CancelMatchMaking(CancellationTokenSource token = default(CancellationTokenSource)){
+        if(!CurrentLobby.isValid()){
+            Debug.LogError($"Cancel MatchMaking: this user has not participated a lobby.");
+            return false;
+        }
+        //Remove notify
+        if(!CurrentLobby.isHost()){
+            LobbyUpdateNotification.Dispose();
+        }
+        LobbyMemberStatusNotification.Dispose();
+
+        //Destroy or Leave the current lobby.
         if(CurrentLobby.isHost()){
             if(CurrentLobby.Members.Count == 1){
                 bool canDestroy = await DestroyLobby(token);
