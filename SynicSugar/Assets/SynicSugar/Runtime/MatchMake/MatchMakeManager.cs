@@ -67,11 +67,14 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         /// <param name="lobbyCondition">Crate by EOSLobbyExtenstions.GenerateLobby().</param>
         /// <param name="token">To cancel task</param>
-        /// <param name="saveFn">To save lobby ID for recconect. If null, use Playerprefs</param>
         /// <returns></returns>
-        public async UniTask<bool> SearchAndCreateLobby(Lobby lobbyCondition, CancellationTokenSource token, Action saveFn = null ){
+        public async UniTask<bool> SearchAndCreateLobby(Lobby lobbyCondition, CancellationTokenSource token){
             //Match at Lobby
-            bool canMatch = await eosLobby.StartMatching(lobbyCondition, token, saveFn);
+            bool canMatch = await eosLobby.StartMatching(lobbyCondition, token);
+
+            if(token.IsCancellationRequested){
+                return false;
+            }
             if(!canMatch){
                 UpdateStateDescription(MatchState.Cancel);
                 return false;
@@ -87,11 +90,10 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         /// <param name="lobbyCondition">Crate by EOSLobbyExtenstions.GenerateLobby().</param>
         /// <param name="token">To cancel task</param>
-        /// <param name="saveFn">To save lobby ID for recconect. If null, use Playerprefs</param>
         /// <returns></returns>
-        public async UniTask<bool> SearchLobby(Lobby lobbyCondition, CancellationTokenSource token, Action saveFn = null ){
+        public async UniTask<bool> SearchLobby(Lobby lobbyCondition, CancellationTokenSource token){
             //Match at Lobby
-            bool canMatch = await eosLobby.StartJustSearch(lobbyCondition, token, saveFn);
+            bool canMatch = await eosLobby.StartJustSearch(lobbyCondition, token);
             if(!canMatch){
                 UpdateStateDescription(MatchState.Cancel);
                 return false;
@@ -107,11 +109,14 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         /// <param name="lobbyCondition">Crate by EOSLobbyExtenstions.GenerateLobby().</param>
         /// <param name="token">To cancel task</param>
-        /// <param name="saveFn">To save lobby ID for recconect. If null, use Playerprefs</param>
         /// <returns></returns>
-        public async UniTask<bool> CreateLobby(Lobby lobbyCondition, CancellationTokenSource token, Action saveFn = null ){
+        public async UniTask<bool> CreateLobby(Lobby lobbyCondition, CancellationTokenSource token){
             //Match at Lobby
-            bool canMatch = await eosLobby.StartJustCreate(lobbyCondition, token, saveFn);
+            bool canMatch = await eosLobby.StartJustCreate(lobbyCondition, token);
+            
+            if(token.IsCancellationRequested){
+                return false;
+            }
             if(!canMatch){
                 UpdateStateDescription(MatchState.Cancel);
                 return false;
