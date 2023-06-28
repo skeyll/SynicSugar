@@ -139,11 +139,13 @@ namespace SynicSugar.MatchMake {
 
             return canJoin;
         }
-        public async UniTask<bool> StopCurrentMatchMake(CancellationTokenSource token){
-            bool canDestroy = await eosLobby.LeaveLobby(false, token);
-
-            // return canDestroy;
-            return false;
+        /// <summary>
+        /// Exit lobby and cancel MatchMake.
+        /// </summary>
+        /// <param name="token">token for this task</param>
+        /// <returns></returns>
+        public async UniTask<bool> CancelCurrentMatchMake(CancellationTokenSource token){
+            return await eosLobby.CancelMatchMaking(token);
         }
         /// <summary>
         /// Leave the current lobby in Game.

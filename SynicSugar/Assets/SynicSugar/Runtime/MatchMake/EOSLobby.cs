@@ -52,7 +52,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="token"></param>
         /// <param name="saveFn">To save LobbyID. If null, save ID to local by PlayerPrefs</param>
         /// <returns>True on success. If false, EOS backend have something problem. So, when you call this process again, should wait for some time.</returns>
-        internal async UniTask<bool> StartMatching(Lobby lobbyCondition, CancellationTokenSource token, Action saveFn = null){
+        internal async UniTask<bool> StartMatching(Lobby lobbyCondition, CancellationTokenSource token){
             //Serach
             MatchMakeManager.Instance.matchState.stopAdditionalInput?.Invoke();
             MatchMakeManager.Instance.UpdateStateDescription(MatchState.Search);
@@ -65,7 +65,12 @@ namespace SynicSugar.MatchMake {
                 MatchMakeManager.Instance.matchState.acceptCancel?.Invoke();
                 await UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token.Token);
                 //Matching cancel
-                if(token.IsCancellationRequested){ return false; }
+                if(token.IsCancellationRequested){
+            #if SYNICSUGAR_LOG
+                    Debug.Log("StartMatching: MatchMake is canceled.");
+            #endif
+                    return false;
+                }
 
                 if(isMatchSuccess){
                     InitConnectConfig(ref p2pConfig.Instance.userIds);
@@ -86,7 +91,12 @@ namespace SynicSugar.MatchMake {
                 MatchMakeManager.Instance.matchState.acceptCancel?.Invoke();
                 await UniTask.WhenAny(UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token.Token), UniTask.Delay(timeoutMS, cancellationToken: token.Token));
                 //Matching cancel
-                if(token.IsCancellationRequested){ return false; }
+                if(matchingToken.IsCancellationRequested){
+            #if SYNICSUGAR_LOG
+                    Debug.Log("StartMatching: MatchMake is canceled.");
+            #endif
+                    return false;
+                }
 
                 if(isMatchSuccess){
                     InitConnectConfig(ref p2pConfig.Instance.userIds);
@@ -104,9 +114,8 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         /// <param name="lobbyCondition">Search condition. <c>MUST NOT</c> add the data not to open public.</param>
         /// <param name="token"></param>
-        /// <param name="saveFn">To save LobbyID. If null, save ID to local by PlayerPrefs</param>
         /// <returns>True on success. If false, EOS backend have something problem. So, when you call this process again, should wait for some time.</returns>
-        internal async UniTask<bool> StartJustSearch(Lobby lobbyCondition, CancellationTokenSource token, Action saveFn = null){
+        internal async UniTask<bool> StartJustSearch(Lobby lobbyCondition, CancellationTokenSource token){
             //Serach
             MatchMakeManager.Instance.matchState.stopAdditionalInput?.Invoke();
             MatchMakeManager.Instance.UpdateStateDescription(MatchState.Search);
@@ -120,7 +129,12 @@ namespace SynicSugar.MatchMake {
                 await UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token.Token);
 
                 //Matching cancel
-                if(token.IsCancellationRequested){ return false; }
+                if(token.IsCancellationRequested){
+            #if SYNICSUGAR_LOG
+                    Debug.Log("StartJustSearch: MatchMake is canceled.");
+            #endif
+                    return false;
+                }
 
                 if(isMatchSuccess){
                     InitConnectConfig(ref p2pConfig.Instance.userIds);
@@ -138,9 +152,8 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         /// <param name="lobbyCondition">Create and search condition. <c>MUST NOT</c> add the data not to open public.</param>
         /// <param name="token"></param>
-        /// <param name="saveFn">To save LobbyID. If null, save ID to local by PlayerPrefs</param>
         /// <returns>True on success. If false, EOS backend have something problem. So, when you call this process again, should wait for some time.</returns>
-        internal async UniTask<bool> StartJustCreate(Lobby lobbyCondition, CancellationTokenSource token, Action saveFn = null){
+        internal async UniTask<bool> StartJustCreate(Lobby lobbyCondition, CancellationTokenSource token){
             MatchMakeManager.Instance.matchState.stopAdditionalInput?.Invoke();
             MatchMakeManager.Instance.UpdateStateDescription(MatchState.Wait);
             bool canCreate = await CreateLobby(lobbyCondition, token);
@@ -153,7 +166,12 @@ namespace SynicSugar.MatchMake {
                 await UniTask.WhenAny(UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token.Token), UniTask.Delay(timeoutMS, cancellationToken: token.Token));
 
                 //Matching cancel
-                if(token.IsCancellationRequested){ return false; }
+                if(matchingToken.IsCancellationRequested){
+            #if SYNICSUGAR_LOG
+                    Debug.Log("StartJustCreate: MatchMake is canceled.");
+            #endif
+                    return false;
+                }
 
                 if(isMatchSuccess){
                     InitConnectConfig(ref p2pConfig.Instance.userIds);
@@ -897,27 +915,27 @@ namespace SynicSugar.MatchMake {
 
             LobbyInterface lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();
 
-            waitingMatch = true;
-            isMatchSuccess = false;
+            waitLeave = true;
+            canLeave = false;
             lobbyInterface.DestroyLobby(ref options, null, OnDestroyLobbyCompleted);
             
-            await UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token.Token);
+            await UniTask.WaitUntil(() => !waitLeave, cancellationToken: token.Token);
 
             DeleteLobbyID();
             LobbyMemberStatusNotification.Dispose();
             CurrentLobby.Clear();
 
-            return isMatchSuccess;
+            return canLeave;
         }
         void OnDestroyLobbyCompleted(ref DestroyLobbyCallbackInfo data){
             if (data.ResultCode != Result.Success){
-                waitingMatch = false;
+                waitLeave = false;
                 Debug.LogErrorFormat("Destroy Lobby: error code: {0}", data.ResultCode);
                 return;
             }
             
-            isMatchSuccess = true;
-            waitingMatch = false;
+            canLeave = true;
+            waitLeave = false;
         }
 #endregion
 #region Re-connect(Waiter)
@@ -939,7 +957,6 @@ namespace SynicSugar.MatchMake {
 
             if(result != Result.Success){
                 Debug.LogError("Get detail: can't get lobby detail handle.");
-                lobbyHandle.Release();
                 return false;
             }
             //Copy details from local handle
