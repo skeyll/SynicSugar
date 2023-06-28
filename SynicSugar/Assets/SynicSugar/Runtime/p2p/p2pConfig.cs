@@ -8,7 +8,7 @@ namespace SynicSugar.P2P {
         public static p2pConfig Instance { get; private set; }
         void Awake() {
             if( Instance != null ) {
-                Destroy( this.gameObject );
+                Destroy( this );
                 return;
             }
             Instance = this;
@@ -55,6 +55,47 @@ namespace SynicSugar.P2P {
         private p2pManager(){}
         [Obsolete("This is old. You can use p2pConfig.Instance.XXX().")]
         public static p2pManager Instance { get; private set; }
+        
+        [Obsolete("This is old. You can use p2pConfig.Instance.XXX")]
+        [HideInInspector] public UserIds userIds {
+            get{
+                return p2pConfig.Instance.userIds;
+            } 
+            set { p2pConfig.Instance.userIds = value; }
+        }
+        
+        [Obsolete("This is old. You can use p2pConfig.Instance.XXX")]
+        public int interval_sendToAll {
+            get{
+                return p2pConfig.Instance.interval_sendToAll;
+            } 
+            set { p2pConfig.Instance.interval_sendToAll = value; }
+        }
+
+        [Obsolete("This is old. You can use p2pConfig.Instance.XXX")]
+        public int autoSyncInterval{
+            get{
+                return p2pConfig.Instance.autoSyncInterval;
+            } 
+            set { p2pConfig.Instance.autoSyncInterval = value; }
+        }
+        public enum ReceiveInterval{
+            Large, Moderate, Small
+        }
+        
+        [Obsolete("This is old. You can use p2pConfig.Instance.XXX")]
+        /// <summary>
+        /// Frequency of calling PacketReceiver. [Small 10ms, Moderate 25ms, Large 50ms]</ br>
+        /// Cannot exceed the recive's fps of the app's. </ br>
+        /// Recommend: Moderate. (-8peers, mobile game, non large-party acion game)
+        /// </summary>
+        public ReceiveInterval receiveInterval = ReceiveInterval.Moderate;
+        /// <summary>
+        /// Quality of connection
+        /// </summary>
+        /// 
+        [Obsolete("This is old. You can use p2pConfig.Instance.XXX")]
+        public PacketReliability packetReliability = PacketReliability.ReliableOrdered;
     }
 #endregion
 }

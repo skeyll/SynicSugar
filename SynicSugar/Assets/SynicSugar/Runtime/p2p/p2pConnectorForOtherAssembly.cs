@@ -15,7 +15,7 @@ namespace SynicSugar.P2P {
         public static p2pConnectorForOtherAssembly Instance { get; private set; }
         void Awake() {
             if( Instance != null ) {
-                Destroy( this.gameObject );
+                Destroy( this );
                 return;
             }
             Instance = this;
