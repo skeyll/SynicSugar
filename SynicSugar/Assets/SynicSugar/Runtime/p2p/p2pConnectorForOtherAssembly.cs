@@ -40,7 +40,7 @@ namespace SynicSugar.P2P {
             }}
         public SocketId SocketId { get; private set; }
 
-        ulong RequestNotifyId;
+        ulong RequestNotifyId, CloseNotifyId;
         public CancellationTokenSource p2pToken;
         
         /// <summary>
@@ -64,18 +64,21 @@ namespace SynicSugar.P2P {
         /// </summary>
         /// <param name="isForced">If True, stop and clear current packet queue. </ br>
         /// If false, process current queue, then stop it.</param>
-        public async UniTask PauseConnections(bool isForced, CancellationTokenSource cancelToken = default(CancellationTokenSource)){
+        public async UniTask PauseConnections(bool isForced, CancellationTokenSource cancelToken){
             if(isForced){
                 ResetConnections();
                 return;
             }
             
             CloseConnection();
+            if(cancelToken == default(CancellationTokenSource)){
+                cancelToken = new CancellationTokenSource();
+            }
             
             GetPacketQueueInfoOptions options = new GetPacketQueueInfoOptions();
             PacketQueueInfo info = new PacketQueueInfo();
 
-            while (info.IncomingPacketQueueCurrentPacketCount <= 0){
+            while (info.IncomingPacketQueueCurrentPacketCount >= 0){
                 P2PHandle.GetPacketQueueInfo(ref options, out info);
                 await UniTask.Delay(receiverInterval, cancellationToken: cancelToken.Token);
             }
@@ -181,7 +184,7 @@ namespace SynicSugar.P2P {
         void SubscribeToConnectionRequest(){
             if (RequestNotifyId == 0){
                 AddNotifyPeerConnectionRequestOptions options = new AddNotifyPeerConnectionRequestOptions(){
-                    LocalUserId = EOSManager.Instance.GetProductUserId(),
+                    LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
                     SocketId = SocketId
                 };
 
@@ -201,7 +204,7 @@ namespace SynicSugar.P2P {
             }
 
             AcceptConnectionOptions options = new AcceptConnectionOptions(){
-                LocalUserId = EOSManager.Instance.GetProductUserId(),
+                LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
                 RemoteUserId = data.RemoteUserId,
                 SocketId = SocketId
             };
@@ -221,6 +224,46 @@ namespace SynicSugar.P2P {
             P2PHandle.RemoveNotifyPeerConnectionRequest(RequestNotifyId);
             RequestNotifyId = 0;
         }
+
+        void AddNotifyPeerConnectionClosed(){
+            if (CloseNotifyId == 0){
+                AddNotifyPeerConnectionClosedOptions options = new AddNotifyPeerConnectionClosedOptions(){
+                    LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
+                    SocketId = SocketId
+                };
+
+                CloseNotifyId = P2PHandle.AddNotifyPeerConnectionClosed(ref options, null, OnRemoteConnectionClosedCallback);
+                
+                if (CloseNotifyId == 0){
+                    Debug.Log("Connection Request: could not subscribe, bad notification id returned.");
+                }
+            }
+        }
+        void OnRemoteConnectionClosedCallback (ref OnRemoteConnectionClosedInfo info){
+            if (!(bool)info.SocketId?.SocketName.Equals(ScoketName)){
+                Debug.LogError("ConnectRequest: unknown socket id. This peer should be no lobby member.");
+                return;
+            }
+            Debug.Log(info.Reason);
+            if(info.Reason != ConnectionClosedReason.ClosedByPeer && info.Reason != ConnectionClosedReason.ConnectionClosed){
+                return;
+            }
+            var closeOptions = new CloseConnectionOptions(){
+                LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
+                RemoteUserId = info.RemoteUserId,
+                SocketId = SocketId
+            };
+            
+            Result result = P2PHandle.CloseConnection(ref closeOptions);
+
+            if(result != Result.Success){
+                Debug.LogErrorFormat("CloseConnections: {0}", result);
+                return;
+            }
+        #if SYNICSUGAR_LOG
+            Debug.Log("p2p connect request: Success Connect Request");
+        #endif
+        }
 #endregion
 #region Connect
     /// <summary>
@@ -229,6 +272,7 @@ namespace SynicSugar.P2P {
     /// </summary>
     internal void OpenConnection(){
         SubscribeToConnectionRequest();
+        AddNotifyPeerConnectionClosed();
     }
     //Reason: This order(Receiver, Connection, Que) is that if the RPC includes Rpc to reply, the connections are automatically re-started.
     /// <summary>
@@ -237,11 +281,11 @@ namespace SynicSugar.P2P {
     void ResetConnections(){
         p2pToken.Cancel();
         CloseConnection();
-        ClearPacketQueue();
+        // ClearPacketQueue();
     }
     void ReAcceptAllConenctions(){
         AcceptConnectionOptions options = new AcceptConnectionOptions(){
-                LocalUserId = EOSManager.Instance.GetProductUserId(),
+                LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
                 SocketId = SocketId
             };
         Result result = Result.Success;
@@ -265,13 +309,29 @@ namespace SynicSugar.P2P {
 #region Disconnect
         void CloseConnection (){
             UnsubscribeFromConnectionRequest();
+
+            // var closeOptions = new CloseConnectionOptions(){
+            //     LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
+            //     SocketId = SocketId
+            // };
+            // foreach(var id in p2pConfig.Instance.userIds.RemoteUserIds){
+            //     closeOptions.RemoteUserId = id.AsEpic;
+
+
+            //     Result result = P2PHandle.CloseConnection(ref closeOptions);
+            //     if(result != Result.Success){
+            //         Debug.LogErrorFormat("CloseConnections: {0} / {1}", result, id);
+            //     }
+            // }
+
             var closeOptions = new CloseConnectionsOptions(){
                 LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
                 SocketId = SocketId
             };
             Result result = P2PHandle.CloseConnections(ref closeOptions);
+            Debug.Log($"close result is {result} / {SocketId}");
             if(result != Result.Success){
-                Debug.LogErrorFormat("CloseConnections: {0}", result);
+                Debug.LogErrorFormat("CloseConnections: Failed to disconnect {0}", result);
             }
         }
 #endregion
