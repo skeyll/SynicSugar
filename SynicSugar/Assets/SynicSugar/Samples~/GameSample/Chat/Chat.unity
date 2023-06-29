@@ -1213,6 +1213,10 @@ PrefabInstance:
       propertyPath: AutoSyncInterval
       value: 500
       objectReference: {fileID: 0}
+    - target: {fileID: 1127570235843273856, guid: e18422c96d27f49489abe8b774c3a6b9, type: 3}
+      propertyPath: AllowUserReconnect
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1535193180786485604, guid: e18422c96d27f49489abe8b774c3a6b9, type: 3}
       propertyPath: m_RootOrder
       value: 5
@@ -3285,6 +3289,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   matchmakeCanvas: {fileID: 837676601}
   chatCanvas: {fileID: 2119717545}
+  modeSelect: {fileID: 0}
   chatText: {fileID: 9063154008829343597}
   currentState: {fileID: 154445146}
   contentField: {fileID: 3124046547690696351}

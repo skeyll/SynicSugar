@@ -89,6 +89,9 @@ namespace SynicSugar.P2P {
         /// Prepare to receive in advance. If user sent packets, it can open to get packets for a socket id without this.
         /// </summary>
         public void RestartConnections(){
+        #region TMP (Can't stop receiving to Buffer)
+            ClearPacketQueue();
+        #endregion
             //MAYBE: This request work only for a new connection request, so, for former peers, we need to accept these by ourself.
             AddNotifyPeerConnectionRequest();
             ReAcceptAllConenctions();

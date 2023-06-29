@@ -29,7 +29,8 @@ namespace SynicSugar.Samples {
             uiSets.transform.Find("Submit").GetComponent<Button>().onClick.AddListener(DecideChat);
             uiSets.transform.Find("Test").GetComponent<Button>().onClick.AddListener(DoStressTest);
             uiSets.transform.Find("Clear").GetComponent<Button>().onClick.AddListener(ClearChat);
-            uiSets.transform.Find("Pause").GetComponent<Button>().onClick.AddListener(PauseSession);
+            uiSets.transform.Find("Pause").GetComponent<Button>().onClick.AddListener(() => PauseSession(false));
+            uiSets.transform.Find("PauseF").GetComponent<Button>().onClick.AddListener(() => PauseSession(true));
             uiSets.transform.Find("Restart").GetComponent<Button>().onClick.AddListener(RestartSession);
             uiSets.transform.Find("Leave").GetComponent<Button>().onClick.AddListener(LeaveSession);
             uiSets.transform.Find("Close").GetComponent<Button>().onClick.AddListener(CloseSession);
@@ -74,10 +75,10 @@ namespace SynicSugar.Samples {
             stressCount = 0;
             systemManager.chatText.text = System.String.Empty;
         }
-        public void PauseSession(){
+        public void PauseSession(bool isForced){
             isStressTesting = false;
             systemManager.currentState.text = "Pause";
-            ConnectHub.Instance.PauseConnections(true).Forget();
+            ConnectHub.Instance.PauseConnections(isForced).Forget();
         }
         public void RestartSession(){
             systemManager.currentState.text = "InGame";
