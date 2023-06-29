@@ -40,7 +40,7 @@ namespace SynicSugar.P2P {
             }}
         public SocketId SocketId { get; private set; }
 
-        ulong RequestNotifyId, CloseNotifyId;
+        ulong RequestNotifyId;
         public CancellationTokenSource p2pToken;
         
         /// <summary>
@@ -90,7 +90,7 @@ namespace SynicSugar.P2P {
         /// </summary>
         public void RestartConnections(){
             //MAYBE: This request work only for a new connection request, so, for former peers, we need to accept these by ourself.
-            SubscribeToConnectionRequest();
+            AddNotifyPeerConnectionRequest();
             ReAcceptAllConenctions();
 
             p2pToken = new CancellationTokenSource();
@@ -181,7 +181,7 @@ namespace SynicSugar.P2P {
 #region Notify(ConnectRquest)
         // MAYBE: Probably uint to determine if the request notification has been sent out, and since we allow reception for all SocketIDs (=SocketName), there is no need to call it multiple times.
         // uint for performance instead of bool?
-        void SubscribeToConnectionRequest(){
+        void AddNotifyPeerConnectionRequest(){
             if (RequestNotifyId == 0){
                 AddNotifyPeerConnectionRequestOptions options = new AddNotifyPeerConnectionRequestOptions(){
                     LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
@@ -220,49 +220,9 @@ namespace SynicSugar.P2P {
         }
         // Stop accepting new connect.
         // ??? Can unsubscribe this notify in game when this player can connect all other pears?
-        void UnsubscribeFromConnectionRequest(){
+        void RemoveNotifyPeerConnectionRequest(){
             P2PHandle.RemoveNotifyPeerConnectionRequest(RequestNotifyId);
             RequestNotifyId = 0;
-        }
-
-        void AddNotifyPeerConnectionClosed(){
-            if (CloseNotifyId == 0){
-                AddNotifyPeerConnectionClosedOptions options = new AddNotifyPeerConnectionClosedOptions(){
-                    LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
-                    SocketId = SocketId
-                };
-
-                CloseNotifyId = P2PHandle.AddNotifyPeerConnectionClosed(ref options, null, OnRemoteConnectionClosedCallback);
-                
-                if (CloseNotifyId == 0){
-                    Debug.Log("Connection Request: could not subscribe, bad notification id returned.");
-                }
-            }
-        }
-        void OnRemoteConnectionClosedCallback (ref OnRemoteConnectionClosedInfo info){
-            if (!(bool)info.SocketId?.SocketName.Equals(ScoketName)){
-                Debug.LogError("ConnectRequest: unknown socket id. This peer should be no lobby member.");
-                return;
-            }
-            Debug.Log(info.Reason);
-            if(info.Reason != ConnectionClosedReason.ClosedByPeer && info.Reason != ConnectionClosedReason.ConnectionClosed){
-                return;
-            }
-            var closeOptions = new CloseConnectionOptions(){
-                LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
-                RemoteUserId = info.RemoteUserId,
-                SocketId = SocketId
-            };
-            
-            Result result = P2PHandle.CloseConnection(ref closeOptions);
-
-            if(result != Result.Success){
-                Debug.LogErrorFormat("CloseConnections: {0}", result);
-                return;
-            }
-        #if SYNICSUGAR_LOG
-            Debug.Log("p2p connect request: Success Connect Request");
-        #endif
         }
 #endregion
 #region Connect
@@ -271,8 +231,7 @@ namespace SynicSugar.P2P {
     /// Call from the library after the MatchMake is established.
     /// </summary>
     internal void OpenConnection(){
-        SubscribeToConnectionRequest();
-        AddNotifyPeerConnectionClosed();
+        AddNotifyPeerConnectionRequest();
     }
     //Reason: This order(Receiver, Connection, Que) is that if the RPC includes Rpc to reply, the connections are automatically re-started.
     /// <summary>
@@ -308,21 +267,7 @@ namespace SynicSugar.P2P {
 #endregion
 #region Disconnect
         void CloseConnection (){
-            UnsubscribeFromConnectionRequest();
-
-            // var closeOptions = new CloseConnectionOptions(){
-            //     LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
-            //     SocketId = SocketId
-            // };
-            // foreach(var id in p2pConfig.Instance.userIds.RemoteUserIds){
-            //     closeOptions.RemoteUserId = id.AsEpic;
-
-
-            //     Result result = P2PHandle.CloseConnection(ref closeOptions);
-            //     if(result != Result.Success){
-            //         Debug.LogErrorFormat("CloseConnections: {0} / {1}", result, id);
-            //     }
-            // }
+            RemoveNotifyPeerConnectionRequest();
 
             var closeOptions = new CloseConnectionsOptions(){
                 LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
