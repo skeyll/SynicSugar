@@ -6,7 +6,7 @@ namespace SynicSugar.Samples {
     public class ChatSystemManager : MonoBehaviour {
         [SerializeField] GameObject matchmakeCanvas, chatCanvas;
         public GameModeSelect modeSelect;
-        public Text chatText, currentState;
+        public Text chatText;
         public InputField contentField;
         public GameObject chatPlayerPrefab, uiSetsPrefabs;
         

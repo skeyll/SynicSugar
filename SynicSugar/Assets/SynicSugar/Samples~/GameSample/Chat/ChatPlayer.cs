@@ -22,7 +22,7 @@ namespace SynicSugar.Samples {
             if(isLocal){
                 uiSets = Instantiate(systemManager.uiSetsPrefabs, chatCanvas.transform);
                 RegisterButtonEvent();
-                systemManager.currentState.text = "InGame";
+                EOSDebug.Instance.Log("Chat Mode: Start");
             }
         }
         void RegisterButtonEvent(){
@@ -77,25 +77,25 @@ namespace SynicSugar.Samples {
         }
         public void PauseSession(bool isForced){
             isStressTesting = false;
-            systemManager.currentState.text = "Pause";
+            EOSDebug.Instance.Log("Chat Mode: Pause");
             ConnectHub.Instance.PauseConnections(isForced).Forget();
         }
         public void RestartSession(){
-            systemManager.currentState.text = "InGame";
+            EOSDebug.Instance.Log("Chat Mode: Restart");
             stressCount = 0;
             systemManager.chatText.text = System.String.Empty;
             ConnectHub.Instance.RestartConnections();
         }
         public async void LeaveSession(){
             isStressTesting = false;
-            systemManager.currentState.text = "Leave";
+            EOSDebug.Instance.Log("Chat Mode: Leave");
             await ConnectHub.Instance.ExitSession();
             systemManager.modeSelect.ChangeGameScene("MainMenu");
 
         }
         public async void CloseSession(){
             isStressTesting = false;
-            systemManager.currentState.text = "Close";
+            EOSDebug.Instance.Log("Chat Mode: Close");
             await ConnectHub.Instance.CloseSession();
             systemManager.modeSelect.ChangeGameScene("MainMenu");
         }
