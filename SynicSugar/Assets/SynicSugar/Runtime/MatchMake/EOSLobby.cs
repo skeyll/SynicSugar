@@ -183,12 +183,17 @@ namespace SynicSugar.MatchMake {
             //Failed due to no-playing-user or server problems.
             return false;
         }
+        [Obsolete("This is old. Can use ")]
+        public async UniTask<bool> ReconnectParticipatingLobby(string LobbyID, CancellationTokenSource token){
+            return await ReconnectParticipatingLobby(LobbyID, token);
+        }
+
         /// <summary>
-        /// Join the Lobby with saved LobbyID. <br />
-        /// Call this at the start of game or match-make.
+        /// Join the Lobby with specific id to that lobby. <br />
+        /// To return to a disconnected lobby.
         /// </summary>
         /// <param name="LobbyID">Lobby ID to <c>re</c>-connect</param>
-        public async UniTask<bool> ReconnectParticipatingLobby(string LobbyID, CancellationTokenSource token){
+        public async UniTask<bool> JoinLobbyBySavedLobbyId(string LobbyID, CancellationTokenSource token){
             MatchMakeManager.Instance.UpdateStateDescription(MatchState.Connect);
             bool canSerch = await RetriveLobbyByLobbyId(LobbyID, token);
 
@@ -208,6 +213,7 @@ namespace SynicSugar.MatchMake {
             });
             
             InitConnectConfig(ref p2pConfig.Instance.userIds);
+            p2pConnectorForOtherAssembly.Instance.OpenConnection();
             p2pConfig.Instance.userIds.isJustReconnected = true;
             return true;
         }
@@ -568,10 +574,10 @@ namespace SynicSugar.MatchMake {
             return true;
         }
         /// <summary>
-        /// Return to last match before the connection is lost.
-        /// Need LobbyID that saved in each user local or somewhere.
+        /// Get Lobby from EOS by LobbyID<br />
+        /// Can get closed-lobby.
         /// </summary>
-        /// <param name="lobbyId"></param>
+        /// <param name="lobbyId">Id to get</param>
         /// <param name="token"></param>
         /// <param name="callback"></param>
         /// <returns></returns>
@@ -946,9 +952,6 @@ namespace SynicSugar.MatchMake {
             canLeave = true;
             waitLeave = false;
         }
-#endregion
-#region Re-connect(Waiter)
-        
 #endregion
         /// <summary>
         /// Init p2pManager's room info with new lobby data.
