@@ -750,14 +750,23 @@ namespace SynicSugar.MatchMake {
             if (data.CurrentStatus == LobbyMemberStatus.Promoted){
                 p2pConfig.Instance.userIds.HostUserId = new UserId(data.TargetUserId);
 
+                #if SYNICSUGAR_LOG
+                    Debug.Log($"MemberStatusNotyfy: {data.TargetUserId} is promoted to host.");
+                #endif
                 if(!CurrentLobby.isHost()){
                     //MEMO: Now, if user disconnect from Lobby and then change hosts, the user become newbie.
                     //Guest Don't need to hold user id 
                     p2pConfig.Instance.userIds.LeftUsers = new List<UserId>();
                 }
             }else if(data.CurrentStatus == LobbyMemberStatus.Left) {
+                #if SYNICSUGAR_LOG
+                    Debug.Log($"MemberStatusNotyfy: {data.TargetUserId} left from lobby.");
+                #endif
                 p2pConfig.Instance.userIds.RemoveUserId(data.TargetUserId);
             }else if(data.CurrentStatus == LobbyMemberStatus.Disconnected){
+                #if SYNICSUGAR_LOG
+                    Debug.Log($"MemberStatusNotyfy: {data.TargetUserId} diconnect from lobby.");
+                #endif
                 p2pConfig.Instance.userIds.MoveTargetUserIdToLefts(data.TargetUserId);
             }
         }
