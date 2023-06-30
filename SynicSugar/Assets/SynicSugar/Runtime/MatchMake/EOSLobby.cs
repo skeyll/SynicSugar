@@ -1006,7 +1006,7 @@ namespace SynicSugar.MatchMake {
                 saveLobbyId.Invoke();
                 return;
             }
-            PlayerPrefs.SetString("eos_lobbyid", CurrentLobby.LobbyId);
+            PlayerPrefs.SetString(MatchMakeManager.Instance.playerprefs_lobbyId_key, CurrentLobby.LobbyId);
         }
         /// <summary>
         /// Delete save data for player not to connect the current lobby after the battle.
@@ -1018,7 +1018,7 @@ namespace SynicSugar.MatchMake {
                 deleteLobbyId.Invoke();
                 return;
             }
-            PlayerPrefs.DeleteKey("eos_lobbyid");
+            PlayerPrefs.DeleteKey(MatchMakeManager.Instance.playerprefs_lobbyId_key);
         }
     }
 }

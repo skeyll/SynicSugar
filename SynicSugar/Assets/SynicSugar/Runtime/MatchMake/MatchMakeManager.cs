@@ -139,11 +139,17 @@ namespace SynicSugar.MatchMake {
             }
 
             bool canJoin = await eosLobby.ReconnectParticipatingLobby(LobbyID, token);
+            GetReconnectLobbyID();
 
             return canJoin;
         }
-        public string DeleteLobbyID(string key = ""){
-            return PlayerPrefs.GetString ("eos_lobbyid", System.String.Empty);
+        /// <summary>
+        /// For the DEFAULT way, get LobbyID from PlayerPrefs.<br />
+        /// NOTE: To use custom method about LobbyID, need get ID from that location.
+        /// </summary>
+        /// <returns>If it exists, returns STRING key. If not, returns String.Empty.</returns>
+        public string GetReconnectLobbyID(){
+            return PlayerPrefs.GetString (MatchMakeManager.Instance.playerprefs_lobbyId_key, System.String.Empty);
         }
         /// <summary>
         /// Exit lobby and cancel MatchMake.
