@@ -1008,12 +1008,17 @@ namespace SynicSugar.MatchMake {
             lobbyHandle.Release();
             return true;
         }
+        internal string GetCurenntLobbyID(){
+            return CurrentLobby.LobbyId;
+        }
         /// <summary>
         /// Save lobby data for player to connect unexpectedly left lobby like power off.
         /// </summary>
         void SaveLobbyId(){
             if(!allowRecoonect){ return; }
-
+        #if SYNICSUGAR_LOG
+            Debug.Log($"Save Lobby Id: Id is {CurrentLobby.LobbyId}");
+        #endif
             if(saveLobbyId != null && deleteLobbyId != null){
                 saveLobbyId.Invoke();
                 return;
