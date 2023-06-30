@@ -19,8 +19,8 @@ namespace SynicSugar.MatchMake {
 
             eosLobby = new EOSLobby(maxSearchResult, hostsTimeoutSec, AllowUserReconnect);
             
-            if(saveLobbyId != null && deleteLobbyId != null){
-                eosLobby.RegisterLobbyIdEvent((() => saveLobbyId.Invoke()), (() => deleteLobbyId.Invoke()));
+            if(custom_method_save_lobbyId != null && custom_method_delete_lobbyId != null){
+                eosLobby.RegisterLobbyIdEvent((() => custom_method_save_lobbyId.Invoke()), (() => custom_method_delete_lobbyId.Invoke()));
             }
         }
         void OnDestroy() {
@@ -30,13 +30,16 @@ namespace SynicSugar.MatchMake {
         }
 #endregion
         //Option
-        [SerializeField] uint maxSearchResult = 5;
-        [SerializeField] int hostsTimeoutSec = 180;
+        public uint maxSearchResult = 5;
+        public int hostsTimeoutSec = 180;
+    #region TODO: Change this to Enum and display only one field for the selected way.
         public bool AllowUserReconnect = true;
-        [SerializeField, Header("Save ID with these events after MatchMaking. Save and Delete must be pair. <br>We can also use RegisterLobbyIDFunctions(UnityEvent save, UnityEvent delete) to set.<br> If not use, Playerprefs with the key eos_lobbyid is used as default action.")]
-        UnityEvent saveLobbyId;
-        [SerializeField] UnityEvent deleteLobbyId;
-
+        [Header("Save and Delete must be pair. <br>We can also use RegisterLobbyIDFunctions(UnityEvent save, UnityEvent delete) to set.")]
+        public UnityEvent custom_method_save_lobbyId;
+        public UnityEvent custom_method_delete_lobbyId;
+        [Header("If the above two aren't set, Playerprefs will be used by default.")]
+        public string playerprefs_lobbyId_key = "eos_lobbyid";
+    #endregion
         EOSLobby eosLobby;
         public MatchGUIState matchState = new MatchGUIState();
 
@@ -138,6 +141,9 @@ namespace SynicSugar.MatchMake {
             bool canJoin = await eosLobby.ReconnectParticipatingLobby(LobbyID, token);
 
             return canJoin;
+        }
+        public string DeleteLobbyID(string key = ""){
+            return PlayerPrefs.GetString ("eos_lobbyid", System.String.Empty);
         }
         /// <summary>
         /// Exit lobby and cancel MatchMake.
