@@ -185,7 +185,7 @@ namespace SynicSugar.MatchMake {
         }
         [Obsolete("This is old. Can use ")]
         public async UniTask<bool> ReconnectParticipatingLobby(string LobbyID, CancellationTokenSource token){
-            return await ReconnectParticipatingLobby(LobbyID, token);
+            return await JoinLobbyBySavedLobbyId(LobbyID, token);
         }
 
         /// <summary>

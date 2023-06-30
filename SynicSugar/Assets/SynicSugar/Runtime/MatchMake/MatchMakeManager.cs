@@ -128,17 +128,21 @@ namespace SynicSugar.MatchMake {
             UpdateStateDescription(MatchState.Success);
             return true;
         }
+        [Obsolete("This is old. ReconnecLobby() is new one.")]
+        public async UniTask<bool> ReconnectParticipatingLobby(string LobbyID, CancellationTokenSource token){
+            return await ReconnecLobby(LobbyID, token);
+        }
         /// <summary>
         /// Join the Lobby with saved LobbyID. <br />
         /// Call this at the start of game or match-make.
         /// </summary>
         /// <param name="LobbyID">Lobby ID to <c>re</c>-connect</param>
-        public async UniTask<bool> ReconnectParticipatingLobby(string LobbyID, CancellationTokenSource token){
+        public async UniTask<bool> ReconnecLobby(string LobbyID, CancellationTokenSource token){
             if(string.IsNullOrEmpty(LobbyID)){
                 return false;
             }
 
-            bool canJoin = await eosLobby.ReconnectParticipatingLobby(LobbyID, token);
+            bool canJoin = await eosLobby.JoinLobbyBySavedLobbyId(LobbyID, token);
             GetReconnectLobbyID();
 
             return canJoin;
@@ -188,12 +192,22 @@ namespace SynicSugar.MatchMake {
         /// <param name="region">For BucletID</param>
         /// <param name="mapName">For BucletID</param>
         /// <returns></returns>
-        [Obsolete]
+        [Obsolete("This is old. GenerateLobbyObject(string[] bucket, uint MaxPlayers, bool bPresenceEnabled) is new one.")]
         public static Lobby GenerateLobby(string mode = "", string region = "",
                                             string mapName = "", uint MaxPlayers = 2,
                                             bool bPresenceEnabled = false){
             Lobby lobby = new Lobby();
             lobby.SetBucketID(new string[3]{ mode, region, mapName });
+            lobby.MaxLobbyMembers = MaxPlayers;
+            lobby.bPresenceEnabled = bPresenceEnabled;
+
+            return lobby;
+        }
+        [Obsolete("This is old. GenerateLobbyObject(string[] bucket, uint MaxPlayers, bool bPresenceEnabled) is new one.")]
+        public static Lobby GenerateLobby(string[] bucket, uint MaxPlayers = 2,
+                                            bool bPresenceEnabled = false){
+            Lobby lobby = new Lobby();
+            lobby.SetBucketID(bucket);
             lobby.MaxLobbyMembers = MaxPlayers;
             lobby.bPresenceEnabled = bPresenceEnabled;
 
@@ -207,7 +221,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="MaxPlayers"></param>
         /// <param name="bPresenceEnabled"></param>
         /// <returns></returns>
-        public static Lobby GenerateLobby(string[] bucket, uint MaxPlayers = 2,
+        public static Lobby GenerateLobbyObject(string[] bucket, uint MaxPlayers = 2,
                                             bool bPresenceEnabled = false){
             Lobby lobby = new Lobby();
             lobby.SetBucketID(bucket);
