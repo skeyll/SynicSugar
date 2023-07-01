@@ -17,10 +17,12 @@ namespace SynicSugar.MatchMake {
             Instance = this;
             DontDestroyOnLoad(this);
 
-            eosLobby = new EOSLobby(maxSearchResult, hostsTimeoutSec, AllowUserReconnect);
-            
-            if(custom_method_save_lobbyId != null && custom_method_delete_lobbyId != null){
-                eosLobby.RegisterLobbyIdEvent((() => custom_method_save_lobbyId.Invoke()), (() => custom_method_delete_lobbyId.Invoke()));
+            eosLobby = new EOSLobby(maxSearchResult, hostsTimeoutSec, lobbyIdSaveType);
+
+            if(lobbyIdSaveType == RecconectLobbyIdSaveType.CustomMethod){
+                if(customSaveLobbyID != null && customDeleteLobbyID != null){
+                    eosLobby.RegisterLobbyIdEvent((() => customSaveLobbyID.Invoke()), (() => customDeleteLobbyID.Invoke()));
+                }
             }
         }
         void OnDestroy() {
@@ -32,13 +34,24 @@ namespace SynicSugar.MatchMake {
         //Option
         public uint maxSearchResult = 5;
         public int hostsTimeoutSec = 180;
-    #region TODO: Change this to Enum and display only one field for the selected way.
-        public bool AllowUserReconnect = true;
-        [Header("Save and Delete must be pair. <br>We can also use RegisterLobbyIDFunctions(UnityEvent save, UnityEvent delete) to set.")]
-        public UnityEvent custom_method_save_lobbyId;
-        public UnityEvent custom_method_delete_lobbyId;
-        [Header("If the above two aren't set, Playerprefs will be used by default.")]
-        public string playerprefs_lobbyId_key = "eos_lobbyid";
+    #region TODO: Change this to Enum and display only one field for the selected way on UnityEditor.
+        public enum RecconectLobbyIdSaveType {
+            NoReconnection, Playerprefs, CustomMethod, AsyncCustomMethod
+        }
+        /// <summary>
+        /// AsyncCustomMethod is under Experimental.
+        /// </summary>
+        [Header("AsyncCustomMethod is under Experimental")]
+        public RecconectLobbyIdSaveType lobbyIdSaveType = RecconectLobbyIdSaveType.Playerprefs;
+        [Header("PlayerPrefs")]
+        /// <summary>
+        /// Key to hold LobbyID after MatchMake. 
+        /// </summary>
+        public string playerprefsSaveKey = "eos_lobbyid";
+        [Header("CustomMetod")]
+        [SerializeField] UnityEvent customSaveLobbyID;
+        [SerializeField] UnityEvent customDeleteLobbyID;
+
     #endregion
         EOSLobby eosLobby;
         public MatchGUIState matchState = new MatchGUIState();
@@ -51,18 +64,31 @@ namespace SynicSugar.MatchMake {
             matchState = state;
         }
         /// <summary>
-        /// Register UnityEvent as Action to save and delete lobby Id for re-connect.<br />
-        /// We can use cloud and save assets for this, but these place to be saved and deleted must be in the same place. <br />
-        /// If it is not registered, it will be stored in the playerprefs with the key eos_lobbyid.
+        /// Register Action to save and delete lobby Id for re-connect.<br />
+        /// We can use cloud and save assets for this, but these place to be saved and deleted must be in the same. 
         /// </summary>
         /// <param name="save">void function</param>
         /// <param name="delete">void function</param>
-        public void RegisterLobbyIDFunctions(UnityEvent save, UnityEvent delete){
-            if(save == null || delete == null){
-                Debug.LogError("RegisterLobbyIDFunctions: need both save and delete.");
-                return;
+        /// <param name="changeType">If true, change SaveType in this method</param>
+        public void RegisterLobbyIDFunctions(Action save, Action delete, bool changeType = true){
+            if(changeType){
+                lobbyIdSaveType = RecconectLobbyIdSaveType.CustomMethod;
             }
-            eosLobby.RegisterLobbyIdEvent((() => save.Invoke()), (() => delete.Invoke()));
+            eosLobby.RegisterLobbyIdEvent(save, delete);
+        }
+        
+        /// <summary>
+        /// Register Action to save and delete lobby Id for re-connect.<br />
+        /// We can use cloud and save assets for this, but these place to be saved and deleted must be in the same. 
+        /// </summary>
+        /// <param name="save">UniTask function</param>
+        /// <param name="delete">UniTask function</param>
+        /// <param name="changeType">If true, change SaveType in this method</param>
+        public void RegisterAsyncLobbyIDFunctions(Func<UniTask> save, Func<UniTask> delete, bool changeType = true){
+            if(changeType){
+                lobbyIdSaveType = RecconectLobbyIdSaveType.AsyncCustomMethod;
+            }
+            eosLobby.RegisterAsyncLobbyIdEvent(save, delete);
         }
         /// <summary>
         /// MatchMake player with conditions and get the data for p2p connect. <br />
@@ -86,7 +112,6 @@ namespace SynicSugar.MatchMake {
             UpdateStateDescription(MatchState.Success);
             return true;
         }
-        
         /// <summary>
         /// Search lobby to join, then get the data for p2p connect. <br />
         /// Recommend: SearchAndCreateLobby()
@@ -141,9 +166,10 @@ namespace SynicSugar.MatchMake {
             if(string.IsNullOrEmpty(LobbyID)){
                 return false;
             }
-
+    #if SYNICSUGAR_LOG
+            Debug.Log($"Try Recconect with {LobbyID}");
+    #endif
             bool canJoin = await eosLobby.JoinLobbyBySavedLobbyId(LobbyID, token);
-            GetReconnectLobbyID();
 
             return canJoin;
         }
@@ -189,7 +215,7 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         /// <returns>If it exists, returns STRING key. If not, returns String.Empty.</returns>
         public string GetReconnectLobbyID(){
-            return PlayerPrefs.GetString (MatchMakeManager.Instance.playerprefs_lobbyId_key, System.String.Empty);
+            return PlayerPrefs.GetString (playerprefsSaveKey, System.String.Empty);
         }
         /// <summary>
         /// For search conditions.<br />
