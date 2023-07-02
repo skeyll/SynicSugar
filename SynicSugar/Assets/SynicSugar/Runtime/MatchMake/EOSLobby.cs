@@ -201,6 +201,7 @@ namespace SynicSugar.MatchMake {
             Debug.LogFormat("JoinLobbyBySavedLobbyId: RetriveLobbyByLobbyId is '{0}'.", canSerch ? "Success" : "Failure");
         #endif
             if(!canSerch){
+                await DeleteLobbyID();
                 return false; //The lobby was already closed.
             }
             //Join
@@ -209,6 +210,7 @@ namespace SynicSugar.MatchMake {
             Debug.LogFormat("JoinLobbyBySavedLobbyId: TryJoinSearchResults is '{0}'.", canJoin ? "Success" : "Failure");
         #endif
             if(!canJoin){
+                await DeleteLobbyID();
                 return false; //The lobby was already closed.
             }
             //For the host migration
