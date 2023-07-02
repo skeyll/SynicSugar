@@ -232,7 +232,6 @@ namespace SynicSugar.MatchMake {
             Lobby lobby = new Lobby();
             lobby.SetBucketID(new string[3]{ mode, region, mapName });
             lobby.MaxLobbyMembers = MaxPlayers;
-            lobby.bPresenceEnabled = bPresenceEnabled;
 
             return lobby;
         }
@@ -242,7 +241,6 @@ namespace SynicSugar.MatchMake {
             Lobby lobby = new Lobby();
             lobby.SetBucketID(bucket);
             lobby.MaxLobbyMembers = MaxPlayers;
-            lobby.bPresenceEnabled = bPresenceEnabled;
 
             return lobby;
         }
