@@ -1,3 +1,4 @@
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using SynicSugar.P2P;
 using UnityEngine;
@@ -89,14 +90,16 @@ namespace SynicSugar.Samples {
         public async void LeaveSession(){
             isStressTesting = false;
             EOSDebug.Instance.Log("Chat Mode: Leave");
-            await ConnectHub.Instance.ExitSession();
+            CancellationTokenSource token = new CancellationTokenSource();
+            await ConnectHub.Instance.ExitSession(token);
             systemManager.modeSelect.ChangeGameScene("MainMenu");
 
         }
         public async void CloseSession(){
             isStressTesting = false;
             EOSDebug.Instance.Log("Chat Mode: Close");
-            await ConnectHub.Instance.CloseSession();
+            CancellationTokenSource token = new CancellationTokenSource();
+            await ConnectHub.Instance.CloseSession(token);
             systemManager.modeSelect.ChangeGameScene("MainMenu");
         }
     }

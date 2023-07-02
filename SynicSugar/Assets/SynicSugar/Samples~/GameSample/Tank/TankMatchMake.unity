@@ -994,38 +994,14 @@ MonoBehaviour:
   startMatchMake: {fileID: 55211627}
   closeLobby: {fileID: 1511264585}
   startGame: {fileID: 0}
-  discriptions:
-    state: {fileID: 355272012}
+  descriptions:
+    state: {fileID: 0}
     stopAdditionalInput:
       m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 837676606}
-          m_TargetAssemblyTypeName: Skeyll.EOS.Samples.MatchMake, Assembly-CSharp
-          m_MethodName: StopAdditionalInput
-          m_Mode: 1
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
+        m_Calls: []
     acceptCancel:
       m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 837676606}
-          m_TargetAssemblyTypeName: Skeyll.EOS.Samples.MatchMake, Assembly-CSharp
-          m_MethodName: ChangeButtonContent
-          m_Mode: 6
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
+        m_Calls: []
     searchLobby: 
     waitothers: 
     tryconnect: 
@@ -1342,6 +1318,10 @@ PrefabInstance:
     - target: {fileID: -6934453671945530594, guid: e18422c96d27f49489abe8b774c3a6b9, type: 3}
       propertyPath: AutoSyncInterval
       value: 500
+      objectReference: {fileID: 0}
+    - target: {fileID: 1127570235843273856, guid: e18422c96d27f49489abe8b774c3a6b9, type: 3}
+      propertyPath: lobbyIdSaveType
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1127570235843273856, guid: e18422c96d27f49489abe8b774c3a6b9, type: 3}
       propertyPath: AllowUserReconnect

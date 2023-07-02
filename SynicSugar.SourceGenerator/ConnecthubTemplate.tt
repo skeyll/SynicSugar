@@ -22,9 +22,6 @@ namespace SynicSugar.P2P {
 
         public ConnectHub(){
         }
-        public void DisposeInstance(){
-            instance = null;
-        }
         //Start
         /// <summary>
         /// Start the packet receiver. Call after creating the Network Instance required for reception.
@@ -73,7 +70,6 @@ namespace SynicSugar.P2P {
         /// </summary>
         public async UniTask<bool> ExitSession(CancellationTokenSource cancelToken = default(CancellationTokenSource)){
             bool isSuccess = await p2pConnectorForOtherAssembly.Instance.ExitSession(cancelToken);
-            DisposeInstance();
             return isSuccess;
         }
         /// <summary>
@@ -82,7 +78,6 @@ namespace SynicSugar.P2P {
         /// </summary>
         public async UniTask<bool> CloseSession(CancellationTokenSource cancelToken = default(CancellationTokenSource)){
             bool isSuccess = await p2pConnectorForOtherAssembly.Instance.CloseSession(cancelToken);
-            DisposeInstance();
             return isSuccess;
         }
         async UniTask RecivePacket(){
@@ -136,7 +131,6 @@ namespace SynicSugar.P2P {
         [Obsolete("This is old. Can use CloseSession()")]
         public void EndConnection(){
             p2pConnectorForOtherAssembly.Instance.CloseSession(null);
-            DisposeInstance();
         }
         //----
     }
