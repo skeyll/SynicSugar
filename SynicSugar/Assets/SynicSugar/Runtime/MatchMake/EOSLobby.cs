@@ -785,6 +785,8 @@ namespace SynicSugar.MatchMake {
                     Debug.Log($"MemberStatusNotyfy: {data.TargetUserId} diconnect from lobby.");
                 #endif
                 p2pConfig.Instance.userIds.MoveTargetUserIdToLefts(data.TargetUserId);
+            }else if(data.CurrentStatus == LobbyMemberStatus.Joined){
+                p2pConfig.Instance.userIds.MoveTargetUserIdToRemoteUsersFromLeft(data.TargetUserId);
             }
         }
         /// <summary>
