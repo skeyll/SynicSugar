@@ -2,7 +2,7 @@
 {
   "name": "net.skeyll.synicsugar",
   "displayName": "SynicSugar",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "unity": "2021.3",
   "description": "No use cost and no CCU Limit Netcode with EpicOnlineServices.",
   "keywords": ["Network", "Services"],
