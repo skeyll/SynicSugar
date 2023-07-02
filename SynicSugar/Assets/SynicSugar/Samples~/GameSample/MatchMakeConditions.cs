@@ -1,6 +1,7 @@
 using SynicSugar.MatchMake;
 using UnityEngine.UI;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace SynicSugar.Samples{
     public class MatchMakeConditions : MonoBehaviour {
@@ -18,7 +19,7 @@ namespace SynicSugar.Samples{
 
         public Lobby GetLobbyCondition(){
             //Create conditions
-            Lobby lobbyCondition = MatchMakeManager.GenerateLobby(mode.ToString(), region.ToString());
+            Lobby lobbyCondition = MatchMakeManager.GenerateLobbyObject(new string[3]{SceneManager.GetActiveScene().name, mode.ToString(), region.ToString()});
             
             lobbyCondition.MaxLobbyMembers = 2; //2-64
 

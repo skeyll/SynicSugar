@@ -18,7 +18,7 @@ namespace SynicSugarGenerator
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalCommonsTemplate.tt"
+    #line 1 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\AdditionalCommonsTemplate.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "16.0.0.0")]
     public partial class AdditionalCommonsTemplate : AdditionalCommonsTemplateBase
     {
@@ -29,70 +29,70 @@ namespace SynicSugarGenerator
         public virtual string TransformText()
         {
             
-            #line 7 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalCommonsTemplate.tt"
+            #line 7 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\AdditionalCommonsTemplate.tt"
  if (!string.IsNullOrEmpty(NameSpace)) { 
             
             #line default
             #line hidden
             this.Write("namespace ");
             
-            #line 8 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalCommonsTemplate.tt"
+            #line 8 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\AdditionalCommonsTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(NameSpace));
             
             #line default
             #line hidden
             this.Write(" {\r\n");
             
-            #line 9 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalCommonsTemplate.tt"
+            #line 9 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\AdditionalCommonsTemplate.tt"
  } 
             
             #line default
             #line hidden
             this.Write("    public partial class ");
             
-            #line 10 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalCommonsTemplate.tt"
+            #line 10 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\AdditionalCommonsTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ClassName));
             
             #line default
             #line hidden
             
-            #line 10 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalCommonsTemplate.tt"
+            #line 10 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\AdditionalCommonsTemplate.tt"
  if (useGetInstance) { 
             
             #line default
             #line hidden
             this.Write(" : IGetCommons ");
             
-            #line 10 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalCommonsTemplate.tt"
+            #line 10 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\AdditionalCommonsTemplate.tt"
  } 
             
             #line default
             #line hidden
             this.Write(" {\r\n        [HideInInspector] public bool isRemotoCall;\r\n        public bool isHo" +
-                    "st { get { return p2pManager.Instance.userIds.IsHost(); } }\r\n        ");
+                    "st { get { return p2pConfig.Instance.userIds.IsHost(); } }\r\n        ");
             
-            #line 13 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalCommonsTemplate.tt"
+            #line 13 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\AdditionalCommonsTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(SyncVar));
             
             #line default
             #line hidden
             this.Write("\r\n        ");
             
-            #line 14 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalCommonsTemplate.tt"
+            #line 14 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\AdditionalCommonsTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Rpcs));
             
             #line default
             #line hidden
             this.Write("\r\n    }\r\n");
             
-            #line 16 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalCommonsTemplate.tt"
+            #line 16 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\AdditionalCommonsTemplate.tt"
  if (!string.IsNullOrEmpty(NameSpace)) { 
             
             #line default
             #line hidden
             this.Write("}\r\n");
             
-            #line 18 "D:\SynicSugar\SynicSugar.SourceGenerator\AdditionalCommonsTemplate.tt"
+            #line 18 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\AdditionalCommonsTemplate.tt"
  } 
             
             #line default

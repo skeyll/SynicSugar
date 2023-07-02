@@ -73,6 +73,7 @@
         //GetInstance
         internal string CreateGetInstance(string nameNamespace, string name) {
             return $@"
+        [Obsolete]
         public {GetFullName(nameNamespace, name)} GetUserInstance(UserId id, {GetFullName(nameNamespace, name)} instanceType) {{
             if (!{name}.ContainsKey(id.ToString())) {{
                 return null;
@@ -114,8 +115,8 @@
         //SyncMetod
         internal string CreateSyncVarMethod(string name, string paramNamespace, string type, int time, bool isPublic, bool isOnlyHost){
             string intervalCondition = $"isWaiting{name}Interval";
-            string condition = isOnlyHost ? $"!p2pManager.Instance.userIds.IsHost() || {intervalCondition}" : intervalCondition;
-            string intervalTime = time > 0 ? time.ToString() : "p2pManager.Instance.AutoSyncInterval";
+            string condition = isOnlyHost ? $"!p2pConfig.Instance.userIds.IsHost() || {intervalCondition}" : intervalCondition;
+            string intervalTime = time > 0 ? time.ToString() : "p2pConfig.Instance.autoSyncInterval";
             string modifer = isPublic ? "public " : System.String.Empty;
             string setterMethod = isPublic ? System.String.Empty : $@"
         internal void SetLocal{name}({GetFullName(paramNamespace, type)} value) {{
@@ -144,9 +145,9 @@
             var preValue = {name};
 
             EOSp2p.SendPacketToAll((byte)ConnectHub.CHANNELLIST.{name}, MemoryPack.MemoryPackSerializer.Serialize({name})).Forget();
-            await UniTask.Delay({intervalTime}, cancellationToken: p2pManager.Instance.p2pToken.Token);
+            await UniTask.Delay({intervalTime}, cancellationToken: p2pConnectorForOtherAssembly.Instance.p2pToken.Token);
             
-            if(p2pManager.Instance.p2pToken.IsCancellationRequested){{
+            if(p2pConnectorForOtherAssembly.Instance.p2pToken.IsCancellationRequested){{
                 return;
             }}
             if(preValue == {name}){{
@@ -163,7 +164,7 @@
             string serializer = string.IsNullOrEmpty(arg) ? "null" : "MemoryPack.MemoryPackSerializer.Serialize(value)";
             return $@"
         void SynicSugarRpc_{fnName}({arg}) {{
-            if(OwnerUserID == p2pManager.Instance.userIds.LocalUserId){{
+            if(OwnerUserID == p2pConfig.Instance.userIds.LocalUserId){{
                 EOSp2p.SendPacketToAll((byte)ConnectHub.CHANNELLIST.{fnName}, {serializer}).Forget();
             }}
         }}";
@@ -173,7 +174,7 @@
             string serializer = string.IsNullOrEmpty(arg) ? "null" : "MemoryPack.MemoryPackSerializer.Serialize(value)";
             return $@"
         void SynicSugarRpc_{fnName}(UserId id{arg}) {{
-            if(OwnerUserID == p2pManager.Instance.userIds.LocalUserId){{
+            if(OwnerUserID == p2pConfig.Instance.userIds.LocalUserId){{
                 EOSp2p.SendPacket((byte)ConnectHub.CHANNELLIST.{fnName}, {serializer}, id);
             }}
         }}";

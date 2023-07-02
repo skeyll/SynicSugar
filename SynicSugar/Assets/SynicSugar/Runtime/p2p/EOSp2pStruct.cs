@@ -30,6 +30,14 @@ namespace SynicSugar.P2P {
             return LocalUserId == HostUserId;
         }
         /// <summary>
+        /// Remove user ID of leaving lobby.<br />
+        /// </summary>
+        /// <param name="targetId"></param>
+        internal void RemoveUserId(ProductUserId targetId){
+            UserId userId = new UserId(targetId);
+            RemoteUserIds.Remove(userId);
+        }
+        /// <summary>
         /// Move UserID from RemotoUserIDs to LeftUsers not to SendPacketToALl in vain.<br />
         /// </summary>
         /// <param name="targetId"></param>
@@ -38,6 +46,25 @@ namespace SynicSugar.P2P {
             RemoteUserIds.Remove(userId);
             LeftUsers.Add(userId);
         }
+        /// <summary>
+        /// Move UserID to RemotoUserIDs from LeftUsers on reconnect.
+        /// </summary>
+        /// <param name="targetId"></param>
+        /// <returns></returns>
+        internal void MoveTargetUserIdToRemoteUsersFromLeft(ProductUserId targetId){
+            UserId userId = new UserId(targetId);
+            LeftUsers.Remove(userId);
+            RemoteUserIds.Add(userId);
+        }
+        /// <summary>
+        /// Get all member count that is current and past participation member count instead of just current.
+        /// </summary>
+        /// <param name="targetId"></param>
+        /// <returns></returns>
+        internal int CurrentLobbyAllMemberCount(ProductUserId targetId){
+            return 1 + RemoteUserIds.Count + LeftUsers.Count; 
+        }
+
     }
     public struct UserId {
         readonly ProductUserId value;

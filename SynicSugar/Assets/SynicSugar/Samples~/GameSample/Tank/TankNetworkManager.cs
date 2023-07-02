@@ -8,11 +8,11 @@ namespace  SynicSugar.Samples {
         public TankPlayerData localPlayer;
         void Start(){
             //Generate other player to get packet
-            foreach(var id in p2pManager.Instance.userIds.RemoteUserIds){
+            foreach(var id in p2pConfig.Instance.userIds.RemoteUserIds){
                 TankPlayerData playerData = new TankPlayerData(){ OwnerUserID = id };
             }
             localPlayer = new TankPlayerData();
-            localPlayer.SetOwnerID(p2pManager.Instance.userIds.LocalUserId);
+            localPlayer.SetOwnerID(p2pConfig.Instance.userIds.LocalUserId);
             //Generate all player model
             SynicObject.AllSpawn(playerPrefab);
             //After creating the instances for receive in local, start Packet Receiver.
@@ -25,12 +25,9 @@ namespace  SynicSugar.Samples {
             AsyncReturnToTitle().Forget();
         }
         async UniTask AsyncReturnToTitle(){
-            ConnectHub.Instance.EndConnection();
-            //The last player close lobby.
-            if(p2pManager.Instance.userIds.IsHost() && p2pManager.Instance.userIds.RemoteUserIds.Count == 0){
-                CancellationTokenSource cnsToken = new CancellationTokenSource();
-                await SynicSugar.MatchMake.MatchMakeManager.Instance.DestroyHostingLobby(cnsToken);
-            }
+            CancellationTokenSource cnsToken = new CancellationTokenSource();
+            await ConnectHub.Instance.CloseSession();
+            
             GameModeSelect modeSelect = new GameModeSelect();
             modeSelect.ChangeGameScene(GameModeSelect.GameScene.MainMenu.ToString());
         }

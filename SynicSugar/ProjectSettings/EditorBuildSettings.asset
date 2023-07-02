@@ -17,4 +17,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/SynicSugar/Samples/GameSample/ReadHearts/ReadHearts.unity
     guid: edef94a35ca4502489f903b15dc6fe95
+  - enabled: 1
+    path: Assets/SynicSugar/Samples/GameSample/Chat/Chat.unity
+    guid: 52f18ba6adc5c53409a96d5576f60f10
   m_configObjects: {}

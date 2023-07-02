@@ -110,7 +110,7 @@ namespace  SynicSugar.Samples {
 
             ChangeUIActive(GameState.InGame);
 
-            if(p2pManager.Instance.userIds.IsHost()){
+            if(p2pConfig.Instance.userIds.IsHost()){
                 currentTime = 0;
             }
         }
@@ -132,11 +132,9 @@ namespace  SynicSugar.Samples {
             }
         }
         public async void ExitGame(){
-            p2pManager.Instance.EndConnection();
-            if(isHost){
-                CancellationTokenSource cnsToken = new CancellationTokenSource();
-                await SynicSugar.MatchMake.MatchMakeManager.Instance.DestroyHostingLobby(cnsToken);
-            }
+            CancellationTokenSource cnsToken = new CancellationTokenSource();
+            await ConnectHub.Instance.CloseSession(cnsToken);
+            
             SynicSugar.Samples.GameModeSelect modeSelect = new SynicSugar.Samples.GameModeSelect();
             modeSelect.ChangeGameScene(GameModeSelect.GameScene.MainMenu.ToString()); //Retrun MainMenu
         }

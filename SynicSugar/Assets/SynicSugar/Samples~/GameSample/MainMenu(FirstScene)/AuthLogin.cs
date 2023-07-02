@@ -2,6 +2,7 @@ using Cysharp.Threading.Tasks;
 using System.Threading;
 using SynicSugar.Auth;
 using UnityEngine;
+using System;
 
 namespace  SynicSugar.Samples {
     public class AuthLogin : MonoBehaviour {

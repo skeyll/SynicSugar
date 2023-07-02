@@ -1,8 +1,8 @@
 using Cysharp.Threading.Tasks;
 using SynicSugar.MatchMake;
 using System.Threading;
-using UnityEngine.UI;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace  SynicSugar.Samples {
     public class MatchMake : MonoBehaviour{
@@ -10,7 +10,7 @@ namespace  SynicSugar.Samples {
         GameObject matchmakeContainer;
         [SerializeField] Button startMatchMake, closeLobby, startGame;
         CancellationTokenSource matchCancellToken;
-        [SerializeField] MatchGUIState discriptions;
+        [SerializeField] MatchGUIState descriptions;
         [SerializeField] MatchMakeConditions matchConditions;
         [SerializeField] Text buttonText;
         //For Tank
@@ -24,7 +24,7 @@ namespace  SynicSugar.Samples {
             }
 
             InitMatchState();
-            MatchMakeManager.Instance.SetGUIState(discriptions);
+            MatchMakeManager.Instance.SetGUIState(descriptions);
         }
 
         void OnDestroy(){
@@ -32,26 +32,43 @@ namespace  SynicSugar.Samples {
                 matchCancellToken.Cancel();
             }
         }
-        async UniTaskVoid Start(){
+        async void Start(){
+            //Allow this only on Chat
+            if(MatchMakeManager.Instance.lobbyIdSaveType == MatchMakeManager.RecconectLobbyIdSaveType.NoReconnection){
+                return;
+            }
             //Try recconect
-            string LobbyID = GetParticipatingLobbyID();
-            matchCancellToken = new CancellationTokenSource();
+            string LobbyID = MatchMakeManager.Instance.GetReconnectLobbyID();
+            EOSDebug.Instance.Log($"SavedLobbyID is {LobbyID}.");
+            
+            if(string.IsNullOrEmpty(LobbyID)){
+                return;
+            }
+            
+            startMatchMake.gameObject.SetActive(false);
+            CancellationTokenSource token = new CancellationTokenSource();
 
-            // bool canReconnect = await MatchMakeManager.Instance.ReconnectParticipatingLobby(LobbyID, matchCancellToken);
+            bool canReconnect = await MatchMakeManager.Instance.ReconnecLobby(LobbyID, token);
 
-            // if(canReconnect){
-            //     EOSDebug.Instance.Log("Success Re-Connect Lobby.");
-            //     return;
-            // }
+            if(canReconnect){
+                EOSDebug.Instance.Log($"Success Recconect! LobbyID:{MatchMakeManager.Instance.GetCurrentLobbyID()}");
+                
+                closeLobby.gameObject.SetActive(true);
+                startGame.gameObject.SetActive(true);
+                return;
+            }
+            EOSDebug.Instance.Log("Failer Re-Connect Lobby.");
             startMatchMake.gameObject.SetActive(true);
         }
         void InitMatchState(){
-            discriptions.searchLobby = "Searching for an opponent...";
-            discriptions.waitothers = "Waiting for an opponent...";
-            discriptions.tryconnect = "Try to connect...";
-            discriptions.success = "Success MatchMaking";
-            discriptions.fail = "Fail to match make";
-            discriptions.trycancel = "Try to Disconnect...";
+            descriptions.searchLobby = "Searching for an opponent...";
+            descriptions.waitothers = "Waiting for an opponent...";
+            descriptions.tryconnect = "Try to connect...";
+            descriptions.success = "Success MatchMaking";
+            descriptions.fail = "Fail to match make";
+            descriptions.trycancel = "Try to Disconnect...";
+            descriptions.stopAdditionalInput.AddListener(StopAdditionalInput);
+            descriptions.acceptCancel.AddListener(() => ChangeButtonContent(false));
         }
         public void StartMatchMake(){
             StartMatching().Forget();
@@ -74,11 +91,11 @@ namespace  SynicSugar.Samples {
                 EOSDebug.Instance.Log("Backend may have something problem.");
                 return;
             }
-            EOSDebug.Instance.Log("Success Matching!");
+            EOSDebug.Instance.Log($"Success Matching! LobbyID:{MatchMakeManager.Instance.GetCurrentLobbyID()}");
 
             closeLobby.gameObject.SetActive(true);
 
-            if(startGame != null){ //For ReadHeart
+            if(startGame != null){ //For ReadHeart and Chat
                 startGame.gameObject.SetActive(true);
             }else{ //For Tank
                 GameModeSelect modeSelect = new GameModeSelect();
@@ -99,7 +116,7 @@ namespace  SynicSugar.Samples {
             closeLobby.gameObject.SetActive(false);
 
             matchCancellToken = new CancellationTokenSource();
-            bool isSuccess = await MatchMakeManager.Instance.DestroyHostingLobby(matchCancellToken);
+            bool isSuccess = await MatchMakeManager.Instance.CancelCurrentMatchMake(matchCancellToken);
             
             startGame.gameObject.SetActive(false);
             startMatchMake.gameObject.SetActive(true);

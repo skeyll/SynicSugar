@@ -24,10 +24,10 @@ namespace SynicSugar.Samples {
         void Start(){
             //API's "isLocal" is enabled after the ID is set to the instance.
             if(isLocalPlayer){ 
-                SetOwnerID(p2pManager.Instance.userIds.LocalUserId);
+                SetOwnerID(p2pConfig.Instance.userIds.LocalUserId);
                 BattleSystem.Instance.player = this;
             }else{
-                SetOwnerID(p2pManager.Instance.userIds.RemoteUserIds[0]);
+                SetOwnerID(p2pConfig.Instance.userIds.RemoteUserIds[0]);
                 BattleSystem.Instance.opponent = this;
             }
         }
@@ -46,16 +46,15 @@ namespace SynicSugar.Samples {
                 return;
             }
             damageText.text = BattleSystem.Instance.sliderValue.text;
-            ReflectDamage(p2pManager.Instance.userIds.RemoteUserIds[0] ,int.Parse(damageText.text));
+            ReflectDamage(p2pConfig.Instance.userIds.RemoteUserIds[0] ,int.Parse(damageText.text));
         }
         [TargetRpc]
         public void ReflectDamage(UserId id, int damage){
             status.AttackDamage = damage;
             currentTurn++;
         }
-
         public void DecideChat(){
-            UpdateChat(p2pManager.Instance.userIds.RemoteUserIds[0], new ChatContent(){ Name = chatName.text, Contents = chatContent.text });
+            UpdateChat(p2pConfig.Instance.userIds.RemoteUserIds[0], new ChatContent(){ Name = chatName.text, Contents = chatContent.text });
         }
         [TargetRpc]
         public void UpdateChat(UserId id, ChatContent contents){

@@ -10,9 +10,10 @@ GameObject:
   m_Component:
   - component: {fileID: 1535193180786485604}
   - component: {fileID: 1127570235843273856}
+  - component: {fileID: 2114254298220440419}
   - component: {fileID: -6934453671945530594}
   m_Layer: 0
-  m_Name: ConnectMaanger
+  m_Name: ConnectManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -45,8 +46,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b54d8e85e5cae104dbc5ce6a176fdb6e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxSerchResult: 5
-  matchTimeoutSec: 180
+  maxSearchResult: 5
+  hostsTimeoutSec: 180
+  AllowUserReconnect: 1
   matchState:
     state: {fileID: 0}
     stopAdditionalInput:
@@ -61,6 +63,22 @@ MonoBehaviour:
     success: 
     fail: 
     trycancel: 
+--- !u!114 &2114254298220440419
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1535193180786485607}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfcb8bb8afbcedd4e97d9ccce350c691, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  interval_sendToAll: 3
+  autoSyncInterval: 1000
+  receiveInterval: 1
+  packetReliability: 2
 --- !u!114 &-6934453671945530594
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -73,4 +91,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f4cd18347d32bd4e81a9ee2f975e9d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  natType: {fileID: 0}
