@@ -250,16 +250,13 @@ namespace SynicSugar.MatchMake {
         /// For search conditions.<br />
         /// About attributes, use GenerateLobbyAttribute to set.
         /// </summary>
-        /// <param name="bucket">important condition like mode, region, map name</param>
-        /// <param name="MaxPlayers"></param>
-        /// <param name="bPresenceEnabled"></param>
+        /// <param name="bucket">important condition like game-mode, region, map</param>
+        /// <param name="MaxPlayers">Max number of user allowed in the lobby</param>
         /// <returns></returns>
-        public static Lobby GenerateLobbyObject(string[] bucket, uint MaxPlayers = 2,
-                                            bool bPresenceEnabled = false){
+        public static Lobby GenerateLobbyObject(string[] bucket, uint MaxPlayers = 2){
             Lobby lobby = new Lobby();
             lobby.SetBucketID(bucket);
             lobby.MaxLobbyMembers = MaxPlayers;
-            lobby.bPresenceEnabled = bPresenceEnabled;
 
             return lobby;
         }
