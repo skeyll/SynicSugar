@@ -120,6 +120,8 @@ namespace SynicSugar.P2P {
             bool canLeave = true;
             if(p2pConfig.Instance.userIds.IsHost()){
                 canLeave = await MatchMakeManager.Instance.CloseCurrentLobby(token);
+            }else{
+                canLeave = await MatchMakeManager.Instance.ExitCurrentLobby(token);
             }
             Destroy(this.gameObject);
             return canLeave;
