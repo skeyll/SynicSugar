@@ -206,7 +206,7 @@ namespace SynicSugar.MatchMake {
             //Join
             bool canJoin = await TryJoinSearchResults(token);
         #if SYNICSUGAR_LOG
-            Debug.LogFormat("JoinLobbyBySavedLobbyId: RetriveLobbyByLobbyId is '{0}'.", canJoin ? "Success" : "Failure");
+            Debug.LogFormat("JoinLobbyBySavedLobbyId: TryJoinSearchResults is '{0}'.", canJoin ? "Success" : "Failure");
         #endif
             if(!canJoin){
                 return false; //The lobby was already closed.
@@ -1035,6 +1035,9 @@ namespace SynicSugar.MatchMake {
         /// Save lobby data for player to connect unexpectedly left lobby like power off.
         /// </summary>
         async UniTask SaveLobbyId(){
+    #if SYNICSUGAR_LOG
+            Debug.Log($"Save LobbyID by {recconectType}");
+    #endif
             switch(recconectType){
                 case MatchMakeManager.RecconectLobbyIdSaveType.NoReconnection:
                 return;
@@ -1053,6 +1056,9 @@ namespace SynicSugar.MatchMake {
         /// Delete save data for player not to connect the current lobby after the battle.
         /// </summary>
         async UniTask DeleteLobbyID(){
+    #if SYNICSUGAR_LOG
+            Debug.Log($"Delete LobbyID by {recconectType}");
+    #endif
             switch(recconectType){
                 case MatchMakeManager.RecconectLobbyIdSaveType.NoReconnection:
                 return;

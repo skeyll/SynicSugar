@@ -196,8 +196,6 @@ namespace SynicSugar.MatchMake {
         /// <param name="token"></param>
         /// <returns>True on success. If user isn't host, return false.</returns>
         internal async UniTask<bool> CloseCurrentLobby(CancellationTokenSource token){
-            //Register the action to delete LobbyID for reconnect on Start or Constructer.
-
             bool canDestroy = await eosLobby.DestroyLobby(token);
 
             return canDestroy;
