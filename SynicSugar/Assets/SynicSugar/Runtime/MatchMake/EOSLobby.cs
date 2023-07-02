@@ -194,18 +194,17 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         /// <param name="LobbyID">Lobby ID to <c>re</c>-connect</param>
         internal async UniTask<bool> JoinLobbyBySavedLobbyId(string LobbyID, CancellationTokenSource token){
-            MatchMakeManager.Instance.UpdateStateDescription(MatchState.Connect);
+            //Search
             bool canSerch = await RetriveLobbyByLobbyId(LobbyID, token);
 
         #if SYNICSUGAR_LOG
             Debug.LogFormat("JoinLobbyBySavedLobbyId: RetriveLobbyByLobbyId is '{0}'.", canSerch ? "Success" : "Failure");
         #endif
             if(!canSerch){
-                MatchMakeManager.Instance.UpdateStateDescription(MatchState.Fail);
                 return false; //The lobby was already closed.
             }
             //Join
-            bool canJoin = await ExamineSearchResults(token);
+            bool canJoin = await TryJoinSearchResults(token);
         #if SYNICSUGAR_LOG
             Debug.LogFormat("JoinLobbyBySavedLobbyId: RetriveLobbyByLobbyId is '{0}'.", canJoin ? "Success" : "Failure");
         #endif
@@ -217,10 +216,10 @@ namespace SynicSugar.MatchMake {
             LobbyMemberStatusNotification = new NotifyEventHandle(AddNotifyLobbyMemberStatusReceived(lobbyInterface, OnMemberStatusReceived), (ulong handle) =>{
                 EOSManager.Instance.GetEOSLobbyInterface().RemoveNotifyLobbyMemberStatusReceived(handle);
             });
-            
+            //Prep Connection
             InitConnectConfig(ref p2pConfig.Instance.userIds);
-            p2pConnectorForOtherAssembly.Instance.OpenConnection();
             p2pConfig.Instance.userIds.isJustReconnected = true;
+            p2pConnectorForOtherAssembly.Instance.OpenConnection();
             return true;
         }
 //Host
@@ -250,7 +249,7 @@ namespace SynicSugar.MatchMake {
             createLobbyOptions.MaxLobbyMembers = lobbyCondition.MaxLobbyMembers;
             createLobbyOptions.PermissionLevel = lobbyCondition.PermissionLevel;
             createLobbyOptions.BucketId = lobbyCondition.BucketId;
-            createLobbyOptions.PresenceEnabled = lobbyCondition.bPresenceEnabled;
+            createLobbyOptions.PresenceEnabled = false;
             createLobbyOptions.AllowInvites = lobbyCondition.bAllowInvites;
 
             // Init for async
@@ -495,7 +494,7 @@ namespace SynicSugar.MatchMake {
                 return false; //Need to create own session
             }
             //Join
-            bool canJoin = await ExamineSearchResults(token);
+            bool canJoin = await TryJoinSearchResults(token);
             if(!canJoin){
                 return false;  //Need to create own session
             }
@@ -634,7 +633,12 @@ namespace SynicSugar.MatchMake {
         }
 #endregion
 #region Join
-        async UniTask<bool> ExamineSearchResults(CancellationTokenSource token){ 
+        /// <summary>
+        /// Check result amounts, then if it has 1 or more, try join the lobby.
+        /// </summary>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        async UniTask<bool> TryJoinSearchResults(CancellationTokenSource token){ 
             if (CurrentSearch == null){
                 Debug.LogError("Exmaine Lobby: CurrentSearch is null");
                 return false;
@@ -677,7 +681,8 @@ namespace SynicSugar.MatchMake {
         }
         
         /// <summary>
-        /// Call this from ExamineSearchResults.
+        /// Call this from TryJoinSearchResults.<br />
+        /// If can join a lobby, then update local lobby infomation in callback.
         /// </summary>
         void JoinLobby(LobbyDetails lobbyDetails, Action<Result> callback = null){
             JoinLobbyOptions joinOptions = new JoinLobbyOptions();
@@ -814,6 +819,9 @@ namespace SynicSugar.MatchMake {
         void OnLobbyUpdated(string lobbyId, OnLobbyCallback LobbyUpdateCompleted = null){
             if (!string.IsNullOrEmpty(lobbyId) && CurrentLobby.LobbyId == lobbyId){
                 CurrentLobby.InitFromLobbyHandle(lobbyId);
+            #if SYNICSUGAR_LOG
+                Debug.Log($"OnLobbyUpdated: Update Lobby with {lobbyId}");
+            #endif
 
                 LobbyUpdateCompleted?.Invoke(Result.Success);
             }
