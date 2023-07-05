@@ -15,4 +15,4 @@ This is created by [GenerateLobbyObject(string[] bucket, uint MaxPlayers = 2)](.
 |---|---|
 | [MaxLobbyMembers](../Lobby/maxlobbymembers)  | The Max amount of lobby members |
 | [BucketId](../Lobby/bucketid) | Important attributes for matchmaking |
-| [Attributes](../Lobby/attributes) | Attricutes for matchmaking conditions |
+| [Attributes](../Lobby/attributes) | Attributes for matchmaking conditions |
