@@ -1,15 +1,20 @@
 +++
 title = "SearchAndCreateLobby"
-weight = 5
+weight = 10
 +++
 ## SearchAndCreateLobby
-public async UniTask<bool> SearchAndCreateLobby(Lobby lobbyCondition, CancellationTokenSource token, Action saveFn = null )
+<small>*Namespace: SynicSugar.MatchMake* <br>
+*Class: MatchMakeManager* </small>
+
+public async UniTask&lt;bool&gt; SearchAndCreateLobby(Lobby lobbyCondition, CancellationTokenSource token)
+
 
 ### Description
-Start MatchMake with conditions and get the data for p2p connect.
+Start MatchMake with args condition and get the data for p2p connect.
 At first, search and try to join. If can't, the user create lobby as host.
 If success and finish preparation p2p connect, return true. If not (by timeout or anything problem), return false.
-saveFn is for LobbyID. By default, LobbyID is saved by Playerprefs. If you want to save LobbyID in a different location, pass the save processs to 3rd argument.
+
+Recommend this for Matchmaking.
 
 ```cs
 using System.Threading;

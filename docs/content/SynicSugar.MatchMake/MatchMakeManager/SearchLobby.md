@@ -1,13 +1,16 @@
 +++
 title = "SearchLobby"
-weight = 6
+weight = 11
 +++
 ## SearchLobby
-public async UniTask<bool> SearchLobby(Lobby lobbyCondition, CancellationTokenSource token, Action saveFn = null )
+<small>*Namespace: SynicSugar.MatchMake* <br>
+*Class: MatchMakeManager* </small>
+
+public async UniTask&lt;bool&gt; SearchLobby(Lobby lobbyCondition, CancellationTokenSource token)
 
 ### Description
-Search lobby to join, then get the data for p2p connect. 
-saveFn is for LobbyID. By default, LobbyID is saved by Playerprefs. If you want to save LobbyID in a different location, pass the save processs to 3rd argument.
+Search lobby to join. If can join and exchange the data for p2p connect, return true. 
+
 Recommend: [SearchAndCreateLobby()](../searchandcreatelobby)
 
 ```cs

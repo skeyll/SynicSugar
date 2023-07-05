@@ -1,12 +1,17 @@
 +++
 title = "matchState"
-weight = 3
+weight = 6
 +++
 ## matchState
-public class MatchGUIState
+<small>*Namespace: SynicSugar.MatchMake* <br>
+*Class: MatchMakeManager* </small>
+
+public MatchGUIState matchState
 
 ### Description
 GUI process in matchmaking.
+
+Can set this value on UnityEditor.
 
 
 ### For process

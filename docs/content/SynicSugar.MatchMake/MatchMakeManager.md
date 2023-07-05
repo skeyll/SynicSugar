@@ -4,28 +4,40 @@ weight = 0
 +++
 
 ## MatchMakeManager
+<small>*Namespace: SynicSugar.MatchMake*</small>
+
+This is used like **MatchMakeManager.Instance.XXX()**.
+
 
 ### Description
-This script is Mono's Singleton attached to EOSp2pManager. Can get this from **Packages/SynicSugar/Runtime/Prefabs/EOSp2pManager**.
-EOSp2pManager has **DontDestroy**, so EOSp2pManager will not be destroyed by scene transitions. This is used for re-connection, and also needed for p2p scene.
+This script is Mono's Singleton attached to ConnenctManager. Drop this **ConnenctManager** into the scene from *Packages/SynicSugar/Runtime/Prefabs/ConnectManager*. 
+ConnectManager has **DontDestroy**, so ConnectManager will not be destroyed by scene transitions. This is used for re-connection, and also needed for p2p scene. If this is no longer needed, we call ~~[CancelCurrentMatchMake](../MatchMakeManager/cancelcurrentmatchmake)~~ ,[ConnectHub.Instance.CloseSession(CancellationTokenSource)](../../P2P/ConnectHub/exitsession) or [ConnectHub.Instance.ExitSession(CancellationTokenSource)](../../P2P/ConnectHub/exitsession).
+
 
 
 ### Properity
 | API | description |
 |---|---|
 | [maxSearchResult](../MatchMakeManager/maxsearchresult)  | The amount of search results |
-| [matchTimeoutSec](../MatchMakeManager/matchtimeoutsec) | Timeout sec of Lobby Host user |
-| [AllowUserReconnect](../MatchMakeManager/allowuserreconnect) | If true, can re-connect to the disconnected match |
-| [matchState](../MatchMakeManager/matchstate) | Text and Button state on GUI in Matching |
+| [hostsTimeoutSec](../MatchMakeManager/hoststimeoutsec) | Timeout seconds for Host to leave not filled lobby |
+| [lobbyIdSaveType](../MatchMakeManager/lobbyidsavetype) | The way to return to the disconnected lobby |
+| [playerprefsSaveKey](../MatchMakeManager/playerprefssavekey) | the key to save LobbyID |
+| [customSaveLobbyID](../MatchMakeManager/customsavelobbyid) | UnityEvent to save LobbyID |
+| [customDeleteLobbyID](../MatchMakeManager/customdeletelobbyid) | UnityEvent to delete LobbyID |
+| [matchState](../MatchMakeManager/matchstate) | Text and Button state on GUI in matchmaking |
 
 
 ### Function 
 | API | description |
 |---|---|
 | [SetGUIState](../MatchMakeManager/setguistate) | Change *MatchState* from script |
-| [SearchAndCreateLobby](../MatchMakeManager/searchandcreatelobby) |  Search lobby and, if can't join, create lobby |
-| [SearchLobby](../MatchMakeManager/searchlobby) | Search lobby |
-| [CreateLobby](../MatchMakeManager/createlobby) | Create lobby as Host |
-| [ReconnectParticipatingLobby](../MatchMakeManager/reconnectparticipatinglobby/) | Join the Lobby with saved LobbyID |
-| [DestroyHostingLobby](../MatchMakeManager/loginwithdeviceid) | Destroy hostted lobby |
-| [GenerateLobby](../MatchMakeManager/generatelobby) | For conditions, generate a lobby in local |
+| [RegisterLobbyIDFunctions](../MatchMakeManager/registerlobbyidfunctions) | Register functions for LobbyID to reconnect |
+| [RegisterAsyncLobbyIDFunctions](../MatchMakeManager/registerasynclobbyidfunctions) | Register async functions for LobbyID to reconnect |
+| [SearchAndCreateLobby](../MatchMakeManager/searchandcreatelobby) | Search lobby and, if can't join, create lobby |
+| [SearchLobby](../MatchMakeManager/searchlobby) | Search lobby and join it as Guest |
+| [CreateLobby](../MatchMakeManager/createlobby) | Create lobby as Host and wait for Guest |
+| [ReconnecLobby](../MatchMakeManager/reconneclobby) | Join the Lobby with saved LobbyID |
+| [CancelCurrentMatchMake](../MatchMakeManager/cancelcurrentmatchmake) | Stop the current matchmaking |
+| [GetCurrentLobbyID](../MatchMakeManager/getcurrentlobbyid) | Get LobbyID that a user participating |
+| [GetReconnectLobbyID](../MatchMakeManager/getreconnectlobbyid) | Get LobbyID by Playerprefs |
+| [GenerateLobbyObject](../MatchMakeManager/generatelobbyobject) | Generate a lobby object for conditions |

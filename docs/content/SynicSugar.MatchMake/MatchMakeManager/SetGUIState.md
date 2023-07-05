@@ -1,8 +1,11 @@
 +++
 title = "SetGUIState"
-weight = 4
+weight = 7
 +++
 ## SetGUIState
+<small>*Namespace: SynicSugar.MatchMake* <br>
+*Class: MatchMakeManager* </small>
+
 public void SetGUIState(MatchGUIState state)
 
 ### Description 
