@@ -9,7 +9,7 @@ weight = 12
 public async UniTask&lt;bool&gt; CreateLobby(Lobby lobbyCondition, CancellationTokenSource token, Action saveFn = null )
 
 ### Description
-Create lobby as host, wait for others until timeoutSec. If the room is filled and can exchange the data for p2p, return true. 
+Create lobby as host, wait for others until timeoutSec. If the room is filled and can exchange the data for p2p, return true. <br>
 Recommend: [SearchAndCreateLobby()](../searchandcreatelobby)
 
 ```cs

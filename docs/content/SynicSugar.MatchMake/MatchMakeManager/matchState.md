@@ -6,7 +6,7 @@ weight = 6
 <small>*Namespace: SynicSugar.MatchMake* <br>
 *Class: MatchMakeManager* </small>
 
-public MatchGUIState matchState
+public [MatchGUIState](../../MatchGUIState/) matchState
 
 ### Description
 GUI process in matchmaking.
@@ -31,12 +31,12 @@ In many games, the MatchMake button becomes interactive after a search, and the 
 
 | API | description |
 |---|---|
-| Search | User searches for Lobby and attempts to join |
-| Wait | User wait for others in lobby |
-| Connect | Host update lobby for p2p  |
-| Success | MatchMake is complete and ready for p2p |
-| Fail | Matchmake fails at some point |
-| Cancel | Leave joining lobby by manually |
+| Search | Searching for Lobby and attempts to join |
+| Wait | Have Waited for others in (Created/Joined) Lobby |
+| Connect | Host's updating lobby to start p2p |
+| Success | MatchMaking has finished and ready for p2p |
+| Fail | Matchmake fails at some point, (and will return false) |
+| Cancel | Leaving Lobby to cancel matchmaking |
 
 example
 discriptions.searchLobby = "Searching for an opponent...";

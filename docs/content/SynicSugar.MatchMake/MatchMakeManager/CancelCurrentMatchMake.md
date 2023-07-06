@@ -10,10 +10,8 @@ public async UniTask&lt;bool&gt; CancelCurrentMatchMake(CancellationTokenSource 
 
 
 ### Description
-Exit lobby and cancel MatchMaking.
-
-If can leave matchmaking, return true. Even if gets False, the lobby will eventually be closed and we can ignore this result.
-
+Exit lobby and cancel MatchMaking.<br>
+If can leave matchmaking, return true. Even if gets False, the lobby will eventually be closed and we can ignore this result.<br>
 This args' token is for this Task. (not for MatchMaking but we can use same token.)
 
 
