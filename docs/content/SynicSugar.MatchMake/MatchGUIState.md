@@ -10,7 +10,7 @@ weight = 3
 ### Description
 GUI process in matchmaking. Set this in MatchMakeManager.<br>
 This is used to switch button process amd display matchmaking progress.<br>
-Check [matchState](../../MatchMakeManager/matchstate).
+Check *[matchState](../MatchMakeManager/matchstate)*.
 
 
 ### Constructor

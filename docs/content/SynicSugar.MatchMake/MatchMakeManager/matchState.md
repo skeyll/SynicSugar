@@ -15,8 +15,9 @@ Can set this value on UnityEditor.
 
 
 ### For process
-The Processes to switch button state or flag can be pass as UnityEvent.
+The Processes to switch button state or flag can be pass as UnityEvent.<br>
 In many games, the MatchMake button becomes interactive after a search, and the button cannot be pressed for some time. Then, a user can leave the room after joining the lobby.
+
 | API | description |
 |---|---|
 | stopAdditionalInput | Stop additional searches or cancellations |
@@ -38,11 +39,12 @@ In many games, the MatchMake button becomes interactive after a search, and the 
 | Fail | Matchmake fails at some point, (and will return false) |
 | Cancel | Leaving Lobby to cancel matchmaking |
 
+
 example
-discriptions.searchLobby = "Searching for an opponent...";
-discriptions.waitothers = "Waiting for an opponent...";
-discriptions.tryconnect = "Try to connect...";
-discriptions.success = "Success MatchMaking";
-discriptions.fail = "Fail to match make";
+discriptions.searchLobby = "Searching for an opponent...";<br>
+discriptions.waitothers = "Waiting for an opponent...";<br>
+discriptions.tryconnect = "Try to connect...";<br>
+discriptions.success = "Success MatchMaking";<br>
+discriptions.fail = "Fail to match make";<br>
 discriptions.trycancel = "Try to Disconnect...";
 

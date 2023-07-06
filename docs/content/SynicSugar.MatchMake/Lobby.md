@@ -7,7 +7,7 @@ weight = 1
 <small>*Namespace: SynicSugar.MatchMake*</small>
 
 ### Description
-This is created by [GenerateLobbyObject(string[] bucket, uint MaxPlayers = 2)](../../MatchMakeManager/generatelobbyobject) for a Matchmaking condition;
+This is created by *[GenerateLobbyObject(string[] bucket, uint MaxPlayers = 2)](../../SynicSugar.MatchMake/MatchMakeManager/generatelobbyobject)* for a Matchmaking condition;
 
 
 ### Properity
