@@ -43,3 +43,14 @@ If this is no longer needed, we call *~~[CancelCurrentMatchMake](../MatchMakeMan
 | [GetCurrentLobbyID](../MatchMakeManager/getcurrentlobbyid) | Get LobbyID that a user participating |
 | [GetReconnectLobbyID](../MatchMakeManager/getreconnectlobbyid) | Get LobbyID by Playerprefs |
 | [GenerateLobbyObject](../MatchMakeManager/generatelobbyobject) | Generate a lobby object for conditions |
+
+
+```cs
+using SynicSugar.MatchMake;
+
+public class MatchMake {
+    void SetMatchMakeCondition(){
+        string LobbyID = MatchMakeManager.Instance.GetReconnectLobbyID();
+    }
+}
+```
