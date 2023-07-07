@@ -21,7 +21,7 @@ If this is no longer needed, we call *~~[CancelCurrentMatchMake](../../SynicSuga
 ### Properity
 | API | description |
 |---|---|
-| [userIds](../p2pConfig/userIds) | UserIDs list of all users in Lobby |
+| [userIds](../userids/) | UserIDs list of all users in Lobby |
 | [interval_sendToAll](../p2pConfig/intervalsendtoall) | Sending to each users interval of Rpc |
 | [autoSyncInterval](../p2pConfig/autosyncinterval) | Sending new value interval of SyncVar |
 | [receiveInterval](../p2pConfig/receiveinterval) | Frequency of calling PacketReceiver |
