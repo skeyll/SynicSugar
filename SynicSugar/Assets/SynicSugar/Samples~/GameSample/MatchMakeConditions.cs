@@ -26,7 +26,7 @@ namespace SynicSugar.Samples{
             LobbyAttribute attribute = new LobbyAttribute();
             attribute.Key = "Level";
             attribute.SetValue(level);
-            attribute.comparisonOption = Epic.OnlineServices.ComparisonOp.Equal;
+            attribute.ComparisonOperator = Epic.OnlineServices.ComparisonOp.Equal;
             lobbyCondition.Attributes.Add(attribute);
             
             EOSDebug.Instance.Log(matchConditions.text);

@@ -22,7 +22,6 @@ namespace  SynicSugar.Samples {
             if(MatchMakeManager.Instance == null){
                 matchmakeContainer = Instantiate(matchmakePrefab);
             }
-
             InitMatchState();
             MatchMakeManager.Instance.SetGUIState(descriptions);
         }
@@ -116,7 +115,7 @@ namespace  SynicSugar.Samples {
             closeLobby.gameObject.SetActive(false);
 
             matchCancellToken = new CancellationTokenSource();
-            bool isSuccess = await MatchMakeManager.Instance.CancelCurrentMatchMake(matchCancellToken);
+            bool isSuccess = await MatchMakeManager.Instance.CancelCurrentMatchMake(token: matchCancellToken);
             
             startGame.gameObject.SetActive(false);
             startMatchMake.gameObject.SetActive(true);
