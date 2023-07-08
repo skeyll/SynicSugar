@@ -8,7 +8,7 @@ using UnityEngine;
 namespace SynicSugar.P2P {
     public static class EOSp2p {
         /// <summary>
-        /// Send packet to all remote pears. <br />
+        /// Send a packet to all remote peers. <br />
         /// Normally, <c>generated functions (have [RPC]) call this</c>, but we can also use this.
         /// We can SendPacketToAll(...).Forget()
         /// </summary>
@@ -45,7 +45,7 @@ namespace SynicSugar.P2P {
             }
         }
         /// <summary>
-        /// Send packet to a specific pear.
+        /// Send a packet to a specific peer.
         /// </summary>
         /// <param name="ch"></param>
         /// <param name="value"></param>

@@ -560,7 +560,7 @@ namespace SynicSugar.MatchMake {
             foreach (var attribute in lobbyCondition.Attributes){
                 AttributeData data = attribute.AsLobbyAttribute();
                 paramOptions.Parameter = data;
-                paramOptions.ComparisonOp = attribute.comparisonOption; 
+                paramOptions.ComparisonOp = attribute.ComparisonOperator; 
 
                 result = lobbySearchHandle.SetParameter(ref paramOptions);
 

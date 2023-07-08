@@ -9,7 +9,7 @@ using UnityEngine.Events;
 namespace SynicSugar.MatchMake {
     public class Lobby {
         internal string LobbyId;
-        public ProductUserId LobbyOwner = new ProductUserId();
+        internal ProductUserId LobbyOwner = new ProductUserId();
         //Basis
         uint _maxLobbyMembers;
         public uint MaxLobbyMembers { //2-64
@@ -24,14 +24,14 @@ namespace SynicSugar.MatchMake {
                 }
             }
         }
-        public LobbyPermissionLevel PermissionLevel = LobbyPermissionLevel.Publicadvertised;
+        internal LobbyPermissionLevel PermissionLevel = LobbyPermissionLevel.Publicadvertised;
         public string BucketId = System.String.Empty;
         bool bPresenceEnabled = false;
-        public bool bAllowInvites = false;
-        public bool bDisableHostMigration = true;
+        internal bool bAllowInvites = false;
+        internal bool bDisableHostMigration = true;
         public List<LobbyAttribute> Attributes = new List<LobbyAttribute>();
-        public uint AvailableSlots = 0;
-        public void SetBucketID(string[] conditions){
+        internal uint AvailableSlots = 0;
+        internal void SetBucketID(string[] conditions){
             BucketId = System.String.Empty;
             if(conditions.Length == 0){
                 BucketId = "NONE";
@@ -191,7 +191,7 @@ namespace SynicSugar.MatchMake {
     /// Class represents all Lobby Attribute properties
     /// </summary>
     public class LobbyAttribute {
-        public LobbyAttributeVisibility Visibility = LobbyAttributeVisibility.Public;
+        internal LobbyAttributeVisibility Visibility = LobbyAttributeVisibility.Public;
         
         public string Key;
         //Only one of the following properties will have valid data (depending on 'ValueType')
@@ -200,7 +200,7 @@ namespace SynicSugar.MatchMake {
         internal double? DOUBLE { get; private set; } = 0.0;
         internal string STRING { get; private set; }
         internal AttributeType ValueType { get; private set; } = AttributeType.String;
-        public ComparisonOp comparisonOption = ComparisonOp.Equal;
+        public ComparisonOp ComparisonOperator = ComparisonOp.Equal;
         /// <summary>
         /// Can use bool, int, double and string.
         /// Retrun new whole attribute instanse by GenereteSerssionAttribute<T>(Key, Value, advertiseType).
