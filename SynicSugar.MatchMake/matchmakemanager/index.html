@@ -1,0 +1,184 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://skeyll.github.io/SynicSugar/main.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <title> SynicSugar | MatchMakeManager </title>
+</head>
+<body>
+
+<main>
+    
+    <nav>
+            <h1><a href="https:&#x2F;&#x2F;skeyll.github.io&#x2F;SynicSugar&#x2F;">SynicSugar</a></h1>
+            <a href="javascript:void(0);" onclick="burger()" id="mobile" class="ms-Icon--GlobalNavButton"></a>
+            <div id="trees">
+                <input class="tree-toggle" type="checkbox" id="gettingstarted"
+                           />
+                    <label class="tree-toggle-label"
+                           for="gettingstarted">GettingStarted</label>
+
+                    <ul class="subtree">
+                        <li >
+                                <a href="https://skeyll.github.io/SynicSugar/GettingStarted/import-setup/">Import and Set up</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/GettingStarted/helloworld/">Hello World</a>
+                            </li>
+
+                            </ul>
+                <input class="tree-toggle" type="checkbox" id="synicsugar-auth"
+                           />
+                    <label class="tree-toggle-label"
+                           for="synicsugar-auth">SynicSugar.Auth</label>
+
+                    <ul class="subtree">
+                        <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.Auth/eosauthentication/">EOSAuthentication</a>
+                            </li>
+
+                            </ul>
+                <input class="tree-toggle" type="checkbox" id="synicsugar-matchmake"
+                           checked/>
+                    <label class="tree-toggle-label"
+                           for="synicsugar-matchmake">SynicSugar.MatchMake</label>
+
+                    <ul class="subtree">
+                        <li class="active">
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.MatchMake/matchmakemanager/">MatchMakeManager</a>
+                            </li>
+
+                            
+                                    
+                                    
+                                        <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.MatchMake/lobby/">Lobby</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.MatchMake/lobbyattribute/">LobbyAttribute</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.MatchMake/matchguistate/">MatchGUIState</a>
+                            </li>
+
+                            </ul>
+                <input class="tree-toggle" type="checkbox" id="synicsugar-p2p"
+                           />
+                    <label class="tree-toggle-label"
+                           for="synicsugar-p2p">SynicSugar.P2P</label>
+
+                    <ul class="subtree">
+                        <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/p2pconfig/">p2pConfig</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/attributes/">Attributes</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/synicobject/">SynicObject</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/userids/">UserIds</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/userid/">UserId</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/connecthub/">ConnectHub</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/sugarpacket/">SugarPacket</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/p2pconnectorforotherassembly/">p2pConnectorForOtherAssembly</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/additionalclass/">AdditionalClass</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/eosp2p/">EOSp2p</a>
+                            </li>
+
+                            </ul>
+                </div>
+        </nav>
+    <article>
+
+        <div id="on_right">
+                <span id="search-ico" class="ms-Icon--Search"></span>
+            </div>
+            <div class="search-container">
+                <input id="search" type="search" placeholder="Search as you type...">
+                <div class="search-results">
+                    <div class="search-results__header"></div>
+                    <ul class="search-results__items"></ul>
+                </div>
+            </div>
+        <div id="wrap">
+            
+        <h2 id="matchmakemanager">MatchMakeManager&nbsp;<a class="anchor" href="#matchmakemanager">&#xE732;</a></h2>
+<p><small><em>Namespace: SynicSugar.MatchMake</em></small></p>
+<p>This is used like <strong>MatchMakeManager.Instance.XXX()</strong>.</p>
+<h3 id="description">Description&nbsp;<a class="anchor" href="#description">&#xE732;</a></h3>
+<p>This script is Mono's Singleton attached to ConnenctManager. Drop this <strong>ConnenctManager</strong> into the scene from <em>Packages/SynicSugar/Runtime/Prefabs/ConnectManager</em>. <br>
+ConnectManager has <strong>DontDestroy</strong>, so ConnectManager will not be destroyed by scene transitions. This is used for re-connection, and also needed for p2p scene. <br></p>
+<p>If this is no longer needed, we call <em><del><a href="../MatchMakeManager/cancelcurrentmatchmake">CancelCurrentMatchMake</a></del></em>, <em><a href="../../SynicSugar.P2P/P2P/ConnectHub/exitsession">ConnectHub.Instance.CloseSession(CancellationTokenSource)</a></em> or <em><a href="../../SynicSugar.P2P/P2P/ConnectHub/exitsession">ConnectHub.Instance.ExitSession(CancellationTokenSource)</a></em>.</p>
+<h3 id="properity">Properity&nbsp;<a class="anchor" href="#properity">&#xE732;</a></h3>
+<table><thead><tr><th>API</th><th>description</th></tr></thead><tbody>
+<tr><td><a href="../MatchMakeManager/maxsearchresult">maxSearchResult</a></td><td>The amount of search results</td></tr>
+<tr><td><a href="../MatchMakeManager/hoststimeoutsec">hostsTimeoutSec</a></td><td>Timeout seconds for Host to leave not filled lobby</td></tr>
+<tr><td><a href="../MatchMakeManager/lobbyidsavetype">lobbyIdSaveType</a></td><td>The way to return to the disconnected lobby</td></tr>
+<tr><td><a href="../MatchMakeManager/playerprefssavekey">playerprefsSaveKey</a></td><td>the key to save LobbyID</td></tr>
+<tr><td><a href="../MatchMakeManager/customsavelobbyid">customSaveLobbyID</a></td><td>UnityEvent to save LobbyID</td></tr>
+<tr><td><a href="../MatchMakeManager/customdeletelobbyid">customDeleteLobbyID</a></td><td>UnityEvent to delete LobbyID</td></tr>
+<tr><td><a href="../MatchMakeManager/matchstate">matchState</a></td><td>Text and Button state on GUI in matchmaking</td></tr>
+</tbody></table>
+<h3 id="function">Function&nbsp;<a class="anchor" href="#function">&#xE732;</a></h3>
+<table><thead><tr><th>API</th><th>description</th></tr></thead><tbody>
+<tr><td><a href="../MatchMakeManager/setguistate">SetGUIState</a></td><td>Change <em>MatchState</em> from script</td></tr>
+<tr><td><a href="../MatchMakeManager/registerlobbyidfunctions">RegisterLobbyIDFunctions</a></td><td>Register functions for LobbyID to reconnect</td></tr>
+<tr><td><a href="../MatchMakeManager/registerasynclobbyidfunctions">RegisterAsyncLobbyIDFunctions</a></td><td>Register async functions for LobbyID to reconnect</td></tr>
+<tr><td><a href="../MatchMakeManager/searchandcreatelobby">SearchAndCreateLobby</a></td><td>Search lobby and, if can't join, create lobby</td></tr>
+<tr><td><a href="../MatchMakeManager/searchlobby">SearchLobby</a></td><td>Search lobby and join it as Guest</td></tr>
+<tr><td><a href="../MatchMakeManager/createlobby">CreateLobby</a></td><td>Create lobby as Host and wait for Guest</td></tr>
+<tr><td><a href="../MatchMakeManager/reconneclobby">ReconnecLobby</a></td><td>Join the Lobby with saved LobbyID</td></tr>
+<tr><td><a href="../MatchMakeManager/cancelcurrentmatchmake">CancelCurrentMatchMake</a></td><td>Stop the current matchmaking</td></tr>
+<tr><td><a href="../MatchMakeManager/getcurrentlobbyid">GetCurrentLobbyID</a></td><td>Get LobbyID that a user participating</td></tr>
+<tr><td><a href="../MatchMakeManager/getreconnectlobbyid">GetReconnectLobbyID</a></td><td>Get LobbyID by Playerprefs</td></tr>
+<tr><td><a href="../MatchMakeManager/generatelobbyobject">GenerateLobbyObject</a></td><td>Generate a lobby object for conditions</td></tr>
+</tbody></table>
+<pre data-lang="cs" style="background-color:#1e1e1e;color:#dcdcdc;" class="language-cs "><code class="language-cs" data-lang="cs"><span style="color:#9b9b9b;">using </span><span>SynicSugar.MatchMake;
+</span><span>
+</span><span style="color:#569cd6;">public class </span><span>MatchMake {
+</span><span>    </span><span style="color:#569cd6;">void </span><span>SetMatchMakeCondition(){
+</span><span>        </span><span style="color:#569cd6;">string </span><span>LobbyID = MatchMakeManager.Instance.GetReconnectLobbyID();
+</span><span>    }
+</span><span>}
+</span></code></pre>
+
+    
+        </div>
+
+    </article>
+</main>
+
+
+    <script type="text/javascript" src="https://skeyll.github.io/SynicSugar/elasticlunr.min.js" defer></script>
+    <script type="text/javascript" src="https://skeyll.github.io/SynicSugar/search_index.en.js" defer></script>
+<script type="text/javascript" src="https://skeyll.github.io/SynicSugar/js.js" defer></script>
+
+</body>
+</html>

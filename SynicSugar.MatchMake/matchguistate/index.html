@@ -1,0 +1,215 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://skeyll.github.io/SynicSugar/main.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <title> SynicSugar | MatchGUIState </title>
+</head>
+<body>
+
+<main>
+    
+    <nav>
+            <h1><a href="https:&#x2F;&#x2F;skeyll.github.io&#x2F;SynicSugar&#x2F;">SynicSugar</a></h1>
+            <a href="javascript:void(0);" onclick="burger()" id="mobile" class="ms-Icon--GlobalNavButton"></a>
+            <div id="trees">
+                <input class="tree-toggle" type="checkbox" id="gettingstarted"
+                           />
+                    <label class="tree-toggle-label"
+                           for="gettingstarted">GettingStarted</label>
+
+                    <ul class="subtree">
+                        <li >
+                                <a href="https://skeyll.github.io/SynicSugar/GettingStarted/import-setup/">Import and Set up</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/GettingStarted/helloworld/">Hello World</a>
+                            </li>
+
+                            </ul>
+                <input class="tree-toggle" type="checkbox" id="synicsugar-auth"
+                           />
+                    <label class="tree-toggle-label"
+                           for="synicsugar-auth">SynicSugar.Auth</label>
+
+                    <ul class="subtree">
+                        <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.Auth/eosauthentication/">EOSAuthentication</a>
+                            </li>
+
+                            </ul>
+                <input class="tree-toggle" type="checkbox" id="synicsugar-matchmake"
+                           checked/>
+                    <label class="tree-toggle-label"
+                           for="synicsugar-matchmake">SynicSugar.MatchMake</label>
+
+                    <ul class="subtree">
+                        <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.MatchMake/matchmakemanager/">MatchMakeManager</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.MatchMake/lobby/">Lobby</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.MatchMake/lobbyattribute/">LobbyAttribute</a>
+                            </li>
+
+                            <li class="active">
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.MatchMake/matchguistate/">MatchGUIState</a>
+                            </li>
+
+                            
+                                    
+                                    
+                                        </ul>
+                <input class="tree-toggle" type="checkbox" id="synicsugar-p2p"
+                           />
+                    <label class="tree-toggle-label"
+                           for="synicsugar-p2p">SynicSugar.P2P</label>
+
+                    <ul class="subtree">
+                        <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/p2pconfig/">p2pConfig</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/attributes/">Attributes</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/synicobject/">SynicObject</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/userids/">UserIds</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/userid/">UserId</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/connecthub/">ConnectHub</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/sugarpacket/">SugarPacket</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/p2pconnectorforotherassembly/">p2pConnectorForOtherAssembly</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/additionalclass/">AdditionalClass</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/eosp2p/">EOSp2p</a>
+                            </li>
+
+                            </ul>
+                </div>
+        </nav>
+    <article>
+
+        <div id="on_right">
+                <span id="search-ico" class="ms-Icon--Search"></span>
+            </div>
+            <div class="search-container">
+                <input id="search" type="search" placeholder="Search as you type...">
+                <div class="search-results">
+                    <div class="search-results__header"></div>
+                    <ul class="search-results__items"></ul>
+                </div>
+            </div>
+        <div id="wrap">
+            
+        <h2 id="matchguistate">MatchGUIState&nbsp;<a class="anchor" href="#matchguistate">&#xE732;</a></h2>
+<p><small><em>Namespace: SynicSugar.MatchMake</em></small></p>
+<h3 id="description">Description&nbsp;<a class="anchor" href="#description">&#xE732;</a></h3>
+<p>GUI process in matchmaking. Set this in MatchMakeManager.<br>
+This is used to switch button process amd display matchmaking progress.<br>
+Check <em><a href="../MatchMakeManager/matchstate">matchState</a></em>.</p>
+<h3 id="constructor">Constructor&nbsp;<a class="anchor" href="#constructor">&#xE732;</a></h3>
+<table><thead><tr><th>API</th><th>description</th></tr></thead><tbody>
+<tr><td>MatchGUIState()</td><td>Instantiate new MatchGUIState class</td></tr>
+<tr><td>MatchGUIState(Text uiText)</td><td>Instantiate new one with uiText to display a match progress</td></tr>
+</tbody></table>
+<h3 id="properity">Properity&nbsp;<a class="anchor" href="#properity">&#xE732;</a></h3>
+<table><thead><tr><th>API</th><th>description</th></tr></thead><tbody>
+<tr><td>state</td><td>Unity UI Text to display a matchmaking progress</td></tr>
+<tr><td>stopAdditionalInput</td><td>Stop user additional input after starting matchmaking</td></tr>
+<tr><td>acceptCancel</td><td>Accept cancel after having created or joined Lobby, if the matchmaking hasn't finished yet.</td></tr>
+<tr><td>searchLobby</td><td>Searching for Lobby and attempts to join</td></tr>
+<tr><td>waitothers</td><td>Have Waited for others in (Created/Joined) Lobby</td></tr>
+<tr><td>tryconnect</td><td>Host's updating lobby to start p2p</td></tr>
+<tr><td>success</td><td>MatchMaking has finished and ready for p2p</td></tr>
+<tr><td>fail</td><td>Matchmake fails at some point, (and will return false)</td></tr>
+<tr><td>trycancel</td><td>Leaving Lobby to cancel matchmaking</td></tr>
+</tbody></table>
+<br>
+<pre data-lang="cs" style="background-color:#1e1e1e;color:#dcdcdc;" class="language-cs "><code class="language-cs" data-lang="cs"><span style="color:#9b9b9b;">using </span><span>UnityEngin.UI;
+</span><span style="color:#9b9b9b;">using </span><span>SynicSugar.MatchMake;
+</span><span>
+</span><span style="color:#569cd6;">public class </span><span>LobbyCondition : </span><span style="color:#4ec9b0;">MonoBehaviour </span><span>{
+</span><span>    [SerializeField] Text stateText;
+</span><span>    [SerializeField] </span><span style="color:#569cd6;">string </span><span>language;
+</span><span>    </span><span style="color:#569cd6;">void </span><span>SetLobbyConditions(){
+</span><span>        MatchGUIState matchState = </span><span style="color:#569cd6;">new </span><span>MatchGUIState(stateText);
+</span><span>
+</span><span>        matchState.stopAdditionalInput.AddListener(StopAdditionalInput);
+</span><span>        matchState.acceptCancel.AddListener(() </span><span style="color:#569cd6;">=&gt; </span><span>ActivateCancelButton(</span><span style="color:#569cd6;">true</span><span>));
+</span><span>
+</span><span>        </span><span style="color:#569cd6;">switch</span><span>(language){
+</span><span>            </span><span style="color:#569cd6;">case </span><span style="color:#d69d85;">&quot;EN&quot;</span><span>:
+</span><span>                matchState.searchLobby = </span><span style="color:#d69d85;">&quot;Searching for an opponent...&quot;</span><span>;
+</span><span>                matchState.waitothers = </span><span style="color:#d69d85;">&quot;Waiting for an opponent...&quot;</span><span>;
+</span><span>                matchState.tryconnect = </span><span style="color:#d69d85;">&quot;Try to connect...&quot;</span><span>;
+</span><span>                matchState.success = </span><span style="color:#d69d85;">&quot;Success MatchMaking&quot;</span><span>;
+</span><span>                matchState.fail = </span><span style="color:#d69d85;">&quot;Fail to match make&quot;</span><span>;
+</span><span>                matchState.trycancel = </span><span style="color:#d69d85;">&quot;Try to Disconnect...&quot;</span><span>;
+</span><span>            </span><span style="color:#569cd6;">break</span><span>;
+</span><span>            </span><span style="color:#569cd6;">case </span><span style="color:#d69d85;">&quot;JP&quot;</span><span>:
+</span><span>                matchState.searchLobby = </span><span style="color:#d69d85;">&quot;対戦相手検索中・・・&quot;</span><span>;
+</span><span>                matchState.waitothers = </span><span style="color:#d69d85;">&quot;対戦相手を探しています&quot;</span><span>;
+</span><span>                matchState.tryconnect = </span><span style="color:#d69d85;">&quot;接続中・・・&quot;</span><span>;
+</span><span>                matchState.success = </span><span style="color:#d69d85;">&quot;成功！&quot;</span><span>;
+</span><span>                matchState.fail = </span><span style="color:#d69d85;">&quot;失敗！&quot;</span><span>;
+</span><span>                matchState.trycancel = </span><span style="color:#d69d85;">&quot;マッチングキャンセル中・・・&quot;</span><span>;
+</span><span>            </span><span style="color:#569cd6;">break</span><span>;
+</span><span>            </span><span style="color:#569cd6;">case </span><span style="color:#d69d85;">&quot;CH&quot;</span><span>:
+</span><span>            </span><span style="color:#608b4e;">//
+</span><span>            </span><span style="color:#569cd6;">break</span><span>;
+</span><span>        }
+</span><span>
+</span><span>        </span><span style="color:#608b4e;">//
+</span><span>
+</span><span>        MatchMakeManager.Instance.SetGUIState(matchState);
+</span><span>    }
+</span><span>    </span><span style="color:#569cd6;">public void </span><span>StopAdditionalInput(){
+</span><span>        MATCH_START_BUTTON_OBJECT.SetActive(</span><span style="color:#569cd6;">false</span><span>);
+</span><span>    }
+</span><span>    </span><span style="color:#569cd6;">public void </span><span>ActivateCancelButton(</span><span style="color:#569cd6;">bool </span><span>isActivate){
+</span><span>        MATCH_CHANCEL_BUTTON_OBJECT.SetActive(isActivate);
+</span><span>    }
+</span><span>}
+</span></code></pre>
+
+    
+        </div>
+
+    </article>
+</main>
+
+
+    <script type="text/javascript" src="https://skeyll.github.io/SynicSugar/elasticlunr.min.js" defer></script>
+    <script type="text/javascript" src="https://skeyll.github.io/SynicSugar/search_index.en.js" defer></script>
+<script type="text/javascript" src="https://skeyll.github.io/SynicSugar/js.js" defer></script>
+
+</body>
+</html>

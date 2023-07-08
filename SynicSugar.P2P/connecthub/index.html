@@ -1,0 +1,177 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://skeyll.github.io/SynicSugar/main.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <title> SynicSugar | ConnectHub </title>
+</head>
+<body>
+
+<main>
+    
+    <nav>
+            <h1><a href="https:&#x2F;&#x2F;skeyll.github.io&#x2F;SynicSugar&#x2F;">SynicSugar</a></h1>
+            <a href="javascript:void(0);" onclick="burger()" id="mobile" class="ms-Icon--GlobalNavButton"></a>
+            <div id="trees">
+                <input class="tree-toggle" type="checkbox" id="gettingstarted"
+                           />
+                    <label class="tree-toggle-label"
+                           for="gettingstarted">GettingStarted</label>
+
+                    <ul class="subtree">
+                        <li >
+                                <a href="https://skeyll.github.io/SynicSugar/GettingStarted/import-setup/">Import and Set up</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/GettingStarted/helloworld/">Hello World</a>
+                            </li>
+
+                            </ul>
+                <input class="tree-toggle" type="checkbox" id="synicsugar-auth"
+                           />
+                    <label class="tree-toggle-label"
+                           for="synicsugar-auth">SynicSugar.Auth</label>
+
+                    <ul class="subtree">
+                        <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.Auth/eosauthentication/">EOSAuthentication</a>
+                            </li>
+
+                            </ul>
+                <input class="tree-toggle" type="checkbox" id="synicsugar-matchmake"
+                           />
+                    <label class="tree-toggle-label"
+                           for="synicsugar-matchmake">SynicSugar.MatchMake</label>
+
+                    <ul class="subtree">
+                        <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.MatchMake/matchmakemanager/">MatchMakeManager</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.MatchMake/lobby/">Lobby</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.MatchMake/lobbyattribute/">LobbyAttribute</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.MatchMake/matchguistate/">MatchGUIState</a>
+                            </li>
+
+                            </ul>
+                <input class="tree-toggle" type="checkbox" id="synicsugar-p2p"
+                           checked/>
+                    <label class="tree-toggle-label"
+                           for="synicsugar-p2p">SynicSugar.P2P</label>
+
+                    <ul class="subtree">
+                        <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/p2pconfig/">p2pConfig</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/attributes/">Attributes</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/synicobject/">SynicObject</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/userids/">UserIds</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/userid/">UserId</a>
+                            </li>
+
+                            <li class="active">
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/connecthub/">ConnectHub</a>
+                            </li>
+
+                            
+                                    
+                                    
+                                        <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/sugarpacket/">SugarPacket</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/p2pconnectorforotherassembly/">p2pConnectorForOtherAssembly</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/additionalclass/">AdditionalClass</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/eosp2p/">EOSp2p</a>
+                            </li>
+
+                            </ul>
+                </div>
+        </nav>
+    <article>
+
+        <div id="on_right">
+                <span id="search-ico" class="ms-Icon--Search"></span>
+            </div>
+            <div class="search-container">
+                <input id="search" type="search" placeholder="Search as you type...">
+                <div class="search-results">
+                    <div class="search-results__header"></div>
+                    <ul class="search-results__items"></ul>
+                </div>
+            </div>
+        <div id="wrap">
+            
+        <h2 id="connecthub">ConnectHub&nbsp;<a class="anchor" href="#connecthub">&#xE732;</a></h2>
+<p><small><em>Namespace: SynicSugar.P2P</em></small></p>
+<h3 id="description">Description&nbsp;<a class="anchor" href="#description">&#xE732;</a></h3>
+<p>Manage around p2p connections.<br>
+This script is Singleton generated by SourceGenerator. This behaves like a network server, and SynicSugar send and receive packets through ConnectHub.<br><br></p>
+<p>At compile, SourceGenerator generates a ConnectHub for each assembly with variables and functions according for the Network attribute. In other words, each assembly has different ConnectHub and that instance. Usually an instance calls ConnectHub in the same assembly automatically. There is no need for us to do anything special for this.</p>
+<p>Each assembly can have max 255 variables and functions with  Network attribute (SyncVar, RPC and TargetRPC). </p>
+<h3 id="properity">Properity&nbsp;<a class="anchor" href="#properity">&#xE732;</a></h3>
+<table><thead><tr><th>API</th><th>description</th></tr></thead><tbody>
+<tr><td>Instance</td><td>This scrip's instance</td></tr>
+<tr><td><a href="../ConnectHub/channellist">CHANNELLIST</a></td><td>List of all variable and functions having Network attribute</td></tr>
+</tbody></table>
+<h3 id="function">Function&nbsp;<a class="anchor" href="#function">&#xE732;</a></h3>
+<table><thead><tr><th>API</th><th>description</th></tr></thead><tbody>
+<tr><td><a href="../ConnectHub/startpacketreceiver">StartPacketReceiver</a></td><td>(Re)Start the packet receiver to get packet from buffer</td></tr>
+<tr><td><a href="../ConnectHub/pausepacketreceiver">PausePacketReceiver</a></td><td>Pause to get a packet from the buffer</td></tr>
+<tr><td><a href="../ConnectHub/pauseconnections">PauseConnections</a></td><td>Pause receiving a packet to the receive buffer</td></tr>
+<tr><td><a href="../ConnectHub/restartconnections">RestartConnections</a></td><td>Restart to receive packets receive buffer</td></tr>
+<tr><td><a href="../ConnectHub/exitsession">ExitSession</a></td><td>Leave connection in in-game</td></tr>
+<tr><td><a href="../ConnectHub/closesession">CloseSession</a></td><td>Close connection. (If Host, close the Lobby)</td></tr>
+<tr><td><a href="../ConnectHub/registerinstance">RegisterInstance</a></td><td>Register instance to receive packets</td></tr>
+<tr><td><a href="../ConnectHub/getuserinstance">GetUserInstance</a></td><td>Get an network instance of a specific user</td></tr>
+<tr><td>ConvertFormPacket</td><td>SynicSugar uses internally</td></tr>
+</tbody></table>
+<pre data-lang="cs" style="background-color:#1e1e1e;color:#dcdcdc;" class="language-cs "><code class="language-cs" data-lang="cs"><span style="color:#9b9b9b;">using </span><span>SynicSugar.P2P;
+</span><span>
+</span><span style="color:#569cd6;">public class </span><span>p2pSample {
+</span><span>    </span><span style="color:#569cd6;">void </span><span>ConnectHubSample(){
+</span><span>        ConnectHub.Instance.StartPacketReceiver();
+</span><span>    }
+</span><span>}
+</span></code></pre>
+
+    
+        </div>
+
+    </article>
+</main>
+
+
+    <script type="text/javascript" src="https://skeyll.github.io/SynicSugar/elasticlunr.min.js" defer></script>
+    <script type="text/javascript" src="https://skeyll.github.io/SynicSugar/search_index.en.js" defer></script>
+<script type="text/javascript" src="https://skeyll.github.io/SynicSugar/js.js" defer></script>
+
+</body>
+</html>
