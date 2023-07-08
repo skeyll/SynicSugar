@@ -7,7 +7,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using SynicSugar.MatchMake;
 //We can't call the main-Assembly from own-assemblies.
-//So, use such processes through  this assembly .
+//So, use such processes through this assembly.
 namespace SynicSugar.P2P {
     public class p2pConnectorForOtherAssembly : MonoBehaviour {
 #region Singleton
@@ -107,8 +107,10 @@ namespace SynicSugar.P2P {
         public async UniTask<bool> ExitSession(CancellationTokenSource token){
             ResetConnections();
 
+            bool canExit = await MatchMakeManager.Instance.ExitCurrentLobby(token);
+            
             Destroy(this.gameObject);
-            return await MatchMakeManager.Instance.ExitCurrentLobby(token);
+            return canExit;
         }
         /// <summary>
         /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll.</ br>

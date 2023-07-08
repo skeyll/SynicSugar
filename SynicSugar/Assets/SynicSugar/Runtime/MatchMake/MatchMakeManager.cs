@@ -64,7 +64,7 @@ namespace SynicSugar.MatchMake {
             matchState = state;
         }
         /// <summary>
-        /// Register Action to save and delete lobby Id for re-connect.<br />
+        /// Register Action to save and delete lobby Id to re-connect.<br />
         /// We can use cloud and save assets for this, but these place to be saved and deleted must be in the same. 
         /// </summary>
         /// <param name="save">void function</param>
@@ -78,7 +78,7 @@ namespace SynicSugar.MatchMake {
         }
         
         /// <summary>
-        /// Register Action to save and delete lobby Id for re-connect.<br />
+        /// Register Action to save and delete lobby Id to re-connect.<br />
         /// We can use cloud and save assets for this, but these place to be saved and deleted must be in the same. 
         /// </summary>
         /// <param name="save">UniTask function</param>
@@ -177,9 +177,15 @@ namespace SynicSugar.MatchMake {
         /// Exit lobby and cancel MatchMake.
         /// </summary>
         /// <param name="token">token for this task</param>
+        /// <param name="removeManager">If MatchMaking scene is independent and return to Menu, pass True. This destroys ConnectManager.</param>
         /// <returns></returns>
-        public async UniTask<bool> CancelCurrentMatchMake(CancellationTokenSource token){
-            return await eosLobby.CancelMatchMaking(token);
+        public async UniTask<bool> CancelCurrentMatchMake(bool removeManager = false, CancellationTokenSource token = default(CancellationTokenSource)){
+            bool canCancel =  await eosLobby.CancelMatchMaking(token);
+            
+            if(removeManager){
+                Destroy(this.gameObject);
+            }
+            return canCancel;
         }
         /// <summary>
         /// Leave the current lobby in Game.
