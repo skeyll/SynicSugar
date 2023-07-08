@@ -1,4 +1,4 @@
-# SynicSugar
+![image](https://github.com/skeyll/SynicSugar/assets/50002207/381e4209-3fbb-415e-9a33-42f24c02538a)# SynicSugar
 ![https://github.com/skeyll/SynicSugar/blob/main/LICENSE](https://img.shields.io/github/license/skeyll/SynicSugar) ![Unity](https://img.shields.io/badge/Unity-2021.3%2B-blue) [![openupm](https://img.shields.io/npm/v/net.skeyll.synicsugar?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/net.skeyll.synicsugar/)  
 SynicSugar is the syntax sugar to synchronize a game via the internet. The backend is EOS, so the server cost is free. The goal is an easy online-game dev for everyone!  
 
@@ -124,6 +124,10 @@ Please check [the eos document](https://dev.epicgames.com/ja/news/how-to-set-up-
 
 About app credential, you can use Peer2Peer as ClientPolicy. The minimum is as follows.
 ![image](https://user-images.githubusercontent.com/50002207/230758754-4333b431-48fe-4539-aa97-20c6f86d68ae.png)
+
+
+## For Debug
+Some process can show log for debug within If SYNISSUGAR_LOG. We need this log, add SYNICSUGAR_LOG to Scripting Define Symbols in project setting.
 
 
 ## License
