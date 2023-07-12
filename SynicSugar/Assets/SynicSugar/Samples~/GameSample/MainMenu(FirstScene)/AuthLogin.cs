@@ -8,6 +8,12 @@ namespace  SynicSugar.Samples {
     public class AuthLogin : MonoBehaviour {
         [SerializeField] GameObject modeSelectCanvas;
         [SerializeField] bool needResultDetail;
+        void Start(){
+            bool hasLogin = EOSAuthentication.HasLoggedinEOSWithConnect();
+            
+            this.gameObject.SetActive(!hasLogin);
+            modeSelectCanvas.SetActive(hasLogin);
+        }
         /// <summary>
         /// For button event
         /// </summary>
