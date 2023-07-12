@@ -221,7 +221,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &55211626
 RectTransform:
   m_ObjectHideFlags: 0
@@ -878,6 +878,7 @@ GameObject:
   - component: {fileID: 837676602}
   - component: {fileID: 837676606}
   - component: {fileID: 837676607}
+  - component: {fileID: 837676608}
   m_Layer: 5
   m_Name: MatchMakeCanvas
   m_TagString: Untagged
@@ -994,6 +995,7 @@ MonoBehaviour:
   startMatchMake: {fileID: 55211627}
   closeLobby: {fileID: 1511264585}
   startGame: {fileID: 0}
+  backtoMenu: {fileID: 0}
   descriptions:
     state: {fileID: 0}
     stopAdditionalInput:
@@ -1010,6 +1012,7 @@ MonoBehaviour:
     trycancel: 
   matchConditions: {fileID: 837676607}
   buttonText: {fileID: 37820300}
+  modeSelect: {fileID: 837676608}
   nameField: {fileID: 1082632817}
   playerName: {fileID: 970822384}
 --- !u!114 &837676607
@@ -1025,6 +1028,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   matchConditions: {fileID: 1477727708}
+--- !u!114 &837676608
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 837676601}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52933c9e82b611040b570c2f9124a8df, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &843756227
 GameObject:
   m_ObjectHideFlags: 0
@@ -2403,8 +2418,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 837676606}
-        m_TargetAssemblyTypeName: Skeyll.EOS.Samples.MatchMake, Assembly-CSharp
-        m_MethodName: CloseLobby
+        m_TargetAssemblyTypeName: SynicSugar.Samples.MatchMake, SynicSugar.Sample
+        m_MethodName: CancelMatchMaking
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

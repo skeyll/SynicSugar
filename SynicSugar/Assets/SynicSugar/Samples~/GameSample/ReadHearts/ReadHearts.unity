@@ -221,7 +221,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &55211626
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1747,6 +1747,7 @@ MonoBehaviour:
   startMatchMake: {fileID: 55211627}
   closeLobby: {fileID: 1511264585}
   startGame: {fileID: 126458044}
+  backtoMenu: {fileID: 0}
   descriptions:
     state: {fileID: 0}
     stopAdditionalInput:
@@ -1763,6 +1764,7 @@ MonoBehaviour:
     trycancel: 
   matchConditions: {fileID: 837676607}
   buttonText: {fileID: 37820300}
+  modeSelect: {fileID: 0}
   nameField: {fileID: 0}
   playerName: {fileID: 0}
 --- !u!114 &837676607
@@ -3424,8 +3426,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 837676606}
-        m_TargetAssemblyTypeName: Skeyll.EOS.Samples.MatchMake, Assembly-CSharp
-        m_MethodName: CloseLobby
+        m_TargetAssemblyTypeName: SynicSugar.Samples.MatchMake, SynicSugar.Sample
+        m_MethodName: CancelMatchMaking
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
