@@ -7,6 +7,9 @@ using UnityEngine;
 
 namespace SynicSugar.Auth {
     public static class EOSAuthentication {
+        public static bool HasLoggedinEOSWithConnect(){
+            return EOSManager.Instance.HasLoggedInWithConnect();
+        }
         /// <summary>
         /// Login with DeviceID. If success, return true.
         /// </summary>
