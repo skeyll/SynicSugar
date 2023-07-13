@@ -107,7 +107,7 @@ namespace SynicSugar.P2P {
         public async UniTask<bool> ExitSession(CancellationTokenSource token){
             ResetConnections();
 
-            bool canExit = await MatchMakeManager.Instance.ExitCurrentLobby(token);
+            bool canExit = await MatchMakeManager.Instance.ExitCurrentLobby(token.Token);
             
             Destroy(this.gameObject);
             return canExit;
@@ -121,9 +121,9 @@ namespace SynicSugar.P2P {
             ResetConnections();
             bool canLeave = true;
             if(p2pConfig.Instance.userIds.IsHost()){
-                canLeave = await MatchMakeManager.Instance.CloseCurrentLobby(token);
+                canLeave = await MatchMakeManager.Instance.CloseCurrentLobby(token.Token);
             }else{
-                canLeave = await MatchMakeManager.Instance.ExitCurrentLobby(token);
+                canLeave = await MatchMakeManager.Instance.ExitCurrentLobby(token.Token);
             }
             Destroy(this.gameObject);
             return canLeave;

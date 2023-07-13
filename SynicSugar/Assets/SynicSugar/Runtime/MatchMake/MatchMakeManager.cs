@@ -96,9 +96,9 @@ namespace SynicSugar.MatchMake {
         /// Search a lobby, then if can't join, create a lobby as host.
         /// </summary>
         /// <param name="lobbyCondition">Crate by EOSLobbyExtenstions.GenerateLobby().</param>
-        /// <param name="token">For matchmaking. This is used by CancelCurrentMatchMake.
+        /// <param name="token">For cancel matchmaking. This is used by CancelCurrentMatchMake.
         /// If pass, we implement OperationCanceledException by ourself.
-        /// If not pass, such processe are done internally</param>
+        /// If not pass, such processe are done internally and return false when we cancel matchmake.</param>
         /// <returns></returns>
         public async UniTask<bool> SearchAndCreateLobby(Lobby lobbyCondition, CancellationTokenSource token = default(CancellationTokenSource)){
             bool useTryCatch = token == default;
@@ -134,9 +134,9 @@ namespace SynicSugar.MatchMake {
         /// Recommend: SearchAndCreateLobby()
         /// </summary>
         /// <param name="lobbyCondition">Crate by EOSLobbyExtenstions.GenerateLobby().</param>
-        /// <param name="token">For matchmaking. This is used by CancelCurrentMatchMake.
+        /// <param name="token">For cancel matchmaking. This is used by CancelCurrentMatchMake.
         /// If pass, we implement OperationCanceledException by ourself.
-        /// If not pass, such processe are done internally</param>
+        /// If not pass, such processe are done internally and return false when we cancel matchmake.</param>
         /// <returns></returns>
         public async UniTask<bool> SearchLobby(Lobby lobbyCondition, CancellationTokenSource token = default(CancellationTokenSource)){
             bool useTryCatch = token == default;
@@ -174,9 +174,9 @@ namespace SynicSugar.MatchMake {
         /// Recommend: SearchAndCreateLobby()
         /// </summary>
         /// <param name="lobbyCondition">Crate by EOSLobbyExtenstions.GenerateLobby().</param>
-        /// <param name="token">For matchmaking. This is used by CancelCurrentMatchMake.
+        /// <param name="token">For cancel matchmaking. This is used by CancelCurrentMatchMake.
         /// If pass, we implement OperationCanceledException by ourself.
-        /// If not pass, such processe are done internally</param>
+        /// If not pass, such processe are done internally and return false when we cancel matchmake.</param>
         /// <returns></returns>
         public async UniTask<bool> CreateLobby(Lobby lobbyCondition, CancellationTokenSource token = default(CancellationTokenSource)){
             bool useTryCatch = token == default;
@@ -257,7 +257,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="token">token for this task</param>
         /// <param name="removeManager">If true, destroy ConnectManager. When we move to the other scene (where we don't need ConnectManager) after this, we should pass true.</param>
         /// <returns></returns>
-        public async UniTask<bool> CancelCurrentMatchMake(bool removeManager = false, CancellationTokenSource token = default(CancellationTokenSource)){
+        public async UniTask<bool> CancelCurrentMatchMake(bool removeManager = false, CancellationToken token = default(CancellationToken)){
             if(matchingToken == null || !matchingToken.Token.CanBeCanceled){
             #if SYNICSUGAR_LOG
                 Debug.Log("CancelCurrentMatchMake: Is this user currently in matchmaking?");
@@ -275,7 +275,7 @@ namespace SynicSugar.MatchMake {
         /// Leave the current lobby in Game.
         /// </summary>
         /// <param name="token"></param>
-        internal async UniTask<bool> ExitCurrentLobby(CancellationTokenSource token = default(CancellationTokenSource)){
+        internal async UniTask<bool> ExitCurrentLobby(CancellationToken token){
             bool canDestroy = await eosLobby.LeaveLobby(false, token);
 
             return canDestroy;
@@ -285,7 +285,7 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         /// <param name="token"></param>
         /// <returns>True on success. If user isn't host, return false.</returns>
-        internal async UniTask<bool> CloseCurrentLobby(CancellationTokenSource token){
+        internal async UniTask<bool> CloseCurrentLobby(CancellationToken token){
             bool canDestroy = await eosLobby.DestroyLobby(token);
 
             return canDestroy;
