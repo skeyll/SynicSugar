@@ -95,10 +95,7 @@ namespace SynicSugar.MatchMake {
                 
                 //Matching cancel
                 if(token.IsCancellationRequested){
-            #if SYNICSUGAR_LOG
-                    Debug.Log("StartMatching: MatchMake is canceled.");
-            #endif
-                    return false;
+                    throw new OperationCanceledException();
                 }
 
             #if SYNICSUGAR_LOG
@@ -136,10 +133,7 @@ namespace SynicSugar.MatchMake {
 
                 //Matching cancel
                 if(token.IsCancellationRequested){
-            #if SYNICSUGAR_LOG
-                    Debug.Log("StartJustSearch: MatchMake is canceled.");
-            #endif
-                    return false;
+                    throw new OperationCanceledException();
                 }
 
                 if(isMatchSuccess){
@@ -173,10 +167,7 @@ namespace SynicSugar.MatchMake {
 
                 //Matching cancel
                 if(token.IsCancellationRequested){
-            #if SYNICSUGAR_LOG
-                    Debug.Log("StartJustCreate: MatchMake is canceled.");
-            #endif
-                    return false;
+                    throw new OperationCanceledException();
                 }
 
                 if(isMatchSuccess){
@@ -670,10 +661,13 @@ namespace SynicSugar.MatchMake {
                     JoinLobby(lobbyHandle);
                     
                     await UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token);
-
-                    if(isMatchSuccess || token.IsCancellationRequested){
+                    
+                    if(isMatchSuccess){
                         SearchResults.Add(lobbyObj, lobbyHandle);
                         break;
+                    }
+                    if(token.IsCancellationRequested){
+                        throw new OperationCanceledException();
                     }
                 }
             }
