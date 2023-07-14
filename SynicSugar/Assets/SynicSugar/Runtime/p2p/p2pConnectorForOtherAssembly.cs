@@ -60,10 +60,11 @@ namespace SynicSugar.P2P {
 
     #region Pause Session(Experimental, Not recommend for game?)
         /// <summary>
-        /// Stop packet receeiveing to buffer. Packets are discarded while stopped.
+        /// For ConnectManager. Stop packet receeiveing to buffer. Packets are discarded while stopped.
         /// </summary>
         /// <param name="isForced">If True, stop and clear current packet queue. </ br>
         /// If false, process current queue, then stop it.</param>
+        /// <param name="token">For this task</param>
         public async UniTask PauseConnections(bool isForced, CancellationTokenSource cancelToken){
             if(isForced){
                 ResetConnections();
@@ -104,10 +105,10 @@ namespace SynicSugar.P2P {
         /// Stop connections, exit current lobby.<br />
         /// To just leave from the current lobby.(This is not destroying it)
         /// </summary>
-        public async UniTask<bool> ExitSession(CancellationTokenSource token){
+        public async UniTask<bool> ExitSession(CancellationToken token){
             ResetConnections();
 
-            bool canExit = await MatchMakeManager.Instance.ExitCurrentLobby(token.Token);
+            bool canExit = await MatchMakeManager.Instance.ExitCurrentLobby(token);
             
             Destroy(this.gameObject);
             return canExit;
@@ -117,13 +118,13 @@ namespace SynicSugar.P2P {
         /// Stop connections, exit current lobby.<br />
         /// To just leave from the current lobby.(This is not destroying it)
         /// </summary>
-        public async UniTask<bool> CloseSession(CancellationTokenSource token){
+        public async UniTask<bool> CloseSession(CancellationToken token){
             ResetConnections();
             bool canLeave = true;
             if(p2pConfig.Instance.userIds.IsHost()){
-                canLeave = await MatchMakeManager.Instance.CloseCurrentLobby(token.Token);
+                canLeave = await MatchMakeManager.Instance.CloseCurrentLobby(token);
             }else{
-                canLeave = await MatchMakeManager.Instance.ExitCurrentLobby(token.Token);
+                canLeave = await MatchMakeManager.Instance.ExitCurrentLobby(token);
             }
             Destroy(this.gameObject);
             return canLeave;
@@ -281,7 +282,7 @@ namespace SynicSugar.P2P {
                 SocketId = SocketId
             };
             Result result = P2PHandle.CloseConnections(ref closeOptions);
-            Debug.Log($"close result is {result} / {SocketId}");
+            Debug.Log($"close result is {result} / {ScoketName}");
             if(result != Result.Success){
                 Debug.LogErrorFormat("CloseConnections: Failed to disconnect {0}", result);
             }
