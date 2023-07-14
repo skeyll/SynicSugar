@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using SynicSugar.MatchMake;
+using System;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.UI;
@@ -82,15 +83,32 @@ namespace  SynicSugar.Samples {
         async UniTask StartMatching(){
             //Prep
             EOSDebug.Instance.Log("Start MatchMake.");
-            matchCancellToken = new CancellationTokenSource();
 
             //Try MatchMaking
-            bool isSuccess = await MatchMakeManager.Instance.SearchAndCreateLobby(matchConditions.GetLobbyCondition(), matchCancellToken);
-            
-            if(!isSuccess){
-                EOSDebug.Instance.Log("Backend may have something problem.");
-                return;
+            bool selfTryCatch = false;
+
+            if(!selfTryCatch){
+                bool isSuccess = await MatchMakeManager.Instance.SearchAndCreateLobby(matchConditions.GetLobbyCondition());
+                
+                if(!isSuccess){
+                    EOSDebug.Instance.Log("MatchMaking Failed.");
+                    return;
+                }
+            }else{
+                try{
+                    matchCancellToken = new CancellationTokenSource();
+                    bool isSuccess = await MatchMakeManager.Instance.SearchAndCreateLobby(matchConditions.GetLobbyCondition(), matchCancellToken);
+
+                    if(!isSuccess){
+                        EOSDebug.Instance.Log("Backend may have something problem.");
+                        return;
+                    }
+                }catch(OperationCanceledException){
+                    EOSDebug.Instance.Log("Cancel MatchMaking");
+                    return;
+                }
             }
+
             EOSDebug.Instance.Log($"Success Matching! LobbyID:{MatchMakeManager.Instance.GetCurrentLobbyID()}");
 
             SwitchCancelButtonActive(true);
@@ -115,7 +133,7 @@ namespace  SynicSugar.Samples {
             SwitchCancelButtonActive(false);
 
             matchCancellToken = new CancellationTokenSource();
-            bool isSuccess = await MatchMakeManager.Instance.CancelCurrentMatchMake(token: matchCancellToken);
+            bool isSuccess = await MatchMakeManager.Instance.CancelCurrentMatchMake(token: matchCancellToken.Token);
             
             startGame.gameObject.SetActive(false);
             startMatchMake.gameObject.SetActive(true);
@@ -129,7 +147,7 @@ namespace  SynicSugar.Samples {
             SwitchCancelButtonActive(false);
 
             matchCancellToken = new CancellationTokenSource();
-            bool isSuccess = await MatchMakeManager.Instance.CancelCurrentMatchMake(true, matchCancellToken);
+            bool isSuccess = await MatchMakeManager.Instance.CancelCurrentMatchMake(true, matchCancellToken.Token);
             
             modeSelect.ChangeGameScene(GameModeSelect.GameScene.MainMenu.ToString());
         }
