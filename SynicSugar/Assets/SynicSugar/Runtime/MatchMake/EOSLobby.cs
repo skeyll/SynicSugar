@@ -28,10 +28,6 @@ namespace SynicSugar.MatchMake {
 
         bool isMatchSuccess;
         string socketName = System.String.Empty;
-        
-        // Manager Callbacks
-        internal delegate void OnLobbyCallback(Result result);
-        internal delegate void OnLobbySearchCallback(Result result);
 
         internal EOSLobby(uint maxSearch, int timeout, MatchMakeManager.RecconectLobbyIdSaveType type){
             MAX_SEARCH_RESULT = maxSearch;
@@ -224,9 +220,8 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         /// <param name="lobbyCondition"></param>
         /// <param name="token"></param>
-        /// <param name="callback"></param>
         /// <returns></returns>
-        async UniTask<bool> CreateLobby(Lobby lobbyCondition, CancellationToken token, OnLobbyCallback callback = null){
+        async UniTask<bool> CreateLobby(Lobby lobbyCondition, CancellationToken token){
             // Check if there is current session. Leave it.
             if (CurrentLobby.isValid()){
 #if SYNICSUGAR_LOG
@@ -254,7 +249,7 @@ namespace SynicSugar.MatchMake {
             CurrentLobby._BeingCreated = true;
             CurrentLobby.LobbyOwner = EOSManager.Instance.GetProductUserId();
 
-            lobbyInterface.CreateLobby(ref createLobbyOptions, callback, OnCreateLobbyCompleted);
+            lobbyInterface.CreateLobby(ref createLobbyOptions, null, OnCreateLobbyCompleted);
 
             await UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token);
 
@@ -287,8 +282,9 @@ namespace SynicSugar.MatchMake {
                 return;
             }
 
-            OnLobbyCallback callback = info.ClientData as OnLobbyCallback;
-            callback?.Invoke(Result.Success);
+            // OnLobbyCallback callback = info.ClientData as OnLobbyCallback;
+            // callback?.Invoke(Result.Success);
+
             CurrentLobby.LobbyId = info.LobbyId;
 
             isMatchSuccess = true;
@@ -301,7 +297,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="token"></param>
         /// <param name="callback"></param>
         /// <returns></returns>
-        async UniTask<bool> AddSerachLobbyAttribute(Lobby lobbyCondition, CancellationToken token, OnLobbyCallback callback = null){
+        async UniTask<bool> AddSerachLobbyAttribute(Lobby lobbyCondition, CancellationToken token){
             if (!CurrentLobby.isHost()){
 #if SYNICSUGAR_LOG
                 Debug.LogError("Change Lobby: This isn't lobby owner.");
@@ -358,23 +354,21 @@ namespace SynicSugar.MatchMake {
             waitingMatch = true;
             isMatchSuccess = false;
 
-            lobbyInterface.UpdateLobby(ref updateOptions, callback, OnAddSerchAttribute);
+            lobbyInterface.UpdateLobby(ref updateOptions, null, OnAddSerchAttribute);
 
             await UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token);
 
             return isMatchSuccess; //"isMatchSuccess" is changed in async and callback method with result.
         }
         void OnAddSerchAttribute(ref UpdateLobbyCallbackInfo info){
-            OnLobbyCallback callback = info.ClientData as OnLobbyCallback;
-
             if (info.ResultCode != Result.Success){
                 waitingMatch = false;
                 Debug.LogErrorFormat("Modify Lobby: error code: {0}", info.ResultCode);
-                callback?.Invoke(info.ResultCode);
+                // callback?.Invoke(info.ResultCode);
                 return;
             }
 
-            OnLobbyUpdated(info.LobbyId, callback);
+            OnLobbyUpdated(info.LobbyId);
             isMatchSuccess = true;
             waitingMatch = false;
         }
@@ -387,7 +381,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="token"></param>
         /// <param name="callback"></param>
         /// <returns></returns>
-        void SwitchLobbyAttribute(OnLobbyCallback callback = null){
+        void SwitchLobbyAttribute(){
             if (!CurrentLobby.isHost()){
 #if SYNICSUGAR_LOG
                 Debug.LogError("Change Lobby: This user isn't lobby owner.");
@@ -450,19 +444,16 @@ namespace SynicSugar.MatchMake {
             UpdateLobbyOptions updateOptions = new UpdateLobbyOptions();
             updateOptions.LobbyModificationHandle = lobbyHandle; 
 
-            lobbyInterface.UpdateLobby(ref updateOptions, callback, OnSwitchLobbyAttribute);
+            lobbyInterface.UpdateLobby(ref updateOptions, null, OnSwitchLobbyAttribute);
         }
         void OnSwitchLobbyAttribute(ref UpdateLobbyCallbackInfo info){
-            OnLobbyCallback callback = info.ClientData as OnLobbyCallback;
-
             if (info.ResultCode != Result.Success){
                 Debug.LogErrorFormat("Modify Lobby: error code: {0}", info.ResultCode);
-                callback?.Invoke(info.ResultCode);
                 waitingMatch = false;
                 return;
             }
 
-            OnLobbyUpdated(info.LobbyId, callback);
+            OnLobbyUpdated(info.LobbyId);
             isMatchSuccess = true;
             waitingMatch = false;
         }
@@ -510,7 +501,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="token"></param>
         /// <param name="callback"></param>
         /// <returns></returns>
-        async UniTask<bool> RetriveLobbyByAttribute(Lobby lobbyCondition, CancellationToken token, OnLobbySearchCallback callback = null){
+        async UniTask<bool> RetriveLobbyByAttribute(Lobby lobbyCondition, CancellationToken token){
             //Create Search handle on local
             // Create new handle 
             CreateLobbySearchOptions searchOptions = new CreateLobbySearchOptions();
@@ -563,7 +554,7 @@ namespace SynicSugar.MatchMake {
             LobbySearchFindOptions findOptions = new LobbySearchFindOptions();
             findOptions.LocalUserId = EOSManager.Instance.GetProductUserId();
             waitingMatch = true;
-            lobbySearchHandle.Find(ref findOptions, callback, OnLobbySearchCompleted);
+            lobbySearchHandle.Find(ref findOptions, null, OnLobbySearchCompleted);
 
             await UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token);
             //Can retrive data
@@ -577,7 +568,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="token"></param>
         /// <param name="callback"></param>
         /// <returns></returns>
-        async UniTask<bool> RetriveLobbyByLobbyId(string lobbyId, CancellationToken token, OnLobbySearchCallback callback = null){
+        async UniTask<bool> RetriveLobbyByLobbyId(string lobbyId, CancellationToken token){
             //Create Search handle on local
             // Create new handle 
             CreateLobbySearchOptions searchOptions = new CreateLobbySearchOptions();
@@ -688,8 +679,6 @@ namespace SynicSugar.MatchMake {
             lobbyInterface.JoinLobby(ref joinOptions, callback, OnJoinLobbyCompleted);
         }
         void OnJoinLobbyCompleted(ref JoinLobbyCallbackInfo data){
-            OnLobbyCallback JoinLobbyCallback = data.ClientData as OnLobbyCallback;
-
             if (data.ResultCode != Result.Success){
                 Debug.LogErrorFormat("Join Lobby: error code: {0}", data.ResultCode);
                 waitingMatch = false;
@@ -812,14 +801,12 @@ namespace SynicSugar.MatchMake {
         }
 #endregion
 #region Modify
-        void OnLobbyUpdated(string lobbyId, OnLobbyCallback LobbyUpdateCompleted = null){
+        void OnLobbyUpdated(string lobbyId){
             if (!string.IsNullOrEmpty(lobbyId) && CurrentLobby.LobbyId == lobbyId){
                 CurrentLobby.InitFromLobbyHandle(lobbyId);
             #if SYNICSUGAR_LOG
                 Debug.Log($"OnLobbyUpdated: Update Lobby with {lobbyId}");
             #endif
-
-                LobbyUpdateCompleted?.Invoke(Result.Success);
             }
         }
 #endregion
@@ -876,7 +863,7 @@ namespace SynicSugar.MatchMake {
         /// When a game is over, call DestroyLobby() instead of this. .
         /// </summary>
         /// <param name="LeaveLobbyCompleted">Callback when leave lobby is completed</param>
-        internal async UniTask<bool> LeaveLobby(bool inMatchMaking = false, CancellationToken token = default(CancellationToken), OnLobbyCallback LeaveLobbyCompleted = null){
+        internal async UniTask<bool> LeaveLobby(bool inMatchMaking = false, CancellationToken token = default(CancellationToken)){
             if (CurrentLobby == null || string.IsNullOrEmpty(CurrentLobby.LobbyId) || !EOSManager.Instance.GetProductUserId().IsValid()){
                 Debug.LogWarning("Leave Lobby: Not currently in a lobby.");
                 return false;
@@ -889,7 +876,7 @@ namespace SynicSugar.MatchMake {
             waitLeave = true;
             canLeave = false;
             LobbyInterface lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();
-            lobbyInterface.LeaveLobby(ref options, LeaveLobbyCompleted, OnLeaveLobbyCompleted);
+            lobbyInterface.LeaveLobby(ref options, null, OnLeaveLobbyCompleted);
 
             await UniTask.WaitUntil(() => !waitLeave, cancellationToken: token);
             if(!inMatchMaking){
@@ -906,10 +893,7 @@ namespace SynicSugar.MatchMake {
                 return;
             }
 
-            OnLobbyCallback LeaveLobbyCallback = data.ClientData as OnLobbyCallback;
-
             CurrentLobby.Clear();
-            LeaveLobbyCallback?.Invoke(Result.Success);
             canLeave = true;
             waitLeave = false;
         }
