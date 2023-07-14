@@ -6,10 +6,10 @@ weight = 1
 <small>*Namespace: SynicSugar.P2P* <br>
 *Class: SynicObject* </small>
 
-public static List<GameObject> AllSpawn(GameObject original)
-public static List<GameObject> AllSpawn(GameObject original, Transform parent)
-public static List<GameObject> AllSpawn(GameObject original, Transform parent, bool instantiateInWorldSpace)
-public static List<GameObject> AllSpawn(GameObject original, Vector3 position, Quaternion rotation)
+public static List<GameObject> AllSpawn(GameObject original)<br>
+public static List<GameObject> AllSpawn(GameObject original, Transform parent)<br>
+public static List<GameObject> AllSpawn(GameObject original, Transform parent, bool instantiateInWorldSpace)<br>
+public static List<GameObject> AllSpawn(GameObject original, Vector3 position, Quaternion rotation)<br>
 public static List<GameObject> AllSpawn(GameObject original, Vector3 position, Quaternion rotation, Transform parent)
 
 
@@ -20,6 +20,7 @@ If original prefab has many components, this will be heavy.
 
 ```cs
 using SynicSugar.P2P;
+using UnityEngine;
 
 public class p2pSample {
     [SerializeField] GameObject playerPrefab;
