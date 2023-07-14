@@ -6,7 +6,7 @@ weight = 2
 <small>*Namespace: SynicSugar.MatchMake* <br>
 *Class: Lobby* </small>
 
-public List<LobbyAttribute> Attributes 
+public List&lt;LobbyAttribute&gt; Attributes 
 
 
 ### Description
@@ -15,6 +15,7 @@ Attributes associated with the lobby.
 
 ```cs
 using SynicSugar.MatchMake;
+using UnityEngine;
 
 public class LobbyCondition : MonoBehaviour {
     void SetLobbyConditions(){
@@ -24,7 +25,7 @@ public class LobbyCondition : MonoBehaviour {
 
         attribute.Key = "Level";
         attribute.SetValue(3);
-        attribute.comparisonOption = Epic.OnlineServices.ComparisonOp.Equal;
+        attribute.ComparisonOperator = Epic.OnlineServices.ComparisonOp.Equal;
         lobby.Attributes.Add(attribute);
     }
 }
