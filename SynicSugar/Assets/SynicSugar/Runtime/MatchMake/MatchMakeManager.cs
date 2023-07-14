@@ -209,14 +209,14 @@ namespace SynicSugar.MatchMake {
         }
         [Obsolete("This is old. ReconnecLobby() is new one.")]
         public async UniTask<bool> ReconnectParticipatingLobby(string LobbyID, CancellationTokenSource token){
-            return await ReconnecLobby(LobbyID, token);
+            return await ReconnectLobby(LobbyID, token);
         }
         /// <summary>
         /// Join the Lobby with saved LobbyID. <br />
         /// Call this at the start of game or match-make.
         /// </summary>
         /// <param name="LobbyID">Lobby ID to <c>re</c>-connect</param>
-        public async UniTask<bool> ReconnecLobby(string LobbyID, CancellationTokenSource token = default(CancellationTokenSource)){
+        public async UniTask<bool> ReconnectLobby(string LobbyID, CancellationTokenSource token = default(CancellationTokenSource)){
             if(string.IsNullOrEmpty(LobbyID)){
                 return false;
             }
@@ -266,7 +266,7 @@ namespace SynicSugar.MatchMake {
             }
             bool canCancel =  await eosLobby.CancelMatchMaking(matchingToken, token);
             
-            if(removeManager){
+            if(removeManager && canCancel){
                 Destroy(this.gameObject);
             }
             return canCancel;
