@@ -38,7 +38,7 @@ If this is no longer needed, we call *~~[CancelCurrentMatchMake](../MatchMakeMan
 | [SearchAndCreateLobby](../MatchMakeManager/searchandcreatelobby) | Search lobby and, if can't join, create lobby |
 | [SearchLobby](../MatchMakeManager/searchlobby) | Search lobby and join it as Guest |
 | [CreateLobby](../MatchMakeManager/createlobby) | Create lobby as Host and wait for Guest |
-| [ReconnecLobby](../MatchMakeManager/reconneclobby) | Join the Lobby with saved LobbyID |
+| [ReconnectLobby](../MatchMakeManager/reconnectlobby) | Join the Lobby with saved LobbyID |
 | [CancelCurrentMatchMake](../MatchMakeManager/cancelcurrentmatchmake) | Stop the current matchmaking |
 | [GetCurrentLobbyID](../MatchMakeManager/getcurrentlobbyid) | Get LobbyID that a user participating |
 | [GetReconnectLobbyID](../MatchMakeManager/getreconnectlobbyid) | Get LobbyID by Playerprefs |
