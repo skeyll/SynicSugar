@@ -6,25 +6,29 @@ weight = 14
 <small>*Namespace: SynicSugar.MatchMake* <br>
 *Class: MatchMakeManager* </small>
 
-public async UniTask&lt;bool&gt; CancelCurrentMatchMake(CancellationTokenSource token)
+public async UniTask&lt;bool&gt; CancelCurrentMatchMake(bool removeManager = false, CancellationToken token = default(CancellationToken))
 
 
 ### Description
-Exit lobby and cancel MatchMaking.<br>
-If can leave matchmaking, return true. Even if gets False, the lobby will eventually be closed and we can ignore this result.<br>
-This args' token is for this Task. (not for MatchMaking but we can use same token.)
+Exit lobby and cancel matchmake.<br>
+This can only be called in mathmaking. SynicSugar judges in matchmaking or not based on the cancel token that we passed Create/SearchXXX.<br>
+If can, return true.<br>
+If we pass true to 1st arg, this will destroy ConnectManager after being able to cancel matchmaking. When we have the two scene for using ConnectManager and not, pass true.<br>
+2nd arg is for this Task. (It's not for MatchMaking but we can also use the same token.)<br>
 
 
 ```cs
+using UnityEngine;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using SynicSugar.MatchMake;
 
 public class MatchMake : MonoBehaviour {
-    async void Start(){
+    public async void CancelMatchMaking(){
+        CancellationTokenSource cts = new CancellationTokenSource();
+        CancellationToken cancelToken = matchCancellToken.Token;
 
-        matchCancellToken = new CancellationTokenSource();
-        bool isSuccess = await MatchMakeManager.Instance.CancelCurrentMatchMake(matchCancellToken);
+        bool isSuccess = await MatchMakeManager.Instance.CancelCurrentMatchMake(true, cancelToken);
         
         if(isSuccess){
             //Success
