@@ -19,30 +19,31 @@ namespace SynicSugar.MatchMake {
         //User config
         uint MAX_SEARCH_RESULT;
         int timeoutMS;
-        MatchMakeManager.RecconectLobbyIdSaveType recconectType;
-        Action saveLobbyId, deleteLobbyId;
-        Func<UniTask> asyncSaveLobbyId, asyncDeleteLobbyID;
+        // MatchMakeManager.RecconectLobbyIdSaveType recconectType;
+        // Action saveLobbyId, deleteLobbyId;
+        // Func<UniTask> asyncSaveLobbyId, asyncDeleteLobbyID;
         //Notification
         NotifyEventHandle LobbyMemberStatusNotification;
         NotifyEventHandle LobbyUpdateNotification;
 
+        
         bool isMatchSuccess;
         string socketName = System.String.Empty;
 
-        internal EOSLobby(uint maxSearch, int timeout, MatchMakeManager.RecconectLobbyIdSaveType type){
+        internal EOSLobby(uint maxSearch, int timeout){
             MAX_SEARCH_RESULT = maxSearch;
             //For Unitask
             timeoutMS = timeout * 1000;
-            recconectType = type;
+            // recconectType = type;
         }
-        internal void RegisterLobbyIdEvent(Action save, Action delete){
-            saveLobbyId = save;
-            deleteLobbyId = delete;
-        }
-        internal void RegisterAsyncLobbyIdEvent(Func<UniTask> save, Func<UniTask> delete){
-            asyncSaveLobbyId = save;
-            asyncDeleteLobbyID = delete;
-        }
+        // internal void RegisterLobbyIdEvent(Action save, Action delete){
+        //     saveLobbyId = save;
+        //     deleteLobbyId = delete;
+        // }
+        // internal void RegisterAsyncLobbyIdEvent(Func<UniTask> save, Func<UniTask> delete){
+        //     asyncSaveLobbyId = save;
+        //     asyncDeleteLobbyID = delete;
+        // }
 
         /// <summary>
         /// Search for lobbies in backend and join in one to meet conditions.<br />
@@ -73,7 +74,7 @@ namespace SynicSugar.MatchMake {
                 if(isMatchSuccess){
                     InitConnectConfig(ref p2pConfig.Instance.userIds);
                     p2pConnectorForOtherAssembly.Instance.OpenConnection();
-                    await SaveLobbyId();
+                    await MatchMakeManager.Instance.SaveLobbyId();
                 }
                 return isMatchSuccess;
             }
@@ -100,7 +101,7 @@ namespace SynicSugar.MatchMake {
                 if(isMatchSuccess){
                     InitConnectConfig(ref p2pConfig.Instance.userIds);
                     p2pConnectorForOtherAssembly.Instance.OpenConnection();
-                    await SaveLobbyId();
+                    await MatchMakeManager.Instance.SaveLobbyId();
                     return true;
                 }
             }
@@ -135,7 +136,7 @@ namespace SynicSugar.MatchMake {
                 if(isMatchSuccess){
                     InitConnectConfig(ref p2pConfig.Instance.userIds);
                     p2pConnectorForOtherAssembly.Instance.OpenConnection();
-                    await SaveLobbyId();
+                    await MatchMakeManager.Instance.SaveLobbyId();
                 }
                 return isMatchSuccess;
             }
@@ -169,7 +170,7 @@ namespace SynicSugar.MatchMake {
                 if(isMatchSuccess){
                     InitConnectConfig(ref p2pConfig.Instance.userIds);
                     p2pConnectorForOtherAssembly.Instance.OpenConnection();
-                    await SaveLobbyId();
+                    await MatchMakeManager.Instance.SaveLobbyId();
                     return true;
                 }
             }
@@ -189,7 +190,7 @@ namespace SynicSugar.MatchMake {
             Debug.LogFormat("JoinLobbyBySavedLobbyId: RetriveLobbyByLobbyId is '{0}'.", canSerch ? "Success" : "Failure");
         #endif
             if(!canSerch){
-                await DeleteLobbyID();
+                await MatchMakeManager.Instance.DeleteLobbyID();
                 return false; //The lobby was already closed.
             }
             //Join
@@ -198,7 +199,7 @@ namespace SynicSugar.MatchMake {
             Debug.LogFormat("JoinLobbyBySavedLobbyId: TryJoinSearchResults is '{0}'.", canJoin ? "Success" : "Failure");
         #endif
             if(!canJoin){
-                await DeleteLobbyID();
+                await MatchMakeManager.Instance.DeleteLobbyID();
                 return false; //The lobby was already closed.
             }
             //For the host migration
@@ -880,7 +881,7 @@ namespace SynicSugar.MatchMake {
 
             await UniTask.WaitUntil(() => !waitLeave, cancellationToken: token);
             if(!inMatchMaking){
-                await DeleteLobbyID();
+                await MatchMakeManager.Instance.DeleteLobbyID();
             }
 
             return canLeave;
@@ -930,7 +931,7 @@ namespace SynicSugar.MatchMake {
             
             await UniTask.WaitUntil(() => !waitLeave, cancellationToken: token);
 
-            await DeleteLobbyID();
+            await MatchMakeManager.Instance.DeleteLobbyID();
             LobbyMemberStatusNotification.Dispose();
             CurrentLobby.Clear();
 
@@ -1010,48 +1011,6 @@ namespace SynicSugar.MatchMake {
         /// <returns></returns>
         internal string GetCurenntLobbyID(){
             return CurrentLobby.LobbyId;
-        }
-        /// <summary>
-        /// Save lobby data for player to connect unexpectedly left lobby like power off.
-        /// </summary>
-        async UniTask SaveLobbyId(){
-    #if SYNICSUGAR_LOG
-            Debug.Log($"Save LobbyID by {recconectType}");
-    #endif
-            switch(recconectType){
-                case MatchMakeManager.RecconectLobbyIdSaveType.NoReconnection:
-                return;
-                case MatchMakeManager.RecconectLobbyIdSaveType.Playerprefs:
-                    PlayerPrefs.SetString(MatchMakeManager.Instance.playerprefsSaveKey, CurrentLobby.LobbyId);
-                return;
-                case MatchMakeManager.RecconectLobbyIdSaveType.CustomMethod:
-                    saveLobbyId.Invoke();
-                return;
-                case MatchMakeManager.RecconectLobbyIdSaveType.AsyncCustomMethod:
-                    await asyncSaveLobbyId().AsAsyncUnitUniTask();
-                return;
-            }
-        }
-        /// <summary>
-        /// Delete save data for player not to connect the current lobby after the battle.
-        /// </summary>
-        async UniTask DeleteLobbyID(){
-    #if SYNICSUGAR_LOG
-            Debug.Log($"Delete LobbyID by {recconectType}");
-    #endif
-            switch(recconectType){
-                case MatchMakeManager.RecconectLobbyIdSaveType.NoReconnection:
-                return;
-                case MatchMakeManager.RecconectLobbyIdSaveType.Playerprefs:
-                    PlayerPrefs.DeleteKey(MatchMakeManager.Instance.playerprefsSaveKey);
-                return;
-                case MatchMakeManager.RecconectLobbyIdSaveType.CustomMethod:
-                    deleteLobbyId.Invoke();
-                return;
-                case MatchMakeManager.RecconectLobbyIdSaveType.AsyncCustomMethod:
-                    await asyncDeleteLobbyID().AsAsyncUnitUniTask();
-                return;
-            }
         }
     }
 }

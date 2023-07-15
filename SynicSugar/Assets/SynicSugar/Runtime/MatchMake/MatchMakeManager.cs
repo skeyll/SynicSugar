@@ -17,16 +17,23 @@ namespace SynicSugar.MatchMake {
             Instance = this;
             DontDestroyOnLoad(this);
 
-            eosLobby = new EOSLobby(maxSearchResult, hostsTimeoutSec, lobbyIdSaveType);
+            eosLobby = new EOSLobby(maxSearchResult, hostsTimeoutSec);
 
             if(lobbyIdSaveType == RecconectLobbyIdSaveType.CustomMethod){
                 if(customSaveLobbyID != null && customDeleteLobbyID != null){
-                    eosLobby.RegisterLobbyIdEvent((() => customSaveLobbyID.Invoke()), (() => customDeleteLobbyID.Invoke()));
+                    saveLobbyId += () => customSaveLobbyID.Invoke();
+                    deleteLobbyId += () => customDeleteLobbyID.Invoke();
                 }
             }
         }
         void OnDestroy() {
             if( Instance == this ) {
+                //For sub events
+                saveLobbyId = null;
+                deleteLobbyId = null;
+                asyncSaveLobbyId = null;
+                asyncDeleteLobbyID = null;
+
                 Instance = null;
             }
         }
@@ -51,7 +58,10 @@ namespace SynicSugar.MatchMake {
         [Header("CustomMetod")]
         [SerializeField] UnityEvent customSaveLobbyID;
         [SerializeField] UnityEvent customDeleteLobbyID;
-
+    #endregion
+    #region SaveEvent's
+        public event Action saveLobbyId, deleteLobbyId;
+        public event Func<UniTask> asyncSaveLobbyId, asyncDeleteLobbyID;
     #endregion
         EOSLobby eosLobby;
         CancellationTokenSource matchingToken;
@@ -75,9 +85,9 @@ namespace SynicSugar.MatchMake {
             if(changeType){
                 lobbyIdSaveType = RecconectLobbyIdSaveType.CustomMethod;
             }
-            eosLobby.RegisterLobbyIdEvent(save, delete);
+            saveLobbyId += save;
+            deleteLobbyId += delete;
         }
-        
         /// <summary>
         /// Register Action to save and delete lobby Id to re-connect.<br />
         /// We can use cloud and save assets for this, but these place to be saved and deleted must be in the same. 
@@ -89,7 +99,8 @@ namespace SynicSugar.MatchMake {
             if(changeType){
                 lobbyIdSaveType = RecconectLobbyIdSaveType.AsyncCustomMethod;
             }
-            eosLobby.RegisterAsyncLobbyIdEvent(save, delete);
+            asyncSaveLobbyId += save;
+            asyncDeleteLobbyID += delete;
         }
         /// <summary>
         /// MatchMake player with conditions and get the data for p2p connect. <br />
@@ -290,12 +301,56 @@ namespace SynicSugar.MatchMake {
 
             return canDestroy;
         }
+    #region LobbyID
         /// <summary>
         /// Get ID of the current lobby that a user's participating
         /// </summary>
         /// <returns>string LobbyID</returns>
         public string GetCurrentLobbyID(){
             return eosLobby.GetCurenntLobbyID();
+        }
+        
+        /// <summary>
+        /// Save lobby data for player to connect unexpectedly left lobby like power off.
+        /// </summary>
+        internal async UniTask SaveLobbyId(){
+    #if SYNICSUGAR_LOG
+            Debug.Log($"Save LobbyID by {lobbyIdSaveType}");
+    #endif
+            switch(lobbyIdSaveType){
+                case MatchMakeManager.RecconectLobbyIdSaveType.NoReconnection:
+                return;
+                case MatchMakeManager.RecconectLobbyIdSaveType.Playerprefs:
+                    PlayerPrefs.SetString(MatchMakeManager.Instance.playerprefsSaveKey, GetCurrentLobbyID());
+                return;
+                case MatchMakeManager.RecconectLobbyIdSaveType.CustomMethod:
+                    saveLobbyId.Invoke();
+                return;
+                case MatchMakeManager.RecconectLobbyIdSaveType.AsyncCustomMethod:
+                    await asyncSaveLobbyId().AsAsyncUnitUniTask();
+                return;
+            }
+        }
+        /// <summary>
+        /// Delete save data for player not to connect the current lobby after the battle.
+        /// </summary>
+        internal async UniTask DeleteLobbyID(){
+    #if SYNICSUGAR_LOG
+            Debug.Log($"Delete LobbyID by {lobbyIdSaveType}");
+    #endif
+            switch(lobbyIdSaveType){
+                case MatchMakeManager.RecconectLobbyIdSaveType.NoReconnection:
+                return;
+                case MatchMakeManager.RecconectLobbyIdSaveType.Playerprefs:
+                    PlayerPrefs.DeleteKey(MatchMakeManager.Instance.playerprefsSaveKey);
+                return;
+                case MatchMakeManager.RecconectLobbyIdSaveType.CustomMethod:
+                    deleteLobbyId.Invoke();
+                return;
+                case MatchMakeManager.RecconectLobbyIdSaveType.AsyncCustomMethod:
+                    await asyncDeleteLobbyID().AsAsyncUnitUniTask();
+                return;
+            }
         }
         /// <summary>
         /// For the DEFAULT way, get LobbyID from PlayerPrefs.<br />
@@ -323,6 +378,7 @@ namespace SynicSugar.MatchMake {
 
             return lobby;
         }
+    #endregion
         [Obsolete("This is old. GenerateLobbyObject(string[] bucket, uint MaxPlayers, bool bPresenceEnabled) is new one.")]
         public static Lobby GenerateLobby(string[] bucket, uint MaxPlayers = 2,
                                             bool bPresenceEnabled = false){
