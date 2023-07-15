@@ -26,7 +26,7 @@ namespace SynicSugar.MatchMake {
         }
         internal LobbyPermissionLevel PermissionLevel = LobbyPermissionLevel.Publicadvertised;
         public string BucketId = System.String.Empty;
-        bool bPresenceEnabled = false;
+        // bool bPresenceEnabled = false;
         internal bool bAllowInvites = false;
         internal bool bDisableHostMigration = true;
         public List<LobbyAttribute> Attributes = new List<LobbyAttribute>();

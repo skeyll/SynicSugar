@@ -21,18 +21,16 @@ namespace SynicSugar.MatchMake {
 
             if(lobbyIdSaveType == RecconectLobbyIdSaveType.CustomMethod){
                 if(customSaveLobbyID != null && customDeleteLobbyID != null){
-                    saveLobbyID += () => customSaveLobbyID.Invoke();
-                    deleteLobbyID += () => customDeleteLobbyID.Invoke();
+                    lobbyIDMethod.Save += () => customSaveLobbyID.Invoke();
+                    lobbyIDMethod.Delete += () => customDeleteLobbyID.Invoke();
                 }
             }
         }
         void OnDestroy() {
             if( Instance == this ) {
                 //For sub events
-                saveLobbyID = null;
-                deleteLobbyID = null;
-                asyncSaveLobbyID = null;
-                asyncDeleteLobbyID = null;
+                lobbyIDMethod.Clear();
+                asyncLobbyIDMethod.Clear();
 
                 Instance = null;
             }
@@ -60,8 +58,8 @@ namespace SynicSugar.MatchMake {
         [SerializeField] UnityEvent customDeleteLobbyID;
     #endregion
     #region SaveEvent's
-        public event Action saveLobbyID, deleteLobbyID;
-        public event Func<UniTask> asyncSaveLobbyID, asyncDeleteLobbyID;
+        public LobbyIDMethod lobbyIDMethod = new LobbyIDMethod();
+        public AsyncLobbyIDMethod asyncLobbyIDMethod = new AsyncLobbyIDMethod();
     #endregion
         EOSLobby eosLobby;
         CancellationTokenSource matchingToken;
@@ -74,34 +72,7 @@ namespace SynicSugar.MatchMake {
         public void SetGUIState(MatchGUIState state){
             matchState = state;
         }
-        /// <summary>
-        /// Register Action to save and delete lobby Id to re-connect.<br />
-        /// We can use cloud and save assets for this, but these place to be saved and deleted must be in the same. 
-        /// </summary>
-        /// <param name="save">void function</param>
-        /// <param name="delete">void function</param>
-        /// <param name="changeType">If true, change SaveType in this method</param>
-        public void RegisterLobbyIDFunctions(Action save, Action delete, bool changeType = true){
-            if(changeType){
-                lobbyIdSaveType = RecconectLobbyIdSaveType.CustomMethod;
-            }
-            saveLobbyID += save;
-            deleteLobbyID += delete;
-        }
-        /// <summary>
-        /// Register Action to save and delete lobby Id to re-connect.<br />
-        /// We can use cloud and save assets for this, but these place to be saved and deleted must be in the same. 
-        /// </summary>
-        /// <param name="save">UniTask function</param>
-        /// <param name="delete">UniTask function</param>
-        /// <param name="changeType">If true, change SaveType in this method</param>
-        public void RegisterAsyncLobbyIDFunctions(Func<UniTask> save, Func<UniTask> delete, bool changeType = true){
-            if(changeType){
-                lobbyIdSaveType = RecconectLobbyIdSaveType.AsyncCustomMethod;
-            }
-            asyncSaveLobbyID += save;
-            asyncDeleteLobbyID += delete;
-        }
+
         /// <summary>
         /// MatchMake player with conditions and get the data for p2p connect. <br />
         /// Search a lobby, then if can't join, create a lobby as host.
@@ -313,7 +284,7 @@ namespace SynicSugar.MatchMake {
         /// <summary>
         /// Save lobby data for player to connect unexpectedly left lobby like power off.
         /// </summary>
-        internal async UniTask SaveLobbyId(){
+        internal async UniTask OnSaveLobbyID(){
     #if SYNICSUGAR_LOG
             Debug.Log($"Save LobbyID by {lobbyIdSaveType}");
     #endif
@@ -324,17 +295,17 @@ namespace SynicSugar.MatchMake {
                     PlayerPrefs.SetString(MatchMakeManager.Instance.playerprefsSaveKey, GetCurrentLobbyID());
                 return;
                 case MatchMakeManager.RecconectLobbyIdSaveType.CustomMethod:
-                    saveLobbyID.Invoke();
+                    lobbyIDMethod.OnSave();
                 return;
                 case MatchMakeManager.RecconectLobbyIdSaveType.AsyncCustomMethod:
-                    await asyncSaveLobbyID().AsAsyncUnitUniTask();
+                    await asyncLobbyIDMethod.OnSave();
                 return;
             }
         }
         /// <summary>
         /// Delete save data for player not to connect the current lobby after the battle.
         /// </summary>
-        internal async UniTask DeleteLobbyID(){
+        internal async UniTask OnDeleteLobbyID(){
     #if SYNICSUGAR_LOG
             Debug.Log($"Delete LobbyID by {lobbyIdSaveType}");
     #endif
@@ -345,10 +316,10 @@ namespace SynicSugar.MatchMake {
                     PlayerPrefs.DeleteKey(MatchMakeManager.Instance.playerprefsSaveKey);
                 return;
                 case MatchMakeManager.RecconectLobbyIdSaveType.CustomMethod:
-                    deleteLobbyID.Invoke();
+                    lobbyIDMethod.OnSave();
                 return;
                 case MatchMakeManager.RecconectLobbyIdSaveType.AsyncCustomMethod:
-                    await asyncDeleteLobbyID().AsAsyncUnitUniTask();
+                    await asyncLobbyIDMethod.OnDelete();
                 return;
             }
         }

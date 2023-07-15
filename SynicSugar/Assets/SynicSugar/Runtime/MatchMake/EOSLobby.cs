@@ -19,14 +19,10 @@ namespace SynicSugar.MatchMake {
         //User config
         uint MAX_SEARCH_RESULT;
         int timeoutMS;
-        // MatchMakeManager.RecconectLobbyIdSaveType recconectType;
-        // Action saveLobbyId, deleteLobbyId;
-        // Func<UniTask> asyncSaveLobbyId, asyncDeleteLobbyID;
         //Notification
         NotifyEventHandle LobbyMemberStatusNotification;
         NotifyEventHandle LobbyUpdateNotification;
 
-        
         bool isMatchSuccess;
         string socketName = System.String.Empty;
 
@@ -34,16 +30,7 @@ namespace SynicSugar.MatchMake {
             MAX_SEARCH_RESULT = maxSearch;
             //For Unitask
             timeoutMS = timeout * 1000;
-            // recconectType = type;
         }
-        // internal void RegisterLobbyIdEvent(Action save, Action delete){
-        //     saveLobbyId = save;
-        //     deleteLobbyId = delete;
-        // }
-        // internal void RegisterAsyncLobbyIdEvent(Func<UniTask> save, Func<UniTask> delete){
-        //     asyncSaveLobbyId = save;
-        //     asyncDeleteLobbyID = delete;
-        // }
 
         /// <summary>
         /// Search for lobbies in backend and join in one to meet conditions.<br />
@@ -74,7 +61,7 @@ namespace SynicSugar.MatchMake {
                 if(isMatchSuccess){
                     InitConnectConfig(ref p2pConfig.Instance.userIds);
                     p2pConnectorForOtherAssembly.Instance.OpenConnection();
-                    await MatchMakeManager.Instance.SaveLobbyId();
+                    await MatchMakeManager.Instance.OnSaveLobbyID();
                 }
                 return isMatchSuccess;
             }
@@ -100,8 +87,10 @@ namespace SynicSugar.MatchMake {
             #endif
                 if(isMatchSuccess){
                     InitConnectConfig(ref p2pConfig.Instance.userIds);
-                    p2pConnectorForOtherAssembly.Instance.OpenConnection();
-                    await MatchMakeManager.Instance.SaveLobbyId();
+                    p2pConnectorForOtherAssembly.Instance.OpenConnection();    
+
+                    await MatchMakeManager.Instance.OnSaveLobbyID();
+
                     return true;
                 }
             }
@@ -136,7 +125,8 @@ namespace SynicSugar.MatchMake {
                 if(isMatchSuccess){
                     InitConnectConfig(ref p2pConfig.Instance.userIds);
                     p2pConnectorForOtherAssembly.Instance.OpenConnection();
-                    await MatchMakeManager.Instance.SaveLobbyId();
+                    
+                    await MatchMakeManager.Instance.OnSaveLobbyID();
                 }
                 return isMatchSuccess;
             }
@@ -170,7 +160,7 @@ namespace SynicSugar.MatchMake {
                 if(isMatchSuccess){
                     InitConnectConfig(ref p2pConfig.Instance.userIds);
                     p2pConnectorForOtherAssembly.Instance.OpenConnection();
-                    await MatchMakeManager.Instance.SaveLobbyId();
+                    await MatchMakeManager.Instance.OnSaveLobbyID();
                     return true;
                 }
             }
@@ -190,7 +180,7 @@ namespace SynicSugar.MatchMake {
             Debug.LogFormat("JoinLobbyBySavedLobbyId: RetriveLobbyByLobbyId is '{0}'.", canSerch ? "Success" : "Failure");
         #endif
             if(!canSerch){
-                await MatchMakeManager.Instance.DeleteLobbyID();
+                await MatchMakeManager.Instance.OnDeleteLobbyID();
                 return false; //The lobby was already closed.
             }
             //Join
@@ -199,7 +189,7 @@ namespace SynicSugar.MatchMake {
             Debug.LogFormat("JoinLobbyBySavedLobbyId: TryJoinSearchResults is '{0}'.", canJoin ? "Success" : "Failure");
         #endif
             if(!canJoin){
-                await MatchMakeManager.Instance.DeleteLobbyID();
+                await MatchMakeManager.Instance.OnDeleteLobbyID();
                 return false; //The lobby was already closed.
             }
             //For the host migration
@@ -881,7 +871,7 @@ namespace SynicSugar.MatchMake {
 
             await UniTask.WaitUntil(() => !waitLeave, cancellationToken: token);
             if(!inMatchMaking){
-                await MatchMakeManager.Instance.DeleteLobbyID();
+                await MatchMakeManager.Instance.OnDeleteLobbyID();
             }
 
             return canLeave;
@@ -931,7 +921,7 @@ namespace SynicSugar.MatchMake {
             
             await UniTask.WaitUntil(() => !waitLeave, cancellationToken: token);
 
-            await MatchMakeManager.Instance.DeleteLobbyID();
+            await MatchMakeManager.Instance.OnDeleteLobbyID();
             LobbyMemberStatusNotification.Dispose();
             CurrentLobby.Clear();
 
