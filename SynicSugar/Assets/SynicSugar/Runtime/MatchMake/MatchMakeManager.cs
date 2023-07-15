@@ -21,17 +21,17 @@ namespace SynicSugar.MatchMake {
 
             if(lobbyIdSaveType == RecconectLobbyIdSaveType.CustomMethod){
                 if(customSaveLobbyID != null && customDeleteLobbyID != null){
-                    saveLobbyId += () => customSaveLobbyID.Invoke();
-                    deleteLobbyId += () => customDeleteLobbyID.Invoke();
+                    saveLobbyID += () => customSaveLobbyID.Invoke();
+                    deleteLobbyID += () => customDeleteLobbyID.Invoke();
                 }
             }
         }
         void OnDestroy() {
             if( Instance == this ) {
                 //For sub events
-                saveLobbyId = null;
-                deleteLobbyId = null;
-                asyncSaveLobbyId = null;
+                saveLobbyID = null;
+                deleteLobbyID = null;
+                asyncSaveLobbyID = null;
                 asyncDeleteLobbyID = null;
 
                 Instance = null;
@@ -60,8 +60,8 @@ namespace SynicSugar.MatchMake {
         [SerializeField] UnityEvent customDeleteLobbyID;
     #endregion
     #region SaveEvent's
-        public event Action saveLobbyId, deleteLobbyId;
-        public event Func<UniTask> asyncSaveLobbyId, asyncDeleteLobbyID;
+        public event Action saveLobbyID, deleteLobbyID;
+        public event Func<UniTask> asyncSaveLobbyID, asyncDeleteLobbyID;
     #endregion
         EOSLobby eosLobby;
         CancellationTokenSource matchingToken;
@@ -85,8 +85,8 @@ namespace SynicSugar.MatchMake {
             if(changeType){
                 lobbyIdSaveType = RecconectLobbyIdSaveType.CustomMethod;
             }
-            saveLobbyId += save;
-            deleteLobbyId += delete;
+            saveLobbyID += save;
+            deleteLobbyID += delete;
         }
         /// <summary>
         /// Register Action to save and delete lobby Id to re-connect.<br />
@@ -99,7 +99,7 @@ namespace SynicSugar.MatchMake {
             if(changeType){
                 lobbyIdSaveType = RecconectLobbyIdSaveType.AsyncCustomMethod;
             }
-            asyncSaveLobbyId += save;
+            asyncSaveLobbyID += save;
             asyncDeleteLobbyID += delete;
         }
         /// <summary>
@@ -324,10 +324,10 @@ namespace SynicSugar.MatchMake {
                     PlayerPrefs.SetString(MatchMakeManager.Instance.playerprefsSaveKey, GetCurrentLobbyID());
                 return;
                 case MatchMakeManager.RecconectLobbyIdSaveType.CustomMethod:
-                    saveLobbyId.Invoke();
+                    saveLobbyID.Invoke();
                 return;
                 case MatchMakeManager.RecconectLobbyIdSaveType.AsyncCustomMethod:
-                    await asyncSaveLobbyId().AsAsyncUnitUniTask();
+                    await asyncSaveLobbyID().AsAsyncUnitUniTask();
                 return;
             }
         }
@@ -345,7 +345,7 @@ namespace SynicSugar.MatchMake {
                     PlayerPrefs.DeleteKey(MatchMakeManager.Instance.playerprefsSaveKey);
                 return;
                 case MatchMakeManager.RecconectLobbyIdSaveType.CustomMethod:
-                    deleteLobbyId.Invoke();
+                    deleteLobbyID.Invoke();
                 return;
                 case MatchMakeManager.RecconectLobbyIdSaveType.AsyncCustomMethod:
                     await asyncDeleteLobbyID().AsAsyncUnitUniTask();
