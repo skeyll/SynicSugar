@@ -1,6 +1,6 @@
 +++
 title = "SetGUIState"
-weight = 7
+weight = 9
 +++
 ## SetGUIState
 <small>*Namespace: SynicSugar.MatchMake* <br>

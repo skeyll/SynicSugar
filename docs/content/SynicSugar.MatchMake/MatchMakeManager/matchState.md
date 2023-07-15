@@ -1,6 +1,6 @@
 +++
 title = "matchState"
-weight = 6
+weight = 8
 +++
 ## matchState
 <small>*Namespace: SynicSugar.MatchMake* <br>
