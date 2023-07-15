@@ -189,10 +189,6 @@ namespace SynicSugar.MatchMake {
             UpdateStateDescription(MatchState.Success);
             return true;
         }
-        [Obsolete("This is old. ReconnecLobby() is new one.")]
-        public async UniTask<bool> ReconnectParticipatingLobby(string LobbyID, CancellationTokenSource token){
-            return await ReconnectLobby(LobbyID, token);
-        }
         /// <summary>
         /// Join the Lobby with saved LobbyID. <br />
         /// Call this at the start of game or match-make.
@@ -335,6 +331,36 @@ namespace SynicSugar.MatchMake {
         /// For search conditions.<br />
         /// About attributes, use GenerateLobbyAttribute to set.
         /// </summary>
+        /// <param name="bucket">important condition like game-mode, region, map</param>
+        /// <param name="MaxPlayers">Max number of user allowed in the lobby</param>
+        /// <returns></returns>
+        public static Lobby GenerateLobbyObject(string[] bucket, uint MaxPlayers = 2){
+            Lobby lobby = new Lobby();
+            lobby.SetBucketID(bucket);
+            lobby.MaxLobbyMembers = MaxPlayers;
+
+            return lobby;
+        }
+        /// <summary>
+        /// Change State text
+        /// </summary>
+        /// <param name="state"></param>
+        internal void UpdateStateDescription(MatchState state){
+            if(matchState.state == null){
+                return;
+            }
+            matchState.state.text = matchState.GetDiscription(state);
+        }
+
+    #region Obsolete
+        [Obsolete("This is old. ReconnecLobby() is new one.")]
+        public async UniTask<bool> ReconnectParticipatingLobby(string LobbyID, CancellationTokenSource token){
+            return await ReconnectLobby(LobbyID, token);
+        }
+        /// <summary>
+        /// For search conditions.<br />
+        /// About attributes, use GenerateLobbyAttribute to set.
+        /// </summary>
         /// <param name="mode">For BucletID</param>
         /// <param name="region">For BucletID</param>
         /// <param name="mapName">For BucletID</param>
@@ -359,29 +385,15 @@ namespace SynicSugar.MatchMake {
 
             return lobby;
         }
-        /// <summary>
-        /// For search conditions.<br />
-        /// About attributes, use GenerateLobbyAttribute to set.
-        /// </summary>
-        /// <param name="bucket">important condition like game-mode, region, map</param>
-        /// <param name="MaxPlayers">Max number of user allowed in the lobby</param>
-        /// <returns></returns>
-        public static Lobby GenerateLobbyObject(string[] bucket, uint MaxPlayers = 2){
-            Lobby lobby = new Lobby();
-            lobby.SetBucketID(bucket);
-            lobby.MaxLobbyMembers = MaxPlayers;
 
-            return lobby;
+        [Obsolete("MatchMakeManager.Instance.lobbyIDMethod.Register(Action save, Action delete, bool changeType = true) is new one")]
+        public void RegisterLobbyIDFunctions(Action save, Action delete, bool changeType = true){
+            lobbyIDMethod.Register(save, delete, changeType);
         }
-        /// <summary>
-        /// Change State text
-        /// </summary>
-        /// <param name="state"></param>
-        internal void UpdateStateDescription(MatchState state){
-            if(matchState.state == null){
-                return;
-            }
-            matchState.state.text = matchState.GetDiscription(state);
+        [Obsolete("MatchMakeManager.Instance.asyncLobbyIDMethod.Register(Func<UniTask> save, Func<UniTask> delete, bool changeType = true is new one")]
+        public void RegisterAsyncLobbyIDFunctions(Func<UniTask> save, Func<UniTask> delete, bool changeType = true){
+            asyncLobbyIDMethod.Register(save, delete, changeType);
         }
+    #endregion
     }
 }
