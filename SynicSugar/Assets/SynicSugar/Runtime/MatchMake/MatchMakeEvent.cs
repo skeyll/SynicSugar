@@ -1,14 +1,12 @@
 using System;
-using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using UnityEngine;
 
 namespace SynicSugar.MatchMake {
     public class LobbyIDMethod {
         public event Action Save, Delete;
-
         /// <summary>
-        /// Register finctions to save and delete lobby Id to re-connect.<br />
+        /// Register functions to save and delete lobby Id to re-connect.<br />
+        /// Can be registerd in the same way as a normal event. In that case, change MatchMakeManager.Instance.lobbyIdSaveType to CustomMethod.<br />
         /// We can use cloud and save assets for this, but these place to be saved and deleted must be in the same. 
         /// </summary>
         /// <param name="save">void function</param>
@@ -37,6 +35,7 @@ namespace SynicSugar.MatchMake {
         public event Func<UniTask> Save, Delete;
         /// <summary>
         /// Register functions that returns UniTask to save and delete lobby Id to re-connect.<br />
+        /// Can be registerd in the same way as a normal event. In that case, change MatchMakeManager.Instance.lobbyIdSaveType to AsyncCustomMethod.<br />
         /// We can use cloud and save assets for this, but these place to be saved and deleted must be in the same. 
         /// </summary>
         /// <param name="save">UniTask function</param>
