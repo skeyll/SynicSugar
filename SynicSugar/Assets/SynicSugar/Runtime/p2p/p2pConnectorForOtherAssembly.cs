@@ -189,8 +189,6 @@ namespace SynicSugar.P2P {
         #endif
         }
 #region Notify(ConnectRquest)
-        // MAYBE: Probably uint to determine if the request notification has been sent out, and since we allow reception for all SocketIDs (=SocketName), there is no need to call it multiple times.
-        // uint for performance instead of bool?
         void AddNotifyPeerConnectionRequest(){
             if (RequestNotifyId == 0){
                 AddNotifyPeerConnectionRequestOptions options = new AddNotifyPeerConnectionRequestOptions(){
@@ -228,8 +226,6 @@ namespace SynicSugar.P2P {
             Debug.Log("p2p connect request: Success Connect Request");
         #endif
         }
-        // Stop accepting new connect.
-        // ??? Can unsubscribe this notify in game when this player can connect all other pears?
         void RemoveNotifyPeerConnectionRequest(){
             P2PHandle.RemoveNotifyPeerConnectionRequest(RequestNotifyId);
             RequestNotifyId = 0;

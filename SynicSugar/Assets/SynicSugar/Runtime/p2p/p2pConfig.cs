@@ -39,7 +39,7 @@ namespace SynicSugar.P2P {
         /// Quality of connection
         /// </summary>
         public PacketReliability packetReliability = PacketReliability.ReliableOrdered;
-        public ConnectionNotify test = new();
+        public ConnectionNotifier ConnectionNotifier = new();
         
         public enum GetPacketFrequency {
             PerSecondFPS, PerSecond100, PerSecond50, PerSecond25
