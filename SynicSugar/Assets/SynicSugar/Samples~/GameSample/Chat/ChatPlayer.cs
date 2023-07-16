@@ -30,6 +30,8 @@ namespace SynicSugar.Samples {
             uiSets.transform.Find("Submit").GetComponent<Button>().onClick.AddListener(DecideChat);
             uiSets.transform.Find("Test").GetComponent<Button>().onClick.AddListener(DoStressTest);
             uiSets.transform.Find("Clear").GetComponent<Button>().onClick.AddListener(ClearChat);
+            uiSets.transform.Find("StopReceiver").GetComponent<Button>().onClick.AddListener(() => StopReceiver());
+            uiSets.transform.Find("StartReceiver").GetComponent<Button>().onClick.AddListener(() => RestartReceiver());
             uiSets.transform.Find("Pause").GetComponent<Button>().onClick.AddListener(() => PauseSession(false));
             uiSets.transform.Find("PauseF").GetComponent<Button>().onClick.AddListener(() => PauseSession(true));
             uiSets.transform.Find("Restart").GetComponent<Button>().onClick.AddListener(RestartSession);
@@ -75,6 +77,15 @@ namespace SynicSugar.Samples {
         public void ClearChat(){
             stressCount = 0;
             systemManager.chatText.text = System.String.Empty;
+        }
+        public void StopReceiver(){
+            EOSDebug.Instance.Log("Chat Mode: StopReceiver");
+            ConnectHub.Instance.PausetPacketReceiver();
+        }
+
+        public void RestartReceiver(){
+            EOSDebug.Instance.Log("Chat Mode: Restart");
+            ConnectHub.Instance.StartPacketReceiver();
         }
         public void PauseSession(bool isForced){
             isStressTesting = false;
