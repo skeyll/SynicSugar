@@ -26,7 +26,7 @@ namespace SynicSugar.P2P {
             }
         }
         void Start(){
-            SetIntervalSeconds(p2pConfig.Instance.receiveInterval);
+            SetIntervalSeconds();
             P2PHandle = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface();
         }
 #endregion
@@ -47,14 +47,21 @@ namespace SynicSugar.P2P {
         /// For internal process Use this 
         /// </summary>
         /// <value></value>
-        public int receiverInterval { get; private set; } = 25;
-        void SetIntervalSeconds(p2pConfig.ReceiveInterval size){
-            if(size == p2pConfig.ReceiveInterval.Large){
-                receiverInterval = 50;
-            }else if(size == p2pConfig.ReceiveInterval.Moderate){
-                receiverInterval = 25;
-            }else{
+        public int receiverInterval { get; private set; } = 20;
+        void SetIntervalSeconds(){
+            switch(p2pConfig.Instance.getPacketFrequency){
+                case p2pConfig.GetPacketFrequency.PerSecondFPS:
+                receiverInterval = 0;
+                break;
+                case p2pConfig.GetPacketFrequency.PerSecond100:
                 receiverInterval = 10;
+                break;
+                case p2pConfig.GetPacketFrequency.PerSecond50:
+                receiverInterval = 20;
+                break;
+                case p2pConfig.GetPacketFrequency.PerSecond25:
+                receiverInterval = 40;
+                break;
             }
         }
 
