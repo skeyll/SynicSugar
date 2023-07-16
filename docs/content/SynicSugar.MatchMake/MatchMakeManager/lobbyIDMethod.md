@@ -27,7 +27,7 @@ Delete is called on the last of ConnectHub *[ExitSession](../../SynicSugar.P2P/C
 | Delete | Event to save LobbyID to reconnect Lobby. |
 
 
-### Properity
+### Function
 | API | description |
 |---|---|
 | Register | Set events and switch lobbyIdSaveType |
