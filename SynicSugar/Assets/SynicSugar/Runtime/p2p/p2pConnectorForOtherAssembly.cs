@@ -137,7 +137,7 @@ namespace SynicSugar.P2P {
             //Set options
             ReceivePacketOptions options = new ReceivePacketOptions(){
                 LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
-                MaxDataSizeBytes = 4096,
+                MaxDataSizeBytes = 1170,
                 RequestedChannel = null
             };
             //Next packet size
