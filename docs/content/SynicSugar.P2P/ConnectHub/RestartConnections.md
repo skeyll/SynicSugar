@@ -13,8 +13,6 @@ public void RestartConnections()
 Restart to receive packets to the receiving buffer and get a packet from there.<br>
 This is for *[PauseConnections](../ConnectHub/pauseconnections)*
 
-**WARNING: PauseConnections doesn't work as intended now. Can't stop receiving packets to buffer. This discards all packets from the receiving buffer before re-start.**
-
 
 ```cs
 using SynicSugar.P2P;

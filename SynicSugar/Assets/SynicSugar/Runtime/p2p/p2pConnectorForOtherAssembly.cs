@@ -7,7 +7,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using SynicSugar.MatchMake;
 //We can't call the main-Assembly from own-assemblies.
-//So, use such processes through  this assembly .
+//So, use such processes through this assembly.
 namespace SynicSugar.P2P {
     public class p2pConnectorForOtherAssembly : MonoBehaviour {
 #region Singleton
@@ -26,7 +26,7 @@ namespace SynicSugar.P2P {
             }
         }
         void Start(){
-            SetIntervalSeconds(p2pConfig.Instance.receiveInterval);
+            SetIntervalSeconds();
             P2PHandle = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface();
         }
 #endregion
@@ -47,23 +47,31 @@ namespace SynicSugar.P2P {
         /// For internal process Use this 
         /// </summary>
         /// <value></value>
-        public int receiverInterval { get; private set; } = 25;
-        void SetIntervalSeconds(p2pConfig.ReceiveInterval size){
-            if(size == p2pConfig.ReceiveInterval.Large){
-                receiverInterval = 50;
-            }else if(size == p2pConfig.ReceiveInterval.Moderate){
-                receiverInterval = 25;
-            }else{
+        public int receiverInterval { get; private set; } = 20;
+        void SetIntervalSeconds(){
+            switch(p2pConfig.Instance.getPacketFrequency){
+                case p2pConfig.GetPacketFrequency.PerSecondFPS:
+                receiverInterval = 0;
+                break;
+                case p2pConfig.GetPacketFrequency.PerSecond100:
                 receiverInterval = 10;
+                break;
+                case p2pConfig.GetPacketFrequency.PerSecond50:
+                receiverInterval = 20;
+                break;
+                case p2pConfig.GetPacketFrequency.PerSecond25:
+                receiverInterval = 40;
+                break;
             }
         }
 
     #region Pause Session(Experimental, Not recommend for game?)
         /// <summary>
-        /// Stop packet receeiveing to buffer. Packets are discarded while stopped.
+        /// For ConnectManager. Stop packet receeiveing to buffer. While stopping, packets are dropped.
         /// </summary>
         /// <param name="isForced">If True, stop and clear current packet queue. </ br>
         /// If false, process current queue, then stop it.</param>
+        /// <param name="token">For this task</param>
         public async UniTask PauseConnections(bool isForced, CancellationTokenSource cancelToken){
             if(isForced){
                 ResetConnections();
@@ -89,12 +97,7 @@ namespace SynicSugar.P2P {
         /// Prepare to receive in advance. If user sent packets, it can open to get packets for a socket id without this.
         /// </summary>
         public void RestartConnections(){
-        #region TMP (Can't stop receiving to Buffer)
-            ClearPacketQueue();
-        #endregion
-            //MAYBE: This request work only for a new connection request, so, for former peers, we need to accept these by ourself.
-            AddNotifyPeerConnectionRequest();
-            ReAcceptAllConenctions();
+            OpenConnection();
 
             p2pToken = new CancellationTokenSource();
         }
@@ -104,18 +107,20 @@ namespace SynicSugar.P2P {
         /// Stop connections, exit current lobby.<br />
         /// To just leave from the current lobby.(This is not destroying it)
         /// </summary>
-        public async UniTask<bool> ExitSession(CancellationTokenSource token){
+        public async UniTask<bool> ExitSession(CancellationToken token){
             ResetConnections();
 
+            bool canExit = await MatchMakeManager.Instance.ExitCurrentLobby(token);
+            
             Destroy(this.gameObject);
-            return await MatchMakeManager.Instance.ExitCurrentLobby(token);
+            return canExit;
         }
         /// <summary>
         /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll.</ br>
         /// Stop connections, exit current lobby.<br />
         /// To just leave from the current lobby.(This is not destroying it)
         /// </summary>
-        public async UniTask<bool> CloseSession(CancellationTokenSource token){
+        public async UniTask<bool> CloseSession(CancellationToken token){
             ResetConnections();
             bool canLeave = true;
             if(p2pConfig.Instance.userIds.IsHost()){
@@ -134,7 +139,7 @@ namespace SynicSugar.P2P {
             //Set options
             ReceivePacketOptions options = new ReceivePacketOptions(){
                 LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
-                MaxDataSizeBytes = 4096,
+                MaxDataSizeBytes = 1170,
                 RequestedChannel = null
             };
             //Next packet size
@@ -184,8 +189,6 @@ namespace SynicSugar.P2P {
         #endif
         }
 #region Notify(ConnectRquest)
-        // MAYBE: Probably uint to determine if the request notification has been sent out, and since we allow reception for all SocketIDs (=SocketName), there is no need to call it multiple times.
-        // uint for performance instead of bool?
         void AddNotifyPeerConnectionRequest(){
             if (RequestNotifyId == 0){
                 AddNotifyPeerConnectionRequestOptions options = new AddNotifyPeerConnectionRequestOptions(){
@@ -223,8 +226,6 @@ namespace SynicSugar.P2P {
             Debug.Log("p2p connect request: Success Connect Request");
         #endif
         }
-        // Stop accepting new connect.
-        // ??? Can unsubscribe this notify in game when this player can connect all other pears?
         void RemoveNotifyPeerConnectionRequest(){
             P2PHandle.RemoveNotifyPeerConnectionRequest(RequestNotifyId);
             RequestNotifyId = 0;
@@ -237,6 +238,7 @@ namespace SynicSugar.P2P {
     /// </summary>
     internal void OpenConnection(){
         AddNotifyPeerConnectionRequest();
+        AcceptAllConenctions();
     }
     //Reason: This order(Receiver, Connection, Que) is that if the RPC includes Rpc to reply, the connections are automatically re-started.
     /// <summary>
@@ -245,9 +247,12 @@ namespace SynicSugar.P2P {
     void ResetConnections(){
         p2pToken.Cancel();
         CloseConnection();
-        // ClearPacketQueue();
+        ClearPacketQueue();
     }
-    void ReAcceptAllConenctions(){
+    /// <summary>
+    /// For the end of matchmaking.
+    /// </summary>
+    void AcceptAllConenctions(){
         AcceptConnectionOptions options = new AcceptConnectionOptions(){
                 LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
                 SocketId = SocketId
@@ -279,7 +284,7 @@ namespace SynicSugar.P2P {
                 SocketId = SocketId
             };
             Result result = P2PHandle.CloseConnections(ref closeOptions);
-            Debug.Log($"close result is {result} / {SocketId}");
+            Debug.Log($"close result is {result} / {ScoketName}");
             if(result != Result.Success){
                 Debug.LogErrorFormat("CloseConnections: Failed to disconnect {0}", result);
             }

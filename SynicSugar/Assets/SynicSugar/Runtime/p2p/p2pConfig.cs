@@ -15,6 +15,8 @@ namespace SynicSugar.P2P {
         }
         void OnDestroy() {
             if( Instance == this ) {
+                ConnectionNotifier.Clear();
+
                 Instance = null;
             }
         }
@@ -35,20 +37,53 @@ namespace SynicSugar.P2P {
         /// Recommend: 1000-3000ms.
         /// </summary>
         public int autoSyncInterval = 1000;
-        public enum ReceiveInterval{
-            Large, Moderate, Small
-        }
-        [Header("delay[ms]/per recive:Small 10, Mod 25, Large 50")]
-        /// <summary>
-        /// Frequency of calling PacketReceiver. [Small 10ms, Moderate 25ms, Large 50ms]</ br>
-        /// Cannot exceed the recive's fps of the app's. </ br>
-        /// Recommend: Moderate. (-8peers, mobile game, non large-party acion game)
-        /// </summary>
-        public ReceiveInterval receiveInterval = ReceiveInterval.Moderate;
         /// <summary>
         /// Quality of connection
         /// </summary>
         public PacketReliability packetReliability = PacketReliability.ReliableOrdered;
+        public ConnectionNotifier ConnectionNotifier = new ConnectionNotifier();
+        
+        public enum GetPacketFrequency {
+            PerSecondFPS, PerSecond100, PerSecond50, PerSecond25
+        }
+        [Header("PacketReceiver's Frequency/per seconds *Never more than game FPS.")]
+        /// <summary>
+        /// Frequency of calling PacketReceiver.</ br>
+        /// Cannot exceed the recive's fps of the app's. </ br>
+        /// </summary>
+        public GetPacketFrequency getPacketFrequency = GetPacketFrequency.PerSecond50;
+
+    #region Obolete
+        public enum ReceiveInterval{
+            Large, Moderate, Small
+        }
+        [Obsolete("getPacketFrequency is new one"), HideInInspector]
+        public ReceiveInterval receiveInterval { 
+            get {
+                switch(getPacketFrequency){
+                    case GetPacketFrequency.PerSecond100:
+                    return ReceiveInterval.Small;
+                    case GetPacketFrequency.PerSecond50:
+                    return ReceiveInterval.Moderate;
+                    default:
+                    return ReceiveInterval.Large;
+                }
+            }
+            set {
+                switch(value){
+                    case ReceiveInterval.Large:
+                    getPacketFrequency = GetPacketFrequency.PerSecond25;
+                    break;
+                    case ReceiveInterval.Moderate:
+                    getPacketFrequency = GetPacketFrequency.PerSecond50;
+                    break;
+                    default:
+                    getPacketFrequency = GetPacketFrequency.PerSecond100;
+                    break;
+                }
+            }
+        }
+    #endregion
     }
 #region Obsolete
     public class p2pManager {

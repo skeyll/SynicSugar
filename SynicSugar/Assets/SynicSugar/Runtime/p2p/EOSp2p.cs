@@ -8,7 +8,7 @@ using UnityEngine;
 namespace SynicSugar.P2P {
     public static class EOSp2p {
         /// <summary>
-        /// Send packet to all remote pears. <br />
+        /// Send a packet to all remote peers. <br />
         /// Normally, <c>generated functions (have [RPC]) call this</c>, but we can also use this.
         /// We can SendPacketToAll(...).Forget()
         /// </summary>
@@ -21,7 +21,7 @@ namespace SynicSugar.P2P {
                 LocalUserId = EOSManager.Instance.GetProductUserId(),
                 SocketId = p2pConnectorForOtherAssembly.Instance.SocketId,
                 Channel = ch,
-                AllowDelayedDelivery = true,
+                AllowDelayedDelivery = false,
                 Reliability = PacketReliability.ReliableOrdered,
                 Data = new ArraySegment<byte>(value != null ? value : Array.Empty<byte>())
             };
@@ -45,7 +45,7 @@ namespace SynicSugar.P2P {
             }
         }
         /// <summary>
-        /// Send packet to a specific pear.
+        /// Send a packet to a specific peer.
         /// </summary>
         /// <param name="ch"></param>
         /// <param name="value"></param>
@@ -56,7 +56,7 @@ namespace SynicSugar.P2P {
                 RemoteUserId = targetId.AsEpic,
                 SocketId = p2pConnectorForOtherAssembly.Instance.SocketId,
                 Channel = ch,
-                AllowDelayedDelivery = true,
+                AllowDelayedDelivery = false,
                 Reliability = p2pConfig.Instance.packetReliability,
                 Data = new ArraySegment<byte>(value != null ? value : Array.Empty<byte>())
             };
@@ -68,5 +68,8 @@ namespace SynicSugar.P2P {
                 return;
             }
         }
+    }
+    public enum Reason {
+        Left, Disconnected, Unknown
     }
 }

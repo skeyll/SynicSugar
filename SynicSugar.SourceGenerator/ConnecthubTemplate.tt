@@ -69,7 +69,7 @@ namespace SynicSugar.P2P {
         /// To exit from lobby alone during a game(= not whole, only one battle). Usually use CloseSession().
         /// </summary>
         public async UniTask<bool> ExitSession(CancellationTokenSource cancelToken = default(CancellationTokenSource)){
-            bool isSuccess = await p2pConnectorForOtherAssembly.Instance.ExitSession(cancelToken);
+            bool isSuccess = await p2pConnectorForOtherAssembly.Instance.ExitSession(cancelToken.Token);
             return isSuccess;
         }
         /// <summary>
@@ -77,7 +77,7 @@ namespace SynicSugar.P2P {
         /// Then, Host closees and Guest leaves the lobby.
         /// </summary>
         public async UniTask<bool> CloseSession(CancellationTokenSource cancelToken = default(CancellationTokenSource)){
-            bool isSuccess = await p2pConnectorForOtherAssembly.Instance.CloseSession(cancelToken);
+            bool isSuccess = await p2pConnectorForOtherAssembly.Instance.CloseSession(cancelToken.Token);
             return isSuccess;
         }
         async UniTask RecivePacket(){
@@ -87,7 +87,11 @@ namespace SynicSugar.P2P {
                 if(recivePacket != null){
                     ConnectHub.Instance.ConvertFormPacket(recivePacket);
                 }
-                await UniTask.Delay(p2pConnectorForOtherAssembly.Instance.receiverInterval, cancellationToken: p2pConnectorForOtherAssembly.Instance.p2pToken.Token);
+                await UniTask.Delay(p2pConnectorForOtherAssembly.Instance.receiverInterval);
+
+                if(p2pConnectorForOtherAssembly.Instance.p2pToken.IsCancellationRequested){
+                    break;
+                }
             }
         }
 
@@ -130,7 +134,8 @@ namespace SynicSugar.P2P {
         /// </summary>
         [Obsolete("This is old. Can use CloseSession()")]
         public void EndConnection(){
-            p2pConnectorForOtherAssembly.Instance.CloseSession(null);
+            CancellationTokenSource token = new CancellationTokenSource();
+            p2pConnectorForOtherAssembly.Instance.CloseSession(token.Token);
         }
         //----
     }

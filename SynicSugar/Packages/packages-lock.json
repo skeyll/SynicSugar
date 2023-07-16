@@ -8,7 +8,7 @@
       "url": "https://package.openupm.com"
     },
     "com.cysharp.unitask": {
-      "version": "2.3.1",
+      "version": "2.3.3",
       "depth": 0,
       "source": "registry",
       "dependencies": {},

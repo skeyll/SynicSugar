@@ -17,16 +17,21 @@ namespace SynicSugar.MatchMake {
             Instance = this;
             DontDestroyOnLoad(this);
 
-            eosLobby = new EOSLobby(maxSearchResult, hostsTimeoutSec, lobbyIdSaveType);
+            eosLobby = new EOSLobby(maxSearchResult, hostsTimeoutSec);
 
             if(lobbyIdSaveType == RecconectLobbyIdSaveType.CustomMethod){
                 if(customSaveLobbyID != null && customDeleteLobbyID != null){
-                    eosLobby.RegisterLobbyIdEvent((() => customSaveLobbyID.Invoke()), (() => customDeleteLobbyID.Invoke()));
+                    lobbyIDMethod.Save += () => customSaveLobbyID.Invoke();
+                    lobbyIDMethod.Delete += () => customDeleteLobbyID.Invoke();
                 }
             }
         }
         void OnDestroy() {
             if( Instance == this ) {
+                //For sub events
+                lobbyIDMethod.Clear();
+                asyncLobbyIDMethod.Clear();
+
                 Instance = null;
             }
         }
@@ -51,9 +56,13 @@ namespace SynicSugar.MatchMake {
         [Header("CustomMetod")]
         [SerializeField] UnityEvent customSaveLobbyID;
         [SerializeField] UnityEvent customDeleteLobbyID;
-
+    #endregion
+    #region SaveEvent's
+        public LobbyIDMethod lobbyIDMethod = new LobbyIDMethod();
+        public AsyncLobbyIDMethod asyncLobbyIDMethod = new AsyncLobbyIDMethod();
     #endregion
         EOSLobby eosLobby;
+        CancellationTokenSource matchingToken;
         public MatchGUIState matchState = new MatchGUIState();
 
         /// <summary>
@@ -63,47 +72,37 @@ namespace SynicSugar.MatchMake {
         public void SetGUIState(MatchGUIState state){
             matchState = state;
         }
-        /// <summary>
-        /// Register Action to save and delete lobby Id for re-connect.<br />
-        /// We can use cloud and save assets for this, but these place to be saved and deleted must be in the same. 
-        /// </summary>
-        /// <param name="save">void function</param>
-        /// <param name="delete">void function</param>
-        /// <param name="changeType">If true, change SaveType in this method</param>
-        public void RegisterLobbyIDFunctions(Action save, Action delete, bool changeType = true){
-            if(changeType){
-                lobbyIdSaveType = RecconectLobbyIdSaveType.CustomMethod;
-            }
-            eosLobby.RegisterLobbyIdEvent(save, delete);
-        }
-        
-        /// <summary>
-        /// Register Action to save and delete lobby Id for re-connect.<br />
-        /// We can use cloud and save assets for this, but these place to be saved and deleted must be in the same. 
-        /// </summary>
-        /// <param name="save">UniTask function</param>
-        /// <param name="delete">UniTask function</param>
-        /// <param name="changeType">If true, change SaveType in this method</param>
-        public void RegisterAsyncLobbyIDFunctions(Func<UniTask> save, Func<UniTask> delete, bool changeType = true){
-            if(changeType){
-                lobbyIdSaveType = RecconectLobbyIdSaveType.AsyncCustomMethod;
-            }
-            eosLobby.RegisterAsyncLobbyIdEvent(save, delete);
-        }
+
         /// <summary>
         /// MatchMake player with conditions and get the data for p2p connect. <br />
         /// Search a lobby, then if can't join, create a lobby as host.
         /// </summary>
         /// <param name="lobbyCondition">Crate by EOSLobbyExtenstions.GenerateLobby().</param>
-        /// <param name="token">To cancel task</param>
+        /// <param name="token">For cancel matchmaking. This is used by CancelCurrentMatchMake.
+        /// If pass, we implement OperationCanceledException by ourself.
+        /// If not pass, such processe are done internally and return false when we cancel matchmake.</param>
         /// <returns></returns>
-        public async UniTask<bool> SearchAndCreateLobby(Lobby lobbyCondition, CancellationTokenSource token){
-            //Match at Lobby
-            bool canMatch = await eosLobby.StartMatching(lobbyCondition, token);
+        public async UniTask<bool> SearchAndCreateLobby(Lobby lobbyCondition, CancellationTokenSource token = default(CancellationTokenSource)){
+            bool useTryCatch = token == default;
+            matchingToken = useTryCatch ? new CancellationTokenSource() : token;
+            
+            bool canMatch = false;
 
-            if(token.IsCancellationRequested){
-                return false;
+            //Match at Lobby
+            if(useTryCatch){
+                try{
+                canMatch = await eosLobby.StartMatching(lobbyCondition, matchingToken.Token);
+                }catch(OperationCanceledException){
+                #if SYNICSUGAR_LOG
+                    Debug.Log("MatchMaking is canceled");
+                #endif
+                    UpdateStateDescription(MatchState.Cancel);
+                    return false;
+                }
+            }else{
+                canMatch = await eosLobby.StartMatching(lobbyCondition, matchingToken.Token);
             }
+
             if(!canMatch){
                 UpdateStateDescription(MatchState.Cancel);
                 return false;
@@ -117,11 +116,32 @@ namespace SynicSugar.MatchMake {
         /// Recommend: SearchAndCreateLobby()
         /// </summary>
         /// <param name="lobbyCondition">Crate by EOSLobbyExtenstions.GenerateLobby().</param>
-        /// <param name="token">To cancel task</param>
+        /// <param name="token">For cancel matchmaking. This is used by CancelCurrentMatchMake.
+        /// If pass, we implement OperationCanceledException by ourself.
+        /// If not pass, such processe are done internally and return false when we cancel matchmake.</param>
         /// <returns></returns>
-        public async UniTask<bool> SearchLobby(Lobby lobbyCondition, CancellationTokenSource token){
+        public async UniTask<bool> SearchLobby(Lobby lobbyCondition, CancellationTokenSource token = default(CancellationTokenSource)){
+            bool useTryCatch = token == default;
+            matchingToken = useTryCatch ? new CancellationTokenSource() : token;
+            
+            bool canMatch = false;
+
             //Match at Lobby
-            bool canMatch = await eosLobby.StartJustSearch(lobbyCondition, token);
+            if(useTryCatch){
+                try{
+                canMatch = await eosLobby.StartJustSearch(lobbyCondition, matchingToken.Token);
+                }catch(OperationCanceledException){
+                #if SYNICSUGAR_LOG
+                    Debug.Log("MatchMaking is canceled");
+                #endif
+                    UpdateStateDescription(MatchState.Cancel);
+                    return false;
+                }
+            }else{
+                canMatch = await eosLobby.StartJustSearch(lobbyCondition, matchingToken.Token);
+            }
+
+
             if(!canMatch){
                 UpdateStateDescription(MatchState.Cancel);
                 return false;
@@ -136,15 +156,31 @@ namespace SynicSugar.MatchMake {
         /// Recommend: SearchAndCreateLobby()
         /// </summary>
         /// <param name="lobbyCondition">Crate by EOSLobbyExtenstions.GenerateLobby().</param>
-        /// <param name="token">To cancel task</param>
+        /// <param name="token">For cancel matchmaking. This is used by CancelCurrentMatchMake.
+        /// If pass, we implement OperationCanceledException by ourself.
+        /// If not pass, such processe are done internally and return false when we cancel matchmake.</param>
         /// <returns></returns>
-        public async UniTask<bool> CreateLobby(Lobby lobbyCondition, CancellationTokenSource token){
-            //Match at Lobby
-            bool canMatch = await eosLobby.StartJustCreate(lobbyCondition, token);
+        public async UniTask<bool> CreateLobby(Lobby lobbyCondition, CancellationTokenSource token = default(CancellationTokenSource)){
+            bool useTryCatch = token == default;
+            matchingToken = useTryCatch ? new CancellationTokenSource() : token;
             
-            if(token.IsCancellationRequested){
-                return false;
+            bool canMatch = false;
+
+            //Match at Lobby
+            if(useTryCatch){
+                try{
+                canMatch = await eosLobby.StartJustCreate(lobbyCondition, matchingToken.Token);
+                }catch(OperationCanceledException){
+                #if SYNICSUGAR_LOG
+                    Debug.Log("MatchMaking is canceled");
+                #endif
+                    UpdateStateDescription(MatchState.Cancel);
+                    return false;
+                }
+            }else{
+                canMatch = await eosLobby.StartJustCreate(lobbyCondition, matchingToken.Token);
             }
+
             if(!canMatch){
                 UpdateStateDescription(MatchState.Cancel);
                 return false;
@@ -153,39 +189,71 @@ namespace SynicSugar.MatchMake {
             UpdateStateDescription(MatchState.Success);
             return true;
         }
-        [Obsolete("This is old. ReconnecLobby() is new one.")]
-        public async UniTask<bool> ReconnectParticipatingLobby(string LobbyID, CancellationTokenSource token){
-            return await ReconnecLobby(LobbyID, token);
-        }
         /// <summary>
         /// Join the Lobby with saved LobbyID. <br />
         /// Call this at the start of game or match-make.
         /// </summary>
         /// <param name="LobbyID">Lobby ID to <c>re</c>-connect</param>
-        public async UniTask<bool> ReconnecLobby(string LobbyID, CancellationTokenSource token){
+        public async UniTask<bool> ReconnectLobby(string LobbyID, CancellationTokenSource token = default(CancellationTokenSource)){
             if(string.IsNullOrEmpty(LobbyID)){
                 return false;
             }
     #if SYNICSUGAR_LOG
             Debug.Log($"Try Recconect with {LobbyID}");
     #endif
-            bool canJoin = await eosLobby.JoinLobbyBySavedLobbyId(LobbyID, token);
+    
+            bool useTryCatch = token == default;
+            matchingToken = useTryCatch ? new CancellationTokenSource() : token;
+            
+            bool canJoin = false;
 
-            return canJoin;
+            //Match at Lobby
+            if(useTryCatch){
+                try{
+                canJoin = await eosLobby.JoinLobbyBySavedLobbyId(LobbyID, matchingToken.Token);
+                }catch(OperationCanceledException){
+                #if SYNICSUGAR_LOG
+                    Debug.Log("MatchMaking is canceled");
+                #endif
+                    UpdateStateDescription(MatchState.Cancel);
+                    return false;
+                }
+            }else{
+                canJoin = await eosLobby.JoinLobbyBySavedLobbyId(LobbyID, matchingToken.Token);
+            }
+
+            if(!canJoin){
+                UpdateStateDescription(MatchState.Cancel);
+                return false;
+            }
+
+            return true;
         }
         /// <summary>
         /// Exit lobby and cancel MatchMake.
         /// </summary>
         /// <param name="token">token for this task</param>
+        /// <param name="removeManager">If true, destroy ConnectManager. When we move to the other scene (where we don't need ConnectManager) after this, we should pass true.</param>
         /// <returns></returns>
-        public async UniTask<bool> CancelCurrentMatchMake(CancellationTokenSource token){
-            return await eosLobby.CancelMatchMaking(token);
+        public async UniTask<bool> CancelCurrentMatchMake(bool removeManager = false, CancellationToken token = default(CancellationToken)){
+            if(matchingToken == null || !matchingToken.Token.CanBeCanceled){
+            #if SYNICSUGAR_LOG
+                Debug.Log("CancelCurrentMatchMake: Is this user currently in matchmaking?");
+            #endif
+                return false;
+            }
+            bool canCancel =  await eosLobby.CancelMatchMaking(matchingToken, token);
+            
+            if(removeManager && canCancel){
+                Destroy(this.gameObject);
+            }
+            return canCancel;
         }
         /// <summary>
         /// Leave the current lobby in Game.
         /// </summary>
         /// <param name="token"></param>
-        internal async UniTask<bool> ExitCurrentLobby(CancellationTokenSource token){
+        internal async UniTask<bool> ExitCurrentLobby(CancellationToken token){
             bool canDestroy = await eosLobby.LeaveLobby(false, token);
 
             return canDestroy;
@@ -195,17 +263,61 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         /// <param name="token"></param>
         /// <returns>True on success. If user isn't host, return false.</returns>
-        internal async UniTask<bool> CloseCurrentLobby(CancellationTokenSource token){
+        internal async UniTask<bool> CloseCurrentLobby(CancellationToken token){
             bool canDestroy = await eosLobby.DestroyLobby(token);
 
             return canDestroy;
         }
+    #region LobbyID
         /// <summary>
         /// Get ID of the current lobby that a user's participating
         /// </summary>
         /// <returns>string LobbyID</returns>
         public string GetCurrentLobbyID(){
             return eosLobby.GetCurenntLobbyID();
+        }
+        
+        /// <summary>
+        /// Save lobby data for player to connect unexpectedly left lobby like power off.
+        /// </summary>
+        internal async UniTask OnSaveLobbyID(){
+    #if SYNICSUGAR_LOG
+            Debug.Log($"Save LobbyID by {lobbyIdSaveType}");
+    #endif
+            switch(lobbyIdSaveType){
+                case MatchMakeManager.RecconectLobbyIdSaveType.NoReconnection:
+                return;
+                case MatchMakeManager.RecconectLobbyIdSaveType.Playerprefs:
+                    PlayerPrefs.SetString(MatchMakeManager.Instance.playerprefsSaveKey, GetCurrentLobbyID());
+                return;
+                case MatchMakeManager.RecconectLobbyIdSaveType.CustomMethod:
+                    lobbyIDMethod.OnSave();
+                return;
+                case MatchMakeManager.RecconectLobbyIdSaveType.AsyncCustomMethod:
+                    await asyncLobbyIDMethod.OnSave();
+                return;
+            }
+        }
+        /// <summary>
+        /// Delete save data for player not to connect the current lobby after the battle.
+        /// </summary>
+        internal async UniTask OnDeleteLobbyID(){
+    #if SYNICSUGAR_LOG
+            Debug.Log($"Delete LobbyID by {lobbyIdSaveType}");
+    #endif
+            switch(lobbyIdSaveType){
+                case MatchMakeManager.RecconectLobbyIdSaveType.NoReconnection:
+                return;
+                case MatchMakeManager.RecconectLobbyIdSaveType.Playerprefs:
+                    PlayerPrefs.DeleteKey(MatchMakeManager.Instance.playerprefsSaveKey);
+                return;
+                case MatchMakeManager.RecconectLobbyIdSaveType.CustomMethod:
+                    lobbyIDMethod.OnSave();
+                return;
+                case MatchMakeManager.RecconectLobbyIdSaveType.AsyncCustomMethod:
+                    await asyncLobbyIDMethod.OnDelete();
+                return;
+            }
         }
         /// <summary>
         /// For the DEFAULT way, get LobbyID from PlayerPrefs.<br />
@@ -214,33 +326,6 @@ namespace SynicSugar.MatchMake {
         /// <returns>If it exists, returns STRING key. If not, returns String.Empty.</returns>
         public string GetReconnectLobbyID(){
             return PlayerPrefs.GetString (playerprefsSaveKey, System.String.Empty);
-        }
-        /// <summary>
-        /// For search conditions.<br />
-        /// About attributes, use GenerateLobbyAttribute to set.
-        /// </summary>
-        /// <param name="mode">For BucletID</param>
-        /// <param name="region">For BucletID</param>
-        /// <param name="mapName">For BucletID</param>
-        /// <returns></returns>
-        [Obsolete("This is old. GenerateLobbyObject(string[] bucket, uint MaxPlayers, bool bPresenceEnabled) is new one.")]
-        public static Lobby GenerateLobby(string mode = "", string region = "",
-                                            string mapName = "", uint MaxPlayers = 2,
-                                            bool bPresenceEnabled = false){
-            Lobby lobby = new Lobby();
-            lobby.SetBucketID(new string[3]{ mode, region, mapName });
-            lobby.MaxLobbyMembers = MaxPlayers;
-
-            return lobby;
-        }
-        [Obsolete("This is old. GenerateLobbyObject(string[] bucket, uint MaxPlayers, bool bPresenceEnabled) is new one.")]
-        public static Lobby GenerateLobby(string[] bucket, uint MaxPlayers = 2,
-                                            bool bPresenceEnabled = false){
-            Lobby lobby = new Lobby();
-            lobby.SetBucketID(bucket);
-            lobby.MaxLobbyMembers = MaxPlayers;
-
-            return lobby;
         }
         /// <summary>
         /// For search conditions.<br />
@@ -266,5 +351,49 @@ namespace SynicSugar.MatchMake {
             }
             matchState.state.text = matchState.GetDiscription(state);
         }
+
+    #region Obsolete
+        [Obsolete("This is old. ReconnecLobby() is new one.")]
+        public async UniTask<bool> ReconnectParticipatingLobby(string LobbyID, CancellationTokenSource token){
+            return await ReconnectLobby(LobbyID, token);
+        }
+        /// <summary>
+        /// For search conditions.<br />
+        /// About attributes, use GenerateLobbyAttribute to set.
+        /// </summary>
+        /// <param name="mode">For BucletID</param>
+        /// <param name="region">For BucletID</param>
+        /// <param name="mapName">For BucletID</param>
+        /// <returns></returns>
+        [Obsolete("This is old. GenerateLobbyObject(string[] bucket, uint MaxPlayers, bool bPresenceEnabled) is new one.")]
+        public static Lobby GenerateLobby(string mode = "", string region = "",
+                                            string mapName = "", uint MaxPlayers = 2,
+                                            bool bPresenceEnabled = false){
+            Lobby lobby = new Lobby();
+            lobby.SetBucketID(new string[3]{ mode, region, mapName });
+            lobby.MaxLobbyMembers = MaxPlayers;
+
+            return lobby;
+        }
+    #endregion
+        [Obsolete("This is old. GenerateLobbyObject(string[] bucket, uint MaxPlayers, bool bPresenceEnabled) is new one.")]
+        public static Lobby GenerateLobby(string[] bucket, uint MaxPlayers = 2,
+                                            bool bPresenceEnabled = false){
+            Lobby lobby = new Lobby();
+            lobby.SetBucketID(bucket);
+            lobby.MaxLobbyMembers = MaxPlayers;
+
+            return lobby;
+        }
+
+        [Obsolete("MatchMakeManager.Instance.lobbyIDMethod.Register(Action save, Action delete, bool changeType = true) is new one")]
+        public void RegisterLobbyIDFunctions(Action save, Action delete, bool changeType = true){
+            lobbyIDMethod.Register(save, delete, changeType);
+        }
+        [Obsolete("MatchMakeManager.Instance.asyncLobbyIDMethod.Register(Func<UniTask> save, Func<UniTask> delete, bool changeType = true is new one")]
+        public void RegisterAsyncLobbyIDFunctions(Func<UniTask> save, Func<UniTask> delete, bool changeType = true){
+            asyncLobbyIDMethod.Register(save, delete, changeType);
+        }
+    #endregion
     }
 }

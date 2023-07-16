@@ -71,45 +71,46 @@ namespace SynicSugarGenerator
                     "game(= not whole, only one battle). Usually use CloseSession().\r\n        /// </s" +
                     "ummary>\r\n        public async UniTask<bool> ExitSession(CancellationTokenSource " +
                     "cancelToken = default(CancellationTokenSource)){\r\n            bool isSuccess = a" +
-                    "wait p2pConnectorForOtherAssembly.Instance.ExitSession(cancelToken);\r\n          " +
-                    "  return isSuccess;\r\n        }\r\n        /// <summary>\r\n        /// Stop receiver" +
-                    ", close all connections and remove the notify events.<br />\r\n        /// Then, H" +
-                    "ost closees and Guest leaves the lobby.\r\n        /// </summary>\r\n        public " +
-                    "async UniTask<bool> CloseSession(CancellationTokenSource cancelToken = default(C" +
-                    "ancellationTokenSource)){\r\n            bool isSuccess = await p2pConnectorForOth" +
-                    "erAssembly.Instance.CloseSession(cancelToken);\r\n            return isSuccess;\r\n " +
-                    "       }\r\n        async UniTask RecivePacket(){\r\n            while(!p2pConnector" +
-                    "ForOtherAssembly.Instance.p2pToken.IsCancellationRequested){\r\n                Su" +
-                    "garPacket recivePacket = p2pConnectorForOtherAssembly.Instance.GetPacketFromBuff" +
-                    "er();\r\n\r\n                if(recivePacket != null){\r\n                    ConnectH" +
-                    "ub.Instance.ConvertFormPacket(recivePacket);\r\n                }\r\n               " +
-                    " await UniTask.Delay(p2pConnectorForOtherAssembly.Instance.receiverInterval, can" +
-                    "cellationToken: p2pConnectorForOtherAssembly.Instance.p2pToken.Token);\r\n        " +
-                    "    }\r\n        }\r\n\r\n        //(for elements)\r\n        public enum CHANNELLIST{\r\n" +
-                    "            ");
+                    "wait p2pConnectorForOtherAssembly.Instance.ExitSession(cancelToken.Token);\r\n    " +
+                    "        return isSuccess;\r\n        }\r\n        /// <summary>\r\n        /// Stop re" +
+                    "ceiver, close all connections and remove the notify events.<br />\r\n        /// T" +
+                    "hen, Host closees and Guest leaves the lobby.\r\n        /// </summary>\r\n        p" +
+                    "ublic async UniTask<bool> CloseSession(CancellationTokenSource cancelToken = def" +
+                    "ault(CancellationTokenSource)){\r\n            bool isSuccess = await p2pConnector" +
+                    "ForOtherAssembly.Instance.CloseSession(cancelToken.Token);\r\n            return i" +
+                    "sSuccess;\r\n        }\r\n        async UniTask RecivePacket(){\r\n            while(!" +
+                    "p2pConnectorForOtherAssembly.Instance.p2pToken.IsCancellationRequested){\r\n      " +
+                    "          SugarPacket recivePacket = p2pConnectorForOtherAssembly.Instance.GetPa" +
+                    "cketFromBuffer();\r\n\r\n                if(recivePacket != null){\r\n                " +
+                    "    ConnectHub.Instance.ConvertFormPacket(recivePacket);\r\n                }\r\n   " +
+                    "             await UniTask.Delay(p2pConnectorForOtherAssembly.Instance.receiverI" +
+                    "nterval);\r\n\r\n                if(p2pConnectorForOtherAssembly.Instance.p2pToken.I" +
+                    "sCancellationRequested){\r\n                    break;\r\n                }\r\n       " +
+                    "     }\r\n        }\r\n\r\n        //(for elements)\r\n        public enum CHANNELLIST{\r" +
+                    "\n            ");
             
-            #line 96 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 100 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(SyncList));
             
             #line default
             #line hidden
             this.Write("\r\n        }\r\n        //Ref(for class)");
             
-            #line 98 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 102 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Reference));
             
             #line default
             #line hidden
             this.Write("\r\n\r\n        //Register(for class)");
             
-            #line 100 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 104 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Register));
             
             #line default
             #line hidden
             this.Write("\r\n\r\n        //GetInstance(with class instance) Good performance in IL2cpp?");
             
-            #line 102 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 106 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetInstance));
             
             #line default
@@ -117,7 +118,7 @@ namespace SynicSugarGenerator
             this.Write("\r\n        //GetInstance(with <type>) Bad performance in IL2cpp?\r\n        // For P" +
                     "layer\r\n        public T GetUserInstance<T>(UserId id) where T : IGetPlayer {");
             
-            #line 105 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 109 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(PlayeInstance));
             
             #line default
@@ -125,7 +126,7 @@ namespace SynicSugarGenerator
             this.Write("\r\n            return default(T);\r\n        }\r\n        // For Commons\r\n        publ" +
                     "ic T GetUserInstance<T>() where T : IGetCommons {");
             
-            #line 109 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 113 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(CommonsInstance));
             
             #line default
@@ -134,7 +135,7 @@ namespace SynicSugarGenerator
                     "class)\r\n        [Obsolete]\r\n        public object GetUserInstanceAsObject(UserId" +
                     " id, Type type){");
             
-            #line 115 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 119 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetInstanceAsObject));
             
             #line default
@@ -143,7 +144,7 @@ namespace SynicSugarGenerator
                     "    public void ConvertFormPacket(SugarPacket packet){\r\n            switch((CHAN" +
                     "NELLIST)packet.ch){");
             
-            #line 121 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 125 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(PacketConvert));
             
             #line default
@@ -160,7 +161,8 @@ namespace SynicSugarGenerator
         /// </summary>
         [Obsolete(""This is old. Can use CloseSession()"")]
         public void EndConnection(){
-            p2pConnectorForOtherAssembly.Instance.CloseSession(null);
+            CancellationTokenSource token = new CancellationTokenSource();
+            p2pConnectorForOtherAssembly.Instance.CloseSession(token.Token);
         }
         //----
     }
