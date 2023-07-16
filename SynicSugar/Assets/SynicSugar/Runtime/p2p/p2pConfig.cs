@@ -15,6 +15,8 @@ namespace SynicSugar.P2P {
         }
         void OnDestroy() {
             if( Instance == this ) {
+                ConnectionNotifier.Clear();
+
                 Instance = null;
             }
         }
@@ -39,7 +41,7 @@ namespace SynicSugar.P2P {
         /// Quality of connection
         /// </summary>
         public PacketReliability packetReliability = PacketReliability.ReliableOrdered;
-        public ConnectionNotifier ConnectionNotifier = new();
+        public ConnectionNotifier ConnectionNotifier = new ConnectionNotifier();
         
         public enum GetPacketFrequency {
             PerSecondFPS, PerSecond100, PerSecond50, PerSecond25

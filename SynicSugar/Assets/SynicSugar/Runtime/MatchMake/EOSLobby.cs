@@ -927,8 +927,6 @@ namespace SynicSugar.MatchMake {
             LobbyMemberStatusNotification.Dispose();
             CurrentLobby.Clear();
 
-            Debug.Log("After");
-
             return canLeave;
         }
         void OnDestroyLobbyCompleted(ref DestroyLobbyCallbackInfo data){
