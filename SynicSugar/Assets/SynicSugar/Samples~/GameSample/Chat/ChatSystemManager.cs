@@ -11,6 +11,8 @@ namespace SynicSugar.Samples {
         public GameObject chatPlayerPrefab, uiSetsPrefabs;
         
         void Start() {
+            p2pConfig.Instance.ConnectionNotifier.Disconnected += OnDisconect;
+            p2pConfig.Instance.ConnectionNotifier.Connected += OnConnected;
             //At first, instantiate network objects.
             //It are registered to ConnectHub automatically.
             SynicObject.AllSpawn(chatPlayerPrefab);
@@ -20,6 +22,12 @@ namespace SynicSugar.Samples {
         public void SwitchPanelContent(){
             matchmakeCanvas.SetActive(false);
             chatCanvas.SetActive(true);
+        }
+        void OnDisconect(){
+            chatText.text += $"{p2pConfig.Instance.ConnectionNotifier.TargetUserId} is Disconnected / {p2pConfig.Instance.ConnectionNotifier.ClosedReason}";
+        }
+        void OnConnected(){
+            chatText.text += $"{p2pConfig.Instance.ConnectionNotifier.TargetUserId} Join";
         }
     }
 }

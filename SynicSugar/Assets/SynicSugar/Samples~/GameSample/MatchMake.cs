@@ -1,9 +1,11 @@
 using Cysharp.Threading.Tasks;
 using SynicSugar.MatchMake;
+using SynicSugar.P2P;
 using System;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.UI;
+
 
 namespace  SynicSugar.Samples {
     public class MatchMake : MonoBehaviour{
@@ -49,7 +51,7 @@ namespace  SynicSugar.Samples {
             startMatchMake.gameObject.SetActive(false);
             CancellationTokenSource token = new CancellationTokenSource();
 
-            bool canReconnect = await MatchMakeManager.Instance.ReconnecLobby(LobbyID, token);
+            bool canReconnect = await MatchMakeManager.Instance.ReconnectLobby(LobbyID, token);
 
             if(canReconnect){
                 EOSDebug.Instance.Log($"Success Recconect! LobbyID:{MatchMakeManager.Instance.GetCurrentLobbyID()}");
