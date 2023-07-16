@@ -1,6 +1,6 @@
 +++
 title = "LoginWithDeviceID"
-weight = 0
+weight = 1
 +++
 
 ## LoginWithDeviceID
@@ -15,6 +15,7 @@ public static async UniTask&lt;string&gt; LoginWithDeviceID(CancellationTokenSou
 Sign in EOS with DeviceID. If can sign in, return true.
 
 ```cs
+using UnityEngine;
 using Cysharp.Threading.Tasks;
 using System.Threading;
 using SynicSugar.Auth;
@@ -38,6 +39,7 @@ public class AuthLogin : MonoBehaviour {
 ```
 
 ```cs
+using UnityEngine;
 using Cysharp.Threading.Tasks;
 using System.Threading;
 using SynicSugar.Auth;
