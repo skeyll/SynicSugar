@@ -21,7 +21,7 @@ namespace SynicSugar.P2P {
                 LocalUserId = EOSManager.Instance.GetProductUserId(),
                 SocketId = p2pConnectorForOtherAssembly.Instance.SocketId,
                 Channel = ch,
-                AllowDelayedDelivery = true,
+                AllowDelayedDelivery = false,
                 Reliability = PacketReliability.ReliableOrdered,
                 Data = new ArraySegment<byte>(value != null ? value : Array.Empty<byte>())
             };
@@ -56,7 +56,7 @@ namespace SynicSugar.P2P {
                 RemoteUserId = targetId.AsEpic,
                 SocketId = p2pConnectorForOtherAssembly.Instance.SocketId,
                 Channel = ch,
-                AllowDelayedDelivery = true,
+                AllowDelayedDelivery = false,
                 Reliability = p2pConfig.Instance.packetReliability,
                 Data = new ArraySegment<byte>(value != null ? value : Array.Empty<byte>())
             };

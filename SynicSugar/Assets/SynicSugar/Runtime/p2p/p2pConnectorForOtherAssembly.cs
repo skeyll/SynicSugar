@@ -60,7 +60,7 @@ namespace SynicSugar.P2P {
 
     #region Pause Session(Experimental, Not recommend for game?)
         /// <summary>
-        /// For ConnectManager. Stop packet receeiveing to buffer. Packets are discarded while stopped.
+        /// For ConnectManager. Stop packet receeiveing to buffer. While stopping, packets are dropped.
         /// </summary>
         /// <param name="isForced">If True, stop and clear current packet queue. </ br>
         /// If false, process current queue, then stop it.</param>
@@ -90,12 +90,7 @@ namespace SynicSugar.P2P {
         /// Prepare to receive in advance. If user sent packets, it can open to get packets for a socket id without this.
         /// </summary>
         public void RestartConnections(){
-        #region TMP (Can't stop receiving to Buffer)
-            ClearPacketQueue();
-        #endregion
-            //MAYBE: This request work only for a new connection request, so, for former peers, we need to accept these by ourself.
-            AddNotifyPeerConnectionRequest();
-            ReAcceptAllConenctions();
+            OpenConnection();
 
             p2pToken = new CancellationTokenSource();
         }
@@ -240,6 +235,7 @@ namespace SynicSugar.P2P {
     /// </summary>
     internal void OpenConnection(){
         AddNotifyPeerConnectionRequest();
+        AcceptAllConenctions();
     }
     //Reason: This order(Receiver, Connection, Que) is that if the RPC includes Rpc to reply, the connections are automatically re-started.
     /// <summary>
@@ -248,9 +244,12 @@ namespace SynicSugar.P2P {
     void ResetConnections(){
         p2pToken.Cancel();
         CloseConnection();
-        // ClearPacketQueue();
+        ClearPacketQueue();
     }
-    void ReAcceptAllConenctions(){
+    /// <summary>
+    /// For the end of matchmaking.
+    /// </summary>
+    void AcceptAllConenctions(){
         AcceptConnectionOptions options = new AcceptConnectionOptions(){
                 LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
                 SocketId = SocketId
