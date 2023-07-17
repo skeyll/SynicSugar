@@ -19,7 +19,7 @@ Each assembly can have max 255 variables and functions with  Network attribute (
 ### Properity
 | API | description |
 |---|---|
-| Instance | This scrip's instance |
+| [Instance](../ConnectHub/instance) | This scrip's instance |
 | [CHANNELLIST](../ConnectHub/channellist) | List of all variable and functions having Network attribute |
 
 ### Function 
