@@ -7,9 +7,9 @@ weight = 9
 *Class: ConnectHub* </small>
 
 For NetworkPlayer<br>
-public T GetUserInstance<T>(UserId id) <br><br>
+public T GetUserInstance&lt;T&gt;(UserId id) <br><br>
 For NetworkCommons<br>
-public T GetUserInstance<T>()<br>
+public T GetUserInstance&lt;T&gt;()<br>
 
 
 ### Description

@@ -35,8 +35,6 @@ If this is no longer needed, we call *[CancelCurrentMatchMake](../MatchMakeManag
 | API | description |
 |---|---|
 | [SetGUIState](../MatchMakeManager/setguistate) | Change *MatchState* from script |
-| [RegisterLobbyIDFunctions](../MatchMakeManager/registerlobbyidfunctions) | Register functions for LobbyID to reconnect |
-| [RegisterAsyncLobbyIDFunctions](../MatchMakeManager/registerasynclobbyidfunctions) | Register async functions for LobbyID to reconnect |
 | [SearchAndCreateLobby](../MatchMakeManager/searchandcreatelobby) | Search lobby and, if can't join, create lobby |
 | [SearchLobby](../MatchMakeManager/searchlobby) | Search lobby and join it as Guest |
 | [CreateLobby](../MatchMakeManager/createlobby) | Create lobby as Host and wait for Guest |
