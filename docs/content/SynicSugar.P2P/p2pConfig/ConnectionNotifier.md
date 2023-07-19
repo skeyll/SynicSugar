@@ -11,7 +11,11 @@ public ConnectionNotifier ConnectionNotifier
 
 ### Description
 Invoke the registered event when another user falls from a connection or joins Lobby after matchmaking.<br>
-**Disconnected** has a lag of about 5-10 seconds after a user falls in its local.
+
+**Disconnected** means a complete loss of a connection.<br>
+In other word, the game has crashed or something problem.<br>
+If a connection is temporarily lost, EOS will automatically try to reconnect. When the game go to the back screen, the connections keep the same state. Even if a user loses p2p for some reason, EOS will switch to the connection via Relay.<br>
+If the connection cannot be re-established after such attempts, SynicSugar determine the user is **Disconnected**. This is made in about **5 seconds**.<br>
 
 ### Properity
 | API | description |
