@@ -1,15 +1,13 @@
 using Cysharp.Threading.Tasks;
 using System.Threading;
-using SynicSugar.Auth;
+using SynicSugar.Login;
 using UnityEngine;
-using System;
-
 namespace  SynicSugar.Samples {
-    public class AuthLogin : MonoBehaviour {
+    public class Login : MonoBehaviour {
         [SerializeField] GameObject modeSelectCanvas;
         [SerializeField] bool needResultDetail;
         void Start(){
-            bool hasLogin = EOSAuthentication.HasLoggedinEOSWithConnect();
+            bool hasLogin = EOSConnect.HasLoggedinEOS();
             
             this.gameObject.SetActive(!hasLogin);
             modeSelectCanvas.SetActive(hasLogin);
@@ -22,33 +20,19 @@ namespace  SynicSugar.Samples {
         }
         public async UniTask LoginWithDeviceIDRequest(){
             this.gameObject.SetActive(false);
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
             EOSDebug.Instance.Log("Trt to connect EOS with deviceID.");
-
-            if(needResultDetail){
-                string result = await EOSAuthentication.LoginWithDeviceID(cancellationToken, true);
-      
-                EOSDebug.Instance.Log($"Login Result is {result}");
-                    
-                if(result == "Success"){
-                    modeSelectCanvas.SetActive(true);
-                    EOSDebug.Instance.Log("SUCCESS EOS AUTHENTHICATION!.");
-                    return;
-                }
-            }else{
-                //Just result true or false
-                bool isSuccess = await EOSAuthentication.LoginWithDeviceID(cancellationToken);
-                EOSDebug.Instance.Log($"DeviceLogin: {isSuccess}");
-
-                if(isSuccess){
-                    modeSelectCanvas.SetActive(true);
-                    EOSDebug.Instance.Log("SUCCESS EOS AUTHENTHICATION!.");
-                    return;
-                }
+            //(bool, Result)
+            var result = await EOSConnect.LoginWithDeviceID();
+    
+            if(result.isSuccess){
+                modeSelectCanvas.SetActive(true);
+                EOSDebug.Instance.Log("SUCCESS EOS AUTHENTHICATION!.");
+                return;
             }
+
             //False
             this.gameObject.SetActive(true);
-            EOSDebug.Instance.Log("Fault EOS authentication.");
+            EOSDebug.Instance.Log($"Fault EOS authentication. {result.detail}");
         }
         /// <summary>
         /// For button event
