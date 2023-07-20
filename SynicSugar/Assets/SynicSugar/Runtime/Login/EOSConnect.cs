@@ -15,7 +15,7 @@ namespace SynicSugar.Login {
         /// </summary>
         /// <param name="token"></param>
         /// <returns></returns>
-        public static async UniTask<(bool result, Result detail)> LoginWithDeviceID(CancellationTokenSource token = default(CancellationTokenSource)){
+        public static async UniTask<(bool isSuccess, Result detail)> LoginWithDeviceID(CancellationTokenSource token = default(CancellationTokenSource)){
             bool isSuccess = false;
             bool waitingAuth = true;
             Result resultS = Result.Success;

@@ -3,10 +3,13 @@ using Epic.OnlineServices.Connect;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using System;
 using ResultE = Epic.OnlineServices.Result;
 
 namespace SynicSugar.Auth {
+    [Obsolete("This is old. new one is EOSConnect in SynicSugar.Login." )]
     public static class EOSAuthentication {
+        [Obsolete("This is old. new one is EOSConnect.HasLoggedinEOS in SynicSugar.Login." )]
         public static bool HasLoggedinEOSWithConnect(){
             return EOSManager.Instance.HasLoggedInWithConnect();
         }
@@ -15,6 +18,7 @@ namespace SynicSugar.Auth {
         /// </summary>
         /// <param name="token"></param>
         /// <returns></returns>
+        [Obsolete("This is old. new one is public static async UniTask<(bool isSuccess, Result detail)> LoginWithDeviceID(CancellationTokenSource token = default(CancellationTokenSource)) in SynicSugar.Login." )]
         public static async UniTask<bool> LoginWithDeviceID(CancellationTokenSource token){
             bool isSuccess = false;
             bool waitingAuth = true;
@@ -62,6 +66,8 @@ namespace SynicSugar.Auth {
         /// <param name="token"></param>
         /// <param name="needResult"></param>
         /// <returns></returns>
+        /// 
+        [Obsolete("This is old. new one is public static async UniTask<(bool isSuccess, Result detail)> LoginWithDeviceID(CancellationTokenSource token = default(CancellationTokenSource)) in SynicSugar.Login." )]
         public static async UniTask<string> LoginWithDeviceID(CancellationTokenSource token, bool needResult){
             string result = Result.UserKicked.ToString();
             bool isSuccess = false;
