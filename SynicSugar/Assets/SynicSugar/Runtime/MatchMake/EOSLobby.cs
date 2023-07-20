@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using SynicSugar.P2P;
 using UnityEngine;
+using ResultE = Epic.OnlineServices.Result;
 
 namespace SynicSugar.MatchMake {
     internal class EOSLobby {
@@ -262,7 +263,7 @@ namespace SynicSugar.MatchMake {
             return true;
         }
         void OnCreateLobbyCompleted(ref CreateLobbyCallbackInfo info){
-            if (info.ResultCode != Result.Success){
+            if (info.ResultCode != ResultE.Success){
                 Debug.LogErrorFormat("Created Lobby: error code: {0}", info.ResultCode);
                 waitingMatch = false;
                 return;
@@ -302,9 +303,9 @@ namespace SynicSugar.MatchMake {
 
             //Create modify handle
             LobbyInterface lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();
-            Result result = lobbyInterface.UpdateLobbyModification(ref options, out LobbyModification lobbyHandle);
+            ResultE result = lobbyInterface.UpdateLobbyModification(ref options, out LobbyModification lobbyHandle);
 
-            if (result != Result.Success){
+            if (result != ResultE.Success){
                 Debug.LogErrorFormat("Change Lobby: Could not create lobby modification. Error code: {0}", result);
                 return false;
             }
@@ -321,7 +322,7 @@ namespace SynicSugar.MatchMake {
             addAttributeOptions.Visibility = LobbyAttributeVisibility.Public;
 
             result = lobbyHandle.AddAttribute(ref addAttributeOptions);
-            if (result != Result.Success){
+            if (result != ResultE.Success){
                 Debug.LogErrorFormat("Change Lobby: could not add backetID. Error code: {0}", result);
                 return false;
             }
@@ -332,7 +333,7 @@ namespace SynicSugar.MatchMake {
                 addAttributeOptions.Visibility = attribute.Visibility;
 
                 result = lobbyHandle.AddAttribute(ref addAttributeOptions);
-                if (result != Result.Success){
+                if (result != ResultE.Success){
                     Debug.LogErrorFormat("Change Lobby: could not add attribute. Error code: {0}", result);
                     return false;
                 }
@@ -352,7 +353,7 @@ namespace SynicSugar.MatchMake {
             return isMatchSuccess; //"isMatchSuccess" is changed in async and callback method with result.
         }
         void OnAddSerchAttribute(ref UpdateLobbyCallbackInfo info){
-            if (info.ResultCode != Result.Success){
+            if (info.ResultCode != ResultE.Success){
                 waitingMatch = false;
                 Debug.LogErrorFormat("Modify Lobby: error code: {0}", info.ResultCode);
                 // callback?.Invoke(info.ResultCode);
@@ -386,9 +387,9 @@ namespace SynicSugar.MatchMake {
 
             //Create modify handle
             LobbyInterface lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();
-            Result result = lobbyInterface.UpdateLobbyModification(ref options, out LobbyModification lobbyHandle);
+            ResultE result = lobbyInterface.UpdateLobbyModification(ref options, out LobbyModification lobbyHandle);
 
-            if (result != Result.Success){
+            if (result != ResultE.Success){
                 Debug.LogErrorFormat("Change Lobby: Could not create lobby modification. Error code: {0}", result);
                 return;
             }
@@ -396,7 +397,7 @@ namespace SynicSugar.MatchMake {
             LobbyModificationSetPermissionLevelOptions permissionOptions = new LobbyModificationSetPermissionLevelOptions();
             permissionOptions.PermissionLevel = LobbyPermissionLevel.Joinviapresence;
             result = lobbyHandle.SetPermissionLevel(ref permissionOptions);
-            if (result != Result.Success){
+            if (result != ResultE.Success){
                 Debug.LogErrorFormat("Change Lobby: can't switch permission level. Error code: {0}", result);
                 return;
             }
@@ -415,7 +416,7 @@ namespace SynicSugar.MatchMake {
             addAttributeOptions.Visibility = LobbyAttributeVisibility.Public;
 
             result = lobbyHandle.AddAttribute(ref addAttributeOptions);
-            if (result != Result.Success){
+            if (result != ResultE.Success){
                 Debug.LogErrorFormat("Change Lobby: could not add socket name. Error code: {0}", result);
                 return;
             }
@@ -426,7 +427,7 @@ namespace SynicSugar.MatchMake {
                 removeAttributeOptions.Key = attribute.Key;
 
                 result = lobbyHandle.RemoveAttribute(ref removeAttributeOptions);
-                if (result != Result.Success){
+                if (result != ResultE.Success){
                     Debug.LogErrorFormat("Change Lobby: could not remove attribute. Error code: {0}", result);
                     return;
                 }
@@ -438,7 +439,7 @@ namespace SynicSugar.MatchMake {
             lobbyInterface.UpdateLobby(ref updateOptions, null, OnSwitchLobbyAttribute);
         }
         void OnSwitchLobbyAttribute(ref UpdateLobbyCallbackInfo info){
-            if (info.ResultCode != Result.Success){
+            if (info.ResultCode != ResultE.Success){
                 Debug.LogErrorFormat("Modify Lobby: error code: {0}", info.ResultCode);
                 waitingMatch = false;
                 return;
@@ -499,9 +500,9 @@ namespace SynicSugar.MatchMake {
             searchOptions.MaxResults = MAX_SEARCH_RESULT; 
 
             LobbyInterface lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();
-            Result result = lobbyInterface.CreateLobbySearch(ref searchOptions, out LobbySearch lobbySearchHandle);
+            ResultE result = lobbyInterface.CreateLobbySearch(ref searchOptions, out LobbySearch lobbySearchHandle);
 
-            if (result != Result.Success){
+            if (result != ResultE.Success){
                 Debug.LogErrorFormat("Search Lobby: could not create SearchByAttribute. Error code: {0}", result);
                 return false;
             }
@@ -522,7 +523,7 @@ namespace SynicSugar.MatchMake {
 
             result = lobbySearchHandle.SetParameter(ref paramOptions);
             
-            if (result != Result.Success){
+            if (result != ResultE.Success){
                 Debug.LogErrorFormat("Retrieve Lobby: failed to add bucketID. Error code: {0}", result);
                 return false;
             }
@@ -535,7 +536,7 @@ namespace SynicSugar.MatchMake {
 
                 result = lobbySearchHandle.SetParameter(ref paramOptions);
 
-                if (result != Result.Success){
+                if (result != ResultE.Success){
                     Debug.LogErrorFormat("Retrieve Lobby: failed to add option attribute. Error code: {0}", result);
                     return false;
                 }
@@ -566,9 +567,9 @@ namespace SynicSugar.MatchMake {
             searchOptions.MaxResults = 1;
 
             LobbyInterface lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();
-            Result result = lobbyInterface.CreateLobbySearch(ref searchOptions, out LobbySearch lobbySearchHandle);
+            ResultE result = lobbyInterface.CreateLobbySearch(ref searchOptions, out LobbySearch lobbySearchHandle);
 
-            if (result != Result.Success){
+            if (result != ResultE.Success){
                 Debug.LogErrorFormat("Lobby Search: could not create SearchByLobbyId. Error code: {0}", result);
                 return false;
             }
@@ -581,7 +582,7 @@ namespace SynicSugar.MatchMake {
 
             result = lobbySearchHandle.SetLobbyId(ref setLobbyOptions);
 
-            if (result != Result.Success){
+            if (result != ResultE.Success){
                 Debug.LogErrorFormat("Search Lobby: failed to update SearchByLobbyId with lobby id. Error code: {0}", result);
                 return false;
             }
@@ -599,7 +600,7 @@ namespace SynicSugar.MatchMake {
 
         void OnLobbySearchCompleted(ref LobbySearchFindCallbackInfo info){
             waitingMatch = false;
-            if (info.ResultCode != Result.Success) {
+            if (info.ResultCode != ResultE.Success) {
                 Debug.LogErrorFormat("Search Lobby: error code: {0}", info.ResultCode);
                 return;
             }
@@ -631,9 +632,9 @@ namespace SynicSugar.MatchMake {
                 Lobby lobbyObj = new Lobby();
                 indexOptions.LobbyIndex = i;
 
-                Result result = CurrentSearch.CopySearchResultByIndex(ref indexOptions, out LobbyDetails lobbyHandle);
+                ResultE result = CurrentSearch.CopySearchResultByIndex(ref indexOptions, out LobbyDetails lobbyHandle);
 
-                if (result == Result.Success && lobbyHandle != null){
+                if (result == ResultE.Success && lobbyHandle != null){
                     lobbyObj.InitFromLobbyDetails(lobbyHandle);
 
                     if (lobbyObj == null || !lobbyObj.isValid()){
@@ -670,7 +671,7 @@ namespace SynicSugar.MatchMake {
             lobbyInterface.JoinLobby(ref joinOptions, callback, OnJoinLobbyCompleted);
         }
         void OnJoinLobbyCompleted(ref JoinLobbyCallbackInfo data){
-            if (data.ResultCode != Result.Success){
+            if (data.ResultCode != ResultE.Success){
                 Debug.LogErrorFormat("Join Lobby: error code: {0}", data.ResultCode);
                 waitingMatch = false;
                 return;
@@ -879,7 +880,7 @@ namespace SynicSugar.MatchMake {
             return canLeave;
         }
         void OnLeaveLobbyCompleted(ref LeaveLobbyCallbackInfo data){
-            if (data.ResultCode != Result.Success){
+            if (data.ResultCode != ResultE.Success){
                 Debug.LogFormat("Leave Lobby: error code: {0}", data.ResultCode);
                 canLeave = false;
                 waitLeave = false;
@@ -930,7 +931,7 @@ namespace SynicSugar.MatchMake {
             return canLeave;
         }
         void OnDestroyLobbyCompleted(ref DestroyLobbyCallbackInfo data){
-            if (data.ResultCode != Result.Success){
+            if (data.ResultCode != ResultE.Success){
                 waitLeave = false;
                 Debug.LogErrorFormat("Destroy Lobby: error code: {0}", data.ResultCode);
                 return;
@@ -952,9 +953,9 @@ namespace SynicSugar.MatchMake {
             options.LobbyId = CurrentLobby.LobbyId;
             options.LocalUserId = EOSManager.Instance.GetProductUserId();
 
-            Result result = lobbyInterface.CopyLobbyDetailsHandle(ref options, out LobbyDetails lobbyHandle );
+            ResultE result = lobbyInterface.CopyLobbyDetailsHandle(ref options, out LobbyDetails lobbyHandle );
 
-            if(result != Result.Success){
+            if(result != ResultE.Success){
                 Debug.LogError("Get detail: can't get lobby detail handle.");
                 return false;
             }
@@ -962,7 +963,7 @@ namespace SynicSugar.MatchMake {
             LobbyDetailsCopyInfoOptions dataOptions = new LobbyDetailsCopyInfoOptions();
             result = lobbyHandle.CopyInfo(ref dataOptions, out LobbyDetailsInfo? dataInfo);
 
-            if(result != Result.Success){
+            if(result != ResultE.Success){
                 Debug.LogError("Get detail: can't copy lobby details on local.");
                 lobbyHandle.Release();
                 return false;
@@ -983,7 +984,7 @@ namespace SynicSugar.MatchMake {
             LobbyDetailsCopyAttributeByKeyOptions attrOptions = new LobbyDetailsCopyAttributeByKeyOptions();
             attrOptions.AttrKey = "socket";
             result = lobbyHandle.CopyAttributeByKey(ref attrOptions, out Epic.OnlineServices.Lobby.Attribute? socket);
-            if(result != Result.Success || socket?.Data == null){
+            if(result != ResultE.Success || socket?.Data == null){
                 Debug.LogError("Get detail: can't copy lobby attribute on local.");
                 lobbyHandle.Release();
                 return false;

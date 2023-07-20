@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
+using ResultE = Epic.OnlineServices.Result;
 
 namespace SynicSugar.MatchMake {
     public class Lobby {
@@ -89,8 +90,8 @@ namespace SynicSugar.MatchMake {
             options.LobbyId = LobbyId;
             options.LocalUserId = EOSManager.Instance.GetProductUserId();
 
-            Result result = EOSManager.Instance.GetEOSLobbyInterface().CopyLobbyDetailsHandle(ref options, out LobbyDetails outLobbyDetailsHandle);
-            if (result != Result.Success){
+            ResultE result = EOSManager.Instance.GetEOSLobbyInterface().CopyLobbyDetailsHandle(ref options, out LobbyDetails outLobbyDetailsHandle);
+            if (result != ResultE.Success){
                 Debug.LogErrorFormat("Init Lobby: can't get lobby info handle. Error code: {0}", result);
                 return;
             }
@@ -117,8 +118,8 @@ namespace SynicSugar.MatchMake {
 
             // copy lobby info
             var lobbyDetailsCopyInfoOptions = new LobbyDetailsCopyInfoOptions();
-            Result infoResult = outLobbyDetailsHandle.CopyInfo(ref lobbyDetailsCopyInfoOptions, out LobbyDetailsInfo? outLobbyDetailsInfo);
-            if (infoResult != Result.Success){
+            ResultE infoResult = outLobbyDetailsHandle.CopyInfo(ref lobbyDetailsCopyInfoOptions, out LobbyDetailsInfo? outLobbyDetailsInfo);
+            if (infoResult != ResultE.Success){
                 Debug.LogErrorFormat("Init Lobby: can't copy lobby info. Error code: {0}", infoResult);
                 return;
             }
@@ -141,8 +142,8 @@ namespace SynicSugar.MatchMake {
             for (uint i = 0; i < attrCount; i++){
                 LobbyDetailsCopyAttributeByIndexOptions attrOptions = new LobbyDetailsCopyAttributeByIndexOptions();
                 attrOptions.AttrIndex = i;
-                Result copyAttrResult = outLobbyDetailsHandle.CopyAttributeByIndex(ref attrOptions, out Epic.OnlineServices.Lobby.Attribute? outAttribute);
-                if (copyAttrResult == Result.Success && outAttribute != null && outAttribute?.Data != null){
+                ResultE copyAttrResult = outLobbyDetailsHandle.CopyAttributeByIndex(ref attrOptions, out Epic.OnlineServices.Lobby.Attribute? outAttribute);
+                if (copyAttrResult == ResultE.Success && outAttribute != null && outAttribute?.Data != null){
                     LobbyAttribute attr = EOSLobbyExtenstions.GenerateLobbyAttribute(outAttribute);
                     Attributes.Add(attr);
                 }
@@ -166,9 +167,9 @@ namespace SynicSugar.MatchMake {
 
                 for (int attributeIndex = 0; attributeIndex < memberAttributeCount; attributeIndex++){
                     var lobbyDetailsCopyMemberAttributeByIndexOptions = new LobbyDetailsCopyMemberAttributeByIndexOptions() { AttrIndex = (uint)attributeIndex, TargetUserId = memberId };
-                    Result memberAttributeResult = outLobbyDetailsHandle.CopyMemberAttributeByIndex(ref lobbyDetailsCopyMemberAttributeByIndexOptions, out Epic.OnlineServices.Lobby.Attribute? outAttribute);
+                    ResultE memberAttributeResult = outLobbyDetailsHandle.CopyMemberAttributeByIndex(ref lobbyDetailsCopyMemberAttributeByIndexOptions, out Epic.OnlineServices.Lobby.Attribute? outAttribute);
 
-                    if (memberAttributeResult != Result.Success){
+                    if (memberAttributeResult != ResultE.Success){
                         Debug.LogFormat("Lobbies (InitFromLobbyDetails): can't copy member attribute. Error code: {0}", memberAttributeResult);
                         continue;
                     }

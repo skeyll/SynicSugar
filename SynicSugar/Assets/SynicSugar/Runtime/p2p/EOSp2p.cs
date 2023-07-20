@@ -1,9 +1,9 @@
 using PlayEveryWare.EpicOnlineServices;
-using Epic.OnlineServices;
 using Epic.OnlineServices.P2P;
 using System;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using ResultE = Epic.OnlineServices.Result;
 
 namespace SynicSugar.P2P {
     public static class EOSp2p {
@@ -26,13 +26,13 @@ namespace SynicSugar.P2P {
                 Data = new ArraySegment<byte>(value != null ? value : Array.Empty<byte>())
             };
 
-            Result result;
+            ResultE result;
             foreach(var id in p2pConfig.Instance.userIds.RemoteUserIds){
                 options.RemoteUserId = id.AsEpic;
                 result = p2pConnectorForOtherAssembly.Instance.P2PHandle.SendPacket(ref options);
 
                 await UniTask.Delay(p2pConfig.Instance.interval_sendToAll);
-                if(result != Result.Success){
+                if(result != ResultE.Success){
                     Debug.LogErrorFormat("Send Packet: can't send packet, code: {0}", result);
                     break;
                 }
@@ -61,9 +61,9 @@ namespace SynicSugar.P2P {
                 Data = new ArraySegment<byte>(value != null ? value : Array.Empty<byte>())
             };
 
-            Result result = p2pConnectorForOtherAssembly.Instance.P2PHandle.SendPacket(ref options);
+            ResultE result = p2pConnectorForOtherAssembly.Instance.P2PHandle.SendPacket(ref options);
 
-            if(result != Result.Success){
+            if(result != ResultE.Success){
                 Debug.LogErrorFormat("Send Packet: can't send packet, code: {0}", result);
                 return;
             }
