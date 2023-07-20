@@ -15,7 +15,7 @@ At first, search and try to join. If can't, the user create lobby as host.<br>
 If success and finish preparation p2p connect, return true. If not (by timeout or anything problem), return false.<br>
 
 This CancellationTokenSource is used only to cancel matchmaking. <br>
-Usually we don't need pass tokensource. In this case, this function handles an exception internally and we can get just return bool result on CancelMatchMaking. If we pass it, we should TryCatch for CancelMatching.<br>
+Usually we don't need pass token source. If not pass, when we call CancelMatchMaking(), we get just bool result from this method. If pass source, we need TryCatch for CancelMatching.<br>
 When matchmaking fails, this always returns false, not an exception.<br>
 
 Recommend this for Matchmaking.
