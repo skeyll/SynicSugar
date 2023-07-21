@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
 using UnityEngine;
 using MemoryPack;
+using MemoryPack.Compression;
 
 namespace SynicSugar.Test {
     public class MemoryPackTest : MonoBehaviour {
@@ -15,11 +16,29 @@ namespace SynicSugar.Test {
                 mainBC += c;
             }
             Debug.Log($"mainB: {mainB.Length} / {mainBC}");
+
+            using var compressor  = new BrotliCompressor();
+            MemoryPackSerializer.Serialize(compressor , main);
+            byte[] mainC = compressor.ToArray();
+            string mainCC = System.String.Empty;
+            foreach(var c in mainC){
+                mainCC += c;
+            }
+            Debug.Log($"mainC: {mainC.Length} / {mainCC}");
+
             
             MemoryPackTestMain mainD = MemoryPackSerializer.Deserialize<MemoryPackTestMain>(mainB);
             mainD.test1.Debug();
             mainD.test2.Debug();
             mainD.test3.Debug();
+
+
+            using var decompressor = new BrotliDecompressor();
+            var decompressedBuffer = decompressor.Decompress(mainC);
+            MemoryPackTestMain mainD2 = MemoryPackSerializer.Deserialize<MemoryPackTestMain>(decompressedBuffer);
+            mainD2.test1.Debug();
+            mainD2.test2.Debug();
+            mainD2.test3.Debug();
         }
         MemoryPackTestMain MemoryPackTestSetMethod(){
             MemoryPackTestMain main = new();
