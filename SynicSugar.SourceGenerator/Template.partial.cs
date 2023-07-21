@@ -3,10 +3,8 @@
         internal string? SyncList;
         internal string? Register;
         internal string? Reference;
-        internal string? GetInstance;
         internal string? PlayeInstance;
         internal string? CommonsInstance;
-        internal string? GetInstanceAsObject;
         internal string? PacketConvert;
     }
     public partial class AdditionalPlayerTemplate {

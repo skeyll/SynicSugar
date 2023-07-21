@@ -102,22 +102,22 @@ namespace SynicSugar.P2P {
         //Ref(for class)<#= Reference #>
 
         //Register(for class)<#= Register #>
-
-        //GetInstance(with class instance) Good performance in IL2cpp?<#= GetInstance #>
-        //GetInstance(with <type>) Bad performance in IL2cpp?
-        // For Player
+        
+        /// <summary>
+        /// Get the NetworkPlayer instance registered with ConnectHub.
+        /// </summary>
+        /// <param name="id">UserID to get</param>
+        /// <returns>T's instance</returns>
         public T GetUserInstance<T>(UserId id) where T : IGetPlayer {<#= PlayeInstance #>
             return default(T);
         }
-        // For Commons
-        public T GetUserInstance<T>() where T : IGetCommons {<#= CommonsInstance #>
+        
+        /// <summary>
+        /// Get the NetworkCommons instance registered with ConnectHub.
+        /// </summary>
+        /// <returns>T's instance</returns>
+        public T GetInstance<T>() where T : IGetCommons {<#= CommonsInstance #>
             return default(T);
-        }
-
-        //GetInstanceAsObject(for class)
-        [Obsolete]
-        public object GetUserInstanceAsObject(UserId id, Type type){<#= GetInstanceAsObject #>
-            return null;
         }
 
         //SendPacket(for elements)
@@ -125,18 +125,5 @@ namespace SynicSugar.P2P {
             switch((CHANNELLIST)packet.ch){<#= PacketConvert #>
             }
         }
-
-
-        //--Obsolete---
-        /// <summary>
-        /// Stop receiver, close all connects and cancel all events to receive. Then, exit the current lobby.<br />
-        /// Fix to LeaveSession and CloseSession for readability.
-        /// </summary>
-        [Obsolete("This is old. Can use CloseSession()")]
-        public void EndConnection(){
-            CancellationTokenSource token = new CancellationTokenSource();
-            p2pConnectorForOtherAssembly.Instance.CloseSession(token.Token);
-        }
-        //----
     }
 }

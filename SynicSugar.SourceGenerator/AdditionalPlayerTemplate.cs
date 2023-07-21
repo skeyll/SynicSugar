@@ -93,35 +93,30 @@ namespace SynicSugarGenerator
             return id == _ownerUserID;
         }
 
-        [HideInInspector, Obsolete]  public bool isOwner { get { return _ownerUserID == p2pConfig.Instance.userIds.LocalUserId; } }
-        [Obsolete]
-        public bool IsOwner(UserId id){
-            return id == _ownerUserID;
-        }
         ");
             
-            #line 39 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
+            #line 34 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(SyncVar));
             
             #line default
             #line hidden
             this.Write("\r\n        ");
             
-            #line 40 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
+            #line 35 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Rpcs));
             
             #line default
             #line hidden
             this.Write("\r\n    }\r\n");
             
-            #line 42 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
+            #line 37 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
  if (!string.IsNullOrEmpty(NameSpace)) { 
             
             #line default
             #line hidden
             this.Write("}\r\n");
             
-            #line 44 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
+            #line 39 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\AdditionalPlayerTemplate.tt"
  } 
             
             #line default

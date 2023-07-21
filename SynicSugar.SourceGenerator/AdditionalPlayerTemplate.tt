@@ -31,11 +31,6 @@ namespace <#= NameSpace #> {
             return id == _ownerUserID;
         }
 
-        [HideInInspector, Obsolete]  public bool isOwner { get { return _ownerUserID == p2pConfig.Instance.userIds.LocalUserId; } }
-        [Obsolete]
-        public bool IsOwner(UserId id){
-            return id == _ownerUserID;
-        }
         <#= SyncVar #>
         <#= Rpcs #>
     }

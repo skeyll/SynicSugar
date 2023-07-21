@@ -6,26 +6,28 @@
             return $@"
         Dictionary<string, {fullname}> {name} = new Dictionary<string, {fullname}>();";
         }
-        internal string CreateStateReference(string nameSpace, string name){
+        internal string CreateCommonsReference(string nameSpace, string name){
             string fullname = string.IsNullOrEmpty(nameSpace) ? name : $"{nameSpace}.{name}";
             return $@"
         {fullname} {name};";
         }
         //SyncVar
         internal string CreatePlayerSyncVarPacketConvert(string name, string variable, string param, string nameSpace, bool isPublic) {
-              string assignment = isPublic ? $"Sync{variable} = MemoryPackSerializer.Deserialize<{GetFullName(nameSpace, param)}>(packet.payload)" : 
-                $"SetLocal{variable}(MemoryPackSerializer.Deserialize<{GetFullName(nameSpace, param)}>(packet.payload))";
+            string assignment = isPublic ? $"MemoryPackSerializer.Deserialize<{GetFullName(nameSpace, param)}>(packet.payload, ref {name}[packet.UserID].{variable});" :
+              $"{name}[packet.UserID].SetLocal{variable}(MemoryPackSerializer.Deserialize<{GetFullName(nameSpace, param)}>(packet.payload));";
             return $@"
                 case CHANNELLIST.{variable}:
-                    {name}[packet.UserID].{assignment};
+                    {assignment}
                 return;";
         }
-        internal string CreateStateSyncVarPacketConvert(string name, string varaible, string param, string nameSpace, bool isPublic){
-            string assignment = isPublic ? $"Sync{varaible} = MemoryPackSerializer.Deserialize<{GetFullName(nameSpace, param)}>(packet.payload)" :
-              $"SetLocal{varaible}(MemoryPackSerializer.Deserialize<{GetFullName(nameSpace, param)}>(packet.payload))";
+        internal string CreateCommonsSyncVarPacketConvert(string name, string variable, string param, string nameSpace, bool isPublic){
+            string assignment = isPublic ? $"MemoryPackSerializer.Deserialize<{GetFullName(nameSpace, param)}>(packet.payload, ref {name}.{variable});" :
+             $@"{name}.isLocalCall = false;
+                    {name}.SetLocal{variable}(MemoryPackSerializer.Deserialize<{GetFullName(nameSpace, param)}>(packet.payload));
+                    {name}.isLocalCall = true;";
             return $@"
-                case CHANNELLIST.{varaible}:
-                    {name}.{assignment};
+                case CHANNELLIST.{variable}:
+                    {assignment}
                 return;";
         }
         //TargetRPC
@@ -44,12 +46,12 @@
                     {rootName}[packet.UserID].{method}({paramName});
                 return;";
         }
-        internal string CreateStateRpcPacketConvert(string rootName, string method, string param, string paramNs){
+        internal string CreateCommonsRpcPacketConvert(string rootName, string method, string param, string paramNs){
             //string fixedParam = string.IsNullOrEmpty(param) ? System.String.Empty : $"MemoryPackSerializer.Deserialize<{GetFullName(paramNameSpace, param)}>(packet.payload))";
             string paramName = string.IsNullOrEmpty(param) ? System.String.Empty : $"MemoryPackSerializer.Deserialize<{GetFullName(paramNs, param)}>(packet.payload)";
             return $@"
                 case CHANNELLIST.{method}:
-                    {rootName}.isRemotoCall = true;
+                    {rootName}.isLocalCall = false;
                     {rootName}.{method}({paramName});
                 return;";
         }
@@ -64,23 +66,13 @@
             }}
         }}";
         }
-        internal string CreateStateRegisterInstance(string nameNamespace, string name) {
+        internal string CreateCommonsRegisterInstance(string nameNamespace, string name) {
             return $@"
         public void RegisterInstance({GetFullName(nameNamespace, name)} classInstance) {{
             {name} = classInstance;
         }}";
         }
         //GetInstance
-        internal string CreateGetInstance(string nameNamespace, string name) {
-            return $@"
-        [Obsolete]
-        public {GetFullName(nameNamespace, name)} GetUserInstance(UserId id, {GetFullName(nameNamespace, name)} instanceType) {{
-            if (!{name}.ContainsKey(id.ToString())) {{
-                return null;
-            }}
-            return {name}[id.ToString()];
-        }}";
-        }
         internal string CreateGetPlayerInstance(string nameNamespace, string name, bool useGetInstance) {
             if (!useGetInstance) {
                 return System.String.Empty;
@@ -102,22 +94,14 @@
                 return (T)(object){name};
             }}";
         }
-        internal string CreateGetInstanceAsObject(string nameSpace, string name) {
-            return $@"
-            if(type == typeof({GetFullName(nameSpace, name)})){{
-                if (!{name}.ContainsKey(id.ToString())) {{
-                    return null;
-                }}
-                return {name}[id.ToString()];
-            }}";
-        }
         //Additional Part
         //SyncMetod
-        internal string CreateSyncVarMethod(string name, string paramNamespace, string type, int time, bool isPublic, bool isOnlyHost){
+        internal string CreateSyncVarMethod(string name, string paramNamespace, string type, int time, bool isPublic, bool isOnlyHost, bool isCommons){
             string intervalCondition = $"isWaiting{name}Interval";
             string condition = isOnlyHost ? $"!p2pConfig.Instance.userIds.IsHost() || {intervalCondition}" : intervalCondition;
             string intervalTime = time > 0 ? time.ToString() : "p2pConfig.Instance.autoSyncInterval";
             string modifer = isPublic ? "public " : System.String.Empty;
+            string localCondition = isCommons ? "isLocalCall" : "isLocal";
             string setterMethod = isPublic ? System.String.Empty : $@"
         internal void SetLocal{name}({GetFullName(paramNamespace, type)} value) {{
             {name} = value;
@@ -129,7 +113,9 @@
         {modifer}{GetFullName(paramNamespace, type)} Sync{name} {{
             set {{
                 {name} = value;
-                StartSynic{name}();
+                if({localCondition}){{
+                    StartSynic{name}();
+                }}
             }}
         }}
         
@@ -164,7 +150,7 @@
             string serializer = string.IsNullOrEmpty(arg) ? "null" : "MemoryPack.MemoryPackSerializer.Serialize(value)";
             return $@"
         void SynicSugarRpc_{fnName}({arg}) {{
-            if(OwnerUserID == p2pConfig.Instance.userIds.LocalUserId){{
+            if(isLocal){{
                 EOSp2p.SendPacketToAll((byte)ConnectHub.CHANNELLIST.{fnName}, {serializer}).Forget();
             }}
         }}";
@@ -174,7 +160,7 @@
             string serializer = string.IsNullOrEmpty(arg) ? "null" : "MemoryPack.MemoryPackSerializer.Serialize(value)";
             return $@"
         void SynicSugarRpc_{fnName}(UserId id{arg}) {{
-            if(OwnerUserID == p2pConfig.Instance.userIds.LocalUserId){{
+            if(isLocal){{
                 EOSp2p.SendPacket((byte)ConnectHub.CHANNELLIST.{fnName}, {serializer}, id);
             }}
         }}";
@@ -184,10 +170,10 @@
             string serializer = string.IsNullOrEmpty(arg) ? "null" : "MemoryPack.MemoryPackSerializer.Serialize(value)";
             return $@"
         void SynicSugarRpc_{fnName}({arg}) {{
-            if(!isRemotoCall){{
+            if(isLocalCall){{
                 EOSp2p.SendPacketToAll((byte)ConnectHub.CHANNELLIST.{fnName}, {serializer}).Forget();
             }}
-            isRemotoCall = false;
+            isLocalCall = true;
         }}";
         }
         //Extenstions

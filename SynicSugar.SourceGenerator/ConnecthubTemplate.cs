@@ -108,65 +108,45 @@ namespace SynicSugarGenerator
             
             #line default
             #line hidden
-            this.Write("\r\n\r\n        //GetInstance(with class instance) Good performance in IL2cpp?");
+            this.Write(@"
+        
+        /// <summary>
+        /// Get the NetworkPlayer instance registered with ConnectHub.
+        /// </summary>
+        /// <param name=""id"">UserID to get</param>
+        /// <returns>T's instance</returns>
+        public T GetUserInstance<T>(UserId id) where T : IGetPlayer {");
             
-            #line 106 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(GetInstance));
-            
-            #line default
-            #line hidden
-            this.Write("\r\n        //GetInstance(with <type>) Bad performance in IL2cpp?\r\n        // For P" +
-                    "layer\r\n        public T GetUserInstance<T>(UserId id) where T : IGetPlayer {");
-            
-            #line 109 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 111 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(PlayeInstance));
             
             #line default
             #line hidden
-            this.Write("\r\n            return default(T);\r\n        }\r\n        // For Commons\r\n        publ" +
-                    "ic T GetUserInstance<T>() where T : IGetCommons {");
+            this.Write(@"
+            return default(T);
+        }
+        
+        /// <summary>
+        /// Get the NetworkCommons instance registered with ConnectHub.
+        /// </summary>
+        /// <returns>T's instance</returns>
+        public T GetInstance<T>() where T : IGetCommons {");
             
-            #line 113 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 119 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(CommonsInstance));
             
             #line default
             #line hidden
-            this.Write("\r\n            return default(T);\r\n        }\r\n\r\n        //GetInstanceAsObject(for " +
-                    "class)\r\n        [Obsolete]\r\n        public object GetUserInstanceAsObject(UserId" +
-                    " id, Type type){");
-            
-            #line 119 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(GetInstanceAsObject));
-            
-            #line default
-            #line hidden
-            this.Write("\r\n            return null;\r\n        }\r\n\r\n        //SendPacket(for elements)\r\n    " +
-                    "    public void ConvertFormPacket(SugarPacket packet){\r\n            switch((CHAN" +
-                    "NELLIST)packet.ch){");
+            this.Write("\r\n            return default(T);\r\n        }\r\n\r\n        //SendPacket(for elements)" +
+                    "\r\n        public void ConvertFormPacket(SugarPacket packet){\r\n            switch" +
+                    "((CHANNELLIST)packet.ch){");
             
             #line 125 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(PacketConvert));
             
             #line default
             #line hidden
-            this.Write(@"
-            }
-        }
-
-
-        //--Obsolete---
-        /// <summary>
-        /// Stop receiver, close all connects and cancel all events to receive. Then, exit the current lobby.<br />
-        /// Fix to LeaveSession and CloseSession for readability.
-        /// </summary>
-        [Obsolete(""This is old. Can use CloseSession()"")]
-        public void EndConnection(){
-            CancellationTokenSource token = new CancellationTokenSource();
-            p2pConnectorForOtherAssembly.Instance.CloseSession(token.Token);
-        }
-        //----
-    }
-}");
+            this.Write("\r\n            }\r\n        }\r\n    }\r\n}");
             return this.GenerationEnvironment.ToString();
         }
     }

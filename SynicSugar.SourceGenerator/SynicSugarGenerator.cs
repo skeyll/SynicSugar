@@ -151,7 +151,7 @@ namespace SynicSugar.Generator {
                                 PacketConvert.Append(cb.CreatePlayerTargetRpcPacketConvert(info.rootName, info.contentName, info.param, info.paramNamespace));
                                 continue;
                             case ContentInfo.Type.SyncVar:
-                                syncvars[cb.GetFullName(info.rootNameSpace, info.rootName)].Append(cb.CreateSyncVarMethod(info.contentName, info.paramNamespace, info.param, info.syncInterval, info.isPublicVar, false));
+                                syncvars[cb.GetFullName(info.rootNameSpace, info.rootName)].Append(cb.CreateSyncVarMethod(info.contentName, info.paramNamespace, info.param, info.syncInterval, info.isPublicVar, false, false));
                                 PacketConvert.Append(cb.CreatePlayerSyncVarPacketConvert(info.rootName, info.contentName, info.param, info.paramNamespace, info.isPublicVar));
                             continue;
                         }
@@ -160,11 +160,11 @@ namespace SynicSugar.Generator {
                     switch (info.type){
                         case ContentInfo.Type.Rpc:
                             rpcs[cb.GetFullName(info.rootNameSpace, info.rootName)].Append(cb.CreateCommonsRpcMethod(info.contentName, info.paramNamespace, info.param));
-                            PacketConvert.Append(cb.CreateStateRpcPacketConvert(info.rootName, info.contentName, info.param, info.paramNamespace));
+                            PacketConvert.Append(cb.CreateCommonsRpcPacketConvert(info.rootName, info.contentName, info.param, info.paramNamespace));
                         continue;
                         case ContentInfo.Type.SyncVar:
-                            syncvars[cb.GetFullName(info.rootNameSpace, info.rootName)].Append(cb.CreateSyncVarMethod(info.contentName, info.paramNamespace, info.param, info.syncInterval, info.isPublicVar, info.isOnlyHost));
-                            PacketConvert.Append(cb.CreateStateSyncVarPacketConvert(info.rootName, info.contentName, info.param, info.paramNamespace, info.isPublicVar));
+                            syncvars[cb.GetFullName(info.rootNameSpace, info.rootName)].Append(cb.CreateSyncVarMethod(info.contentName, info.paramNamespace, info.param, info.syncInterval, info.isPublicVar, info.isOnlyHost, true));
+                            PacketConvert.Append(cb.CreateCommonsSyncVarPacketConvert(info.rootName, info.contentName, info.param, info.paramNamespace, info.isPublicVar));
                         continue;
                     }
                 }
@@ -186,10 +186,7 @@ namespace SynicSugar.Generator {
                     if (info.isNetworkPlayer){
                         Reference.Append(cb.CreatePlayerReference(info.nameSpace, info.name));
                         Register.Append(cb.CreatePlayerRegisterInstance(info.nameSpace, info.name));
-                        GetInstance.Append(cb.CreateGetInstance(info.nameSpace, info.name));
                         PlayeInstance.Append(cb.CreateGetPlayerInstance(info.nameSpace, info.name, info.useGetInstance));
-
-                        GetInstanceAsObject.Append(cb.CreateGetInstanceAsObject(info.nameSpace, info.name));
 
                         var pt = new AdditionalPlayerTemplate();
                         pt.NameSpace = info.nameSpace;
@@ -200,8 +197,8 @@ namespace SynicSugar.Generator {
                         AdditionalClass.Append(pt.TransformText());
                         continue;
                     }
-                    Reference.Append(cb.CreateStateReference(info.nameSpace, info.name));
-                    Register.Append(cb.CreateStateRegisterInstance(info.nameSpace, info.name));
+                    Reference.Append(cb.CreateCommonsReference(info.nameSpace, info.name));
+                    Register.Append(cb.CreateCommonsRegisterInstance(info.nameSpace, info.name));
                     CommonsInstance.Append(cb.CreateGetCommonsInstance(info.nameSpace, info.name, info.useGetInstance));
 
                     var ct = new AdditionalCommonsTemplate();
@@ -217,11 +214,9 @@ namespace SynicSugar.Generator {
                     SyncList = SyncList.ToString(),
                     Register = Register.ToString(),
                     Reference = Reference.ToString(),
-                    GetInstance = GetInstance.ToString(),
                     PlayeInstance = PlayeInstance.ToString(),
                     CommonsInstance = CommonsInstance.ToString(),
                     PacketConvert = PacketConvert.ToString(),
-                    GetInstanceAsObject = GetInstanceAsObject.ToString()
                 }.TransformText();
                 context.AddSource("ConnectHub.g.cs", connectTemplate);
 

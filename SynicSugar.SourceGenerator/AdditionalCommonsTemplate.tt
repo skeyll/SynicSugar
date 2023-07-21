@@ -8,7 +8,7 @@
 namespace <#= NameSpace #> {
 <# } #>
     public partial class <#= ClassName #><# if (useGetInstance) { #> : IGetCommons <# } #> {
-        [HideInInspector] public bool isRemotoCall;
+        [HideInInspector] public bool isLocalCall = true;
         public bool isHost { get { return p2pConfig.Instance.userIds.IsHost(); } }
         <#= SyncVar #>
         <#= Rpcs #>

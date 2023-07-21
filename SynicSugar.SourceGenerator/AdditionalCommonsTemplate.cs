@@ -68,8 +68,8 @@ namespace SynicSugarGenerator
             
             #line default
             #line hidden
-            this.Write(" {\r\n        [HideInInspector] public bool isRemotoCall;\r\n        public bool isHo" +
-                    "st { get { return p2pConfig.Instance.userIds.IsHost(); } }\r\n        ");
+            this.Write(" {\r\n        [HideInInspector] public bool isLocalCall = true;\r\n        public boo" +
+                    "l isHost { get { return p2pConfig.Instance.userIds.IsHost(); } }\r\n        ");
             
             #line 13 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\AdditionalCommonsTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(SyncVar));
