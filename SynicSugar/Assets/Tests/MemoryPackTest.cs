@@ -31,6 +31,7 @@ namespace SynicSugar.Test {
             mainD.test1.Debug();
             mainD.test2.Debug();
             mainD.test3.Debug();
+            mainD.testB.Debug();
 
 
             using var decompressor = new BrotliDecompressor();
@@ -50,14 +51,26 @@ namespace SynicSugar.Test {
             main.test2 = test2;
             Debug.Log($"test2: {Marshal.SizeOf(test2)}");
 
-            MemoryPackTest3 test3 = new MemoryPackTest3("MemoryPackTest3", 3, "3");
+            MemoryPackTest3 test3 = new MemoryPackTest3("MemoryPackTest3", 3, GetRandomString(50));
             main.test3 = test3;
             Debug.Log($"test3: {Marshal.SizeOf(test3)}");
 
+            MemoryPackTestBig testB = new MemoryPackTestBig("MemoryPackTestB", 4, GetRandomString(2000));
+            main.testB = testB;
+            Debug.Log($"testB: {Marshal.SizeOf(testB)}");
+
             return main;
         }
-        long GetObjectSize(){
-            return 0;
+        string GetRandomString(int length){
+            var sample = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            var array = new char[length];
+            var random = new System.Random();
+
+            for (int i = 0; i < array.Length; i++){
+                array[i] = sample[random.Next(sample.Length)];
+            }
+
+            return new string(array);
         }
     }
     [MemoryPackable]
@@ -65,6 +78,7 @@ namespace SynicSugar.Test {
         public MemoryPackTest1 test1;
         public MemoryPackTest2 test2;
         public MemoryPackTest3 test3;
+        public MemoryPackTestBig testB;
     }
     [MemoryPackable]
     public partial struct MemoryPackTest1{
@@ -101,6 +115,21 @@ namespace SynicSugar.Test {
         public int id;
         public string code;
         public MemoryPackTest3(string name, int id, string code){
+            this.name = name;
+            this.id = id;
+            this.code = code;
+        }
+
+        public void Debug(){
+            UnityEngine.Debug.Log($"{this.name} / {this.id} / {this.code}");
+        }
+    }
+    [MemoryPackable]
+    public partial struct MemoryPackTestBig{
+        public string name;
+        public int id;
+        public string code;
+        public MemoryPackTestBig(string name, int id, string code){
             this.name = name;
             this.id = id;
             this.code = code;
