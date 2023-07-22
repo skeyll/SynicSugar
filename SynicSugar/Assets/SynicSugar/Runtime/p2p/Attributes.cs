@@ -52,6 +52,25 @@ namespace SynicSugar.P2P {
             syncInterval = syncIntervalMs;
         }
     }
+    [AttributeUsage(AttributeTargets.Field,
+    Inherited = false)]
+    public sealed class SynicAttribute : Attribute {
+        byte SyncedHierarchy;
+        /// <summary>
+        /// Synchronize synic variables to TargetUser in batches. This can send packets larger than 1170, but this performance is poor. </ br>
+        /// If no argument is specified, it is always synchronized
+        /// </summary>
+        public SynicAttribute(){
+        }
+        /// <summary>
+        /// Synchronize synic variables to TargetUser in batches. This can send packets larger than 1170, but this performance is poor. </ br>
+        /// If no argument is specified, it is always synchronized
+        /// </summary>
+        /// <param name="syncedHierarchy">Hierarchy or step to which this variable belongs. If we call SyncSynic with 10, all fields in 1-10 are synchronized.</param>
+        public SynicAttribute(byte syncedHierarchy){
+            SyncedHierarchy = syncedHierarchy;
+        }
+    }
     [AttributeUsage(AttributeTargets.Method,
     Inherited = false)]
     public sealed class RpcAttribute : Attribute {
