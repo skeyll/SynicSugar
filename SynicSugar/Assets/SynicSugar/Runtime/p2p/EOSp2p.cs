@@ -1,8 +1,8 @@
 using PlayEveryWare.EpicOnlineServices;
-using Epic.OnlineServices.P2P;
 using System;
-using Cysharp.Threading.Tasks;
 using UnityEngine;
+using Cysharp.Threading.Tasks;
+using Epic.OnlineServices.P2P;
 using ResultE = Epic.OnlineServices.Result;
 
 namespace SynicSugar.P2P {
@@ -67,6 +67,43 @@ namespace SynicSugar.P2P {
                 Debug.LogErrorFormat("Send Packet: can't send packet, code: {0}", result);
                 return;
             }
+        }
+        /// <summary>
+        /// Send a large packet to a specific peer. To send returner. </ br>
+        /// *Current: We can use this from a specific API.
+        /// </summary>
+        /// <param name="ch">Only 255 now</param>
+        /// <param name="value">The payload serialized with MemoryPack and BrotliCompressor</param>
+        /// <param name="targetId"></param>
+        public static void SendLargePacket(byte ch, byte[] value, UserId targetId){
+            int length = 1100;
+            //Max payload is 1170 but we need some header.
+            for(int startIndex = 0; startIndex < value.Length; startIndex += 1100){
+                length = startIndex + 1100 < value.Length ? 1100 : value.Length - startIndex;
+
+                Span<byte> _payload = new Span<byte>(value, startIndex, length); 
+                byte[] payload = _payload.ToArray();
+
+                SendPacketOptions options = new SendPacketOptions(){
+                    LocalUserId = EOSManager.Instance.GetProductUserId(),
+                    RemoteUserId = targetId.AsEpic,
+                    SocketId = p2pConnectorForOtherAssembly.Instance.SocketId,
+                    Channel = ch,
+                    AllowDelayedDelivery = true,
+                    Reliability = p2pConfig.Instance.packetReliability,
+                    Data = new ArraySegment<byte>(payload)
+                };
+
+                ResultE result = p2pConnectorForOtherAssembly.Instance.P2PHandle.SendPacket(ref options);
+
+                if(result != ResultE.Success){
+                    Debug.LogErrorFormat("Send Large Packet: can't send packet, code: {0}", result);
+                    return;
+                }
+            }
+        #if SYNICSUGAR_LOG
+            Debug.Log($"Send Large Packet: Success to {targetId.ToString()}!");
+        #endif
         }
     }
     public enum Reason {
