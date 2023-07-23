@@ -2,6 +2,7 @@ using PlayEveryWare.EpicOnlineServices;
 using System;
 using System.Collections.Generic;
 using Epic.OnlineServices;
+using MemoryPack;
 
 namespace SynicSugar.P2P {
     /// <summary>
@@ -96,5 +97,24 @@ namespace SynicSugar.P2P {
         public byte ch;
         public string UserID;
         public ArraySegment<byte> payload;
+    }
+    public class LargePacketInfomation {
+        public byte chunk;
+        public byte hierarchy;
+        public bool syncSpecificHierarchy;
+    }
+    [MemoryPackable]
+    // This way is bad performance. Please let me know if you have a good idea to serialize and send data.
+    public partial class SynicContainer {
+        public string SynicSets0 = System.String.Empty;
+        public string SynicSets1 = System.String.Empty;
+        public string SynicSets2 = System.String.Empty;
+        public string SynicSets3 = System.String.Empty;
+        public string SynicSets4 = System.String.Empty;
+        public string SynicSets5 = System.String.Empty;
+        public string SynicSets6 = System.String.Empty;
+        public string SynicSets7 = System.String.Empty;
+        public string SynicSets8 = System.String.Empty;
+        public string SynicSets9 = System.String.Empty;
     }
 }
