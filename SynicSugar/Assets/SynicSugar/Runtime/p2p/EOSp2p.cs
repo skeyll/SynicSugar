@@ -4,6 +4,7 @@ using UnityEngine;
 using Cysharp.Threading.Tasks;
 using Epic.OnlineServices.P2P;
 using ResultE = Epic.OnlineServices.Result;
+using MemoryPack;
 
 namespace SynicSugar.P2P {
     public static class EOSp2p {
@@ -114,10 +115,10 @@ namespace SynicSugar.P2P {
             Debug.Log($"Send Large Packet: Success to {targetId.ToString()}!");
         #endif
             /// <summary>
-            /// index, (chunk count, hierarchy level, only sync hierarchy), tail
+            /// index, (chunk count, hierarchy level, only sync hierarchy)
             /// </summary>
             byte[] GenerateHeader(byte chunk, byte hierarchy, bool isOnly, ref byte chunkIndex){
-                byte[] result = new byte[chunkIndex == 0 ? 5 : 2];
+                byte[] result = new byte[chunkIndex == 0 ? 4 : 1];
 
                 result[0] = chunkIndex;
                 if(chunkIndex == 0){
@@ -125,7 +126,6 @@ namespace SynicSugar.P2P {
                     result[2] = hierarchy;
                     result[3] = isOnly ? (byte)1 : (byte)0;
                 }
-                result[result.Length - 1] = 0;
                 chunkIndex++;
 
                 return result;
