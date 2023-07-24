@@ -176,6 +176,12 @@
             isLocalCall = true;
         }}";
         }
+        //Synic
+        internal string CreateSynicItem(string variable, string nameSpace, string param) {
+            return $@"
+        public {GetFullName(nameSpace, param)} {variable};";
+        }
+
         //Extenstions
         internal string GetFullName(string nameSpace, string name) {
             if (string.IsNullOrEmpty(nameSpace)) {

@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Linq;
 using System.Text;
@@ -15,6 +15,7 @@ namespace SynicSugar.Generator {
         internal const string RPC = "Rpc";
         internal const string TARGETRPC = "TargetRpc";
         internal const string SYNCVAR = "SyncVar";
+        internal const string SYNIC = "Synic";
 
         public void Initialize(GeneratorInitializationContext context) {
             context.RegisterForSyntaxNotifications(() => new SyntaxReceiver());
@@ -26,7 +27,9 @@ namespace SynicSugar.Generator {
             try {
                 List<ClassInfo> classesInfo = new List<ClassInfo>();
                 List<ContentInfo> contentsInfo = new List<ContentInfo>();
+                //To set key on analysis phase.
                 Dictionary<string, StringBuilder> syncvars = new Dictionary<string, StringBuilder>();
+                Dictionary<string, StringBuilder> synics = new Dictionary<string, StringBuilder>();
                 Dictionary<string, StringBuilder> rpcs = new Dictionary<string, StringBuilder>();
 
                 int classI(){ return classesInfo.Count - 1; }
@@ -49,6 +52,7 @@ namespace SynicSugar.Generator {
                     if (!syncvars.ContainsKey($"{cb.GetFullName(classesInfo[classI()].nameSpace, classesInfo[classI()].name)}")){
                         syncvars.Add(cb.GetFullName(classesInfo[classI()].nameSpace, classesInfo[classI()].name), new StringBuilder());
                         rpcs.Add(cb.GetFullName(classesInfo[classI()].nameSpace, classesInfo[classI()].name), new StringBuilder());
+                        synics.Add(cb.GetFullName(classesInfo[classI()].nameSpace, classesInfo[classI()].name), new StringBuilder());
                     }
 
                     foreach (var method in target.Members.OfType<MethodDeclarationSyntax>()){
@@ -90,18 +94,24 @@ namespace SynicSugar.Generator {
                     }
 
                     foreach (var field in target.Members.OfType<FieldDeclarationSyntax>()){
-                        var contentAttributes = field.AttributeLists.SelectMany(al => al.Attributes);
-                        var syncvarSyntax = contentAttributes.FirstOrDefault(a => a.Name.ToString() == SYNCVAR);
+                        var fieldAttributes = field.AttributeLists.SelectMany(al => al.Attributes);
+                        var syncvarSyntax = fieldAttributes.FirstOrDefault(a => a.Name.ToString() == SYNCVAR);
+                        var synicSyntax = fieldAttributes.FirstOrDefault(a => a.Name.ToString() == SYNIC);
 
-                        if (syncvarSyntax == null){
+                        if(syncvarSyntax == null && synicSyntax == null){
                             continue;
                         }
+                        
+                        if(synicSyntax != null && !field.Modifiers.Any(SyntaxKind.PublicKeyword)){
+                            continue;
+                        }
+
                         var model = context.Compilation.GetSemanticModel(field.SyntaxTree);
 
                         contentsInfo.Add(new ContentInfo());
                         int ci = contentsI();
                         contentsInfo[ci].isNetworkPlayer = classesInfo[classI()].isNetworkPlayer;
-                        contentsInfo[ci].type = ContentInfo.Type.SyncVar;
+                        contentsInfo[ci].type = syncvarSyntax != null ? ContentInfo.Type.SyncVar : ContentInfo.Type.Synic;
                         contentsInfo[ci].rootNameSpace = classesInfo[classI()].nameSpace;
                         contentsInfo[ci].rootName = classesInfo[classI()].name;
                         contentsInfo[ci].contentName = field.Declaration.Variables.FirstOrDefault().Identifier.ValueText;
@@ -111,23 +121,37 @@ namespace SynicSugar.Generator {
 
                         var fieldSymbol = model.GetDeclaredSymbol(field) as IFieldSymbol;
 
-                        //Set attribute data
-                        var argsCount = syncvarSyntax.ArgumentList?.Arguments.Count ?? 0;
-                        if (argsCount == 0){
+                        if (syncvarSyntax != null) {
+                            //Set attribute data
+                            var argsCount = syncvarSyntax.ArgumentList?.Arguments.Count ?? 0;
+                            if (argsCount == 0){
+                                continue;
+                            }
+
+                            if(argsCount == 1){
+                                var args = (syncvarSyntax.ArgumentList.Arguments[0].Expression as LiteralExpressionSyntax).Token.Value;
+                                if (args is bool){
+                                    contentsInfo[ci].isOnlyHost = (bool)(syncvarSyntax.ArgumentList.Arguments[0].Expression as LiteralExpressionSyntax).Token.Value;
+                                }else if(args is int){
+                                    contentsInfo[ci].argOption = (int)(syncvarSyntax.ArgumentList.Arguments[0].Expression as LiteralExpressionSyntax).Token.Value;
+                                }
+                            }
+                            else{
+                                contentsInfo[ci].isOnlyHost  = (bool)(syncvarSyntax.ArgumentList.Arguments[0].Expression as LiteralExpressionSyntax).Token.Value;
+                                contentsInfo[ci].argOption = (int)(syncvarSyntax.ArgumentList.Arguments[1].Expression as LiteralExpressionSyntax).Token.Value;
+                            }
                             continue;
                         }
 
-                        if(argsCount == 1){
-                            var args = (syncvarSyntax.ArgumentList.Arguments[0].Expression as LiteralExpressionSyntax).Token.Value;
-                            if (args is bool){
-                                contentsInfo[ci].isOnlyHost = (bool)(syncvarSyntax.ArgumentList.Arguments[0].Expression as LiteralExpressionSyntax).Token.Value;
-                            }else if(args is int){
-                                contentsInfo[ci].syncInterval = (int)(syncvarSyntax.ArgumentList.Arguments[0].Expression as LiteralExpressionSyntax).Token.Value;
+                        if (synicSyntax != null){
+                            //Set attribute data
+                            var argsCount = synicSyntax.ArgumentList?.Arguments.Count ?? 0;
+                            if (argsCount == 0){
+                                contentsInfo[ci].argOption = 0;
+                                continue;
                             }
-                        }
-                        else{
-                            contentsInfo[ci].isOnlyHost  = (bool)(syncvarSyntax.ArgumentList.Arguments[0].Expression as LiteralExpressionSyntax).Token.Value;
-                            contentsInfo[ci].syncInterval = (int)(syncvarSyntax.ArgumentList.Arguments[1].Expression as LiteralExpressionSyntax).Token.Value;
+                            contentsInfo[ci].argOption = (int)(synicSyntax.ArgumentList.Arguments[0].Expression as LiteralExpressionSyntax).Token.Value;
+                            continue;
                         }
                     }
                 }
@@ -137,8 +161,19 @@ namespace SynicSugar.Generator {
                 //Set each detail data
                 StringBuilder SyncList = new StringBuilder();
                 StringBuilder PacketConvert = new StringBuilder();
+                Dictionary<int, StringBuilder> SynicItems = new Dictionary<int, StringBuilder>();
+                //Prep
+                for(int i = 0; i <= 9; i++) {
+                    SynicItems.Add(i, new StringBuilder());
+                }
+
                 foreach (var info in contentsInfo) {
-                    SyncList.Append($"{info.contentName}, ");
+                    if (info.type == ContentInfo.Type.Synic) { 
+                        SynicItems[info.argOption].Append(cb.CreateSynicItem(info.contentName, info.paramNamespace, info.param));
+                        continue;
+                    }else{
+                        SyncList.Append($"{info.contentName}, ");
+                    }
 
                     if (info.isNetworkPlayer) {
                         switch (info.type) {
@@ -151,7 +186,7 @@ namespace SynicSugar.Generator {
                                 PacketConvert.Append(cb.CreatePlayerTargetRpcPacketConvert(info.rootName, info.contentName, info.param, info.paramNamespace));
                                 continue;
                             case ContentInfo.Type.SyncVar:
-                                syncvars[cb.GetFullName(info.rootNameSpace, info.rootName)].Append(cb.CreateSyncVarMethod(info.contentName, info.paramNamespace, info.param, info.syncInterval, info.isPublicVar, false, false));
+                                syncvars[cb.GetFullName(info.rootNameSpace, info.rootName)].Append(cb.CreateSyncVarMethod(info.contentName, info.paramNamespace, info.param, info.argOption, info.isPublicVar, false, false));
                                 PacketConvert.Append(cb.CreatePlayerSyncVarPacketConvert(info.rootName, info.contentName, info.param, info.paramNamespace, info.isPublicVar));
                             continue;
                         }
@@ -163,7 +198,7 @@ namespace SynicSugar.Generator {
                             PacketConvert.Append(cb.CreateCommonsRpcPacketConvert(info.rootName, info.contentName, info.param, info.paramNamespace));
                         continue;
                         case ContentInfo.Type.SyncVar:
-                            syncvars[cb.GetFullName(info.rootNameSpace, info.rootName)].Append(cb.CreateSyncVarMethod(info.contentName, info.paramNamespace, info.param, info.syncInterval, info.isPublicVar, info.isOnlyHost, true));
+                            syncvars[cb.GetFullName(info.rootNameSpace, info.rootName)].Append(cb.CreateSyncVarMethod(info.contentName, info.paramNamespace, info.param, info.argOption, info.isPublicVar, info.isOnlyHost, true));
                             PacketConvert.Append(cb.CreateCommonsSyncVarPacketConvert(info.rootName, info.contentName, info.param, info.paramNamespace, info.isPublicVar));
                         continue;
                     }
@@ -173,8 +208,6 @@ namespace SynicSugar.Generator {
                 }
 
                 //Set base class data
-                //StringBuilder CommonsList = new StringBuilder();
-                //StringBuilder PlayerList = new StringBuilder();
                 StringBuilder Reference = new StringBuilder();
                 StringBuilder Register = new StringBuilder();
                 StringBuilder GetInstance = new StringBuilder();
@@ -210,6 +243,7 @@ namespace SynicSugar.Generator {
                     AdditionalClass.Append(ct.TransformText());
                 }
 
+
                 var connectTemplate = new ConnecthubTemplate() {
                     SyncList = SyncList.ToString(),
                     Register = Register.ToString(),
@@ -221,6 +255,18 @@ namespace SynicSugar.Generator {
                 context.AddSource("ConnectHub.g.cs", connectTemplate);
 
                 context.AddSource("SynicSugarAdditonalClass.g.cs", AdditionalClass.ToString());
+
+                StringBuilder SynicItemsClass = new StringBuilder(SynicItemsHeader);
+                foreach (var i in SynicItems) {
+                    var st = new SynicItemsTemplate() {
+                        hierarchyIndex = i.Key,
+                        items = i.Value.ToString()
+                    };
+                    SynicItemsClass.Append(st.TransformText());
+                }
+                SynicItemsClass.Append("}");
+
+                context.AddSource("SynicSugarSynicItemsClass.g.cs", SynicItemsClass.ToString());
             }
             catch (Exception ex) {
                 System.Diagnostics.Trace.WriteLine(ex.ToString());
@@ -233,11 +279,11 @@ namespace SynicSugar.Generator {
         public class ContentInfo{
             public bool isNetworkPlayer, isOnlyHost;
             public string rootNameSpace, rootName, contentName, param, paramNamespace;
-            public int syncInterval;
+            public int argOption;
             public bool isPublicVar;
             public Type type;
             public enum Type{
-                Rpc, TargetRpc, SyncVar
+                Rpc, TargetRpc, SyncVar, Synic
             }
         }
 
@@ -268,6 +314,13 @@ using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 ";
+
+        string SynicItemsHeader = $@"// <auto-generated>
+// THIS (.cs) FILE IS GENERATED BY SynicSugarGenerator. DO NOT CHANGE IT.
+// </auto-generated>
+namespace SynicSugar.P2P {{
+";
+
         class SyntaxReceiver : ISyntaxReceiver {
             internal List<ClassDeclarationSyntax> Targets { get; } = new List<ClassDeclarationSyntax>();
 

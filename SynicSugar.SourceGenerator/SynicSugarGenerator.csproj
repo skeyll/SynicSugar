@@ -6,25 +6,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="AdditionalCommonsTemplate.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>AdditionalCommonsTemplate.tt</DependentUpon>
-    </None>
-    <None Include="ConnecthubTemplate.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>ConnecthubTemplate.tt</DependentUpon>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis" Version="3.9.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="3.9.0" />
     <PackageReference Include="System.CodeDom" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="SynicItemsTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>SynicItemsTemplate.cs</LastGenOutput>
+    </None>
     <None Update="ConnecthubTemplate.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>ConnecthubTemplate.cs</LastGenOutput>
@@ -53,6 +44,11 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>AdditionalPlayerTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Update="SynicItemsTemplate.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>SynicItemsTemplate.tt</DependentUpon>
     </Compile>
     <Compile Update="ConnecthubTemplate.cs">
       <DesignTime>True</DesignTime>
