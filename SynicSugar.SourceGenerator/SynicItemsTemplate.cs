@@ -28,7 +28,7 @@ namespace SynicSugarGenerator
         /// </summary>
         public virtual string TransformText()
         {
-            this.Write("    public struct SynicItem");
+            this.Write("    internal struct SynicItem");
             
             #line 7 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\SynicItemsTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(hierarchyIndex));

@@ -6,6 +6,7 @@
         internal string? PlayeInstance;
         internal string? CommonsInstance;
         internal string? PacketConvert;
+        internal string? SyncSynic;
     }
     public partial class AdditionalPlayerTemplate {
         internal string? NameSpace;
@@ -20,5 +21,9 @@
         internal string? SyncVar;
         internal string? Rpcs;
         internal bool useGetInstance;
+    }
+    public partial class SynicItemsTemplate {
+        internal int hierarchyIndex;
+        internal string? items;
     }
 }

@@ -179,7 +179,21 @@
         //Synic
         internal string CreateSynicItem(string variable, string nameSpace, string param) {
             return $@"
-        public {GetFullName(nameSpace, param)} {variable};";
+        internal {GetFullName(nameSpace, param)} {variable};";
+        }
+        internal string CreateSyncSynicContent(string variableName, string className,　bool isPlayerClass) {
+            string id = isPlayerClass ? "[targetId.ToString()]" : System.String.Empty;
+            return $@" {variableName} = {className}{id}.{variableName},";
+        }
+        internal string CreateSyncSynicFrame(int index, string content) {
+            string footer = index == 0 ? @"
+                break;" : $@"
+                if (syncSingleHierarchy) {{ break; }}
+                else {{ goto case {index - 1}; }}";
+            return $@"
+                case {index}:
+                    SynicItem{index} synicItem{index} = new SynicItem{index}(){{{ content }}};
+                    synicContainer.SynicItem{index} = JsonUtility.ToJson(synicItem{index});{footer}";
         }
 
         //Extenstions
