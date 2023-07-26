@@ -177,11 +177,11 @@
         }}";
         }
         //Synic
-        internal string CreateSynicItem(string variable, string nameSpace, string param) {
+        internal string CreateSynicItemVariable(string variable, string nameSpace, string param) {
             return $@"
         internal {GetFullName(nameSpace, param)} {variable};";
         }
-        internal string CreateSyncSynicContent(string variableName, string className,　bool isPlayerClass) {
+        internal string CreateSyncSynicContent(string variableName, string className, bool isPlayerClass) {
             string id = isPlayerClass ? "[targetId.ToString()]" : System.String.Empty;
             return $@" {variableName} = {className}{id}.{variableName},";
         }
@@ -195,7 +195,27 @@
                     SynicItem{index} synicItem{index} = new SynicItem{index}(){{{ content }}};
                     synicContainer.SynicItem{index} = JsonUtility.ToJson(synicItem{index});{footer}";
         }
+        internal string CreateSyncedInvoker(int index) {
+            string footer = index == 0 ? @"
+                break;" : $@"
+                if (syncSingleHierarchy) {{ break; }}
+                else {{ goto case {index - 1}; }}";
+            return $@"
+                case {index}:
+                    SynicItem{index} synicItem{index} = JsonUtility.FromJson<SynicItem{index}>(container.SynicItem{index});
+                    SyncedItem{index}(targetId, synicItem{index});{footer}";
+        }
 
+        internal string CreateSyncedContent(string variableName, string className, bool isPlayerClass) {
+            string id = isPlayerClass ? "[id.ToString()]" : System.String.Empty;
+            return $@"
+            {className}{id}.{variableName} = synicItem.{variableName};";
+        }
+        internal string CreateSynedItem(int index, string content){
+            return $@"
+        void SyncedItem{index}(UserId id, SynicItem{index} synicItem){{ {content}
+        }}";
+        }
         //Extenstions
         internal string GetFullName(string nameSpace, string name) {
             if (string.IsNullOrEmpty(nameSpace)) {

@@ -162,14 +162,22 @@ namespace SynicSugar.Generator {
                 StringBuilder SyncList = new StringBuilder();
                 StringBuilder PacketConvert = new StringBuilder();
                 Dictionary<int, StringBuilder> SynicItems = new Dictionary<int, StringBuilder>();
+                Dictionary<int, StringBuilder> SyncSynics = new Dictionary<int, StringBuilder>();
+                Dictionary<int, StringBuilder> SyncedContents = new Dictionary<int, StringBuilder>();
+                StringBuilder SyncedInvoker = new StringBuilder();
                 //Prep
-                for(int i = 0; i <= 9; i++) {
+                for (int i = 0; i <= 9; i++) {
                     SynicItems.Add(i, new StringBuilder());
+                    SyncSynics.Add(i, new StringBuilder());
+                    SyncedContents.Add(i, new StringBuilder());
+                    SyncedInvoker.Append(cb.CreateSyncedInvoker(i));
                 }
 
                 foreach (var info in contentsInfo) {
-                    if (info.type == ContentInfo.Type.Synic) { 
-                        SynicItems[info.argOption].Append(cb.CreateSynicItem(info.contentName, info.paramNamespace, info.param));
+                    if (info.type == ContentInfo.Type.Synic) {
+                        SynicItems[info.argOption].Append(cb.CreateSynicItemVariable(info.contentName, info.paramNamespace, info.param));
+                        SyncSynics[info.argOption].Append(cb.CreateSyncSynicContent(info.contentName, info.rootName, info.isNetworkPlayer));
+                        SyncedContents[info.argOption].Append(cb.CreateSyncedContent(info.contentName, info.rootName, info.isNetworkPlayer));
                         continue;
                     }else{
                         SyncList.Append($"{info.contentName}, ");
@@ -203,9 +211,8 @@ namespace SynicSugar.Generator {
                         continue;
                     }
                 }
-                if (string.IsNullOrEmpty(SyncList.ToString())){
-                    SyncList.Append("None");
-                }
+                //For library api
+                SyncList.Append("Synic = 255");
 
                 //Set base class data
                 StringBuilder Reference = new StringBuilder();
@@ -243,6 +250,16 @@ namespace SynicSugar.Generator {
                     AdditionalClass.Append(ct.TransformText());
                 }
 
+                StringBuilder SyncedItem = new StringBuilder();
+                
+                foreach (var i in SyncedContents) {
+                    SyncedItem.Append(cb.CreateSynedItem(i.Key, i.Value.ToString()));
+                }
+                
+                StringBuilder SyncSynic= new StringBuilder();
+                foreach (var i in SyncSynics) {
+                    SyncSynic.Append(cb.CreateSyncSynicFrame(i.Key, i.Value.ToString()));
+                }
 
                 var connectTemplate = new ConnecthubTemplate() {
                     SyncList = SyncList.ToString(),
@@ -251,22 +268,24 @@ namespace SynicSugar.Generator {
                     PlayeInstance = PlayeInstance.ToString(),
                     CommonsInstance = CommonsInstance.ToString(),
                     PacketConvert = PacketConvert.ToString(),
+                    SyncSynic = SyncSynic.ToString(),
+                    SyncedInvoker = SyncedInvoker.ToString(),
+                    SyncedItems = SyncedItem.ToString()
                 }.TransformText();
                 context.AddSource("ConnectHub.g.cs", connectTemplate);
 
                 context.AddSource("SynicSugarAdditonalClass.g.cs", AdditionalClass.ToString());
 
                 StringBuilder SynicItemsClass = new StringBuilder(SynicItemsHeader);
-                foreach (var i in SynicItems) {
-                    var st = new SynicItemsTemplate() {
+                foreach (var i in SynicItems){
+                    var st = new SynicItemsTemplate(){
                         hierarchyIndex = i.Key,
                         items = i.Value.ToString()
                     };
                     SynicItemsClass.Append(st.TransformText());
                 }
                 SynicItemsClass.Append("}");
-
-                context.AddSource("SynicSugarSynicItemsClass.g.cs", SynicItemsClass.ToString());
+                context.AddSource("SynicSugarSynicContainer.g.cs", SynicItemsClass.ToString());
             }
             catch (Exception ex) {
                 System.Diagnostics.Trace.WriteLine(ex.ToString());

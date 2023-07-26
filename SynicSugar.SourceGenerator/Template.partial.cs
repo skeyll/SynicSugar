@@ -7,6 +7,8 @@
         internal string? CommonsInstance;
         internal string? PacketConvert;
         internal string? SyncSynic;
+        internal string? SyncedInvoker;
+        internal string? SyncedItems;
     }
     public partial class AdditionalPlayerTemplate {
         internal string? NameSpace;
