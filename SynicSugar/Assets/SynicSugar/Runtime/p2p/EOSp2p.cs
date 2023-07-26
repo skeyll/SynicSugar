@@ -79,20 +79,20 @@ namespace SynicSugar.P2P {
         /// <param name="targetId"></param>
         /// <param name="hierarchyLevel">Sync from 0 to hierarchy</param>
         /// <param name="syncAllHierarchy">If false, synchronize an only specific hierarchy</param>
-        public static void SendLargePacket(byte ch, byte[] value, UserId targetId, byte hierarchyLevel = 255, bool syncSpecificHierarchy = false){
+        public static void SendLargePacket(byte ch, byte[] value, UserId targetId, byte hierarchyLevel = 9, bool syncSpecificHierarchy = false){
             int length = 1100;
             byte chunkIndex = 0;
-            byte chunkAmount = (byte)Math.Ceiling(value.Length / 1100f);
+            byte[] header = GenerateHeader(value.Length, hierarchyLevel, syncSpecificHierarchy);
+
             //Max payload is 1170 but we need some header.
             for(int startIndex = 0; startIndex < value.Length; startIndex += 1100){
                 length = startIndex + 1100 < value.Length ? 1100 : value.Length - startIndex;
 
                 Span<byte> _payload = new Span<byte>(value, startIndex, length); 
-                byte[] header = GenerateHeader(chunkAmount, hierarchyLevel, syncSpecificHierarchy, ref chunkIndex);
                 //Add header
-                byte[] payload = new byte[header.Length + length];
-                Array.Copy(header, 0, payload, 0, header.Length);
-                Array.Copy(_payload.ToArray(), 0, payload, header.Length, length);
+                Span<byte> payload = new byte[header.Length + length];
+                header.CopyTo(payload);
+                _payload.CopyTo(payload.Slice(header.Length));
 
                 SendPacketOptions options = new SendPacketOptions(){
                     LocalUserId = EOSManager.Instance.GetProductUserId(),
@@ -101,7 +101,7 @@ namespace SynicSugar.P2P {
                     Channel = ch,
                     AllowDelayedDelivery = true,
                     Reliability = p2pConfig.Instance.packetReliability,
-                    Data = new ArraySegment<byte>(payload)
+                    Data = new ArraySegment<byte>(payload.ToArray())
                 };
 
                 ResultE result = p2pConnectorForOtherAssembly.Instance.P2PHandle.SendPacket(ref options);
@@ -110,6 +110,8 @@ namespace SynicSugar.P2P {
                     Debug.LogErrorFormat("Send Large Packet: can't send packet, code: {0}", result);
                     return;
                 }
+                //add index
+                header[0]++;
             }
         #if SYNICSUGAR_LOG
             Debug.Log($"Send Large Packet: Success to {targetId.ToString()}!");
@@ -117,12 +119,12 @@ namespace SynicSugar.P2P {
             /// <summary>
             /// index, (chunk count, hierarchy level, only sync hierarchy)
             /// </summary>
-            byte[] GenerateHeader(byte chunk, byte hierarchy, bool isOnly, ref byte chunkIndex){
-                byte[] result = new byte[chunkIndex == 0 ? 4 : 1];
+            byte[] GenerateHeader(int valueLength, byte hierarchy, bool isOnly){
+                byte[] result = new byte[4];
 
-                result[0] = chunkIndex;
+                result[0] = 0;
                 if(chunkIndex == 0){
-                    result[1] = chunk;
+                    result[1] = (byte)Math.Ceiling(valueLength / 1100f);;
                     result[2] = hierarchy;
                     result[3] = isOnly ? (byte)1 : (byte)0;
                 }
