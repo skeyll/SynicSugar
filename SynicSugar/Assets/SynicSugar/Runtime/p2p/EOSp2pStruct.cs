@@ -9,8 +9,8 @@ namespace SynicSugar.P2P {
     /// Hold user ids in Room player.
     /// </summary>
     public class UserIds {
-        public UserId LocalUserId;
-        public List<UserId> RemoteUserIds;
+        internal UserId LocalUserId;
+        internal List<UserId> RemoteUserIds;
 
         //Options
         internal UserId HostUserId;
@@ -20,6 +20,13 @@ namespace SynicSugar.P2P {
         // If not, only the local user can manipulate the local user's data.
         // For Anti-Cheat to rewrite other player data.
         internal bool isJustReconnected;
+        internal bool _AcceptHostSynic(){
+            if(isJustReconnected){
+                isJustReconnected = false;
+                return true;
+            }
+            return false;
+        }
         public UserIds(){
             LocalUserId = new UserId(EOSManager.Instance.GetProductUserId());
         }
@@ -27,6 +34,7 @@ namespace SynicSugar.P2P {
         /// Is this local user Game Host?
         /// </summary>
         /// <returns></returns>
+        [Obsolete("This is old. p2pConfig.Instance.IsHost() is new one.")]
         public bool IsHost (){
             return LocalUserId == HostUserId;
         }
@@ -76,7 +84,7 @@ namespace SynicSugar.P2P {
             this.value = id.AsEpic;
         }
         public UserId(string idString){
-            this.value = ProductUserId.FromString(idString);;
+            this.value = ProductUserId.FromString(idString);
         }
         public readonly ProductUserId AsEpic => value;
         public static explicit operator ProductUserId(UserId id) => id.value;

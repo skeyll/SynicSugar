@@ -1,6 +1,7 @@
 using Epic.OnlineServices.P2P;
 using UnityEngine;
 using System;
+using System.Collections.Generic;
 namespace SynicSugar.P2P {
     public class p2pConfig : MonoBehaviour {
 #region Singleton
@@ -22,6 +23,24 @@ namespace SynicSugar.P2P {
         }
 #endregion
         [HideInInspector] public UserIds userIds = new UserIds();
+        public UserId LocalUserId => userIds.LocalUserId;
+        public List<UserId> RemoteUserIds => userIds.RemoteUserIds;
+        public bool AcceptHostSynic () => userIds._AcceptHostSynic();
+        /// <summary>
+        /// Is this local user Game Host?
+        /// </summary>
+        /// <returns></returns>
+        public bool IsHost (){
+            return userIds.LocalUserId == userIds.HostUserId;
+        }
+        /// <summary>
+        /// Is this user Game Host?
+        /// </summary>
+        /// <returns></returns>
+        public bool IsHost (UserId targetId){
+            return targetId == userIds.HostUserId;
+        }
+
         ///Options 
         [Header("Interval of sending each users[ms]. Recommend: 3ms-")]
         /// <summary>
