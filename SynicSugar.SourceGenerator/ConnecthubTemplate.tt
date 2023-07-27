@@ -16,7 +16,6 @@ using UnityEngine;
 using MemoryPack;
 using MemoryPack.Compression;
 using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
@@ -26,7 +25,7 @@ namespace SynicSugar.P2P {
         private static Lazy<ConnectHub> instance = new Lazy<ConnectHub>();
         public static ConnectHub Instance => instance.Value;
 
-        private ConnectHub(){
+        public ConnectHub(){
         }
         //Start
         /// <summary>
@@ -91,7 +90,7 @@ namespace SynicSugar.P2P {
                 SugarPacket recivePacket = p2pConnectorForOtherAssembly.Instance.GetPacketFromBuffer();
 
                 if(recivePacket != null){
-                    ConnectHub.Instance.ConvertFormPacket(recivePacket);
+                    ConnectHub.Instance.ConvertFromPacket(recivePacket);
                 }
                 await UniTask.Delay(p2pConnectorForOtherAssembly.Instance.receiverInterval);
 
@@ -105,6 +104,10 @@ namespace SynicSugar.P2P {
         public enum CHANNELLIST{
             <#= SyncList #>
         }
+        //For Synic
+        Dictionary<string, byte[]> buffer = new Dictionary<string, byte[]>();
+        Dictionary<string, LargePacketInfomation> packetInfo = new Dictionary<string, LargePacketInfomation>();
+
         //Ref(for class)<#= Reference #>
 
         //Register(for class)<#= Register #>
@@ -127,14 +130,21 @@ namespace SynicSugar.P2P {
         }
 
         //SendPacket(for elements)
-        public void ConvertFormPacket(SugarPacket packet){
+        public void ConvertFromPacket(SugarPacket packet){
             switch((CHANNELLIST)packet.ch){<#= PacketConvert #>
+                case CHANNELLIST.Synic:
+                    bool restoredPacket = RestorePackets(packet);
+                    if(!restoredPacket){
+    #if SYNICSUGAR_LOG 
+                        Debug.LogFormat("ConvertFormPacket: Restore packet is in progress. From {0}", packet.UserID);
+    #endif
+                        return;
+                    }
+                    SyncedSynic(packet.UserID);
+                return;
             }
         }
 
-        //For Synic
-        Dictionary<string, List<ArraySegment<byte>>> buffer = new Dictionary<string, List<ArraySegment<byte>>>();
-        Dictionary<string, LargePacketInfomation> packetInfo = new Dictionary<string, LargePacketInfomation>();
         /// <summary>
         /// Sync all Synic variables. This is very heavy because it handles multiple data and repeats compression and serialization.
         /// </summary>
@@ -149,70 +159,59 @@ namespace SynicSugar.P2P {
             }
             using var compressor  = new BrotliCompressor();
             MemoryPackSerializer.Serialize(compressor , synicContainer);
+    #if SYNICSUGAR_LOG 
+            Debug.Log($"SyncSynic: {synicContainer.SynicItem1}");
+    #endif
 
             EOSp2p.SendLargePacket((byte)CHANNELLIST.Synic, compressor.ToArray(), targetId, syncedHierarchy, syncSingleHierarchy);
         }
         
-        byte[] RestorePackets(SugarPacket packet){
+        bool RestorePackets(SugarPacket packet){
             if(!buffer.ContainsKey(packet.UserID)){
-                buffer.Add(packet.UserID, new List<ArraySegment<byte>>());
-                packetInfo.Add(packet.UserID, new LargePacketInfomation());
+                packetInfo.Add(packet.UserID, new LargePacketInfomation(){  chunk = packet.payload[1], 
+                                                                            hierarchy = packet.payload[2], 
+                                                                            syncSpecificHierarchy = packet.payload[3] == 1 ? true : false });
+                //Prep enough byte[]
+                buffer.Add(packet.UserID, new byte[packet.payload[1] * 1100]);
             }
             int packetIndex = packet.payload[0];
-            bool isFirstPacket = packetIndex == 0;
-            if(isFirstPacket){
-                packetInfo[packet.UserID].chunk = packet.payload[1];
-                packetInfo[packet.UserID].hierarchy = packet.payload[2];
-                packetInfo[packet.UserID].syncSpecificHierarchy = packet.payload[3] == 1 ? true : false;
-            }
+            int offset = packetIndex * 1100;
 
-            RemoveLargePacketHeader(ref packet.payload, isFirstPacket);
-
-            //Hold packet in order
-            if(packetIndex == buffer[packet.UserID].Count - 1){ //same with length 
-                buffer[packet.UserID].Add(packet.payload);
-            }else if(packetIndex >= buffer[packet.UserID].Count){
-                for(int length = buffer[packet.UserID].Count; length <= packetIndex; length++){ //short
-                    buffer[packet.UserID].Add(new ArraySegment<byte>());
-                }
-            }else{ //enough
-                buffer[packet.UserID][packetIndex] = packet.payload;
+    #if SYNICSUGAR_LOG            
+            string t = System.String.Empty;
+            foreach(var c in packet.payload){
+                t += c;
             }
-
-            //Restore packet
-            if(buffer[packet.UserID].Count == packetInfo[packet.UserID].chunk){
-                int length = buffer[packet.UserID].Sum(segment => segment.Count);
-                byte[] result = new byte[length];
-                int offset = 0;
-
-                foreach (var i in buffer[packet.UserID]){
-                    i.Array.CopyTo(result, offset);
-                    offset += i.Count;
-                }
-                return result;
-            }
-            return null;
-            
-            void RemoveLargePacketHeader(ref ArraySegment<byte> payload, bool isFirst){
-                if(isFirst){
-                    payload = payload.Slice(4);
-                }else{
-                    payload = payload.Slice(1);
-                }
-            }
+            Debug.Log($"RestorePackets: content// {t}");
+    #endif
+    #if SYNICSUGAR_LOG
+            Debug.Log($"RestorePackets: PacketInfo:: index {packet.payload[0]} / chunk {packet.payload[1]} / hierarchy {packet.payload[2]} / syncSpecificHierarchy {packet.payload[3]}");
+    #endif
+            //Remove header
+            Span<byte> packetPayload = packet.payload.Slice(4);
+            packetInfo[packet.UserID].currentSize += packetPayload.Length;
+            //Copy Byte from what come in
+            Buffer.BlockCopy(packetPayload.ToArray(), 0, buffer[packet.UserID], offset, packetPayload.Length);
+            //Comming all?
+            return packetInfo[packet.UserID].currentSize + 1100 > buffer[packet.UserID].Length ? true : false;
         }
         /// <summary>
         /// Call from ConvertFormPacket.
         /// </summary>
-        void SyncedSynic(UserId targetId, byte[] restoredPacket){
+        void SyncedSynic(string transmitterId){
             //Deserialize packet
             using var decompressor = new BrotliDecompressor();
-            var decompressedBuffer = decompressor.Decompress(restoredPacket);
+            Span<byte> transmittedPaylaod = new Span<byte>(buffer[transmitterId]);
+
+            var decompressedBuffer = decompressor.Decompress(transmittedPaylaod.Slice(0, packetInfo[transmitterId].currentSize));
             SynicContainer container = MemoryPackSerializer.Deserialize<SynicContainer>(decompressedBuffer);
+#if SYNICSUGAR_LOG
+            Debug.Log($"SyncedSynic: Deserialize is Success {container != null}");
+    #endif
 
             //Packet data
-            int hierarchy = packetInfo[targetId.ToString()].hierarchy;
-            bool syncSingleHierarchy = packetInfo[targetId.ToString()].syncSpecificHierarchy;
+            int hierarchy = packetInfo[transmitterId].hierarchy;
+            bool syncSingleHierarchy = packetInfo[transmitterId].syncSpecificHierarchy;
 
             switch(hierarchy){<#= SyncedInvoker #>
                 default:

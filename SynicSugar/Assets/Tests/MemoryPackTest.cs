@@ -2,9 +2,11 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 using MemoryPack;
 using MemoryPack.Compression;
+using SynicSugar.P2P;
 
 namespace SynicSugar.Test {
     public class MemoryPackTest : MonoBehaviour {
+        int overwriteTest;
         void Start(){
             MemoryPackTestMain main = MemoryPackTestSetMethod();
             
@@ -40,6 +42,14 @@ namespace SynicSugar.Test {
             mainD2.test1.Debug();
             mainD2.test2.Debug();
             mainD2.test3.Debug();
+
+
+            Debug.Log(overwriteTest);
+            var testOw = MemoryPackSerializer.Serialize(overwriteTest);
+            int owTestD = MemoryPackSerializer.Deserialize<int>(testOw);
+            Debug.Log(owTestD);
+            MemoryPackSerializer.Deserialize<int>(testOw, ref overwriteTest);
+            Debug.Log(overwriteTest);
         }
         MemoryPackTestMain MemoryPackTestSetMethod(){
             MemoryPackTestMain main = new();

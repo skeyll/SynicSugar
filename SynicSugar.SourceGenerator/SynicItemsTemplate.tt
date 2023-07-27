@@ -4,5 +4,5 @@
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ output extension=".cs" #>
-    internal struct SynicItem<#= hierarchyIndex #> { <#= items #>
+    public class SynicItem<#= hierarchyIndex #> { <#= items #>
     }

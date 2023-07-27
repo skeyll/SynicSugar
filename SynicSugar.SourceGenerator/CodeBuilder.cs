@@ -179,10 +179,10 @@
         //Synic
         internal string CreateSynicItemVariable(string variable, string nameSpace, string param) {
             return $@"
-        internal {GetFullName(nameSpace, param)} {variable};";
+        public {GetFullName(nameSpace, param)} {variable};";
         }
         internal string CreateSyncSynicContent(string variableName, string className, bool isPlayerClass) {
-            string id = isPlayerClass ? "[targetId.ToString()]" : System.String.Empty;
+            string id = isPlayerClass ? "[p2pConfig.Instance.userIds.LocalUserId.ToString()]" : System.String.Empty;
             return $@" {variableName} = {className}{id}.{variableName},";
         }
         internal string CreateSyncSynicFrame(int index, string content) {
@@ -202,18 +202,20 @@
                 else {{ goto case {index - 1}; }}";
             return $@"
                 case {index}:
-                    SynicItem{index} synicItem{index} = JsonUtility.FromJson<SynicItem{index}>(container.SynicItem{index});
-                    SyncedItem{index}(targetId, synicItem{index});{footer}";
+                    if(container.SynicItem{index} != null){{
+                        SynicItem{index} synicItem{index} = JsonUtility.FromJson<SynicItem{index}>(container.SynicItem{index});
+                        SyncedItem{index}(transmitterId, synicItem{index});
+                    }}{footer}";
         }
 
         internal string CreateSyncedContent(string variableName, string className, bool isPlayerClass) {
-            string id = isPlayerClass ? "[id.ToString()]" : System.String.Empty;
+            string id = isPlayerClass ? "[id]" : System.String.Empty;
             return $@"
             {className}{id}.{variableName} = synicItem.{variableName};";
         }
         internal string CreateSynedItem(int index, string content){
             return $@"
-        void SyncedItem{index}(UserId id, SynicItem{index} synicItem){{ {content}
+        void SyncedItem{index}(string id, SynicItem{index} synicItem){{ {content}
         }}";
         }
         //Extenstions

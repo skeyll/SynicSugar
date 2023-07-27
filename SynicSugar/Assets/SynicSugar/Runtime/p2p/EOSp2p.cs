@@ -83,6 +83,9 @@ namespace SynicSugar.P2P {
             int length = 1100;
             byte chunkIndex = 0;
             byte[] header = GenerateHeader(value.Length, hierarchyLevel, syncSpecificHierarchy);
+        #if SYNICSUGAR_LOG
+            Debug.Log($"SendLargePacket: PacketInfo:: size {value.Length} / chunk {header[1]} / hierarchy {header[2]} / syncSpecificHierarchy {header[3]}");
+        #endif
 
             //Max payload is 1170 but we need some header.
             for(int startIndex = 0; startIndex < value.Length; startIndex += 1100){

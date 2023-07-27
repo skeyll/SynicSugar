@@ -102,19 +102,20 @@ namespace SynicSugar.P2P {
         public byte chunk;
         public byte hierarchy;
         public bool syncSpecificHierarchy;
+        public int currentSize;
     }
     [MemoryPackable]
     // This way is bad performance. Please let me know if you have a good idea to serialize and send data.
     public partial class SynicContainer {
-        public string SynicSets0 = System.String.Empty;
-        public string SynicSets1 = System.String.Empty;
-        public string SynicSets2 = System.String.Empty;
-        public string SynicSets3 = System.String.Empty;
-        public string SynicSets4 = System.String.Empty;
-        public string SynicSets5 = System.String.Empty;
-        public string SynicSets6 = System.String.Empty;
-        public string SynicSets7 = System.String.Empty;
-        public string SynicSets8 = System.String.Empty;
-        public string SynicSets9 = System.String.Empty;
+        public string SynicItem0;
+        public string SynicItem1;
+        public string SynicItem2;
+        public string SynicItem3;
+        public string SynicItem4;
+        public string SynicItem5;
+        public string SynicItem6;
+        public string SynicItem7;
+        public string SynicItem8;
+        public string SynicItem9;
     }
 }
