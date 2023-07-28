@@ -8,11 +8,11 @@ namespace  SynicSugar.Samples {
         public TankPlayerData localPlayer;
         void Start(){
             //Generate other player to get packet
-            foreach(var id in p2pConfig.Instance.userIds.RemoteUserIds){
+            foreach(var id in p2pInfo.Instance.RemoteUserIds){
                 TankPlayerData playerData = new TankPlayerData(){ OwnerUserID = id };
             }
             localPlayer = new TankPlayerData();
-            localPlayer.SetOwnerID(p2pConfig.Instance.userIds.LocalUserId);
+            localPlayer.SetOwnerID(p2pInfo.Instance.LocalUserId);
             //Generate all player model
             SynicObject.AllSpawn(playerPrefab);
             //After creating the instances for receive in local, start Packet Receiver.

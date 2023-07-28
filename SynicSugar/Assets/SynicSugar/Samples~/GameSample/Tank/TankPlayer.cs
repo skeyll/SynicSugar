@@ -25,6 +25,7 @@ namespace  SynicSugar.Samples {
                         Stop();
                     }
                     return;
+                    
                 }
                 if(currentState == CurrentState.Stay){
                     Move();

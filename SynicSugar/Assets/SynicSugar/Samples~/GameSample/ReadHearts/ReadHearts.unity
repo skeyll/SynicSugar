@@ -2515,7 +2515,6 @@ MonoBehaviour:
   status:
     CurrentHP: 0
     AttackDamage: 0
-  isLocalPlayer: 1
   chatName: {fileID: 2118036904}
   chatContent: {fileID: 638339505}
 --- !u!1 &1221944607
@@ -2737,7 +2736,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1535193180786485607, guid: e18422c96d27f49489abe8b774c3a6b9, type: 3}
       propertyPath: m_Name
-      value: ConnectManager
+      value: NetworkManager
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -3178,7 +3177,6 @@ MonoBehaviour:
   status:
     CurrentHP: 0
     AttackDamage: 0
-  isLocalPlayer: 0
   chatName: {fileID: 0}
   chatContent: {fileID: 0}
 --- !u!1 &1477727706
@@ -5710,7 +5708,7 @@ MonoBehaviour:
   attackSlider: {fileID: 641576757}
   player: {fileID: 0}
   opponent: {fileID: 0}
-  isRemotoCall: 0
+  isLocalCall: 1
 --- !u!1001 &3124046547690696349
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -4,24 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 
 namespace  SynicSugar.Samples {
-    [NetworkCommons]
+    [NetworkCommons(true)]
     public partial class BattleSystem : MonoBehaviour {
-#region Singleton
-        public static BattleSystem Instance { get; private set; }
-        void Awake() {
-            if( Instance != null ) {
-                Destroy( this.gameObject );
-                return;
-            }
-            Instance = this;
-            ConnectHub.Instance.RegisterInstance(this);
-        }
-        void OnDestroy() {
-            if( Instance == this ) {
-                Instance = null;
-            }
-        }
-#endregion
 #region UI
         [SerializeField] GameObject matchmakeCanvas, inGameObjects, resultObjects, chatCanvas, gamestartButton;
         [SerializeField] Text turnState, battleResult, timeText;
@@ -47,19 +31,34 @@ namespace  SynicSugar.Samples {
         [SyncVar(true, 1000)]
         float currentTime;
 #endregion
-#region Connection
+#region Prep
         public void ActivateGameCanvas(){
             this.gameObject.SetActive(true);
             matchmakeCanvas.SetActive(false);
         }
         void Start(){
+            ConnectHub.Instance.RegisterInstance(this);
             ChangeUIActive(GameState.Result);
             gamestartButton.SetActive(isHost);
             chatCanvas.SetActive(true);
+            
+            //Set UserID to sync
+            SetUserId();
+            //After the all objects for Sync have been prepared, call StartPacketReceiver() to get packets.
             ConnectHub.Instance.StartPacketReceiver();
         }
+        void SetUserId(){
+            //We can set UserID in by ourself in or after "Start".
+            GameObject playerObject = this.transform.Find("PlayerHP").gameObject;
+            player = playerObject.GetComponent<Player>();
+            player.SetOwnerID(p2pInfo.Instance.LocalUserId);
+
+            GameObject enemyObject = this.transform.Find("EnemyHP").gameObject;
+            opponent = enemyObject.GetComponent<Player>();
+            opponent.SetOwnerID(p2pInfo.Instance.RemoteUserIds[0]);
+        }
 #endregion
-#region GameSystem
+#region In GameSystem
         void StartEndphaseProcess(){
             _currentTurn++;
             CalculateDamage();
@@ -71,7 +70,7 @@ namespace  SynicSugar.Samples {
             }
         }
         void CalculateDamage(){
-            if(player.status.AttackDamage == opponent.status.AttackDamage){
+            if(player.status.AttackDamage == opponent.status.AttackDamage){ //shuffle
                 int tmpHP = player.status.CurrentHP;
                 player.status.CurrentHP = opponent.status.CurrentHP;
                 opponent.status.CurrentHP = tmpHP;
@@ -110,7 +109,7 @@ namespace  SynicSugar.Samples {
 
             ChangeUIActive(GameState.InGame);
 
-            if(p2pConfig.Instance.userIds.IsHost()){
+            if(p2pInfo.Instance.IsHost()){
                 currentTime = 0;
             }
         }
@@ -132,8 +131,7 @@ namespace  SynicSugar.Samples {
             }
         }
         public async void ExitGame(){
-            CancellationTokenSource cnsToken = new CancellationTokenSource();
-            await ConnectHub.Instance.CloseSession(cnsToken);
+            await ConnectHub.Instance.CloseSession();
             
             SynicSugar.Samples.GameModeSelect modeSelect = new SynicSugar.Samples.GameModeSelect();
             modeSelect.ChangeGameScene(GameModeSelect.GameScene.MainMenu.ToString()); //Retrun MainMenu
