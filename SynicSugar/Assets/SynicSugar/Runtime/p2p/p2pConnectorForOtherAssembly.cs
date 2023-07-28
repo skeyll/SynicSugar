@@ -124,7 +124,7 @@ namespace SynicSugar.P2P {
         public async UniTask<bool> CloseSession(CancellationToken token){
             ResetConnections();
             bool canLeave = true;
-            if(p2pConfig.Instance.userIds.IsHost()){
+            if(p2pInfo.Instance.IsHost()){
                 canLeave = await MatchMakeManager.Instance.CloseCurrentLobby(token);
             }else{
                 canLeave = await MatchMakeManager.Instance.ExitCurrentLobby(token);
@@ -238,8 +238,8 @@ namespace SynicSugar.P2P {
     /// Call from the library after the MatchMake is established.
     /// </summary>
     internal void OpenConnection(){
-        AddNotifyPeerConnectionRequest();
         AcceptAllConenctions();
+        AddNotifyPeerConnectionRequest();
     }
     //Reason: This order(Receiver, Connection, Que) is that if the RPC includes Rpc to reply, the connections are automatically re-started.
     /// <summary>
@@ -264,7 +264,7 @@ namespace SynicSugar.P2P {
             result = P2PHandle.AcceptConnection(ref options);
 
             if (result != ResultE.Success){
-                Debug.LogErrorFormat("Re-accept All Connections: error while accepting connection, code: {0} / id: {1}", result, id);
+                Debug.LogErrorFormat("Accept All Connections: error while accepting connection, code: {0} / id: {1}", result, id);
                 break;
             }
         }
@@ -272,7 +272,7 @@ namespace SynicSugar.P2P {
             return;
         }
         #if SYNICSUGAR_LOG
-            Debug.Log("Re-accept All Connections: Success accept Connections");
+            Debug.Log("Accept All Connections: Success accept Connections");
         #endif
     }
 #endregion

@@ -9,7 +9,7 @@ namespace <#= NameSpace #> {
 <# } #>
     public partial class <#= ClassName #><# if (useGetInstance) { #> : IGetCommons <# } #> {
         [HideInInspector] public bool isLocalCall = true;
-        public bool isHost { get { return p2pConfig.Instance.IsHost(); } }
+        public bool isHost { get { return p2pInfo.Instance.IsHost(); } }
         <#= SyncVar #>
         <#= Rpcs #>
     }

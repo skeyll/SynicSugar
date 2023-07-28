@@ -184,18 +184,18 @@ namespace SynicSugarGenerator
                     "    public void SyncSynic(UserId targetId, byte syncedHierarchy = 9, bool syncSi" +
                     "ngleHierarchy = false, bool syncTargetsData = true){\r\n            //Sync local d" +
                     "ata to target local\r\n            SynicContainer synicContainer = GenerateSynicCo" +
-                    "ntainer(p2pConfig.Instance.LocalUserId, syncedHierarchy, syncSingleHierarchy);\r\n" +
-                    "\r\n            using var selfCompressor  = new BrotliCompressor();\r\n            M" +
-                    "emoryPackSerializer.Serialize(selfCompressor, synicContainer);\r\n\r\n            EO" +
-                    "Sp2p.SendLargePacket((byte)CHANNELLIST.Synic, selfCompressor.ToArray(), targetId" +
-                    ", syncedHierarchy, syncSingleHierarchy);\r\n\r\n            if(!syncTargetsData || !" +
-                    "p2pConfig.Instance.IsHost()){\r\n                return;\r\n            }\r\n         " +
-                    "   //Sync target data in local to target local\r\n\r\n            synicContainer = G" +
-                    "enerateSynicContainer(targetId, syncedHierarchy, syncSingleHierarchy);\r\n\r\n      " +
-                    "      using var targetCompressor  = new BrotliCompressor();\r\n            MemoryP" +
-                    "ackSerializer.Serialize(targetCompressor, synicContainer);\r\n\r\n            EOSp2p" +
-                    ".SendLargePacket((byte)CHANNELLIST.Synic, targetCompressor.ToArray(), targetId, " +
-                    "syncedHierarchy, syncSingleHierarchy);\r\n        }\r\n\r\n        ");
+                    "ntainer(p2pInfo.Instance.LocalUserId, syncedHierarchy, syncSingleHierarchy);\r\n\r\n" +
+                    "            using var selfCompressor  = new BrotliCompressor();\r\n            Mem" +
+                    "oryPackSerializer.Serialize(selfCompressor, synicContainer);\r\n\r\n            EOSp" +
+                    "2p.SendLargePacket((byte)CHANNELLIST.Synic, selfCompressor.ToArray(), targetId, " +
+                    "syncedHierarchy, syncSingleHierarchy);\r\n\r\n            if(!syncTargetsData || !p2" +
+                    "pInfo.Instance.IsHost()){\r\n                return;\r\n            }\r\n            /" +
+                    "/Sync target data in local to target local\r\n\r\n            synicContainer = Gener" +
+                    "ateSynicContainer(targetId, syncedHierarchy, syncSingleHierarchy);\r\n\r\n          " +
+                    "  using var targetCompressor  = new BrotliCompressor();\r\n            MemoryPackS" +
+                    "erializer.Serialize(targetCompressor, synicContainer);\r\n\r\n            EOSp2p.Sen" +
+                    "dLargePacket((byte)CHANNELLIST.Synic, targetCompressor.ToArray(), targetId, sync" +
+                    "edHierarchy, syncSingleHierarchy);\r\n        }\r\n\r\n        ");
             
             #line 179 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GenerateSynicContainer));
@@ -211,39 +211,39 @@ namespace SynicSugarGenerator
             #line hidden
             this.Write("\r\n        //Synced 0 = index, 1 = chunk, 2 = hierarchy, 3 = syncSpecificHierarchy" +
                     ", 4 = isSelf\r\n        bool RestorePackets(ref SugarPacket packet){\r\n            " +
-                    "if(packet.payload[4] == 0){\r\n                if(p2pConfig.Instance.IsHost(new Us" +
-                    "erId(packet.UserID)) && p2pConfig.Instance.AcceptHostSynic){\r\n                  " +
-                    "  packet.UserID = p2pConfig.Instance.LocalUserId.ToString();\r\n                }e" +
-                    "lse{\r\n                    return false;\r\n                }\r\n            }\r\n\r\n   " +
-                    "         if(!buffer.ContainsKey(packet.UserID)){\r\n                packetInfo.Add" +
-                    "(packet.UserID, new LargePacketInfomation(){  chunk = packet.payload[1], \r\n     " +
-                    "                                                                       hierarchy" +
-                    " = packet.payload[2], \r\n                                                        " +
-                    "                    syncSpecificHierarchy = packet.payload[3] == 1 ? true : fals" +
-                    "e });\r\n                //Prep enough byte[]\r\n                buffer.Add(packet.U" +
-                    "serID, new byte[packet.payload[1] * 1100]);\r\n            }\r\n            int pack" +
-                    "etIndex = packet.payload[0];\r\n            int offset = packetIndex * 1100;\r\n\r\n  " +
-                    "  #if SYNICSUGAR_LOG\r\n            Debug.Log($\"RestorePackets: PacketInfo:: index" +
-                    " {packet.payload[0]} / chunk {packet.payload[1]} / hierarchy {packet.payload[2]}" +
-                    " / syncSpecificHierarchy {packet.payload[3]}\");\r\n    #endif\r\n            //Remov" +
-                    "e header\r\n            Span<byte> packetPayload = packet.payload.Slice(5);\r\n     " +
-                    "       packetInfo[packet.UserID].currentSize += packetPayload.Length;\r\n         " +
-                    "   //Copy Byte from what come in\r\n            Buffer.BlockCopy(packetPayload.ToA" +
-                    "rray(), 0, buffer[packet.UserID], offset, packetPayload.Length);\r\n            //" +
-                    "Comming all?\r\n            return packetInfo[packet.UserID].currentSize + 1100 > " +
-                    "buffer[packet.UserID].Length ? true : false;\r\n        }\r\n\r\n        /// <summary>" +
-                    "\r\n        /// Call from ConvertFormPacket.\r\n        /// </summary>\r\n        void" +
-                    " SyncedSynic(string overwriterUserId){\r\n            //Deserialize packet\r\n      " +
-                    "      using var decompressor = new BrotliDecompressor();\r\n            Span<byte>" +
-                    " transmittedPaylaod = new Span<byte>(buffer[overwriterUserId]);\r\n\r\n            v" +
-                    "ar decompressedBuffer = decompressor.Decompress(transmittedPaylaod.Slice(0, pack" +
-                    "etInfo[overwriterUserId].currentSize));\r\n            SynicContainer container = " +
-                    "MemoryPackSerializer.Deserialize<SynicContainer>(decompressedBuffer);\r\n#if SYNIC" +
-                    "SUGAR_LOG\r\n            Debug.Log($\"SyncedSynic: Deserialize is Success for {over" +
-                    "writerUserId}\");\r\n    #endif\r\n\r\n            //Packet data\r\n            int hiera" +
-                    "rchy = packetInfo[overwriterUserId].hierarchy;\r\n            bool syncSingleHiera" +
-                    "rchy = packetInfo[overwriterUserId].syncSpecificHierarchy;\r\n\r\n            switch" +
-                    "(hierarchy){");
+                    "if(packet.payload[4] == 0){\r\n                if(p2pInfo.Instance.IsHost(new User" +
+                    "Id(packet.UserID)) && p2pInfo.Instance.AcceptHostSynic){\r\n                    pa" +
+                    "cket.UserID = p2pInfo.Instance.LocalUserId.ToString();\r\n                }else{\r\n" +
+                    "                    return false;\r\n                }\r\n            }\r\n\r\n         " +
+                    "   if(!buffer.ContainsKey(packet.UserID)){\r\n                packetInfo.Add(packe" +
+                    "t.UserID, new LargePacketInfomation(){  chunk = packet.payload[1], \r\n           " +
+                    "                                                                 hierarchy = pac" +
+                    "ket.payload[2], \r\n                                                              " +
+                    "              syncSpecificHierarchy = packet.payload[3] == 1 ? true : false });\r" +
+                    "\n                //Prep enough byte[]\r\n                buffer.Add(packet.UserID," +
+                    " new byte[packet.payload[1] * 1100]);\r\n            }\r\n            int packetInde" +
+                    "x = packet.payload[0];\r\n            int offset = packetIndex * 1100;\r\n\r\n    #if " +
+                    "SYNICSUGAR_LOG\r\n            Debug.Log($\"RestorePackets: PacketInfo:: index {pack" +
+                    "et.payload[0]} / chunk {packet.payload[1]} / hierarchy {packet.payload[2]} / syn" +
+                    "cSpecificHierarchy {packet.payload[3]}\");\r\n    #endif\r\n            //Remove head" +
+                    "er\r\n            Span<byte> packetPayload = packet.payload.Slice(5);\r\n           " +
+                    " packetInfo[packet.UserID].currentSize += packetPayload.Length;\r\n            //C" +
+                    "opy Byte from what come in\r\n            Buffer.BlockCopy(packetPayload.ToArray()" +
+                    ", 0, buffer[packet.UserID], offset, packetPayload.Length);\r\n            //Commin" +
+                    "g all?\r\n            return packetInfo[packet.UserID].currentSize + 1100 > buffer" +
+                    "[packet.UserID].Length ? true : false;\r\n        }\r\n\r\n        /// <summary>\r\n    " +
+                    "    /// Call from ConvertFormPacket.\r\n        /// </summary>\r\n        void Synce" +
+                    "dSynic(string overwriterUserId){\r\n            //Deserialize packet\r\n            " +
+                    "using var decompressor = new BrotliDecompressor();\r\n            Span<byte> trans" +
+                    "mittedPaylaod = new Span<byte>(buffer[overwriterUserId]);\r\n\r\n            var dec" +
+                    "ompressedBuffer = decompressor.Decompress(transmittedPaylaod.Slice(0, packetInfo" +
+                    "[overwriterUserId].currentSize));\r\n            SynicContainer container = Memory" +
+                    "PackSerializer.Deserialize<SynicContainer>(decompressedBuffer);\r\n#if SYNICSUGAR_" +
+                    "LOG\r\n            Debug.Log($\"SyncedSynic: Deserialize is Success for {overwriter" +
+                    "UserId}\");\r\n    #endif\r\n\r\n            //Packet data\r\n            int hierarchy =" +
+                    " packetInfo[overwriterUserId].hierarchy;\r\n            bool syncSingleHierarchy =" +
+                    " packetInfo[overwriterUserId].syncSpecificHierarchy;\r\n\r\n            switch(hiera" +
+                    "rchy){");
             
             #line 232 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(SyncedInvoker));

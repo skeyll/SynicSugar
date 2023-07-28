@@ -98,7 +98,7 @@
         //SyncMetod
         internal string CreateSyncVarMethod(string name, string paramNamespace, string type, int time, bool isPublic, bool isOnlyHost, bool isCommons){
             string intervalCondition = $"isWaiting{name}Interval";
-            string condition = isOnlyHost ? $"!p2pConfig.Instance.IsHost() || {intervalCondition}" : intervalCondition;
+            string condition = isOnlyHost ? $"!p2pInfo.Instance.IsHost() || {intervalCondition}" : intervalCondition;
             string intervalTime = time > 0 ? time.ToString() : "p2pConfig.Instance.autoSyncInterval";
             string modifer = isPublic ? "public " : System.String.Empty;
             string localCondition = isCommons ? "isLocalCall" : "isLocal";

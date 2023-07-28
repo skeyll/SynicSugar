@@ -32,12 +32,12 @@ namespace SynicSugar.Login {
                     if (data.ResultCode == ResultE.Success) {
                         isSuccess = true;
 #if SYNICSUGAR_LOG
-                        Debug.Log("EOS AUTH: Create new DeviceId");
+                        Debug.Log("EOSConnect: Create new DeviceId");
 #endif
                     }else if (data.ResultCode == ResultE.DuplicateNotAllowed){
                         isSuccess = true;                  
 #if SYNICSUGAR_LOG
-                        Debug.Log("EOS AUTH: Already create DeviceID");
+                        Debug.Log("EOSConnect: Already have DeviceID in local");
 #endif    
                     }
                     resultS = (Result)data.ResultCode;
