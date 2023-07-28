@@ -156,14 +156,14 @@ namespace SynicSugar.P2P {
         /// <param name="syncTargetsData">If true, sync target's data in Host local. When the target AllowHostsSynic, can overwrite the target's data in that local only once.</param>
         public void SyncSynic(UserId targetId, byte syncedHierarchy = 9, bool syncSingleHierarchy = false, bool syncTargetsData = true){
             //Sync local data to target local
-            SynicContainer synicContainer = GenerateSynicContainer(p2pConfig.Instance.LocalUserId, syncedHierarchy, syncSingleHierarchy);
+            SynicContainer synicContainer = GenerateSynicContainer(p2pInfo.Instance.LocalUserId, syncedHierarchy, syncSingleHierarchy);
 
             using var selfCompressor  = new BrotliCompressor();
             MemoryPackSerializer.Serialize(selfCompressor, synicContainer);
 
             EOSp2p.SendLargePacket((byte)CHANNELLIST.Synic, selfCompressor.ToArray(), targetId, syncedHierarchy, syncSingleHierarchy);
 
-            if(!syncTargetsData || !p2pConfig.Instance.IsHost()){
+            if(!syncTargetsData || !p2pInfo.Instance.IsHost()){
                 return;
             }
             //Sync target data in local to target local
@@ -182,8 +182,8 @@ namespace SynicSugar.P2P {
         //Synced 0 = index, 1 = chunk, 2 = hierarchy, 3 = syncSpecificHierarchy, 4 = isSelf
         bool RestorePackets(ref SugarPacket packet){
             if(packet.payload[4] == 0){
-                if(p2pConfig.Instance.IsHost(new UserId(packet.UserID)) && p2pConfig.Instance.AcceptHostSynic){
-                    packet.UserID = p2pConfig.Instance.LocalUserId.ToString();
+                if(p2pInfo.Instance.IsHost(new UserId(packet.UserID)) && p2pInfo.Instance.AcceptHostSynic){
+                    packet.UserID = p2pInfo.Instance.LocalUserId.ToString();
                 }else{
                     return false;
                 }

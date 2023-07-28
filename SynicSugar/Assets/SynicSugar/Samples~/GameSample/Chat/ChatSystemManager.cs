@@ -3,11 +3,11 @@ using UnityEngine;
 using UnityEngine.UI;
 
 namespace SynicSugar.Samples {
-    public class ChatSystemManager : MonoBehaviour {
+    public partial class ChatSystemManager : MonoBehaviour {
         [SerializeField] GameObject matchmakeCanvas, chatCanvas;
         public GameModeSelect modeSelect;
-        public Text chatText;
-        public InputField contentField;
+        public Text chatText, inputCount;
+        public InputField contentField, nameField;
         public GameObject chatPlayerPrefab, uiSetsPrefabs;
         
         void Start() {
@@ -24,10 +24,13 @@ namespace SynicSugar.Samples {
             chatCanvas.SetActive(true);
         }
         void OnDisconect(){
-            chatText.text += $"{p2pConfig.Instance.ConnectionNotifier.TargetUserId} is Disconnected / {p2pConfig.Instance.ConnectionNotifier.ClosedReason}";
+            chatText.text += $"{p2pConfig.Instance.ConnectionNotifier.TargetUserId} is Disconnected / {p2pConfig.Instance.ConnectionNotifier.ClosedReason}{System.Environment.NewLine}";
+            
         }
         void OnConnected(){
-            chatText.text += $"{p2pConfig.Instance.ConnectionNotifier.TargetUserId} Join";
+            chatText.text += $"{p2pConfig.Instance.ConnectionNotifier.TargetUserId} Join {System.Environment.NewLine}";
+            //Send local data
+            ConnectHub.Instance.SyncSynic(p2pConfig.Instance.ConnectionNotifier.TargetUserId, 0, false, true);
         }
     }
 }
