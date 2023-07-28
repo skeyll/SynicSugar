@@ -6,7 +6,8 @@
         internal string? PlayeInstance;
         internal string? CommonsInstance;
         internal string? PacketConvert;
-        internal string? SyncSynic;
+        internal bool needSyncSynic;
+        internal string? GenerateSynicContainer;
         internal string? SyncedInvoker;
         internal string? SyncedItems;
     }

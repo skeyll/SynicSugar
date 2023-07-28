@@ -98,7 +98,7 @@
         //SyncMetod
         internal string CreateSyncVarMethod(string name, string paramNamespace, string type, int time, bool isPublic, bool isOnlyHost, bool isCommons){
             string intervalCondition = $"isWaiting{name}Interval";
-            string condition = isOnlyHost ? $"!p2pConfig.Instance.userIds.IsHost() || {intervalCondition}" : intervalCondition;
+            string condition = isOnlyHost ? $"!p2pConfig.Instance.IsHost() || {intervalCondition}" : intervalCondition;
             string intervalTime = time > 0 ? time.ToString() : "p2pConfig.Instance.autoSyncInterval";
             string modifer = isPublic ? "public " : System.String.Empty;
             string localCondition = isCommons ? "isLocalCall" : "isLocal";
@@ -176,25 +176,38 @@
             isLocalCall = true;
         }}";
         }
-        //Synic
+        //SyncSynic
         internal string CreateSynicItemVariable(string variable, string nameSpace, string param) {
             return $@"
         public {GetFullName(nameSpace, param)} {variable};";
         }
         internal string CreateSyncSynicContent(string variableName, string className, bool isPlayerClass) {
-            string id = isPlayerClass ? "[p2pConfig.Instance.userIds.LocalUserId.ToString()]" : System.String.Empty;
+            string id = isPlayerClass ? "[id.ToString()]" : System.String.Empty;
             return $@" {variableName} = {className}{id}.{variableName},";
         }
-        internal string CreateSyncSynicFrame(int index, string content) {
-            string footer = index == 0 ? @"
-                break;" : $@"
-                if (syncSingleHierarchy) {{ break; }}
-                else {{ goto case {index - 1}; }}";
-            return $@"
-                case {index}:
+        internal (string text, bool needData) AddSyncSynicFrame(int index, string content) {
+            string getPart = string.IsNullOrEmpty(content) ? System.String.Empty :$@"
                     SynicItem{index} synicItem{index} = new SynicItem{index}(){{{ content }}};
-                    synicContainer.SynicItem{index} = JsonUtility.ToJson(synicItem{index});{footer}";
+                    synicContainer.SynicItem{index} = JsonUtility.ToJson(synicItem{index});" ;
+            string footer = index == 0 ? @"break;" : $@"if (syncSingleHierarchy) {{ break; }}
+                else {{ goto case {index - 1}; }}";
+
+            return ($@"
+                case {index}: {getPart}
+                {footer}", !string.IsNullOrEmpty(content));
         }
+        internal string CreateGenerateSynicContainer(string content) {
+            return $@"SynicContainer GenerateSynicContainer(UserId id, byte syncedHierarchy, bool syncSingleHierarchy){{
+            SynicContainer synicContainer = new SynicContainer();
+            switch(syncedHierarchy){{ {content}
+                default:
+                goto case 9;
+            }}
+            return synicContainer;
+        }}
+";
+        }
+        //SyncedSynic
         internal string CreateSyncedInvoker(int index) {
             string footer = index == 0 ? @"
                 break;" : $@"
@@ -204,7 +217,7 @@
                 case {index}:
                     if(container.SynicItem{index} != null){{
                         SynicItem{index} synicItem{index} = JsonUtility.FromJson<SynicItem{index}>(container.SynicItem{index});
-                        SyncedItem{index}(transmitterId, synicItem{index});
+                        SyncedItem{index}(overwriterUserId, synicItem{index});
                     }}{footer}";
         }
 
@@ -218,6 +231,7 @@
         void SyncedItem{index}(string id, SynicItem{index} synicItem){{ {content}
         }}";
         }
+
         //Extenstions
         internal string GetFullName(string nameSpace, string name) {
             if (string.IsNullOrEmpty(nameSpace)) {
