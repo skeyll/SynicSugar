@@ -98,37 +98,18 @@ namespace SynicSugar.Generator {
                         var syncvarSyntax = fieldAttributes.FirstOrDefault(a => a.Name.ToString() == SYNCVAR);
                         var synicSyntax = fieldAttributes.FirstOrDefault(a => a.Name.ToString() == SYNIC);
 
-                        if(syncvarSyntax == null && synicSyntax == null){
-                            continue;
-                        }
-                        
-                        if(synicSyntax != null && !field.Modifiers.Any(SyntaxKind.PublicKeyword)){
-                            continue;
-                        }
-
                         var model = context.Compilation.GetSemanticModel(field.SyntaxTree);
 
-                        contentsInfo.Add(new ContentInfo());
-                        int ci = contentsI();
-                        contentsInfo[ci].isNetworkPlayer = classesInfo[classI()].isNetworkPlayer;
-                        contentsInfo[ci].type = syncvarSyntax != null ? ContentInfo.Type.SyncVar : ContentInfo.Type.Synic;
-                        contentsInfo[ci].rootNameSpace = classesInfo[classI()].nameSpace;
-                        contentsInfo[ci].rootName = classesInfo[classI()].name;
-                        contentsInfo[ci].contentName = field.Declaration.Variables.FirstOrDefault().Identifier.ValueText;
-                        contentsInfo[ci].isPublicVar = field.Modifiers.Any(SyntaxKind.PublicKeyword);
-                        contentsInfo[ci].param = field.Declaration.Type.ToString();
-                        contentsInfo[ci].paramNamespace = GetNamespace(field.Declaration.Type, model);
-
-                        var fieldSymbol = model.GetDeclaredSymbol(field) as IFieldSymbol;
-
                         if (syncvarSyntax != null) {
+                            //Get pre index. We need current target index after adding object.
+                            int ci = contentsI() + 1;
+                            AddInfoWithBasicData(ci, true);
+
                             //Set attribute data
                             var argsCount = syncvarSyntax.ArgumentList?.Arguments.Count ?? 0;
                             if (argsCount == 0){
-                                continue;
                             }
-
-                            if(argsCount == 1){
+                            else if(argsCount == 1){
                                 var args = (syncvarSyntax.ArgumentList.Arguments[0].Expression as LiteralExpressionSyntax).Token.Value;
                                 if (args is bool){
                                     contentsInfo[ci].isOnlyHost = (bool)(syncvarSyntax.ArgumentList.Arguments[0].Expression as LiteralExpressionSyntax).Token.Value;
@@ -140,18 +121,32 @@ namespace SynicSugar.Generator {
                                 contentsInfo[ci].isOnlyHost  = (bool)(syncvarSyntax.ArgumentList.Arguments[0].Expression as LiteralExpressionSyntax).Token.Value;
                                 contentsInfo[ci].argOption = (int)(syncvarSyntax.ArgumentList.Arguments[1].Expression as LiteralExpressionSyntax).Token.Value;
                             }
-                            continue;
                         }
+                        
+                        if (synicSyntax != null && field.Modifiers.Any(SyntaxKind.PublicKeyword)){
+                            int ci = contentsI() + 1;
+                            AddInfoWithBasicData(ci, false);
 
-                        if (synicSyntax != null){
                             //Set attribute data
                             var argsCount = synicSyntax.ArgumentList?.Arguments.Count ?? 0;
                             if (argsCount == 0){
                                 contentsInfo[ci].argOption = 0;
-                                continue;
                             }
-                            contentsInfo[ci].argOption = (int)(synicSyntax.ArgumentList.Arguments[0].Expression as LiteralExpressionSyntax).Token.Value;
-                            continue;
+                            else {
+                                contentsInfo[ci].argOption = (int)(synicSyntax.ArgumentList.Arguments[0].Expression as LiteralExpressionSyntax).Token.Value;
+                            }
+                        }
+                        void AddInfoWithBasicData(int ci, bool isSyncVar){
+                            contentsInfo.Add(new ContentInfo());
+
+                            contentsInfo[ci].isNetworkPlayer = classesInfo[classI()].isNetworkPlayer;
+                            contentsInfo[ci].type = isSyncVar ? ContentInfo.Type.SyncVar : ContentInfo.Type.Synic;
+                            contentsInfo[ci].rootNameSpace = classesInfo[classI()].nameSpace;
+                            contentsInfo[ci].rootName = classesInfo[classI()].name;
+                            contentsInfo[ci].contentName = field.Declaration.Variables.FirstOrDefault().Identifier.ValueText;
+                            contentsInfo[ci].isPublicVar = field.Modifiers.Any(SyntaxKind.PublicKeyword);
+                            contentsInfo[ci].param = field.Declaration.Type.ToString();
+                            contentsInfo[ci].paramNamespace = GetNamespace(field.Declaration.Type, model);
                         }
                     }
                 }
