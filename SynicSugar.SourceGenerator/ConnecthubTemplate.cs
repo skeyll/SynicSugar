@@ -211,7 +211,7 @@ namespace SynicSugarGenerator
                     "  using var targetCompressor  = new BrotliCompressor();\r\n            MemoryPackS" +
                     "erializer.Serialize(targetCompressor, synicContainer);\r\n\r\n            EOSp2p.Sen" +
                     "dLargePacket((byte)CHANNELLIST.Synic, targetCompressor.ToArray(), targetId, sync" +
-                    "edHierarchy, syncSingleHierarchy);\r\n        }\r\n\r\n        ");
+                    "edHierarchy, syncSingleHierarchy, false);\r\n        }\r\n\r\n        ");
             
             #line 193 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GenerateSynicContainer));

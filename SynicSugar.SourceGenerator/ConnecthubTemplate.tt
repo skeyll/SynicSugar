@@ -187,7 +187,7 @@ namespace SynicSugar.P2P {
             using var targetCompressor  = new BrotliCompressor();
             MemoryPackSerializer.Serialize(targetCompressor, synicContainer);
 
-            EOSp2p.SendLargePacket((byte)CHANNELLIST.Synic, targetCompressor.ToArray(), targetId, syncedHierarchy, syncSingleHierarchy);
+            EOSp2p.SendLargePacket((byte)CHANNELLIST.Synic, targetCompressor.ToArray(), targetId, syncedHierarchy, syncSingleHierarchy, false);
         }
 
         <#= GenerateSynicContainer #>

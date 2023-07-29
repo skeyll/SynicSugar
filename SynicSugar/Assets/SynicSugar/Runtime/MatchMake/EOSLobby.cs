@@ -740,7 +740,7 @@ namespace SynicSugar.MatchMake {
             //In game
             // Hosts changed?
             if (data.CurrentStatus == LobbyMemberStatus.Promoted){
-                p2pConfig.Instance.userIds.HostUserId = new UserId(data.TargetUserId);
+                p2pConfig.Instance.userIds.HostUserId = new UserId(CurrentLobby.LobbyOwner);
 
                 #if SYNICSUGAR_LOG
                     Debug.Log($"MemberStatusNotyfy: {data.TargetUserId} is promoted to host.");
