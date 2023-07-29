@@ -22,7 +22,8 @@ namespace SynicSugar.P2P {
 #endregion
         public UserId LocalUserId => p2pConfig.Instance.userIds.LocalUserId;
         public List<UserId> RemoteUserIds => p2pConfig.Instance.userIds.RemoteUserIds;
-        public bool AcceptHostSynic => p2pConfig.Instance.userIds._AcceptHostSynic();
+        public bool AcceptHostSynic => p2pConfig.Instance.userIds.isJustReconnected;
+    #region IsHost
         /// <summary>
         /// Is this local user Game Host?
         /// </summary>
@@ -37,5 +38,29 @@ namespace SynicSugar.P2P {
         public bool IsHost (UserId targetId){
             return targetId == p2pConfig.Instance.userIds.HostUserId;
         }
+        /// <summary>
+        /// Is this user Game Host?
+        /// </summary>
+        /// <returns></returns>
+        public bool IsHost (string targetId){
+            return targetId == p2pConfig.Instance.userIds.HostUserId.ToString();
+        }
+    #endregion
+    #region IsLocalUser
+        /// <summary>
+        /// Is this user local user?
+        /// </summary>
+        /// <returns></returns>
+        public bool IsLoaclUser (UserId targetId){
+            return targetId == p2pConfig.Instance.userIds.LocalUserId;
+        }
+        /// <summary>
+        /// Is this user local user?
+        /// </summary>
+        /// <returns></returns>
+        public bool IsLoaclUser (string targetId){
+            return targetId == p2pConfig.Instance.userIds.LocalUserId.ToString();
+        }
+    #endregion
     }
 }
