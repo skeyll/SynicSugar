@@ -11,8 +11,8 @@ namespace SynicSugar.Samples {
         public GameObject chatPlayerPrefab, uiSetsPrefabs;
         
         void Start() {
-            p2pConfig.Instance.ConnectionNotifier.Disconnected += OnDisconect;
-            p2pConfig.Instance.ConnectionNotifier.Connected += OnConnected;
+            p2pInfo.Instance.ConnectionNotifier.Disconnected += OnDisconect;
+            p2pInfo.Instance.ConnectionNotifier.Connected += OnConnected;
             //At first, instantiate network objects.
             //It are registered to ConnectHub automatically.
             SynicObject.AllSpawn(chatPlayerPrefab);
@@ -24,13 +24,13 @@ namespace SynicSugar.Samples {
             chatCanvas.SetActive(true);
         }
         void OnDisconect(){
-            chatText.text += $"{p2pConfig.Instance.ConnectionNotifier.TargetUserId} is Disconnected / {p2pConfig.Instance.ConnectionNotifier.ClosedReason}{System.Environment.NewLine}";
+            chatText.text += $"{p2pInfo.Instance.LastDisconnectedUsersId} is Disconnected / {p2pInfo.Instance.LastDisconnectedUsersReason}{System.Environment.NewLine}";
             
         }
         void OnConnected(){
-            chatText.text += $"{p2pConfig.Instance.ConnectionNotifier.TargetUserId} Join {System.Environment.NewLine}";
+            chatText.text += $"{p2pInfo.Instance.LastDisconnectedUsersId} Join {System.Environment.NewLine}";
             //Send local data
-            ConnectHub.Instance.SyncSynic(p2pConfig.Instance.ConnectionNotifier.TargetUserId, 0, false, true);
+            ConnectHub.Instance.SyncSynic(p2pInfo.Instance.LastDisconnectedUsersId, 0, false, true);
         }
     }
 }
