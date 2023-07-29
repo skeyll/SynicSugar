@@ -141,6 +141,10 @@ namespace SynicSugar.P2P {
                         return;
                     }
                     SyncedSynic(packet.UserID);
+                    //Change AcceptHostsSynic flag.
+                    if(p2pInfo.Instance.IsLoaclUser(packet.UserID)){
+                        p2pConnectorForOtherAssembly.Instance.CloseHostSynic();
+                    }
                 return;
             }
         }
@@ -182,7 +186,7 @@ namespace SynicSugar.P2P {
         //Synced 0 = index, 1 = chunk, 2 = hierarchy, 3 = syncSpecificHierarchy, 4 = isSelf
         bool RestorePackets(ref SugarPacket packet){
             if(packet.payload[4] == 0){
-                if(p2pInfo.Instance.IsHost(new UserId(packet.UserID)) && p2pInfo.Instance.AcceptHostSynic){
+                if(p2pInfo.Instance.IsHost(packet.UserID) && p2pInfo.Instance.AcceptHostSynic){
                     packet.UserID = p2pInfo.Instance.LocalUserId.ToString();
                 }else{
                     return false;

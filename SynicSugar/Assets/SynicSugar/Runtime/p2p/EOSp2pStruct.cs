@@ -15,28 +15,13 @@ namespace SynicSugar.P2P {
         //Options
         internal UserId HostUserId;
         // For the Host to pass the user's data to the player.
-        public List<UserId> LeftUsers = new List<UserId>();
+        internal List<UserId> LeftUsers = new List<UserId>();
         // If true, host can manage the this local user's data in direct.
         // If not, only the local user can manipulate the local user's data.
         // For Anti-Cheat to rewrite other player data.
         internal bool isJustReconnected;
-        internal bool _AcceptHostSynic(){
-            if(isJustReconnected){
-                isJustReconnected = false;
-                return true;
-            }
-            return false;
-        }
-        public UserIds(){
+        internal UserIds(){
             LocalUserId = new UserId(EOSManager.Instance.GetProductUserId());
-        }
-        /// <summary>
-        /// Is this local user Game Host?
-        /// </summary>
-        /// <returns></returns>
-        [Obsolete("This is old. p2pConfig.Instance.IsHost() is new one.")]
-        public bool IsHost (){
-            return LocalUserId == HostUserId;
         }
         /// <summary>
         /// Remove user ID of leaving lobby.<br />

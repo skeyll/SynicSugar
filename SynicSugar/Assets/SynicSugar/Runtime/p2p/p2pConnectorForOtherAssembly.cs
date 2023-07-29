@@ -291,5 +291,11 @@ namespace SynicSugar.P2P {
             }
         }
 #endregion
+        /// <summary>
+        /// Change AcceptHostsSynic to false. Call from ConnectHub
+        /// </summary>
+        public void CloseHostSynic(){
+            p2pConfig.Instance.userIds.isJustReconnected = false;
+        }
     }
 }
