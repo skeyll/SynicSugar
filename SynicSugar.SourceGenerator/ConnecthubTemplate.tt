@@ -75,6 +75,7 @@ namespace SynicSugar.P2P {
         /// </summary>
         public async UniTask<bool> ExitSession(CancellationTokenSource cancelToken = default(CancellationTokenSource)){
             bool isSuccess = await p2pConnectorForOtherAssembly.Instance.ExitSession(cancelToken.Token);
+            ClearReferenceDictionaries();
             return isSuccess;
         }
         /// <summary>
@@ -83,6 +84,7 @@ namespace SynicSugar.P2P {
         /// </summary>
         public async UniTask<bool> CloseSession(CancellationTokenSource cancelToken = default(CancellationTokenSource)){
             bool isSuccess = await p2pConnectorForOtherAssembly.Instance.CloseSession(cancelToken.Token);
+            ClearReferenceDictionaries();
             return isSuccess;
         }
         async UniTask RecivePacket(){
@@ -109,6 +111,10 @@ namespace SynicSugar.P2P {
         Dictionary<string, LargePacketInfomation> packetInfo = new Dictionary<string, LargePacketInfomation>();
 
         //Ref(for class)<#= Reference #>
+
+        //Clear ref
+        private void ClearReferenceDictionaries(){ <#= ClearReference #>
+        }
 
         //Register(for class)<#= Register #>
         
@@ -141,6 +147,10 @@ namespace SynicSugar.P2P {
                         return;
                     }
                     SyncedSynic(packet.UserID);
+                    //Init
+                    buffer.Remove(packet.UserID);
+                    packetInfo.Remove(packet.UserID);
+
                     //Change AcceptHostsSynic flag.
                     if(p2pInfo.Instance.IsLoaclUser(packet.UserID)){
                         p2pConnectorForOtherAssembly.Instance.CloseHostSynic();

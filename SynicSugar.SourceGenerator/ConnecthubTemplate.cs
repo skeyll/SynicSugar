@@ -74,24 +74,25 @@ namespace SynicSugarGenerator
                     "use CloseSession().\r\n        /// </summary>\r\n        public async UniTask<bool> " +
                     "ExitSession(CancellationTokenSource cancelToken = default(CancellationTokenSourc" +
                     "e)){\r\n            bool isSuccess = await p2pConnectorForOtherAssembly.Instance.E" +
-                    "xitSession(cancelToken.Token);\r\n            return isSuccess;\r\n        }\r\n      " +
-                    "  /// <summary>\r\n        /// Stop receiver, close all connections and remove the" +
-                    " notify events.<br />\r\n        /// Then, Host closees and Guest leaves the lobby" +
-                    ".\r\n        /// </summary>\r\n        public async UniTask<bool> CloseSession(Cance" +
-                    "llationTokenSource cancelToken = default(CancellationTokenSource)){\r\n           " +
-                    " bool isSuccess = await p2pConnectorForOtherAssembly.Instance.CloseSession(cance" +
-                    "lToken.Token);\r\n            return isSuccess;\r\n        }\r\n        async UniTask " +
-                    "RecivePacket(){\r\n            while(!p2pConnectorForOtherAssembly.Instance.p2pTok" +
-                    "en.IsCancellationRequested){\r\n                SugarPacket recivePacket = p2pConn" +
-                    "ectorForOtherAssembly.Instance.GetPacketFromBuffer();\r\n\r\n                if(reci" +
-                    "vePacket != null){\r\n                    ConnectHub.Instance.ConvertFromPacket(re" +
-                    "civePacket);\r\n                }\r\n                await UniTask.Delay(p2pConnecto" +
-                    "rForOtherAssembly.Instance.receiverInterval);\r\n\r\n                if(p2pConnector" +
-                    "ForOtherAssembly.Instance.p2pToken.IsCancellationRequested){\r\n                  " +
-                    "  break;\r\n                }\r\n            }\r\n        }\r\n\r\n        //(for elements" +
-                    ")\r\n        public enum CHANNELLIST{\r\n            ");
+                    "xitSession(cancelToken.Token);\r\n            ClearReferenceDictionaries();\r\n     " +
+                    "       return isSuccess;\r\n        }\r\n        /// <summary>\r\n        /// Stop rec" +
+                    "eiver, close all connections and remove the notify events.<br />\r\n        /// Th" +
+                    "en, Host closees and Guest leaves the lobby.\r\n        /// </summary>\r\n        pu" +
+                    "blic async UniTask<bool> CloseSession(CancellationTokenSource cancelToken = defa" +
+                    "ult(CancellationTokenSource)){\r\n            bool isSuccess = await p2pConnectorF" +
+                    "orOtherAssembly.Instance.CloseSession(cancelToken.Token);\r\n            ClearRefe" +
+                    "renceDictionaries();\r\n            return isSuccess;\r\n        }\r\n        async Un" +
+                    "iTask RecivePacket(){\r\n            while(!p2pConnectorForOtherAssembly.Instance." +
+                    "p2pToken.IsCancellationRequested){\r\n                SugarPacket recivePacket = p" +
+                    "2pConnectorForOtherAssembly.Instance.GetPacketFromBuffer();\r\n\r\n                i" +
+                    "f(recivePacket != null){\r\n                    ConnectHub.Instance.ConvertFromPac" +
+                    "ket(recivePacket);\r\n                }\r\n                await UniTask.Delay(p2pCo" +
+                    "nnectorForOtherAssembly.Instance.receiverInterval);\r\n\r\n                if(p2pCon" +
+                    "nectorForOtherAssembly.Instance.p2pToken.IsCancellationRequested){\r\n            " +
+                    "        break;\r\n                }\r\n            }\r\n        }\r\n\r\n        //(for el" +
+                    "ements)\r\n        public enum CHANNELLIST{\r\n            ");
             
-            #line 105 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 107 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(SyncList));
             
             #line default
@@ -101,14 +102,21 @@ namespace SynicSugarGenerator
                     "> packetInfo = new Dictionary<string, LargePacketInfomation>();\r\n\r\n        //Ref" +
                     "(for class)");
             
-            #line 111 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 113 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Reference));
             
             #line default
             #line hidden
-            this.Write("\r\n\r\n        //Register(for class)");
+            this.Write("\r\n\r\n        //Clear ref\r\n        private void ClearReferenceDictionaries(){ ");
             
-            #line 113 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 116 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(ClearReference));
+            
+            #line default
+            #line hidden
+            this.Write("\r\n        }\r\n\r\n        //Register(for class)");
+            
+            #line 119 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Register));
             
             #line default
@@ -122,7 +130,7 @@ namespace SynicSugarGenerator
         /// <returns>T's instance</returns>
         public T GetUserInstance<T>(UserId id) where T : IGetPlayer {");
             
-            #line 120 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 126 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(PlayeInstance));
             
             #line default
@@ -137,7 +145,7 @@ namespace SynicSugarGenerator
         /// <returns>T's instance</returns>
         public T GetInstance<T>() where T : IGetCommons {");
             
-            #line 128 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 134 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(CommonsInstance));
             
             #line default
@@ -146,7 +154,7 @@ namespace SynicSugarGenerator
                     "\r\n        public void ConvertFromPacket(SugarPacket packet){\r\n            switch" +
                     "((CHANNELLIST)packet.ch){");
             
-            #line 134 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 140 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(PacketConvert));
             
             #line default
@@ -161,6 +169,10 @@ namespace SynicSugarGenerator
                         return;
                     }
                     SyncedSynic(packet.UserID);
+                    //Init
+                    buffer.Remove(packet.UserID);
+                    packetInfo.Remove(packet.UserID);
+
                     //Change AcceptHostsSynic flag.
                     if(p2pInfo.Instance.IsLoaclUser(packet.UserID)){
                         p2pConnectorForOtherAssembly.Instance.CloseHostSynic();
@@ -171,7 +183,7 @@ namespace SynicSugarGenerator
 
         ");
             
-            #line 152 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 162 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
  if (needSyncSynic) { 
             
             #line default
@@ -201,14 +213,14 @@ namespace SynicSugarGenerator
                     "dLargePacket((byte)CHANNELLIST.Synic, targetCompressor.ToArray(), targetId, sync" +
                     "edHierarchy, syncSingleHierarchy);\r\n        }\r\n\r\n        ");
             
-            #line 183 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 193 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GenerateSynicContainer));
             
             #line default
             #line hidden
             this.Write("\r\n        ");
             
-            #line 184 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 194 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
  } 
             
             #line default
@@ -248,7 +260,7 @@ namespace SynicSugarGenerator
                     "overwriterUserId].hierarchy;\r\n            bool syncSingleHierarchy = packetInfo[" +
                     "overwriterUserId].syncSpecificHierarchy;\r\n\r\n            switch(hierarchy){");
             
-            #line 236 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 246 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(SyncedInvoker));
             
             #line default
@@ -256,7 +268,7 @@ namespace SynicSugarGenerator
             this.Write("\r\n                default:\r\n                goto case 9;\r\n            }\r\n        " +
                     "}\r\n        ");
             
-            #line 241 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 251 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(SyncedItems));
             
             #line default

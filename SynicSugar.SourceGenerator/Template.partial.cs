@@ -3,6 +3,7 @@
         internal string? SyncList;
         internal string? Register;
         internal string? Reference;
+        internal string? ClearReference;
         internal string? PlayeInstance;
         internal string? CommonsInstance;
         internal string? PacketConvert;

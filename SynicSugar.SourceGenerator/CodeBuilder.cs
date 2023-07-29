@@ -55,6 +55,13 @@
                     {rootName}.{method}({paramName});
                 return;";
         }
+
+        //ClearReference
+        internal string CreateClearReference(string name, bool isNetworkPlayer){
+            string resetWay = isNetworkPlayer ? ".Clear()" : " = null";
+            return $@"
+            {name}{resetWay};";
+        }
         //RegisterInstance
         internal string CreatePlayerRegisterInstance(string nameNamespace, string name) {
             return $@"
