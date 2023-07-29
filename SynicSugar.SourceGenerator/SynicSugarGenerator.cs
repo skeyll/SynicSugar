@@ -212,12 +212,14 @@ namespace SynicSugar.Generator {
                 //Set base class data
                 StringBuilder Reference = new StringBuilder();
                 StringBuilder Register = new StringBuilder();
+                StringBuilder ClearReference = new StringBuilder();
                 StringBuilder GetInstance = new StringBuilder();
                 StringBuilder PlayeInstance = new StringBuilder();
                 StringBuilder CommonsInstance = new StringBuilder();
-                StringBuilder GetInstanceAsObject = new StringBuilder();
                 StringBuilder AdditionalClass = new StringBuilder(AdditionalClassHeader);
                 foreach (var info in classesInfo){
+                    ClearReference.Append(cb.CreateClearReference(info.name, info.isNetworkPlayer));
+
                     if (info.isNetworkPlayer){
                         Reference.Append(cb.CreatePlayerReference(info.nameSpace, info.name));
                         Register.Append(cb.CreatePlayerRegisterInstance(info.nameSpace, info.name));
@@ -268,6 +270,7 @@ namespace SynicSugar.Generator {
                     SyncList = SyncList.ToString(),
                     Register = Register.ToString(),
                     Reference = Reference.ToString(),
+                    ClearReference = ClearReference.ToString(),
                     PlayeInstance = PlayeInstance.ToString(),
                     CommonsInstance = CommonsInstance.ToString(),
                     PacketConvert = PacketConvert.ToString(),

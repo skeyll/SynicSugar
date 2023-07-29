@@ -61,15 +61,21 @@ namespace SynicSugar.P2P {
 
     }
     public struct UserId {
-        readonly ProductUserId value;
+        #nullable enable
+        readonly ProductUserId? value;
+        #nullable disable
+        readonly string stringValue;
         public UserId(ProductUserId id){
             this.value = id;
+            this.stringValue = id.ToString();
         }
         public UserId(UserId id){
             this.value = id.AsEpic;
+            this.stringValue = id.ToString();
         }
         public UserId(string idString){
             this.value = ProductUserId.FromString(idString);
+            this.stringValue = idString;
         }
         public readonly ProductUserId AsEpic => value;
         public static explicit operator ProductUserId(UserId id) => id.value;
@@ -82,7 +88,7 @@ namespace SynicSugar.P2P {
         }
         #nullable restore
         public override int GetHashCode() => value.GetHashCode();
-        public override string ToString() => value.ToString();
+        public override string ToString() => stringValue;
         public static bool operator ==(in UserId x, in UserId y) => x.value.Equals(y.value);
         public static bool operator !=(in UserId x, in UserId y) => !x.value.Equals(y.value);
     }

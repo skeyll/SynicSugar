@@ -2,8 +2,8 @@ using System;
 
 namespace SynicSugar.P2P {
     public class ConnectionNotifier {
-        public Reason ClosedReason { get; private set; }
-        public UserId TargetUserId { get; private set; }
+        internal Reason ClosedReason { get; private set; }
+        internal UserId TargetUserId { get; private set; }
 
         /// <summary>
         /// Invoke when another user disconnects unexpectedly.</ br>

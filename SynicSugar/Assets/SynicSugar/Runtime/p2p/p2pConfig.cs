@@ -16,14 +16,13 @@ namespace SynicSugar.P2P {
         }
         void OnDestroy() {
             if( Instance == this ) {
-                ConnectionNotifier.Clear();
-
                 Instance = null;
             }
         }
 #endregion
         [HideInInspector] internal UserIds userIds = new UserIds();
-
+        [Obsolete("p2pInfo.Instance.ConnectionNotifier is new one.")]
+        public ConnectionNotifier ConnectionNotifier => p2pInfo.Instance.ConnectionNotifier;
         ///Options 
         [Header("Interval of sending each users[ms]. Recommend: 3ms-")]
         /// <summary>
@@ -43,7 +42,6 @@ namespace SynicSugar.P2P {
         /// Quality of connection
         /// </summary>
         public PacketReliability packetReliability = PacketReliability.ReliableOrdered;
-        public ConnectionNotifier ConnectionNotifier = new ConnectionNotifier();
         
         public enum GetPacketFrequency {
             PerSecondFPS, PerSecond100, PerSecond50, PerSecond25
