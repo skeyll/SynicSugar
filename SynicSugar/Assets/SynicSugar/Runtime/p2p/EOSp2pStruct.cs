@@ -67,11 +67,11 @@ namespace SynicSugar.P2P {
         readonly string stringValue;
         public UserId(ProductUserId id){
             this.value = id;
-            this.stringValue = id.ToString();
+            this.stringValue = id != null ? id.ToString() : System.String.Empty;
         }
         public UserId(UserId id){
             this.value = id.AsEpic;
-            this.stringValue = id.ToString();
+            this.stringValue = id != null ? id.ToString() : System.String.Empty;
         }
         public UserId(string idString){
             this.value = ProductUserId.FromString(idString);
