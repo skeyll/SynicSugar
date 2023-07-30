@@ -11,7 +11,7 @@ public sealed class SynicAttribute : Attribute
 
 ### Description
 **This is experimental now.**<br>
-Synchronize all own Synic variables at once to TargetUser. We can set 0 - 9 as the sync phase can be set, and all variables below the phase or only variables in the specified phase are synchronized at once. This can send larger packets than 1170. To sync, call [SyncSynic](../ConnectHub/syncsynic)<br>
+Synchronize all own Synic variables at once to TargetUser. We can set 0 - 9 as the sync phase can be set, and all variables below the phase or only variables in the specified phase are synchronized at once. This can send larger packets than 1170. To sync, call [SyncSynic](../../SynicSugar.P2P/ConnectHub/syncsynic)<br>
 
 One of the greatest features of Synic is that Host user can synchronize the reconnecter's variables in the local with the recconecter instance data in Host's local. <br>
 SynicSugar can synchronize the data only from the owner instance to the same owner Instance. In other words, in order to send the data the reconnecter, Host must get the reconnecter data in the owner instance, and send these via Host's instance RPC that assigns the data in target Player instance.<br>

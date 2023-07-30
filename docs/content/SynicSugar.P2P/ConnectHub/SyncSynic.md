@@ -10,7 +10,7 @@ public void SyncSynic(UserId targetId, byte syncedPhase = 9, bool syncSinglePhas
 
 
 ### Description
-Synchronize all own *[Synic](../Attributes/synic)* variables at once to TargetUser.<br>
+Synchronize all own *[Synic](../../SynicSugar.P2P/Attributes/synic)* variables at once to TargetUser.<br>
 
 targetId: Synced target<br>
 syncedPhase: Sync varaibles from 0 to passed value or only passed value.<br>
