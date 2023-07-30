@@ -192,21 +192,21 @@
             string id = isPlayerClass ? "[id.ToString()]" : System.String.Empty;
             return $@" {variableName} = {className}{id}.{variableName},";
         }
-        internal (string text, bool needData) AddSyncSynicFrame(int index, string content) {
-            string getPart = string.IsNullOrEmpty(content) ? System.String.Empty :$@"
-                    SynicItem{index} synicItem{index} = new SynicItem{index}(){{{ content }}};
+        internal (string text, bool needData) AddSyncSynicFrame(int index, string playerContent, string commonsContent) {
+            string getPart = string.IsNullOrEmpty(playerContent) && string.IsNullOrEmpty(commonsContent) ? System.String.Empty :$@"
+                    SynicItem{index} synicItem{index} = p2pInfo.Instance.IsHost() ? new SynicItem{index}(){{{ playerContent }{ commonsContent }}} : new SynicItem{index}(){{{ playerContent }}};
                     synicContainer.SynicItem{index} = JsonUtility.ToJson(synicItem{index});" ;
-            string footer = index == 0 ? @"break;" : $@"if (syncSingleHierarchy) {{ break; }}
+            string footer = index == 0 ? @"break;" : $@"if (syncSinglePhase) {{ break; }}
                 else {{ goto case {index - 1}; }}";
 
             return ($@"
                 case {index}: {getPart}
-                {footer}", !string.IsNullOrEmpty(content));
+                {footer}", !string.IsNullOrEmpty(getPart));
         }
         internal string CreateGenerateSynicContainer(string content) {
-            return $@"SynicContainer GenerateSynicContainer(UserId id, byte syncedHierarchy, bool syncSingleHierarchy){{
+            return $@"SynicContainer GenerateSynicContainer(UserId id, byte syncedPhase, bool syncSinglePhase){{
             SynicContainer synicContainer = new SynicContainer();
-            switch(syncedHierarchy){{ {content}
+            switch(syncedPhase){{ {content}
                 default:
                 goto case 9;
             }}
@@ -218,7 +218,7 @@
         internal string CreateSyncedInvoker(int index) {
             string footer = index == 0 ? @"
                 break;" : $@"
-                if (syncSingleHierarchy) {{ break; }}
+                if (syncSinglePhase) {{ break; }}
                 else {{ goto case {index - 1}; }}";
             return $@"
                 case {index}:
@@ -230,12 +230,17 @@
 
         internal string CreateSyncedContent(string variableName, string className, bool isPlayerClass) {
             string id = isPlayerClass ? "[id]" : System.String.Empty;
+            string indent = isPlayerClass ? System.String.Empty : "    ";
             return $@"
-            {className}{id}.{variableName} = synicItem.{variableName};";
+            {indent}{className}{id}.{variableName} = synicItem.{variableName};";
         }
-        internal string CreateSynedItem(int index, string content){
+        internal string CreateSyncedItem(int index, string playerContent, string commonsContent){
             return $@"
-        void SyncedItem{index}(string id, SynicItem{index} synicItem){{ {content}
+        void SyncedItem{index}(string id, SynicItem{index} synicItem){{ {playerContent}
+            if(p2pInfo.Instance.IsHost(id)){{
+                //Commons
+                {commonsContent}
+            }}
         }}";
         }
 

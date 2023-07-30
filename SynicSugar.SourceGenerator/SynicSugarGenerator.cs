@@ -157,23 +157,24 @@ namespace SynicSugar.Generator {
                 StringBuilder SyncList = new StringBuilder();
                 StringBuilder PacketConvert = new StringBuilder();
                 Dictionary<int, StringBuilder> SynicItems = new Dictionary<int, StringBuilder>();
-                Dictionary<int, StringBuilder> SyncSynics = new Dictionary<int, StringBuilder>();
-                Dictionary<int, StringBuilder> SyncedContents = new Dictionary<int, StringBuilder>();
+                Dictionary<int, StringBuilder> SyncPlayer = new Dictionary<int, StringBuilder>();
+                Dictionary<int, StringBuilder> SyncCommons = new Dictionary<int, StringBuilder>();
+                Dictionary<int, StringBuilder> SyncedPlayer = new Dictionary<int, StringBuilder>();
+                Dictionary<int, StringBuilder> SyncedCommons = new Dictionary<int, StringBuilder>();
                 StringBuilder SyncedInvoker = new StringBuilder();
                 //Prep
                 for (int i = 0; i <= 9; i++) {
                     SynicItems.Add(i, new StringBuilder());
-                    SyncSynics.Add(i, new StringBuilder());
-                    SyncedContents.Add(i, new StringBuilder());
+                    SyncPlayer.Add(i, new StringBuilder());
+                    SyncCommons.Add(i, new StringBuilder());
+                    SyncedPlayer.Add(i, new StringBuilder());
+                    SyncedCommons.Add(i, new StringBuilder());
                     SyncedInvoker.Append(cb.CreateSyncedInvoker(i));
                 }
 
                 foreach (var info in contentsInfo) {
                     if (info.type == ContentInfo.Type.Synic) {
                         SynicItems[info.argOption].Append(cb.CreateSynicItemVariable(info.contentName, info.paramNamespace, info.param));
-                        SyncSynics[info.argOption].Append(cb.CreateSyncSynicContent(info.contentName, info.rootName, info.isNetworkPlayer));
-                        SyncedContents[info.argOption].Append(cb.CreateSyncedContent(info.contentName, info.rootName, info.isNetworkPlayer));
-                        continue;
                     }else{
                         SyncList.Append($"{info.contentName}, ");
                     }
@@ -183,14 +184,18 @@ namespace SynicSugar.Generator {
                             case ContentInfo.Type.Rpc:
                                 rpcs[cb.GetFullName(info.rootNameSpace, info.rootName)].Append(cb.CreatePlayerRpcMethod(info.contentName, info.paramNamespace, info.param));
                                 PacketConvert.Append(cb.CreatePlayerRpcPacketConvert(info.rootName, info.contentName, info.param, info.paramNamespace));
-                                continue;
+                           continue;
                             case ContentInfo.Type.TargetRpc:
                                 rpcs[cb.GetFullName(info.rootNameSpace, info.rootName)].Append(cb.CreatePlayerTargetRpcMethod(info.contentName, info.paramNamespace, info.param));
                                 PacketConvert.Append(cb.CreatePlayerTargetRpcPacketConvert(info.rootName, info.contentName, info.param, info.paramNamespace));
-                                continue;
+                            continue;
                             case ContentInfo.Type.SyncVar:
                                 syncvars[cb.GetFullName(info.rootNameSpace, info.rootName)].Append(cb.CreateSyncVarMethod(info.contentName, info.paramNamespace, info.param, info.argOption, info.isPublicVar, false, false));
                                 PacketConvert.Append(cb.CreatePlayerSyncVarPacketConvert(info.rootName, info.contentName, info.param, info.paramNamespace, info.isPublicVar));
+                            continue;
+                            case ContentInfo.Type.Synic:
+                                SyncPlayer[info.argOption].Append(cb.CreateSyncSynicContent(info.contentName, info.rootName, true));
+                                SyncedPlayer[info.argOption].Append(cb.CreateSyncedContent(info.contentName, info.rootName, true));
                             continue;
                         }
                     }
@@ -203,6 +208,10 @@ namespace SynicSugar.Generator {
                         case ContentInfo.Type.SyncVar:
                             syncvars[cb.GetFullName(info.rootNameSpace, info.rootName)].Append(cb.CreateSyncVarMethod(info.contentName, info.paramNamespace, info.param, info.argOption, info.isPublicVar, info.isOnlyHost, true));
                             PacketConvert.Append(cb.CreateCommonsSyncVarPacketConvert(info.rootName, info.contentName, info.param, info.paramNamespace, info.isPublicVar));
+                        continue;
+                        case ContentInfo.Type.Synic:
+                            SyncCommons[info.argOption].Append(cb.CreateSyncSynicContent(info.contentName, info.rootName, false));
+                            SyncedCommons[info.argOption].Append(cb.CreateSyncedContent(info.contentName, info.rootName, false));
                         continue;
                     }
                 }
@@ -247,16 +256,11 @@ namespace SynicSugar.Generator {
                     AdditionalClass.Append(ct.TransformText());
                 }
 
-                StringBuilder SyncedItem = new StringBuilder();
-                
-                foreach (var i in SyncedContents) {
-                    SyncedItem.Append(cb.CreateSynedItem(i.Key, i.Value.ToString()));
-                }
                 
                 StringBuilder SyncSynic= new StringBuilder();
                 bool needSyncSynic = false;
-                foreach (var i in SyncSynics) {
-                    var result = cb.AddSyncSynicFrame(i.Key, i.Value.ToString());
+                foreach (var i in SyncPlayer) {
+                    var result = cb.AddSyncSynicFrame(i.Key, i.Value.ToString(), SyncCommons[i.Key].ToString());
 
                     SyncSynic.Append(result.text);
 
@@ -264,6 +268,13 @@ namespace SynicSugar.Generator {
                         needSyncSynic = result.needData;
                     }
                 }
+
+                StringBuilder SyncedItem = new StringBuilder();
+                
+                foreach (var i in SyncedPlayer) {
+                    SyncedItem.Append(cb.CreateSyncedItem(i.Key, i.Value.ToString(), SyncedCommons[i.Key].ToString()));
+                }
+
                 StringBuilder GenerateSynicContainer = new StringBuilder(cb.CreateGenerateSynicContainer(SyncSynic.ToString()));
 
                 var connectTemplate = new ConnecthubTemplate() {

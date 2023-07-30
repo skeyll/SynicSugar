@@ -165,35 +165,35 @@ namespace SynicSugar.P2P {
         /// Sync all Synic variables. This is very heavy because it handles multiple data and repeats compression and serialization.
         /// </summary>
         /// <param name="targetId">Target to be synced by this local user.</param>
-        /// <param name="syncedHierarchy">Hierarchy to be synced. If syncSingleHierarchy is false, sync all variables in the hierarchy up to this point.</param>
-        /// <param name="syncSingleHierarchy">If true, send only variables in syncedHierarchy.</param>
+        /// <param name="syncedPhase">Phase to be synced. If syncSinglePhase is false, sync all variables in the phase up to this point.</param>
+        /// <param name="syncSinglePhase">If true, send only variables in syncedPhase.</param>
         /// <param name="syncTargetsData">If true, sync target's data in Host local. When the target AllowHostsSynic, can overwrite the target's data in that local only once.</param>
-        public void SyncSynic(UserId targetId, byte syncedHierarchy = 9, bool syncSingleHierarchy = false, bool syncTargetsData = true){
+        public void SyncSynic(UserId targetId, byte syncedPhase = 9, bool syncSinglePhase = false, bool syncTargetsData = true){
             //Sync local data to target local
-            SynicContainer synicContainer = GenerateSynicContainer(p2pInfo.Instance.LocalUserId, syncedHierarchy, syncSingleHierarchy);
+            SynicContainer synicContainer = GenerateSynicContainer(p2pInfo.Instance.LocalUserId, syncedPhase, syncSinglePhase);
 
             using var selfCompressor  = new BrotliCompressor();
             MemoryPackSerializer.Serialize(selfCompressor, synicContainer);
 
-            EOSp2p.SendLargePacket((byte)CHANNELLIST.Synic, selfCompressor.ToArray(), targetId, syncedHierarchy, syncSingleHierarchy);
+            EOSp2p.SendLargePacket((byte)CHANNELLIST.Synic, selfCompressor.ToArray(), targetId, syncedPhase, syncSinglePhase);
 
             if(!syncTargetsData || !p2pInfo.Instance.IsHost()){
                 return;
             }
             //Sync target data in local to target local
 
-            synicContainer = GenerateSynicContainer(targetId, syncedHierarchy, syncSingleHierarchy);
+            synicContainer = GenerateSynicContainer(targetId, syncedPhase, syncSinglePhase);
 
             using var targetCompressor  = new BrotliCompressor();
             MemoryPackSerializer.Serialize(targetCompressor, synicContainer);
 
-            EOSp2p.SendLargePacket((byte)CHANNELLIST.Synic, targetCompressor.ToArray(), targetId, syncedHierarchy, syncSingleHierarchy, false);
+            EOSp2p.SendLargePacket((byte)CHANNELLIST.Synic, targetCompressor.ToArray(), targetId, syncedPhase, syncSinglePhase, false);
         }
 
         <#= GenerateSynicContainer #>
         <# } #>
 
-        //Synced 0 = index, 1 = chunk, 2 = hierarchy, 3 = syncSpecificHierarchy, 4 = isSelf
+        //Synced 0 = index, 1 = chunk, 2 = phase, 3 = syncSinglePhase, 4 = isSelf
         bool RestorePackets(ref SugarPacket packet){
             if(packet.payload[4] == 0){
                 if(p2pInfo.Instance.IsHost(packet.UserID) && p2pInfo.Instance.AcceptHostSynic){
@@ -205,8 +205,8 @@ namespace SynicSugar.P2P {
 
             if(!buffer.ContainsKey(packet.UserID)){
                 packetInfo.Add(packet.UserID, new LargePacketInfomation(){  chunk = packet.payload[1], 
-                                                                            hierarchy = packet.payload[2], 
-                                                                            syncSpecificHierarchy = packet.payload[3] == 1 ? true : false });
+                                                                            phase = packet.payload[2], 
+                                                                            syncSinglePhase = packet.payload[3] == 1 ? true : false });
                 //Prep enough byte[]
                 buffer.Add(packet.UserID, new byte[packet.payload[1] * 1100]);
             }
@@ -214,7 +214,7 @@ namespace SynicSugar.P2P {
             int offset = packetIndex * 1100;
 
     #if SYNICSUGAR_LOG
-            Debug.Log($"RestorePackets: PacketInfo:: index {packet.payload[0]} / chunk {packet.payload[1]} / hierarchy {packet.payload[2]} / syncSpecificHierarchy {packet.payload[3]}");
+            Debug.Log($"RestorePackets: PacketInfo:: index {packet.payload[0]} / chunk {packet.payload[1]} / phase {packet.payload[2]} / syncSinglePhase {packet.payload[3]}");
     #endif
             //Remove header
             Span<byte> packetPayload = packet.payload.Slice(5);
@@ -240,10 +240,10 @@ namespace SynicSugar.P2P {
     #endif
 
             //Packet data
-            int hierarchy = packetInfo[overwriterUserId].hierarchy;
-            bool syncSingleHierarchy = packetInfo[overwriterUserId].syncSpecificHierarchy;
+            int phase = packetInfo[overwriterUserId].phase;
+            bool syncSinglePhase = packetInfo[overwriterUserId].syncSinglePhase;
 
-            switch(hierarchy){<#= SyncedInvoker #>
+            switch(phase){<#= SyncedInvoker #>
                 default:
                 goto case 9;
             }
