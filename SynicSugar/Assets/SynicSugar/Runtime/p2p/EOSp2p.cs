@@ -77,14 +77,14 @@ namespace SynicSugar.P2P {
         /// <param name="ch">Only 255 now</param>
         /// <param name="value">The payload serialized with MemoryPack and BrotliCompressor</param>
         /// <param name="targetId"></param>
-        /// <param name="hierarchyLevel">Sync from 0 to hierarchy</param>
+        /// <param name="syncedPhase">Sync from 0 to hierarchy</param>
         /// <param name="syncAllHierarchy">If false, synchronize an only specific hierarchy</param>
-        public static void SendLargePacket(byte ch, byte[] value, UserId targetId, byte hierarchyLevel = 9, bool syncSpecificHierarchy = false, bool isSelfData = true){
+        public static void SendLargePacket(byte ch, byte[] value, UserId targetId, byte syncedPhase = 9, bool syncSpecificPhase = false, bool isSelfData = true){
             int length = 1100;
-            byte[] header = GenerateHeader(value.Length, hierarchyLevel, syncSpecificHierarchy, isSelfData);
+            byte[] header = GenerateHeader(value.Length, syncedPhase, syncSpecificPhase, isSelfData);
 
         #if SYNICSUGAR_LOG
-            Debug.Log($"SendLargePacket: PacketInfo:: size {value.Length} / chunk {header[1]} / hierarchy {header[2]} / syncSpecificHierarchy {header[3]}");
+            Debug.Log($"SendLargePacket: PacketInfo:: size {value.Length} / chunk {header[1]} / hierarchy {header[2]} / syncSpecificPhase {header[3]}");
         #endif
 
             //Max payload is 1170 but we need some header.
@@ -120,14 +120,14 @@ namespace SynicSugar.P2P {
             Debug.Log($"Send Large Packet: Success to {targetId.ToString()}!");
         #endif
             /// <summary>
-            /// index, chunk, hierarchy level, is Specific sync, self or not
+            /// index, chunk, sycned phase, is Specific sync, self or not
             /// </summary>
-            byte[] GenerateHeader(int valueLength, byte hierarchy, bool isOnly, bool isSelfData){
+            byte[] GenerateHeader(int valueLength, byte phase, bool isOnly, bool isSelfData){
                 byte[] result = new byte[5];
 
                 result[0] = 0; 
                 result[1] = (byte)Math.Ceiling(valueLength / 1100f);;
-                result[2] = hierarchy;
+                result[2] = phase;
                 result[3] = isOnly ? (byte)1 : (byte)0;
                 result[4] = isSelfData ? (byte)1 : (byte)0;
 

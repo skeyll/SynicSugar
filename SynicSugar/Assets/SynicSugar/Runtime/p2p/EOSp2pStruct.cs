@@ -99,8 +99,8 @@ namespace SynicSugar.P2P {
     }
     public class LargePacketInfomation {
         public byte chunk;
-        public byte hierarchy;
-        public bool syncSpecificHierarchy;
+        public byte phase;
+        public bool syncSinglePhase;
         public int currentSize;
     }
     [MemoryPackable]
