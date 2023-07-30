@@ -1,66 +1,49 @@
+# <p align="center">[<img src="https://github.com/skeyll/SynicSugar/blob/main/Resources/Logo_top.png" width="15%">](https://skeyll.github.io/SynicSugar/)</p>
 # SynicSugar
-![https://github.com/skeyll/SynicSugar/blob/main/LICENSE](https://img.shields.io/github/license/skeyll/SynicSugar) ![Unity](https://img.shields.io/badge/Unity-2021.3%2B-blue) [![openupm](https://img.shields.io/npm/v/net.skeyll.synicsugar?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/net.skeyll.synicsugar/)  
-SynicSugar is the syntax sugar to synchronize a game via the internet. The backend is EOS, so the server cost is free. The goal is an easy online-game dev for everyone!  
+![https://github.com/skeyll/SynicSugar/blob/main/LICENSE](https://img.shields.io/github/license/skeyll/SynicSugar) ![Unity](https://img.shields.io/badge/Unity-2021.3%2B-blue) [![openupm](https://img.shields.io/npm/v/net.skeyll.synicsugar?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/net.skeyll.synicsugar/) 
+
+SynicSugar is Unity High-Level Network Library with EpicOnlineServices. The concept is the syntax sugar of netcode. The process is sonic by pre-generating and IL weaving codes for your project. SynicSugar will be optimized for small-party (action) game
 
 For more detail is [https://skeyll.github.io/SynicSugar/](https://skeyll.github.io/SynicSugar/).
 
 
 ## Feature
-- Max 64 peers mesh topology
-- No Use Cost and No CCU Limit
-- MatchMake with your conditions
-- Host-Migration
-- Re-connect to a disconnected Lobby
-- Cross-platform (Now: Android, iOS, Windows)
+ - Mesh topology with max 64 peers
+ - No Use Cost and No CCU Limit
+ - High-level APIs for mobile and small-group games (MatchMaking, Host-Migration and Re-connection...)
+ - Cross-platform connction (Current: Android, iOS, and PC / Future: Console )
+
 
 ```csharp
 using SynicSugar.P2P;
-using MemoryPack;
 using UnityEngine;
-[NetworkPlayer]
-public partial class Player {    
-    [SyncVar(3000)] public Vector3 pos;
-    //Sync in manager's interval
+[NetworkPlayer(true)]
+public partial class Player {  
+    //Sync every 1000ms(default)
     [SyncVar] public int Hp;
-    [SyncVar(1000)] Skill skill;
-    
-    [Rpc] //Can send 1st parameter to other clients
-    public void Attack(int a, int b = 0, float c = 0){
-         Hp -= a;
-    }
-    [TargetRpc] //Can send 2nd parameter to id's client
-    public void GreetTarget(UserId id){
-         Debug.log("Hi");
-    }
-    [Rpc] //Can pass multiple data class with MemoryPack
-    public void Heal(HealInfo info){
-         Debug.log($"{OwnerUserId} heal {info.target} {info.amount}");
-    }
-}    
-[MemoryPackable]
-public partial class Skill {
-    public string Name;
-    public bool isValid;
-    public int Damage;
-}
-[MemoryPackable]
-public partial class HealInfo {
-    public UserId target;
-    public int amount;
-}
-```
-```csharp
-using SynicSugar.P2P;
-using UnityEngine;
-[NetworkCommons]
-public partial class GameSystem : MonoBehaviour {
-    //Sync Host's value by 500ms
-    [SyncVar(true, 500)] public float currentTime;
-    [SyncVar] Vector3 enemyPos;
+    //Sync every 3000ms
+    [SyncVar(3000)] Skill skill;
+
+    [Synic(0)] public string name;
+    [Synic(0)] public string item;
+    [Synic(1)] public Vector3 pos;
     
     [Rpc] 
-    public void StartGame(){
-         Debug.log("Start");
+    public void Attack(int a){
+        Hp -= a;
+    }
+    [TargetRpc]
+    public void GreetTarget(UserId id){
+        Debug.log("Hi");
+    }
+    [Rpc]
+    public void Heal(HealInfo info){
+        Debug.log($"{OwnerUserId} heal {info.target} {info.amount}");
+    }
+
+    public void SyncBasisStatus(){
+        //Sync the Variables that have Synic(0) attribute at once.
+        ConnectHub.Instance.SyncSynic(p2pInfo.Instance.LastDisconnectedUsersId, 0);
     }
 }
 ```
@@ -76,7 +59,7 @@ public partial class GameSystem : MonoBehaviour {
  Large dependencies is for performance. SynicSugar is a full-mesh p2p. All peers connect with each other instead of 1-to-many like dedicated server and client-server model. If we want to sync data with 63 peer in a full-mesh, we need to send data 63 times. Individual connection is fast but the whole is costly. So the core needs faster.  
 
 ## Warning 
- SynicSugar is still in development.　This library is made for my game and will be developed with my game. Therefore, It may bugs and fewer features. And will have destructive changes. So, I currently recommend using [Mirror](https://github.com/MirrorNetworking/Mirror) with [EOSRelay](https://github.com/FakeByte/EpicOnlineTransport) for a product.
+ SynicSugar is still in development. This library is made for my game and will be developed with my game. Therefore, It may bugs and fewer features. And will have destructive changes. So, I currently recommend using [Mirror](https://github.com/MirrorNetworking/Mirror) with [EOSRelay](https://github.com/FakeByte/EpicOnlineTransport) for a product.
 
 ## Getting started
 ### 1.Install SynicSugar and depended librarys.  
