@@ -24,7 +24,8 @@ namespace SynicSugar.P2P {
 #endregion
         public ConnectionNotifier ConnectionNotifier = new ConnectionNotifier();
         public Reason LastDisconnectedUsersReason => ConnectionNotifier.ClosedReason;
-        public UserId LastDisconnectedUsersId => ConnectionNotifier.TargetUserId;
+        public UserId LastDisconnectedUsersId => ConnectionNotifier.CloseUserId;
+        public UserId LastConnectedUsersId => ConnectionNotifier.ConnectUserId;
         public UserId LocalUserId => p2pConfig.Instance.userIds.LocalUserId;
         public List<UserId> RemoteUserIds => p2pConfig.Instance.userIds.RemoteUserIds;
         public bool AcceptHostSynic => p2pConfig.Instance.userIds.isJustReconnected;
