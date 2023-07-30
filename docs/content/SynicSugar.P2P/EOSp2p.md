@@ -1,15 +1,15 @@
 +++
 title = "EOSp2p"
-weight = 8
+weight = 9
 +++
 
-## p2pConfig
+## EOSp2p
 <small>*Namespace: SynicSugar.P2P*</small>
 
 
 ### Description
 **This is used by ILPostProcesser.**<br>
-**Basically, this is not intended to be used by others.**<br>
+**Basically, this is not intended to be used by Library user.**<br>
 
 If we add the network attribute to a method and a field, We can also call these directly.<br>
 This 1st arg's byte is ConnectHub.CHANNELLIST.METHOD_OR_VARIABLE. 2nd arg's byte[] is serialized by MemoryPack.

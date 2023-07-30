@@ -1,14 +1,14 @@
 +++
 title = "p2pConnectorForOtherAssembly"
-weight = 6
+weight = 7
 +++
 
-## ConnectHub
+## p2pConnectorForOtherAssembly
 <small>*Namespace: SynicSugar.P2P*</small>
 
 
 ### Description
-This script is Mono's Singleton attached to ConnenctManager.<br>
+This script is Mono's Singleton attached to NetworkManager.<br>
 *Used internally.*<br>
 
 Just for hub between Assembly.<br>

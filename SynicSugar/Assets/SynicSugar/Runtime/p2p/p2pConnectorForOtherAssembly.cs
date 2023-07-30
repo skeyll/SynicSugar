@@ -6,6 +6,7 @@ using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using SynicSugar.MatchMake;
+using ResultE = Epic.OnlineServices.Result;
 //We can't call the main-Assembly from own-assemblies.
 //So, use such processes through this assembly.
 namespace SynicSugar.P2P {
@@ -123,7 +124,7 @@ namespace SynicSugar.P2P {
         public async UniTask<bool> CloseSession(CancellationToken token){
             ResetConnections();
             bool canLeave = true;
-            if(p2pConfig.Instance.userIds.IsHost()){
+            if(p2pInfo.Instance.IsHost()){
                 canLeave = await MatchMakeManager.Instance.CloseCurrentLobby(token);
             }else{
                 canLeave = await MatchMakeManager.Instance.ExitCurrentLobby(token);
@@ -152,11 +153,11 @@ namespace SynicSugar.P2P {
 
             byte[] data = new byte[nextPacketSizeBytes];
             var dataSegment = new ArraySegment<byte>(data);
-            Result result = P2PHandle.ReceivePacket(ref options, out ProductUserId peerId, out SocketId socketId, out byte outChannel, dataSegment, out uint bytesWritten);
+            ResultE result = P2PHandle.ReceivePacket(ref options, out ProductUserId peerId, out SocketId socketId, out byte outChannel, dataSegment, out uint bytesWritten);
             
-            if (result != Result.Success){
+            if (result != ResultE.Success){
 #if SYNICSUGAR_LOG //This range is for performance since this is called every frame.
-                if(result == Result.InvalidParameters){
+                if(result == ResultE.InvalidParameters){
                     Debug.LogErrorFormat("Get Packets: input was invalid: {0}", result);
                 }
 #endif
@@ -177,9 +178,9 @@ namespace SynicSugar.P2P {
             foreach(var id in p2pConfig.Instance.userIds.RemoteUserIds){
                 options.RemoteUserId = id.AsEpic;
 
-                Result result = P2PHandle.ClearPacketQueue(ref options);
+                ResultE result = P2PHandle.ClearPacketQueue(ref options);
                 
-                if (result != Result.Success){
+                if (result != ResultE.Success){
                     Debug.LogErrorFormat("Clear Queue: can't clear packet queue, code: {0}", result);
                     return;
                 }
@@ -217,9 +218,9 @@ namespace SynicSugar.P2P {
                 SocketId = SocketId
             };
 
-            Result result = P2PHandle.AcceptConnection(ref options);
+            ResultE result = P2PHandle.AcceptConnection(ref options);
 
-            if (result != Result.Success){
+            if (result != ResultE.Success){
                 Debug.LogErrorFormat("p2p connect request: error while accepting connection, code: {0}", result);
             }
         #if SYNICSUGAR_LOG
@@ -237,8 +238,8 @@ namespace SynicSugar.P2P {
     /// Call from the library after the MatchMake is established.
     /// </summary>
     internal void OpenConnection(){
-        AddNotifyPeerConnectionRequest();
         AcceptAllConenctions();
+        AddNotifyPeerConnectionRequest();
     }
     //Reason: This order(Receiver, Connection, Que) is that if the RPC includes Rpc to reply, the connections are automatically re-started.
     /// <summary>
@@ -257,21 +258,21 @@ namespace SynicSugar.P2P {
                 LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
                 SocketId = SocketId
             };
-        Result result = Result.Success;
+        ResultE result = ResultE.Success;
         foreach(var id in p2pConfig.Instance.userIds.RemoteUserIds){
             options.RemoteUserId = id.AsEpic;
             result = P2PHandle.AcceptConnection(ref options);
 
-            if (result != Result.Success){
-                Debug.LogErrorFormat("Re-accept All Connections: error while accepting connection, code: {0} / id: {1}", result, id);
+            if (result != ResultE.Success){
+                Debug.LogErrorFormat("Accept All Connections: error while accepting connection, code: {0} / id: {1}", result, id);
                 break;
             }
         }
-        if(result != Result.Success){
+        if(result != ResultE.Success){
             return;
         }
         #if SYNICSUGAR_LOG
-            Debug.Log("Re-accept All Connections: Success accept Connections");
+            Debug.Log("Accept All Connections: Success accept Connections");
         #endif
     }
 #endregion
@@ -283,12 +284,18 @@ namespace SynicSugar.P2P {
                 LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
                 SocketId = SocketId
             };
-            Result result = P2PHandle.CloseConnections(ref closeOptions);
+            ResultE result = P2PHandle.CloseConnections(ref closeOptions);
             Debug.Log($"close result is {result} / {ScoketName}");
-            if(result != Result.Success){
+            if(result != ResultE.Success){
                 Debug.LogErrorFormat("CloseConnections: Failed to disconnect {0}", result);
             }
         }
 #endregion
+        /// <summary>
+        /// Change AcceptHostsSynic to false. Call from ConnectHub
+        /// </summary>
+        public void CloseHostSynic(){
+            p2pConfig.Instance.userIds.isJustReconnected = false;
+        }
     }
 }

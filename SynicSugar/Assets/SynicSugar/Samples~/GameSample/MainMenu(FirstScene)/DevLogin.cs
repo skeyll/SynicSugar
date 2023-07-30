@@ -1,7 +1,6 @@
 using PlayEveryWare.EpicOnlineServices;
 using Epic.OnlineServices.Auth;
 using Cysharp.Threading.Tasks;
-using Epic.OnlineServices;
 using System.Threading;
 using UnityEngine.UI;
 using UnityEngine;
@@ -36,7 +35,7 @@ namespace  SynicSugar.Samples {
             EOSManager.Instance.StartLoginWithLoginTypeAndToken(LoginCredentialType.Developer, $"localhost:{portI.text}", nameI.text, info =>{
                     Debug.Log(info.ResultCode);
                     Debug.Log(info.LocalUserId);
-                    isSuccess = (info.ResultCode == Result.Success);
+                    isSuccess = (info.ResultCode == Epic.OnlineServices.Result.Success);
                     waitingAuth = false;
             });
             await UniTask.WaitUntil(() => !waitingAuth, cancellationToken: token.Token);

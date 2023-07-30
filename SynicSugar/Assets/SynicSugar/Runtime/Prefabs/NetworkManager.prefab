@@ -11,9 +11,10 @@ GameObject:
   - component: {fileID: 1535193180786485604}
   - component: {fileID: 1127570235843273856}
   - component: {fileID: 2114254298220440419}
+  - component: {fileID: 6016646276410024044}
   - component: {fileID: -6934453671945530594}
   m_Layer: 0
-  m_Name: ConnectManager
+  m_Name: NetworkManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -48,7 +49,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxSearchResult: 5
   hostsTimeoutSec: 180
-  AllowUserReconnect: 1
+  lobbyIdSaveType: 1
+  playerprefsSaveKey: eos_lobbyid
+  customSaveLobbyID:
+    m_PersistentCalls:
+      m_Calls: []
+  customDeleteLobbyID:
+    m_PersistentCalls:
+      m_Calls: []
   matchState:
     state: {fileID: 0}
     stopAdditionalInput:
@@ -77,8 +85,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   interval_sendToAll: 3
   autoSyncInterval: 1000
-  receiveInterval: 1
   packetReliability: 2
+  getPacketFrequency: 2
+--- !u!114 &6016646276410024044
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1535193180786485607}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8958f75b02c3a941b5e1459374649e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &-6934453671945530594
 MonoBehaviour:
   m_ObjectHideFlags: 0

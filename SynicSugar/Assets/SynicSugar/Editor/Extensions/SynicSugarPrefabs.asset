@@ -1,0 +1,16 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b0643dd981747d04784563fe8f9b436c, type: 3}
+  m_Name: SynicSugarPrefabs
+  m_EditorClassIdentifier: 
+  EOSManager: {fileID: 6072974263789745078, guid: c5247b9c4d20be7418c42a5ce7f566af, type: 3}
+  NetWorkManager: {fileID: 1535193180786485607, guid: e18422c96d27f49489abe8b774c3a6b9, type: 3}

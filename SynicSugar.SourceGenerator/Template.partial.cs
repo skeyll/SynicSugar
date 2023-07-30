@@ -3,11 +3,14 @@
         internal string? SyncList;
         internal string? Register;
         internal string? Reference;
-        internal string? GetInstance;
+        internal string? ClearReference;
         internal string? PlayeInstance;
         internal string? CommonsInstance;
-        internal string? GetInstanceAsObject;
         internal string? PacketConvert;
+        internal bool needSyncSynic;
+        internal string? GenerateSynicContainer;
+        internal string? SyncedInvoker;
+        internal string? SyncedItems;
     }
     public partial class AdditionalPlayerTemplate {
         internal string? NameSpace;
@@ -22,5 +25,9 @@
         internal string? SyncVar;
         internal string? Rpcs;
         internal bool useGetInstance;
+    }
+    public partial class SynicItemsTemplate {
+        internal int hierarchyIndex;
+        internal string? items;
     }
 }

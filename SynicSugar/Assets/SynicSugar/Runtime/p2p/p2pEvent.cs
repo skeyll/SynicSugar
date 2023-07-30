@@ -2,8 +2,9 @@ using System;
 
 namespace SynicSugar.P2P {
     public class ConnectionNotifier {
-        public Reason ClosedReason { get; private set; }
-        public UserId TargetUserId { get; private set; }
+        internal Reason ClosedReason { get; private set; }
+        internal UserId CloseUserId { get; private set; }
+        internal UserId ConnectUserId { get; private set; }
 
         /// <summary>
         /// Invoke when another user disconnects unexpectedly.</ br>
@@ -26,11 +27,11 @@ namespace SynicSugar.P2P {
         }
         internal void OnDisconnected(UserId id, Reason reason){
             ClosedReason = reason;
-            TargetUserId = id;
+            CloseUserId = id;
             Disconnected?.Invoke();
         }
         internal void OnConnected(UserId id){
-            TargetUserId = id;
+            ConnectUserId = id;
             Connected?.Invoke();
         }
     }

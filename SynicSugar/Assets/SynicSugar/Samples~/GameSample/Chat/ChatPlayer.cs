@@ -1,34 +1,62 @@
+using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using SynicSugar.P2P;
 using UnityEngine;
 using UnityEngine.UI;
 
+
 namespace SynicSugar.Samples {
     //To use "ConnectHub.Instance.GetUserInstance<ChatPlayer>(UserID), make this [NetworkPlayer(true)].
-    [NetworkPlayer]
+    [NetworkPlayer(true)]
     public partial class ChatPlayer : MonoBehaviour {
         ChatSystemManager systemManager;
         bool isStressTesting;
-        int stressCount;
         GameObject uiSets; //Holds buttons.
+        [Synic(1)]
+        public string LargePacket;
+        [Synic(0)]
+        public string Name;
+        [Synic(0)]
+        public int submitCount;
+        ChatPlayer opponent; //Maybe: For tmp version
         void Start(){
             GameObject chatCanvas = GameObject.Find("Chat");
             systemManager = chatCanvas.GetComponent<ChatSystemManager>();
+            Name = GenerateBasicName();
 
             // For example, suppose this local Player's ID is A. 
             // Player A can only control the character Instance that has OwnerUserID A.
             // If this instance holds A, this is isLocal for A.
             // On the other hand, when this has B, this is isRemote(=!isLocal) for A.
             if(isLocal){
+                //Instantiate GUI 
                 uiSets = Instantiate(systemManager.uiSetsPrefabs, chatCanvas.transform);
                 RegisterButtonEvent();
                 EOSDebug.Instance.Log("Chat Mode: Start");
+
+                //These are just Large packet test
+                opponent = ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.RemoteUserIds[0]);
+                GetOpponentLargePacket().Forget();
             }
+
+            string GenerateBasicName(){
+                return $"User{OwnerUserID.ToString().Substring(4, 8)}";
+            }
+        }
+        //Maybe: For tmp version
+        //Overwrite largepacket and display it on Chat when LargePacket is updated.
+        //Alternate. Current, we don't get the notify to receive SyncSynic packet.
+        async UniTask GetOpponentLargePacket(){
+            await UniTask.WaitUntil(() => !string.IsNullOrEmpty(opponent.LargePacket));
+            EOSDebug.Instance.Log("GetLargePacket");
+            systemManager.chatText.text = opponent.LargePacket;
         }
         void RegisterButtonEvent(){
             uiSets.transform.Find("Submit").GetComponent<Button>().onClick.AddListener(DecideChat);
             uiSets.transform.Find("Test").GetComponent<Button>().onClick.AddListener(DoStressTest);
+            uiSets.transform.Find("TestL").GetComponent<Button>().onClick.AddListener(DoLargePacketTest);
+            uiSets.transform.Find("Name").GetComponent<Button>().onClick.AddListener(DecideUserName);
             uiSets.transform.Find("Clear").GetComponent<Button>().onClick.AddListener(ClearChat);
             uiSets.transform.Find("StopReceiver").GetComponent<Button>().onClick.AddListener(() => StopReceiver());
             uiSets.transform.Find("StartReceiver").GetComponent<Button>().onClick.AddListener(() => RestartReceiver());
@@ -38,17 +66,35 @@ namespace SynicSugar.Samples {
             uiSets.transform.Find("Leave").GetComponent<Button>().onClick.AddListener(LeaveSession);
             uiSets.transform.Find("Close").GetComponent<Button>().onClick.AddListener(CloseSession);
         }
-        //For Button
-        public void DecideChat(){
-            UpdateChatText(systemManager.contentField.text);
+
+        [Rpc] //On call, send this ch byte with args.
+        public void UpdateChatText(string message){
+            //SynicSugar inserts "SendProcess" here.
+            //We can't put "if" or another on the top of this method.
+            //So, when we need the condition for this process, call this from the other.
+            //
+            // --- Inserted Process --- 
+            //
+
+
+            string chat = $"{Name}: {message}{System.Environment.NewLine}";
+            systemManager.chatText.text += chat;
+
+            submitCount++;
+            systemManager.inputCount.text = $"ChatCount: {ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.LocalUserId).submitCount} / {ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.RemoteUserIds[0]).submitCount}";
         }
         [Rpc]
-        public void UpdateChatText(string message){
-            string selfSign = isLocal ? "★" : "";
-            string chat = $"{selfSign}{OwnerUserID}: {message}{System.Environment.NewLine}";
-            systemManager.chatText.text = systemManager.chatText.text + chat;
+        public void UpdateName(string newName){
+            Name = newName;
         }
-        //For Button
+
+        //---For button
+        public void DecideChat(){
+            if(string.IsNullOrEmpty(systemManager.contentField.text)){
+                return;
+            }
+            UpdateChatText(systemManager.contentField.text);
+        }
         public void DoStressTest(){
             if(isStressTesting){
                 return;
@@ -56,7 +102,7 @@ namespace SynicSugar.Samples {
             isStressTesting = true;
             for(int i = 0; i < 100; i++){
                 string message = i % 2 == 0 ? "Even" : "Odd";
-                SendMassMessages(message);
+                UpdateChatText(message);
                 
                 if(!isStressTesting){
                     break;
@@ -64,18 +110,24 @@ namespace SynicSugar.Samples {
             }
             isStressTesting = false;
         }
-        [Rpc]
-        public void SendMassMessages(string message){
-            //SynicSugar inserte "SendProcess" here.
-            //We can't put "if" on the top of this method.
-            //So, we need to call this from the other code for IF Statement.
+        public void DoLargePacketTest(){
+            var sample = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            var array = new char[4000];
+            var random = new System.Random();
 
-            systemManager.chatText.text = $"{OwnerUserID}'s EnduranceTest: {stressCount.ToString()}";
-            stressCount++;
+            for (int i = 0; i < array.Length; i++){
+                array[i] = sample[random.Next(sample.Length)];
+            }
+            LargePacket = new string(array);
+            systemManager.chatText.text += LargePacket;
+            //When the 3rd arg is true, this becomea the rpc to send large packet.
+            //Pass false to 4th arg. The opponent will drop the packets for self data except for the moment re-cconect.
+            ConnectHub.Instance.SyncSynic(opponent.OwnerUserID, 1, true, false);
         }
-        //---For button
+        public void DecideUserName(){
+            UpdateName(systemManager.nameField.text);
+        }
         public void ClearChat(){
-            stressCount = 0;
             systemManager.chatText.text = System.String.Empty;
         }
         public void StopReceiver(){
@@ -94,7 +146,6 @@ namespace SynicSugar.Samples {
         }
         public void RestartSession(){
             EOSDebug.Instance.Log("Chat Mode: Restart");
-            stressCount = 0;
             systemManager.chatText.text = System.String.Empty;
             ConnectHub.Instance.RestartConnections();
         }

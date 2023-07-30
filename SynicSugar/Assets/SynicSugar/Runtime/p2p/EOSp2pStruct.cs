@@ -2,32 +2,26 @@ using PlayEveryWare.EpicOnlineServices;
 using System;
 using System.Collections.Generic;
 using Epic.OnlineServices;
+using MemoryPack;
 
 namespace SynicSugar.P2P {
     /// <summary>
     /// Hold user ids in Room player.
     /// </summary>
     public class UserIds {
-        public UserId LocalUserId;
-        public List<UserId> RemoteUserIds;
+        internal UserId LocalUserId;
+        internal List<UserId> RemoteUserIds;
 
         //Options
         internal UserId HostUserId;
         // For the Host to pass the user's data to the player.
-        public List<UserId> LeftUsers = new List<UserId>();
+        internal List<UserId> LeftUsers = new List<UserId>();
         // If true, host can manage the this local user's data in direct.
         // If not, only the local user can manipulate the local user's data.
         // For Anti-Cheat to rewrite other player data.
         internal bool isJustReconnected;
-        public UserIds(){
+        internal UserIds(){
             LocalUserId = new UserId(EOSManager.Instance.GetProductUserId());
-        }
-        /// <summary>
-        /// Is this local user Game Host?
-        /// </summary>
-        /// <returns></returns>
-        public bool IsHost (){
-            return LocalUserId == HostUserId;
         }
         /// <summary>
         /// Remove user ID of leaving lobby.<br />
@@ -67,15 +61,21 @@ namespace SynicSugar.P2P {
 
     }
     public struct UserId {
-        readonly ProductUserId value;
+        #nullable enable
+        readonly ProductUserId? value;
+        #nullable disable
+        readonly string stringValue;
         public UserId(ProductUserId id){
             this.value = id;
+            this.stringValue = id != null ? id.ToString() : System.String.Empty;
         }
         public UserId(UserId id){
             this.value = id.AsEpic;
+            this.stringValue = id != null ? id.ToString() : System.String.Empty;
         }
         public UserId(string idString){
-            this.value = ProductUserId.FromString(idString);;
+            this.value = ProductUserId.FromString(idString);
+            this.stringValue = idString;
         }
         public readonly ProductUserId AsEpic => value;
         public static explicit operator ProductUserId(UserId id) => id.value;
@@ -88,7 +88,7 @@ namespace SynicSugar.P2P {
         }
         #nullable restore
         public override int GetHashCode() => value.GetHashCode();
-        public override string ToString() => value.ToString();
+        public override string ToString() => stringValue;
         public static bool operator ==(in UserId x, in UserId y) => x.value.Equals(y.value);
         public static bool operator !=(in UserId x, in UserId y) => !x.value.Equals(y.value);
     }
@@ -96,5 +96,25 @@ namespace SynicSugar.P2P {
         public byte ch;
         public string UserID;
         public ArraySegment<byte> payload;
+    }
+    public class LargePacketInfomation {
+        public byte chunk;
+        public byte phase;
+        public bool syncSinglePhase;
+        public int currentSize;
+    }
+    [MemoryPackable]
+    // This way is bad performance. Please let me know if you have a good idea to serialize and send data.
+    public partial class SynicContainer {
+        public string SynicItem0;
+        public string SynicItem1;
+        public string SynicItem2;
+        public string SynicItem3;
+        public string SynicItem4;
+        public string SynicItem5;
+        public string SynicItem6;
+        public string SynicItem7;
+        public string SynicItem8;
+        public string SynicItem9;
     }
 }

@@ -3,7 +3,7 @@ title = "UserId"
 weight = 3
 +++
 
-## p2pConfig
+## UserId
 <small>*Namespace: SynicSugar.P2P*</small>
 
 
