@@ -11,7 +11,7 @@ highlight_code = true
 highlight_theme = "visual-studio-dark"
 
 [extra]
-
-logo = "https://github.com/skeyll/SynicSugar/blob/main/Resources/Logo_doc.png"
-favicon = "https://github.com/skeyll/SynicSugar/blob/main/Resources/favicon.ico"
+logo = "https://github.com/skeyll/SynicSugar/blob/main/Resources/Logo_doc.png?raw=true"
+release = "https://api.github.com/repos/skeyll/SynicSugar/releases/latest"
+favicon = "https://github.com/skeyll/SynicSugar/blob/main/Resources/favicon.ico?raw=true"
 easydocs_heading_threshold = 5
