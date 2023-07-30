@@ -1,10 +1,10 @@
 +++
 title = "ConnectionNotifier"
-weight = 5
+weight = 3
 +++
 ## ConnectionNotifier
 <small>*Namespace: SynicSugar.P2P* <br>
-*Class: p2pConfig* </small>
+*Class: p2pInfo* </small>
 
 public ConnectionNotifier ConnectionNotifier
 
@@ -20,8 +20,6 @@ If the connection cannot be re-established after such attempts, SynicSugar deter
 ### Properity
 | API | description |
 |---|---|
-| ClosedReason | Disconnected reason  |
-| TargetUserId | UserID of Disconnected or Connected user |
 | Disconnected | Invoked when another user disconnects unexpectedly |
 | Connected | Invoked when a user connects after matchmaking |
 
@@ -43,12 +41,12 @@ using UnityEngine;
 
 public class p2pSample : MonoBehaviour {
     void Start(){
-        p2pConfig.Instance.ConnectionNotifier.Disconnected += OnDisconect;
-        p2pConfig.Instance.ConnectionNotifier.Connected += () => Debug.Log($"{p2pConfig.Instance.ConnectionNotifier.TargetUserId} Join");
+        p2pInfo.Instance.ConnectionNotifier.Disconnected += OnDisconect;
+        p2pInfo.Instance.ConnectionNotifier.Connected += () => Debug.Log($"{p2pConfig.Instance.LastConnectedUsersId} Join");
     }
 
     void OnDisconect(){
-        Debug.Log($"{p2pConfig.Instance.ConnectionNotifier.TargetUserId} is Disconnected / {p2pConfig.Instance.ConnectionNotifier.ClosedReason}");
+        Debug.Log($"{p2pInfo.Instance.LastDisconnectedUsersId} is Disconnected / {p2pInfo.Instance.ClosedReason}");
     }
 }
 ```

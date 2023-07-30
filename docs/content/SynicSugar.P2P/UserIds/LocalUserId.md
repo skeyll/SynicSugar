@@ -18,7 +18,7 @@ using SynicSugar.P2P;
 
 public class p2pSample {
     void UserIDsSample(){
-        UserID id = p2pConfig.Instance.userIds.LocalUserId;
+        UserID id = p2pInfo.Instance.LocalUserId;
     }
 }
 ```

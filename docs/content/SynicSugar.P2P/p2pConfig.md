@@ -10,10 +10,13 @@ This is used like **p2pConfig.Instance.XXX()**.
 
 
 ### Description
-This is configs for p2p. The Singleton instance has UserIDs (of Lobby members) and some config on conenction.<br>
+This is config class for p2p.<br>
 
-This script is Mono's Singleton attached to ConnenctManager. Drop this **ConnenctManager** into the scene from *Packages/SynicSugar/Runtime/Prefabs/ConnectManager*. <br>
-ConnectManager has **DontDestroy**, so ConnectManager will not be destroyed by scene transitions. <br>
+This script is Mono's Singleton attached to NetworkManager. To generate NetworkManager, right-click on the Hierarchy and click SynicSugar/NetworkManager.<br>
+NetworkManager has **DontDestroy**, so ConnectManager will not be destroyed by scene transitions. <br>
+
+If this is no longer needed, we call *[CancelCurrentMatchMake](../../SynicSugar.MatchMake/MatchMakeManager/cancelcurrentmatchmake)*, *[ConnectHub.Instance.CloseSession(CancellationTokenSource)](../../SynicSugar.P2P/ConnectHub/exitsession)* or *[ConnectHub.Instance.ExitSession(CancellationTokenSource)](../../SynicSugar.P2P/ConnectHub/exitsession)*.
+
 
 If this is no longer needed, we call *[CancelCurrentMatchMake](../../SynicSugar.MatchMake/MatchMakeManager/cancelcurrentmatchmake)*, *[ConnectHub.Instance.CloseSession(CancellationTokenSource)](../../SynicSugar.P2P/ConnectHub/exitsession)* or *[ConnectHub.Instance.ExitSession(CancellationTokenSource)](../../SynicSugar.P2P/ConnectHub/exitsession)*.
 
@@ -21,12 +24,10 @@ If this is no longer needed, we call *[CancelCurrentMatchMake](../../SynicSugar.
 ### Properity
 | API | description |
 |---|---|
-| [userIds](../userids/) | UserIDs list of all users in Lobby |
 | [interval_sendToAll](../p2pConfig/intervalsendtoall) | Sending to each users interval of Rpc |
 | [autoSyncInterval](../p2pConfig/autosyncinterval) | Sending new value interval of SyncVar |
 | [GetPacketFrequency](../p2pConfig/getpacketfrequency) | Frequency of calling PacketReceiver |
 | [packetReliability](../p2pConfig/packetreliability) | The delivery reliability of a packet |
-| [ConnectionNotifier](../p2pConfig/connectionnotifier) | Invoked when a user connects or disconnects |
 
 
 ```cs

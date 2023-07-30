@@ -3,7 +3,7 @@ title = "Attributes"
 weight = 1
 +++
 
-## p2pConfig
+## Attributes
 <small>*Namespace: SynicSugar.P2P*</small>
 
 
@@ -19,6 +19,7 @@ Attributes to Synchronize.
 | [SyncVar](../Attributes/syncvar) | Synchronize variable with other users |
 | [Rpc](../Attributes/rpc) | Synchronize invoked function with other users |
 | [TargetRpc](../Attributes/targetrpc) | Synchronize invoked function with other user |
+| [Synic](../Attributes/synic) | Synchronize all Synic variables with other user |
 
 
 ```cs

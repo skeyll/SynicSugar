@@ -28,7 +28,7 @@ weight = 1
 2. Install these packages  
 　These packages can be imported from **Window/PackageManager/MyRegistries**. Importing SynicSugar will automatically import the other required librarys. If you are using another version in your project, that one will probably work. However, SynicSugar has been developed using the following:  
  * Epic Online Services Plugin for Unity: 2.2.0  
- * UniTask: 2.3.1  
+ * UniTask: 2.3.3
  * MemoryPack: 1.9.13  
  
  

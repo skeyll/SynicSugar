@@ -1,9 +1,9 @@
 +++
 title = "AdditionalClass"
-weight = 7
+weight = 8
 +++
 
-## ConnectHub
+## AdditionalClass
 <small>*Namespace: SynicSugar.P2P*</small>
 
 

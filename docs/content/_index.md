@@ -11,7 +11,7 @@ title = "SynicSugar"
 
 +++
 # What is SynicSugar?
-SynicSugar is the syntax sugar of netcode for Unity with Epic Online Services. The process is sonic by pre-generating and IL weaving codes for your project. The goal is an easy online game dev for everyone! SynicSugar will be optimized for small-party (action) game. Can import from [Github](https://github.com/skeyll/SynicSugar)
+SynicSugar is Unity High-Level Network Library with EpicOnlineServices. The concept is the syntax sugar of netcode. The process is sonic by pre-generating and IL weaving codes for your project. SynicSugar will be optimized for small-party (action) game. Can import from [Github](https://github.com/skeyll/SynicSugar)
 
 
 ```cs
@@ -23,6 +23,10 @@ public partial class Player {
     [SyncVar] public int Hp;
     //Sync every 3000ms
     [SyncVar(3000)] Skill skill;
+
+    [Synic(0)] public string name;
+    [Synic(0)] public string item;
+    [Synic(1)] public Vector3 pos;
     
     [Rpc] 
     public void Attack(int a){
@@ -36,16 +40,20 @@ public partial class Player {
     public void Heal(HealInfo info){
         Debug.log($"{OwnerUserId} heal {info.target} {info.amount}");
     }
+
+    public void SyncBasisStatus(){
+        //Sync the Variables that have Synic(0) attribute at once.
+        ConnectHub.Instance.SyncSynic(p2pInfo.Instance.LastDisconnectedUsersId, 0);
+    }
 }
 ```
 
 ## Feature
- - Max 64 peers full-mesh connect
+ - Mesh topology with max 64 peers
  - No Use Cost and No CCU Limit
- - MatchMake with your conditions
- - Host-Migration
- - Re-connect to a disconnected match
- - Cross-platform connction (Android, iOS, Windows, and Console)
+ - High-level APIs for mobile and small-group games (MatchMaking, Host-Migration and Re-connection...)
+ - Cross-platform connction <br>
+    (Current: Android, iOS, and PC / Future: Console / Not support: WebGL)
 
 ## Requirement
  - Unity 2021-3 or later
@@ -61,7 +69,7 @@ public partial class Player {
 Large dependencies is for performance. SynicSugar is a full-mesh p2p. All peers connect with each other instead of 1-to-many like dedicated server and client-server model. If we want to sync data with 63 peer in a full-mesh, we need to send data 63 times. Individual connection is fast but the whole is costly. So the core needs faster. 
 
 ## For Debug
-Some process can show log for debug within If SYNISSUGAR_LOG. We need this log, add SYNICSUGAR_LOG to Scripting Define Symbols in project setting.
+SynicSugar has Debug.Log in some parts for the game development. To use the logs, add SYNICSUGAR_LOG to Scripting Define Symbols in project setting. Logs for errors are displayed by default.
 
 ## Contribution Guideline
 SynicSugar's concept is an easy online game development for everyone. Therefore, the development is also based on this policy. The target is online game for up to 64 people supported by EOS, but the main is small-party action game. If you want to create MMO, you can use [Mirror](https://github.com/MirrorNetworking/Mirror). 

@@ -10,8 +10,8 @@ This is used like **MatchMakeManager.Instance.XXX()**.
 
 
 ### Description
-This script is Mono's Singleton attached to ConnenctManager. Drop this **ConnenctManager** into the scene from *Packages/SynicSugar/Runtime/Prefabs/ConnectManager*. <br>
-ConnectManager has **DontDestroy**, so ConnectManager will not be destroyed by scene transitions. This is used for re-connection, and also needed for p2p scene. <br>
+This script is Mono's Singleton attached to NetworkManager.  To generate NetworkManager, right-click on the Hierarchy and click SynicSugar/NetworkManager.<br>
+NetworkManager has **DontDestroy**, so NetworkManager will not be destroyed by scene transitions. This is used for re-connection, and also needed for p2p scene. <br>
 
 If this is no longer needed, we call *[CancelCurrentMatchMake](../MatchMakeManager/cancelcurrentmatchmake)*, *[ExitSession](../../SynicSugar.P2P/ConnectHub/exitsession)* and *[CloseSession](../../SynicSugar.P2P/ConnectHub/exitsession)*.
 

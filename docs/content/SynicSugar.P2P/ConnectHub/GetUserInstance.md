@@ -6,31 +6,24 @@ weight = 9
 <small>*Namespace: SynicSugar.P2P* <br>
 *Class: ConnectHub* </small>
 
-For NetworkPlayer<br>
-public T GetUserInstance&lt;T&gt;(UserId id) <br><br>
-For NetworkCommons<br>
-public T GetUserInstance&lt;T&gt;()<br>
+public T GetUserInstance&lt;T&gt;(UserId id) 
 
 
 ### Description
-Get a instanse registered to ConnectHub.<br>
-If we want to use this, pass true to Network class attributes.
+Get a target instance registered to ConnectHub.<br>
+If we want to use this, pass true to NetworkPlayer class attributes.
 
 
 ```cs
 using SynicSugar.P2P;
-using UnityEngine;
 
-[NetworkCommons(true)]
+[NetworkPlayer(true)]
 public partial class p2pSample {
-    void Start(){
-        ConnectHub.Instance.RegisterInstance(this);
-    }
 }
 
 public class p2pSample2 {
     void p2pSampleMethod(){
-        p2pSample pSample = ConnectHub.Instance.GetUserInstance<p2pSample>();
+        p2pSample pSample = ConnectHub.Instance.GetUserInstance<p2pSample>(targetId);
     }
 }
 ```
