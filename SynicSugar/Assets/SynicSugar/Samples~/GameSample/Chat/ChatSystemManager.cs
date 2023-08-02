@@ -1,7 +1,6 @@
 using SynicSugar.P2P;
 using UnityEngine;
 using UnityEngine.UI;
-
 namespace SynicSugar.Samples {
     public partial class ChatSystemManager : MonoBehaviour {
         [SerializeField] GameObject matchmakeCanvas, chatCanvas;

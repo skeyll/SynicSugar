@@ -1,10 +1,10 @@
 using Cysharp.Threading.Tasks;
 using SynicSugar.MatchMake;
-using SynicSugar.P2P;
 using System;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 
 namespace  SynicSugar.Samples {
@@ -12,7 +12,6 @@ namespace  SynicSugar.Samples {
         [SerializeField] GameObject matchmakePrefab;
         GameObject matchmakeContainer;
         [SerializeField] Button startMatchMake, closeLobby, startGame, backtoMenu;
-        CancellationTokenSource matchCancellToken;
         [SerializeField] MatchGUIState descriptions;
         [SerializeField] MatchMakeConditions matchConditions;
         [SerializeField] Text buttonText;
@@ -20,33 +19,60 @@ namespace  SynicSugar.Samples {
         //For Tank
         public InputField nameField;
         [SerializeField] Text playerName;
-        
         int level;
+        enum GameMode{
+            Tank, ReadHearts, Chat
+        }
+        GameMode gameMode;
+        enum SceneState{
+            Standby, inMatchMake, ToGame
+        }
+    #region Init
         void Awake(){
             if(MatchMakeManager.Instance == null){
                 matchmakeContainer = Instantiate(matchmakePrefab);
             }
-            InitMatchState();
+            SetGUIState();
+            SetGameMode();
+        }
+        void SetGUIState(){
+            descriptions = MatchMakeConfig.SetMatchingText(MatchMakeConfig.Langugage.EN);
+            descriptions.stopAdditionalInput.AddListener(StopAdditionalInput);
+            descriptions.acceptCancel.AddListener(() => ActivateCancelButton(false));
+
             MatchMakeManager.Instance.SetGUIState(descriptions);
         }
-
-        void OnDestroy(){
-            if(matchCancellToken != null){
-                matchCancellToken.Cancel();
+        void SetGameMode(){
+            string scene = SceneManager.GetActiveScene().ToString();
+            switch(scene){
+                case "TankMatchMake":
+                gameMode = GameMode.Tank;
+                break;
+                case "ReadHearts":
+                gameMode = GameMode.ReadHearts;
+                break;
+                case "Chat":
+                gameMode = GameMode.Chat;
+                break;
             }
         }
+    #endregion
+    #region For Recconect
         async void Start(){
-            //Allow this only on Chat
+            //Dose this game allow user to re-join thedisconnected match? 
             if(MatchMakeManager.Instance.lobbyIdSaveType == MatchMakeManager.RecconectLobbyIdSaveType.NoReconnection){
                 return;
             }
+
             //Try recconect
+            //Sample projects use the playerprefs to save LobbyIDs for recconection.
             string LobbyID = MatchMakeManager.Instance.GetReconnectLobbyID();
-            EOSDebug.Instance.Log($"SavedLobbyID is {LobbyID}.");
-            
+            //On the default way, return Empty when there is no lobby data in local.
             if(string.IsNullOrEmpty(LobbyID)){
                 return;
             }
+
+            EOSDebug.Instance.Log($"SavedLobbyID is {LobbyID}.");
             
             startMatchMake.gameObject.SetActive(false);
             CancellationTokenSource token = new CancellationTokenSource();
@@ -55,51 +81,46 @@ namespace  SynicSugar.Samples {
 
             if(canReconnect){
                 EOSDebug.Instance.Log($"Success Recconect! LobbyID:{MatchMakeManager.Instance.GetCurrentLobbyID()}");
-                
-                closeLobby.gameObject.SetActive(true);
-                startGame.gameObject.SetActive(true);
+                SwitchGUIState(SceneState.inMatchMake);
                 return;
             }
             EOSDebug.Instance.Log("Failer Re-Connect Lobby.");
             startMatchMake.gameObject.SetActive(true);
         }
-        void InitMatchState(){
-            descriptions.searchLobby = "Searching for an opponent...";
-            descriptions.waitothers = "Waiting for an opponent...";
-            descriptions.tryconnect = "Try to connect...";
-            descriptions.success = "Success MatchMaking";
-            descriptions.fail = "Fail to match make";
-            descriptions.trycancel = "Try to Disconnect...";
-            descriptions.stopAdditionalInput.AddListener(StopAdditionalInput);
-            descriptions.acceptCancel.AddListener(() => ActivateCancelButton(false));
-        }
+    #endregion
+    // #region MatchMaking
         public void StartMatchMake(){
-            StartMatching().Forget();
+            EOSDebug.Instance.Log("Start MatchMake.");
+            StartMatchMakeEntity().Forget();
 
+            //For some samples to need user name before MatchMaking.
+            //Just set user name for game.
             if(nameField != null){
                 nameField.gameObject.SetActive(false);
                 TankPassedData.PlayerName = string.IsNullOrEmpty(nameField.text) ? $"Player{UnityEngine.Random.Range(0, 100)}" : nameField.text;
                 playerName.text = $"PlayerName: {nameField.text}";
             }
         }
-        async UniTask StartMatching(){
-            //Prep
-            EOSDebug.Instance.Log("Start MatchMake.");
-
-            //Try MatchMaking
+        //We can't set NOT void process to Unity Event.
+        //So, register StartMatchMake() to Button instead of this.
+        async UniTask StartMatchMakeEntity(){
+            //We have two ways to call SearchAndCreateLobby.
+            //If pass self caneltoken, we should use Try-catch.
+            //If not, the API returns just bool result.
+            //Basically, we don't have to give token to SynicSugar APIs.
             bool selfTryCatch = false;
 
-            if(!selfTryCatch){
+            if(!selfTryCatch){ //Recommend
                 bool isSuccess = await MatchMakeManager.Instance.SearchAndCreateLobby(matchConditions.GetLobbyCondition());
                 
                 if(!isSuccess){
                     EOSDebug.Instance.Log("MatchMaking Failed.");
                     return;
                 }
-            }else{
+            }else{ //Sample for another way
                 try{
-                    matchCancellToken = new CancellationTokenSource();
-                    bool isSuccess = await MatchMakeManager.Instance.SearchAndCreateLobby(matchConditions.GetLobbyCondition(), matchCancellToken);
+                    CancellationTokenSource matchCTS = new CancellationTokenSource();
+                    bool isSuccess = await MatchMakeManager.Instance.SearchAndCreateLobby(matchConditions.GetLobbyCondition(), matchCTS);
 
                     if(!isSuccess){
                         EOSDebug.Instance.Log("Backend may have something problem.");
@@ -115,30 +136,24 @@ namespace  SynicSugar.Samples {
 
             SwitchCancelButtonActive(true);
 
-            if(startGame != null){ //For ReadHeart and Chat
-                startGame.gameObject.SetActive(true);
-            }else{ //For Tank
-                modeSelect.ChangeGameScene(GameModeSelect.GameScene.Tank.ToString());
-            }
+            GoGameScene();
         }
         /// <summary>
         /// Cancel matchmaking (Host delete and Guest leave the current lobby)
         /// </summary>
         public void CancelMatchMaking(){
-            LeaveLobby().Forget();
+            CancelMatchMakingEntity().Forget();
 
             if(nameField != null){
                 nameField.gameObject.SetActive(true);
             }
         }
-        async UniTask LeaveLobby(){
+        async UniTask CancelMatchMakingEntity(){
             SwitchCancelButtonActive(false);
 
-            matchCancellToken = new CancellationTokenSource();
-            bool isSuccess = await MatchMakeManager.Instance.CancelCurrentMatchMake(token: matchCancellToken.Token);
+            bool isSuccess = await MatchMakeManager.Instance.CancelCurrentMatchMake();
             
-            startGame.gameObject.SetActive(false);
-            startMatchMake.gameObject.SetActive(true);
+            SwitchGUIState(SceneState.Standby);
         }
         /// <summary>
         /// Cancel matchmaking (Host delete and Guest leave the current lobby)
@@ -148,8 +163,7 @@ namespace  SynicSugar.Samples {
         public async void CanelMatchMakingAndReturnToLobby(){
             SwitchCancelButtonActive(false);
 
-            matchCancellToken = new CancellationTokenSource();
-            bool isSuccess = await MatchMakeManager.Instance.CancelCurrentMatchMake(true, matchCancellToken.Token);
+            bool isSuccess = await MatchMakeManager.Instance.CancelCurrentMatchMake(true);
             
             modeSelect.ChangeGameScene(GameModeSelect.GameScene.MainMenu.ToString());
         }
@@ -168,6 +182,19 @@ namespace  SynicSugar.Samples {
                 backtoMenu.gameObject.SetActive(isActivate);
             }
             closeLobby.gameObject.SetActive(isActivate);
+        }
+        
+        void GoGameScene(){
+            if(startGame != null){ //For ReadHeart and Chat
+                startGame.gameObject.SetActive(true);
+            }else{ //For Tank
+                modeSelect.ChangeGameScene(GameModeSelect.GameScene.Tank.ToString());
+            }
+        }
+        void SwitchGUIState(SceneState state){
+            startMatchMake.gameObject.SetActive(state == SceneState.Standby);
+            closeLobby.gameObject.SetActive(state == SceneState.ToGame);
+            startGame.gameObject.SetActive(state == SceneState.ToGame);
         }
         /// <summary>
         /// Is there a Lobby that should be reconnected?<br />
