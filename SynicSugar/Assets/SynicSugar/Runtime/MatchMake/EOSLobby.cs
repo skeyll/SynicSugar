@@ -13,8 +13,8 @@ namespace SynicSugar.MatchMake {
     internal class EOSLobby {
         Lobby CurrentLobby = new Lobby();
 
-        // Search
         bool waitingMatch;
+        bool waitLeave, canLeave;
         LobbySearch CurrentSearch;
         Dictionary<Lobby, LobbyDetails> SearchResults = new Dictionary<Lobby, LobbyDetails>();
         //User config
@@ -377,91 +377,6 @@ namespace SynicSugar.MatchMake {
             isMatchSuccess = true;
             waitingMatch = false;
         }
-        /// <summary>
-        /// Add scoketName and remove search attributes.
-        /// This process is the preparation for p2p connect and re-Connect. <br />
-        /// Use lobbyID to connect on the problem, so save lobbyID in local somewhere.
-        /// </summary>
-        /// <param name="attributes"></param>
-        /// <param name="token"></param>
-        /// <param name="callback"></param>
-        /// <returns></returns>
-        void SwitchLobbyAttribute(){
-            if (!CurrentLobby.isHost()){
-#if SYNICSUGAR_LOG
-                Debug.LogError("Change Lobby: This user isn't lobby owner.");
-#endif
-                return;
-            }
-
-            UpdateLobbyModificationOptions options = new UpdateLobbyModificationOptions();
-            options.LobbyId = CurrentLobby.LobbyId;
-            options.LocalUserId = EOSManager.Instance.GetProductUserId();
-
-            //Create modify handle
-            LobbyInterface lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();
-            ResultE result = lobbyInterface.UpdateLobbyModification(ref options, out LobbyModification lobbyHandle);
-
-            if (result != ResultE.Success){
-                Debug.LogErrorFormat("Change Lobby: Could not create lobby modification. Error code: {0}", result);
-                return;
-            }
-            //Change permission level
-            LobbyModificationSetPermissionLevelOptions permissionOptions = new LobbyModificationSetPermissionLevelOptions();
-            permissionOptions.PermissionLevel = LobbyPermissionLevel.Joinviapresence;
-            result = lobbyHandle.SetPermissionLevel(ref permissionOptions);
-            if (result != ResultE.Success){
-                Debug.LogErrorFormat("Change Lobby: can't switch permission level. Error code: {0}", result);
-                return;
-            }
-
-            // Set SocketName
-            string socket = !string.IsNullOrEmpty(socketName) ? socketName : EOSp2pExtenstions.GenerateRandomSocketName();
-            AttributeData socketAttribute = new AttributeData();
-            socketAttribute.Key = "socket";
-            socketAttribute.Value = new AttributeDataValue(){
-                AsUtf8 = socket
-            };
-            
-            LobbyModificationAddAttributeOptions addAttributeOptions = new LobbyModificationAddAttributeOptions();
-
-            addAttributeOptions.Attribute = socketAttribute;
-            addAttributeOptions.Visibility = LobbyAttributeVisibility.Public;
-
-            result = lobbyHandle.AddAttribute(ref addAttributeOptions);
-            if (result != ResultE.Success){
-                Debug.LogErrorFormat("Change Lobby: could not add socket name. Error code: {0}", result);
-                return;
-            }
-
-            // Set attribute to handle in local
-            foreach(var attribute in CurrentLobby.Attributes){
-                LobbyModificationRemoveAttributeOptions removeAttributeOptions = new LobbyModificationRemoveAttributeOptions();
-                removeAttributeOptions.Key = attribute.Key;
-
-                result = lobbyHandle.RemoveAttribute(ref removeAttributeOptions);
-                if (result != ResultE.Success){
-                    Debug.LogErrorFormat("Change Lobby: could not remove attribute. Error code: {0}", result);
-                    return;
-                }
-            }
-            //Change lobby attributes with handle
-            UpdateLobbyOptions updateOptions = new UpdateLobbyOptions();
-            updateOptions.LobbyModificationHandle = lobbyHandle; 
-
-            lobbyInterface.UpdateLobby(ref updateOptions, null, OnSwitchLobbyAttribute);
-        }
-        void OnSwitchLobbyAttribute(ref UpdateLobbyCallbackInfo info){
-            if (info.ResultCode != ResultE.Success){
-                Debug.LogErrorFormat("Modify Lobby: error code: {0}", info.ResultCode);
-                waitingMatch = false;
-                return;
-            }
-
-            OnLobbyUpdated(info.LobbyId);
-            isMatchSuccess = true;
-            waitingMatch = false;
-        }
 #endregion
 //Guest
 #region Search
@@ -808,6 +723,91 @@ namespace SynicSugar.MatchMake {
         }
 #endregion
 #region Modify
+        /// <summary>
+        /// Add scoketName and remove search attributes.
+        /// This process is the preparation for p2p connect and re-Connect. <br />
+        /// Use lobbyID to connect on the problem, so save lobbyID in local somewhere.
+        /// </summary>
+        /// <param name="attributes"></param>
+        /// <param name="token"></param>
+        /// <param name="callback"></param>
+        /// <returns></returns>
+        void SwitchLobbyAttribute(){
+            if (!CurrentLobby.isHost()){
+#if SYNICSUGAR_LOG
+                Debug.LogError("Change Lobby: This user isn't lobby owner.");
+#endif
+                return;
+            }
+
+            UpdateLobbyModificationOptions options = new UpdateLobbyModificationOptions();
+            options.LobbyId = CurrentLobby.LobbyId;
+            options.LocalUserId = EOSManager.Instance.GetProductUserId();
+
+            //Create modify handle
+            LobbyInterface lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();
+            ResultE result = lobbyInterface.UpdateLobbyModification(ref options, out LobbyModification lobbyHandle);
+
+            if (result != ResultE.Success){
+                Debug.LogErrorFormat("Change Lobby: Could not create lobby modification. Error code: {0}", result);
+                return;
+            }
+            //Change permission level
+            LobbyModificationSetPermissionLevelOptions permissionOptions = new LobbyModificationSetPermissionLevelOptions();
+            permissionOptions.PermissionLevel = LobbyPermissionLevel.Joinviapresence;
+            result = lobbyHandle.SetPermissionLevel(ref permissionOptions);
+            if (result != ResultE.Success){
+                Debug.LogErrorFormat("Change Lobby: can't switch permission level. Error code: {0}", result);
+                return;
+            }
+
+            // Set SocketName
+            string socket = !string.IsNullOrEmpty(socketName) ? socketName : EOSp2pExtenstions.GenerateRandomSocketName();
+            AttributeData socketAttribute = new AttributeData();
+            socketAttribute.Key = "socket";
+            socketAttribute.Value = new AttributeDataValue(){
+                AsUtf8 = socket
+            };
+            
+            LobbyModificationAddAttributeOptions addAttributeOptions = new LobbyModificationAddAttributeOptions();
+
+            addAttributeOptions.Attribute = socketAttribute;
+            addAttributeOptions.Visibility = LobbyAttributeVisibility.Public;
+
+            result = lobbyHandle.AddAttribute(ref addAttributeOptions);
+            if (result != ResultE.Success){
+                Debug.LogErrorFormat("Change Lobby: could not add socket name. Error code: {0}", result);
+                return;
+            }
+
+            // Set attribute to handle in local
+            foreach(var attribute in CurrentLobby.Attributes){
+                LobbyModificationRemoveAttributeOptions removeAttributeOptions = new LobbyModificationRemoveAttributeOptions();
+                removeAttributeOptions.Key = attribute.Key;
+
+                result = lobbyHandle.RemoveAttribute(ref removeAttributeOptions);
+                if (result != ResultE.Success){
+                    Debug.LogErrorFormat("Change Lobby: could not remove attribute. Error code: {0}", result);
+                    return;
+                }
+            }
+            //Change lobby attributes with handle
+            UpdateLobbyOptions updateOptions = new UpdateLobbyOptions();
+            updateOptions.LobbyModificationHandle = lobbyHandle; 
+
+            lobbyInterface.UpdateLobby(ref updateOptions, null, OnSwitchLobbyAttribute);
+        }
+        void OnSwitchLobbyAttribute(ref UpdateLobbyCallbackInfo info){
+            if (info.ResultCode != ResultE.Success){
+                Debug.LogErrorFormat("Modify Lobby: error code: {0}", info.ResultCode);
+                waitingMatch = false;
+                return;
+            }
+
+            OnLobbyUpdated(info.LobbyId);
+            isMatchSuccess = true;
+            waitingMatch = false;
+        }
         void OnLobbyUpdated(string lobbyId){
             if (!string.IsNullOrEmpty(lobbyId) && CurrentLobby.LobbyId == lobbyId){
                 CurrentLobby.InitFromLobbyHandle(lobbyId);
@@ -860,7 +860,6 @@ namespace SynicSugar.MatchMake {
     }
 #endregion
 #region Leave
-        bool waitLeave, canLeave;
         //SynicSugar does not expect user to be in more than one Lobby at the same time.
         //So when joining in a new Lobby, the user needs to exit an old one.
         //It is not necessary to synchronize in most situations and can add Forget().
