@@ -237,9 +237,10 @@ namespace SynicSugar.P2P {
     /// Prep for p2p connections.
     /// Call from the library after the MatchMake is established.
     /// </summary>
+    //* Maybe: Some processes in InitConnectConfig need time to complete and the Member list will be created after that end. Therefore, we will add Notify first to spent time.
     internal void OpenConnection(){
-        AcceptAllConenctions();
         AddNotifyPeerConnectionRequest();
+        AcceptAllConenctions();
     }
     //Reason: This order(Receiver, Connection, Que) is that if the RPC includes Rpc to reply, the connections are automatically re-started.
     /// <summary>
