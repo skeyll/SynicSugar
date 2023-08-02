@@ -42,10 +42,13 @@ namespace SynicSugar.MatchMake {
         /// <param name="saveFn">To save LobbyID. If null, save ID to local by PlayerPrefs</param>
         /// <returns>True on success. If false, EOS backend have something problem. So, when you call this process again, should wait for some time.</returns>
         internal async UniTask<bool> StartMatching(Lobby lobbyCondition, CancellationToken token){
+            //Start timer 
+            var timer = TimeoutTimer(token);
             //Serach
             MatchMakeManager.Instance.matchState.stopAdditionalInput?.Invoke();
             MatchMakeManager.Instance.UpdateStateDescription(MatchState.Search);
             bool canJoin = await JoinExistingLobby(lobbyCondition, token);
+
             if(canJoin){
                 // Wait for SocketName to use p2p connection
                 // Chagne these value via MamberStatusUpdate notification.
@@ -53,7 +56,7 @@ namespace SynicSugar.MatchMake {
                 waitingMatch = true;
                 MatchMakeManager.Instance.matchState.acceptCancel?.Invoke();
 
-                await UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token);
+                await UniTask.WhenAny(UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token), timer);
 
                 if(token.IsCancellationRequested){
                     throw new OperationCanceledException();
@@ -76,16 +79,13 @@ namespace SynicSugar.MatchMake {
                 isMatchSuccess = false;
                 waitingMatch = true;
                 MatchMakeManager.Instance.matchState.acceptCancel?.Invoke();
-                await UniTask.WhenAny(UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token), UniTask.Delay(timeoutMS, cancellationToken: token));
+                await UniTask.WhenAny(UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token), timer);
                 
                 //Matching cancel
                 if(token.IsCancellationRequested){
                     throw new OperationCanceledException();
                 }
-
-            #if SYNICSUGAR_LOG
-                    Debug.Log("StartMatching: MatchMake isnot canceled.");
-            #endif
+                
                 if(isMatchSuccess){
                     InitConnectConfig(ref p2pConfig.Instance.userIds);
                     p2pConnectorForOtherAssembly.Instance.OpenConnection();    
@@ -106,6 +106,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="token"></param>
         /// <returns>True on success. If false, EOS backend have something problem. So, when you call this process again, should wait for some time.</returns>
         internal async UniTask<bool> StartJustSearch(Lobby lobbyCondition, CancellationToken token){
+            var timer = TimeoutTimer(token);
             //Serach
             MatchMakeManager.Instance.matchState.stopAdditionalInput?.Invoke();
             MatchMakeManager.Instance.UpdateStateDescription(MatchState.Search);
@@ -116,7 +117,7 @@ namespace SynicSugar.MatchMake {
                 isMatchSuccess = false;
                 waitingMatch = true;
                 MatchMakeManager.Instance.matchState.acceptCancel?.Invoke();
-                await UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token);
+                await UniTask.WhenAny(UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token), timer);
 
                 //Matching cancel
                 if(token.IsCancellationRequested){
@@ -142,6 +143,8 @@ namespace SynicSugar.MatchMake {
         /// <param name="token"></param>
         /// <returns>True on success. If false, EOS backend have something problem. So, when you call this process again, should wait for some time.</returns>
         internal async UniTask<bool> StartJustCreate(Lobby lobbyCondition, CancellationToken token){
+            var timer = TimeoutTimer(token);
+
             MatchMakeManager.Instance.matchState.stopAdditionalInput?.Invoke();
             MatchMakeManager.Instance.UpdateStateDescription(MatchState.Wait);
             bool canCreate = await CreateLobby(lobbyCondition, token);
@@ -151,7 +154,7 @@ namespace SynicSugar.MatchMake {
                 isMatchSuccess = false;
                 waitingMatch = true;
                 MatchMakeManager.Instance.matchState.acceptCancel?.Invoke();
-                await UniTask.WhenAny(UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token), UniTask.Delay(timeoutMS, cancellationToken: token));
+                await UniTask.WhenAny(UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token), timer);
 
                 //Matching cancel
                 if(token.IsCancellationRequested){
@@ -203,6 +206,9 @@ namespace SynicSugar.MatchMake {
             p2pConfig.Instance.userIds.isJustReconnected = true;
             p2pConnectorForOtherAssembly.Instance.OpenConnection();
             return true;
+        }
+        async UniTask TimeoutTimer(CancellationToken token){
+            await UniTask.Delay(timeoutMS, cancellationToken: token);
         }
 //Host
 #region Create
