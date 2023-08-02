@@ -115,6 +115,7 @@ namespace  SynicSugar.Samples {
                 
                 if(!isSuccess){
                     EOSDebug.Instance.Log("MatchMaking Failed.");
+                    SwitchGUIState(SceneState.Standby);
                     return;
                 }
             }else{ //Sample for another way
@@ -124,10 +125,12 @@ namespace  SynicSugar.Samples {
 
                     if(!isSuccess){
                         EOSDebug.Instance.Log("Backend may have something problem.");
+                        SwitchGUIState(SceneState.Standby);
                         return;
                     }
                 }catch(OperationCanceledException){
                     EOSDebug.Instance.Log("Cancel MatchMaking");
+                    SwitchGUIState(SceneState.Standby);
                     return;
                 }
             }
@@ -195,6 +198,7 @@ namespace  SynicSugar.Samples {
             startMatchMake.gameObject.SetActive(state == SceneState.Standby);
             closeLobby.gameObject.SetActive(state == SceneState.ToGame);
             startGame.gameObject.SetActive(state == SceneState.ToGame);
+            backtoMenu.gameObject.SetActive(false);
         }
         /// <summary>
         /// Is there a Lobby that should be reconnected?<br />
