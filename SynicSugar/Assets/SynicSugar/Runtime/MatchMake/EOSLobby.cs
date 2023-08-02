@@ -209,6 +209,13 @@ namespace SynicSugar.MatchMake {
         }
         async UniTask TimeoutTimer(CancellationToken token){
             await UniTask.Delay(timeoutMS, cancellationToken: token);
+            if(waitingMatch && !waitLeave){
+                bool canLeave = await LeaveLobby(true, token);
+                Debug.Log("cancel with TimeOut");
+                if(canLeave){
+                    MatchMakeManager.Instance.matchingToken?.Cancel();
+                }
+            }
         }
 //Host
 #region Create

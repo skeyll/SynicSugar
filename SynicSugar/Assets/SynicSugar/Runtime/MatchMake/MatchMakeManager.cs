@@ -62,7 +62,7 @@ namespace SynicSugar.MatchMake {
         public AsyncLobbyIDMethod asyncLobbyIDMethod = new AsyncLobbyIDMethod();
     #endregion
         EOSLobby eosLobby;
-        CancellationTokenSource matchingToken;
+        internal CancellationTokenSource matchingToken;
         public MatchGUIState matchState = new MatchGUIState();
 
         /// <summary>
