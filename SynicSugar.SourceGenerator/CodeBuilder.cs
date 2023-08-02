@@ -246,7 +246,7 @@
 
         //Extenstions
         internal string GetFullName(string nameSpace, string name) {
-            if (string.IsNullOrEmpty(nameSpace)) {
+            if (string.IsNullOrEmpty(nameSpace) || nameSpace  == "<global namespace>") {
                 return name;
             }
             return $"{nameSpace}.{name}";
