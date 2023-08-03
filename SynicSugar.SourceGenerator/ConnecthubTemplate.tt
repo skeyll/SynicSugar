@@ -58,7 +58,10 @@ namespace SynicSugar.P2P {
         /// <param name="isForced">If True, force to stop and clear current packet queue. <br />
         /// If false, process current queue, then stop it.</param>
         public async UniTask PauseConnections(bool isForced = false, CancellationTokenSource cancelToken = default(CancellationTokenSource)){
-            await p2pConnectorForOtherAssembly.Instance.PauseConnections(isForced, cancelToken);
+            if(cancelToken == default(CancellationTokenSource)){
+                cancelToken = new CancellationTokenSource();
+            }
+            await p2pConnectorForOtherAssembly.Instance.PauseConnections(isForced, cancelToken.Token);
         }
         /// <summary>
         /// Prepare to receive packets in advance. If user sent a packet, it can also open connection to get packets without this.
@@ -74,6 +77,9 @@ namespace SynicSugar.P2P {
         /// To exit from lobby alone during a game(= not whole, only one battle). Usually use CloseSession().
         /// </summary>
         public async UniTask<bool> ExitSession(CancellationTokenSource cancelToken = default(CancellationTokenSource)){
+            if(cancelToken == default(CancellationTokenSource)){
+                cancelToken = new CancellationTokenSource();
+            }
             bool isSuccess = await p2pConnectorForOtherAssembly.Instance.ExitSession(cancelToken.Token);
             ClearReferenceDictionaries();
             return isSuccess;
@@ -83,6 +89,9 @@ namespace SynicSugar.P2P {
         /// Then, Host closees and Guest leaves the lobby.
         /// </summary>
         public async UniTask<bool> CloseSession(CancellationTokenSource cancelToken = default(CancellationTokenSource)){
+            if(cancelToken == default(CancellationTokenSource)){
+                cancelToken = new CancellationTokenSource();
+            }
             bool isSuccess = await p2pConnectorForOtherAssembly.Instance.CloseSession(cancelToken.Token);
             ClearReferenceDictionaries();
             return isSuccess;

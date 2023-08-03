@@ -73,23 +73,20 @@ namespace SynicSugar.P2P {
         /// <param name="isForced">If True, stop and clear current packet queue. </ br>
         /// If false, process current queue, then stop it.</param>
         /// <param name="token">For this task</param>
-        public async UniTask PauseConnections(bool isForced, CancellationTokenSource cancelToken){
+        public async UniTask PauseConnections(bool isForced, CancellationToken token){
             if(isForced){
                 ResetConnections();
                 return;
             }
             
             CloseConnection();
-            if(cancelToken == default(CancellationTokenSource)){
-                cancelToken = new CancellationTokenSource();
-            }
             
             GetPacketQueueInfoOptions options = new GetPacketQueueInfoOptions();
             PacketQueueInfo info = new PacketQueueInfo();
 
             while (info.IncomingPacketQueueCurrentPacketCount >= 0){
                 P2PHandle.GetPacketQueueInfo(ref options, out info);
-                await UniTask.Delay(receiverInterval, cancellationToken: cancelToken.Token);
+                await UniTask.Delay(receiverInterval, cancellationToken: token);
             }
 
             p2pToken.Cancel();
