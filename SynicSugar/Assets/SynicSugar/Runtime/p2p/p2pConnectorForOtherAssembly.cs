@@ -41,7 +41,7 @@ namespace SynicSugar.P2P {
             }}
         public SocketId SocketId { get; private set; }
 
-        ulong RequestNotifyId;
+        ulong RequestNotifyId, InterruptedNotify, EstablishedNotify;
         public CancellationTokenSource p2pToken;
         
         /// <summary>
@@ -238,6 +238,11 @@ namespace SynicSugar.P2P {
     internal void OpenConnection(){
         AddNotifyPeerConnectionRequest();
         AcceptAllConenctions();
+
+        if(p2pConfig.Instance.UseDisconnectedEarlyNotify){     
+            AddNotifyPeerConnectionInterrupted();
+            AddNotifyPeerConnectionEstablished();
+        }
     }
     //Reason: This order(Receiver, Connection, Que) is that if the RPC includes Rpc to reply, the connections are automatically re-started.
     /// <summary>
@@ -274,9 +279,77 @@ namespace SynicSugar.P2P {
         #endif
     }
 #endregion
+#region Early Disconnected Notify
+    void AddNotifyPeerConnectionInterrupted(){
+        if (InterruptedNotify == 0){
+            AddNotifyPeerConnectionInterruptedOptions options = new AddNotifyPeerConnectionInterruptedOptions(){
+                LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
+                SocketId = SocketId
+            };
+
+            InterruptedNotify = P2PHandle.AddNotifyPeerConnectionInterrupted(ref options, null, OnPeerConnectionInterruptedCallback);
+            
+            if (InterruptedNotify == 0){
+                Debug.Log("Connection Request: could not subscribe, bad notification id returned.");
+            }
+        }
+    }
+    // Call from SubscribeToConnectionRequest.
+    // This function will only be called if the connection has not been accepted yet.
+    void OnPeerConnectionInterruptedCallback(ref OnPeerConnectionInterruptedInfo data){
+        if (!(bool)data.SocketId?.SocketName.Equals(ScoketName)){
+            Debug.LogError("InterruptedCallback: unknown socket id. This peer should be no lobby member.");
+            return;
+        }
+        p2pInfo.Instance.ConnectionNotifier.OnEarlyDisconnected(new UserId(data.RemoteUserId), Reason.Interrupted);
+    #if SYNICSUGAR_LOG
+        Debug.Log("PeerConnectionInterrupted: Connection lost now.");
+    #endif
+    }
+    void RemoveNotifyPeerConnectionInterrupted(){
+        P2PHandle.RemoveNotifyPeerConnectionInterrupted(InterruptedNotify);
+        InterruptedNotify = 0;
+    }
+    void AddNotifyPeerConnectionEstablished(){
+        if (EstablishedNotify == 0){
+            AddNotifyPeerConnectionEstablishedOptions options = new AddNotifyPeerConnectionEstablishedOptions(){
+                LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
+                SocketId = SocketId
+            };
+
+            EstablishedNotify = P2PHandle.AddNotifyPeerConnectionEstablished(ref options, null, OnPeerConnectionEstablishedCallback);
+            
+            if (EstablishedNotify == 0){
+                Debug.Log("Connection Request: could not subscribe, bad notification id returned.");
+            }
+        }
+    }
+    // Call from SubscribeToConnectionRequest.
+    // This function will only be called if the connection has not been accepted yet.
+    void OnPeerConnectionEstablishedCallback(ref OnPeerConnectionEstablishedInfo data){
+        if (!(bool)data.SocketId?.SocketName.Equals(ScoketName)){
+            Debug.LogError("EstablishedCallback: unknown socket id. This peer should be no lobby member.");
+            return;
+        }
+        if(data.ConnectionType == ConnectionEstablishedType.Reconnection){
+            p2pInfo.Instance.ConnectionNotifier.OnRestored(new UserId(data.RemoteUserId));
+    #if SYNICSUGAR_LOG
+        Debug.Log("EstablishedCallback: Connection is restored.");
+    #endif
+        }
+    }
+    void RemoveNotifyPeerConnectionnEstablished(){
+        P2PHandle.RemoveNotifyPeerConnectionEstablished(EstablishedNotify);
+        EstablishedNotify = 0;
+    }
+#endregion
 #region Disconnect
         void CloseConnection (){
             RemoveNotifyPeerConnectionRequest();
+            if(p2pConfig.Instance.UseDisconnectedEarlyNotify){
+                RemoveNotifyPeerConnectionInterrupted();
+                RemoveNotifyPeerConnectionnEstablished();
+            }
 
             var closeOptions = new CloseConnectionsOptions(){
                 LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,

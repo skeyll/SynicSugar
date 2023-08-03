@@ -52,7 +52,7 @@ namespace SynicSugar.P2P {
         /// Cannot exceed the recive's fps of the app's. </ br>
         /// </summary>
         public GetPacketFrequency getPacketFrequency = GetPacketFrequency.PerSecond50;
-
+        public bool UseDisconnectedEarlyNotify;
     #region Obolete
         public enum ReceiveInterval{
             Large, Moderate, Small

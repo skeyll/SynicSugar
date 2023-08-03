@@ -136,6 +136,6 @@ namespace SynicSugar.P2P {
         }
     }
     public enum Reason {
-        Left, Disconnected, Unknown
+        Left, Disconnected, Interrupted, Unknown
     }
 }
