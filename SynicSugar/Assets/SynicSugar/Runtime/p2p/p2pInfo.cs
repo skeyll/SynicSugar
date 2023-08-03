@@ -23,20 +23,38 @@ namespace SynicSugar.P2P {
         }
 #endregion
         [HideInInspector] internal UserIds userIds = new UserIds();
+        public UserId LocalUserId => userIds.LocalUserId;
+        public List<UserId> RemoteUserIds => userIds.RemoteUserIds;
+
         public ConnectionNotifier ConnectionNotifier = new ConnectionNotifier();
         public Reason LastDisconnectedUsersReason => ConnectionNotifier.ClosedReason;
         public UserId LastDisconnectedUsersId => ConnectionNotifier.CloseUserId;
         public UserId LastConnectedUsersId => ConnectionNotifier.ConnectUserId;
-        public UserId LocalUserId => userIds.LocalUserId;
-        public List<UserId> RemoteUserIds => userIds.RemoteUserIds;
+
+        public SyncSnyicNotifier SyncSnyicNotifier = new SyncSnyicNotifier();
+        /// <summary>
+        /// Return True only once when this local user is received SyncSync from every other peers of the current session. </ br>
+        /// After return true, all variable for this flag is initialized and returns False again.
+        /// </summary>
+        /// <returns></returns>
+        public bool ReceivedAllSyncSynic => SyncSnyicNotifier.ReceivedAllSyncSynic();
+        public byte SyncSynicPhase => SyncSnyicNotifier.SyncSynicPhase;
         public bool AcceptHostSynic => userIds.isJustReconnected;
         
+        /// <summary>
+        /// Get member count in just current match.
+        /// </summary>
+        /// <param name="targetId"></param>
+        /// <returns></returns>
+        internal int GetCurrentLobbyMemberCount(){
+            return 1 + userIds.RemoteUserIds.Count; 
+        }
         /// <summary>
         /// Get all member count that is current and past participation member count instead of just current.
         /// </summary>
         /// <param name="targetId"></param>
         /// <returns></returns>
-        internal int CurrentLobbyAllMemberCount(){
+        internal int GetLobbyAllMemberCount(){
             return 1 + userIds.RemoteUserIds.Count + userIds.LeftUsers.Count; 
         }
     #region IsHost

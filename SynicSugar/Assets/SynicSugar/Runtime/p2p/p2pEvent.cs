@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace SynicSugar.P2P {
     public class ConnectionNotifier {
@@ -65,6 +66,34 @@ namespace SynicSugar.P2P {
             ConnectUserId = id;
             Connected?.Invoke();
         }
+    }
+    
+    public class SyncSnyicNotifier {
+        internal byte SyncSynicPhase;
+        bool _receivedAllSyncSynic;
+        List<string> ReceivedUsers = new List<string>();
+        internal bool ReceivedAllSyncSynic(){
+            if(_receivedAllSyncSynic){
+                //Init
+                ReceivedUsers.Clear();
+                _receivedAllSyncSynic = false;
+
+                return true;
+            }
+            return false;
+        }
+        //Access this from public method in p2pAssembleXXX.　We can move this to that for calling cast.
+        internal void UpdateReceivedList(string id){
+            if (!ReceivedUsers.Contains(id)){
+                ReceivedUsers.Add(id);
+            }
+
+            if(ReceivedUsers.Count == p2pInfo.Instance.GetCurrentLobbyMemberCount()){
+                _receivedAllSyncSynic = true;
+            }
+        }
+        
+
     }
 
 }
