@@ -93,10 +93,10 @@ namespace SynicSugarGenerator
                     "tFromBuffer();\r\n\r\n                if(recivePacket != null){\r\n                   " +
                     " ConnectHub.Instance.ConvertFromPacket(recivePacket);\r\n                }\r\n      " +
                     "          await UniTask.Delay(p2pConnectorForOtherAssembly.Instance.receiverInte" +
-                    "rval);\r\n\r\n                if(p2pConnectorForOtherAssembly.Instance.p2pToken.IsCa" +
-                    "ncellationRequested){\r\n                    break;\r\n                }\r\n          " +
-                    "  }\r\n        }\r\n\r\n        //(for elements)\r\n        public enum CHANNELLIST{\r\n  " +
-                    "          ");
+                    "rval);\r\n\r\n                if(p2pConnectorForOtherAssembly.Instance == null || p2" +
+                    "pConnectorForOtherAssembly.Instance.p2pToken.IsCancellationRequested){\r\n        " +
+                    "            break;\r\n                }\r\n            }\r\n        }\r\n\r\n        //(fo" +
+                    "r elements)\r\n        public enum CHANNELLIST{\r\n            ");
             
             #line 116 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(SyncList));
