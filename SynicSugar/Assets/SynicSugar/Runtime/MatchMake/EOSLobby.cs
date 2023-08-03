@@ -63,7 +63,7 @@ namespace SynicSugar.MatchMake {
                 }
 
                 if(isMatchSuccess){
-                    InitConnectConfig(ref p2pConfig.Instance.userIds);
+                    InitConnectConfig(ref p2pInfo.Instance.userIds);
                     p2pConnectorForOtherAssembly.Instance.OpenConnection();
                     await MatchMakeManager.Instance.OnSaveLobbyID();
                 }
@@ -87,7 +87,7 @@ namespace SynicSugar.MatchMake {
                 }
                 
                 if(isMatchSuccess){
-                    InitConnectConfig(ref p2pConfig.Instance.userIds);
+                    InitConnectConfig(ref p2pInfo.Instance.userIds);
                     p2pConnectorForOtherAssembly.Instance.OpenConnection();    
 
                     await MatchMakeManager.Instance.OnSaveLobbyID();
@@ -125,7 +125,7 @@ namespace SynicSugar.MatchMake {
                 }
 
                 if(isMatchSuccess){
-                    InitConnectConfig(ref p2pConfig.Instance.userIds);
+                    InitConnectConfig(ref p2pInfo.Instance.userIds);
                     p2pConnectorForOtherAssembly.Instance.OpenConnection();
                     
                     await MatchMakeManager.Instance.OnSaveLobbyID();
@@ -162,7 +162,7 @@ namespace SynicSugar.MatchMake {
                 }
 
                 if(isMatchSuccess){
-                    InitConnectConfig(ref p2pConfig.Instance.userIds);
+                    InitConnectConfig(ref p2pInfo.Instance.userIds);
                     p2pConnectorForOtherAssembly.Instance.OpenConnection();
                     await MatchMakeManager.Instance.OnSaveLobbyID();
                     return true;
@@ -202,8 +202,8 @@ namespace SynicSugar.MatchMake {
                 EOSManager.Instance.GetEOSLobbyInterface().RemoveNotifyLobbyMemberStatusReceived(handle);
             });
             //Prep Connection
-            InitConnectConfig(ref p2pConfig.Instance.userIds);
-            p2pConfig.Instance.userIds.isJustReconnected = true;
+            InitConnectConfig(ref p2pInfo.Instance.userIds);
+            p2pInfo.Instance.userIds.isJustReconnected = true;
             p2pConnectorForOtherAssembly.Instance.OpenConnection();
             return true;
         }
@@ -668,7 +668,7 @@ namespace SynicSugar.MatchMake {
             //In game
             // Hosts changed?
             if (data.CurrentStatus == LobbyMemberStatus.Promoted){
-                p2pConfig.Instance.userIds.HostUserId = new UserId(CurrentLobby.LobbyOwner);
+                p2pInfo.Instance.userIds.HostUserId = new UserId(CurrentLobby.LobbyOwner);
 
                 #if SYNICSUGAR_LOG
                     Debug.Log($"MemberStatusNotyfy: {data.TargetUserId} is promoted to host.");
@@ -676,21 +676,21 @@ namespace SynicSugar.MatchMake {
                 if(!CurrentLobby.isHost()){
                     //MEMO: Now, if user disconnect from Lobby and then change hosts, the user become newbie.
                     //Guest Don't need to hold user id 
-                    p2pConfig.Instance.userIds.LeftUsers = new List<UserId>();
+                    p2pInfo.Instance.userIds.LeftUsers = new List<UserId>();
                 }
             }else if(data.CurrentStatus == LobbyMemberStatus.Left) {
                 #if SYNICSUGAR_LOG
                     Debug.Log($"MemberStatusNotyfy: {data.TargetUserId} left from lobby.");
                 #endif
-                p2pConfig.Instance.userIds.RemoveUserId(data.TargetUserId);
+                p2pInfo.Instance.userIds.RemoveUserId(data.TargetUserId);
             }else if(data.CurrentStatus == LobbyMemberStatus.Disconnected){
                 #if SYNICSUGAR_LOG
                     Debug.Log($"MemberStatusNotyfy: {data.TargetUserId} diconnect from lobby.");
                 #endif
-                p2pConfig.Instance.userIds.MoveTargetUserIdToLefts(data.TargetUserId);
+                p2pInfo.Instance.userIds.MoveTargetUserIdToLefts(data.TargetUserId);
                 p2pInfo.Instance.ConnectionNotifier.OnDisconnected(new UserId(data.TargetUserId), Reason.Disconnected);
             }else if(data.CurrentStatus == LobbyMemberStatus.Joined){
-                p2pConfig.Instance.userIds.MoveTargetUserIdToRemoteUsersFromLeft(data.TargetUserId);
+                p2pInfo.Instance.userIds.MoveTargetUserIdToRemoteUsersFromLeft(data.TargetUserId);
                 p2pInfo.Instance.ConnectionNotifier.OnConnected(new UserId(data.TargetUserId));
             }
         }

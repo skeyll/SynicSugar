@@ -22,34 +22,44 @@ namespace SynicSugar.P2P {
             }
         }
 #endregion
+        [HideInInspector] internal UserIds userIds = new UserIds();
         public ConnectionNotifier ConnectionNotifier = new ConnectionNotifier();
         public Reason LastDisconnectedUsersReason => ConnectionNotifier.ClosedReason;
         public UserId LastDisconnectedUsersId => ConnectionNotifier.CloseUserId;
         public UserId LastConnectedUsersId => ConnectionNotifier.ConnectUserId;
-        public UserId LocalUserId => p2pConfig.Instance.userIds.LocalUserId;
-        public List<UserId> RemoteUserIds => p2pConfig.Instance.userIds.RemoteUserIds;
-        public bool AcceptHostSynic => p2pConfig.Instance.userIds.isJustReconnected;
+        public UserId LocalUserId => userIds.LocalUserId;
+        public List<UserId> RemoteUserIds => userIds.RemoteUserIds;
+        public bool AcceptHostSynic => userIds.isJustReconnected;
+        
+        /// <summary>
+        /// Get all member count that is current and past participation member count instead of just current.
+        /// </summary>
+        /// <param name="targetId"></param>
+        /// <returns></returns>
+        internal int CurrentLobbyAllMemberCount(){
+            return 1 + userIds.RemoteUserIds.Count + userIds.LeftUsers.Count; 
+        }
     #region IsHost
         /// <summary>
         /// Is this local user Game Host?
         /// </summary>
         /// <returns></returns>
         public bool IsHost (){
-            return p2pConfig.Instance.userIds.LocalUserId == p2pConfig.Instance.userIds.HostUserId;
+            return userIds.LocalUserId == userIds.HostUserId;
         }
         /// <summary>
         /// Is this user Game Host?
         /// </summary>
         /// <returns></returns>
         public bool IsHost (UserId targetId){
-            return targetId == p2pConfig.Instance.userIds.HostUserId;
+            return targetId == userIds.HostUserId;
         }
         /// <summary>
         /// Is this user Game Host?
         /// </summary>
         /// <returns></returns>
         public bool IsHost (string targetId){
-            return targetId == p2pConfig.Instance.userIds.HostUserId.ToString();
+            return targetId == userIds.HostUserId.ToString();
         }
     #endregion
     #region IsLocalUser
@@ -58,14 +68,14 @@ namespace SynicSugar.P2P {
         /// </summary>
         /// <returns></returns>
         public bool IsLoaclUser (UserId targetId){
-            return targetId == p2pConfig.Instance.userIds.LocalUserId;
+            return targetId == userIds.LocalUserId;
         }
         /// <summary>
         /// Is this user local user?
         /// </summary>
         /// <returns></returns>
         public bool IsLoaclUser (string targetId){
-            return targetId == p2pConfig.Instance.userIds.LocalUserId.ToString();
+            return targetId == userIds.LocalUserId.ToString();
         }
     #endregion
     }

@@ -136,13 +136,13 @@ namespace SynicSugar.P2P {
         public SugarPacket GetPacketFromBuffer(){
             //Set options
             ReceivePacketOptions options = new ReceivePacketOptions(){
-                LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
+                LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
                 MaxDataSizeBytes = 1170,
                 RequestedChannel = null
             };
             //Next packet size
             var getNextReceivedPacketSizeOptions = new GetNextReceivedPacketSizeOptions {
-                LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
+                LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
                 RequestedChannel = null
             };
 
@@ -168,11 +168,11 @@ namespace SynicSugar.P2P {
         /// </summary>
         void ClearPacketQueue(){
             ClearPacketQueueOptions options = new ClearPacketQueueOptions(){
-                LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
+                LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
                 SocketId = SocketId
             };
 
-            foreach(var id in p2pConfig.Instance.userIds.RemoteUserIds){
+            foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
                 options.RemoteUserId = id.AsEpic;
 
                 ResultE result = P2PHandle.ClearPacketQueue(ref options);
@@ -190,7 +190,7 @@ namespace SynicSugar.P2P {
         void AddNotifyPeerConnectionRequest(){
             if (RequestNotifyId == 0){
                 AddNotifyPeerConnectionRequestOptions options = new AddNotifyPeerConnectionRequestOptions(){
-                    LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
+                    LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
                     SocketId = SocketId
                 };
 
@@ -210,7 +210,7 @@ namespace SynicSugar.P2P {
             }
 
             AcceptConnectionOptions options = new AcceptConnectionOptions(){
-                LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
+                LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
                 RemoteUserId = data.RemoteUserId,
                 SocketId = SocketId
             };
@@ -258,11 +258,11 @@ namespace SynicSugar.P2P {
     /// </summary>
     void AcceptAllConenctions(){
         AcceptConnectionOptions options = new AcceptConnectionOptions(){
-                LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
+                LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
                 SocketId = SocketId
             };
         ResultE result = ResultE.Success;
-        foreach(var id in p2pConfig.Instance.userIds.RemoteUserIds){
+        foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
             options.RemoteUserId = id.AsEpic;
             result = P2PHandle.AcceptConnection(ref options);
 
@@ -283,7 +283,7 @@ namespace SynicSugar.P2P {
     void AddNotifyPeerConnectionInterrupted(){
         if (InterruptedNotify == 0){
             AddNotifyPeerConnectionInterruptedOptions options = new AddNotifyPeerConnectionInterruptedOptions(){
-                LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
+                LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
                 SocketId = SocketId
             };
 
@@ -313,7 +313,7 @@ namespace SynicSugar.P2P {
     void AddNotifyPeerConnectionEstablished(){
         if (EstablishedNotify == 0){
             AddNotifyPeerConnectionEstablishedOptions options = new AddNotifyPeerConnectionEstablishedOptions(){
-                LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
+                LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
                 SocketId = SocketId
             };
 
@@ -352,7 +352,7 @@ namespace SynicSugar.P2P {
             }
 
             var closeOptions = new CloseConnectionsOptions(){
-                LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
+                LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
                 SocketId = SocketId
             };
             ResultE result = P2PHandle.CloseConnections(ref closeOptions);
@@ -366,7 +366,7 @@ namespace SynicSugar.P2P {
         /// Change AcceptHostsSynic to false. Call from ConnectHub
         /// </summary>
         public void CloseHostSynic(){
-            p2pConfig.Instance.userIds.isJustReconnected = false;
+            p2pInfo.Instance.userIds.isJustReconnected = false;
         }
     }
 }

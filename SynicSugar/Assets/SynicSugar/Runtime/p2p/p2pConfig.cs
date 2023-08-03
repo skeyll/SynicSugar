@@ -20,7 +20,6 @@ namespace SynicSugar.P2P {
             }
         }
 #endregion
-        [HideInInspector] internal UserIds userIds = new UserIds();
         [Obsolete("p2pInfo.Instance.ConnectionNotifier is new one.")]
         public ConnectionNotifier ConnectionNotifier => p2pInfo.Instance.ConnectionNotifier;
         ///Options 
@@ -94,9 +93,9 @@ namespace SynicSugar.P2P {
         [Obsolete("This is old. You can use p2pConfig.Instance.XXX")]
         [HideInInspector] public UserIds userIds {
             get{
-                return p2pConfig.Instance.userIds;
+                return p2pInfo.Instance.userIds;
             } 
-            set { p2pConfig.Instance.userIds = value; }
+            set { p2pInfo.Instance.userIds = value; }
         }
         
         [Obsolete("This is old. You can use p2pConfig.Instance.XXX")]

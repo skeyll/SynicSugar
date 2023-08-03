@@ -50,15 +50,6 @@ namespace SynicSugar.P2P {
             LeftUsers.Remove(userId);
             RemoteUserIds.Add(userId);
         }
-        /// <summary>
-        /// Get all member count that is current and past participation member count instead of just current.
-        /// </summary>
-        /// <param name="targetId"></param>
-        /// <returns></returns>
-        internal int CurrentLobbyAllMemberCount(ProductUserId targetId){
-            return 1 + RemoteUserIds.Count + LeftUsers.Count; 
-        }
-
     }
     public struct UserId {
         #nullable enable
