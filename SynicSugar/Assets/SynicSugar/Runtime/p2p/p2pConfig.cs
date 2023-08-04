@@ -43,7 +43,7 @@ namespace SynicSugar.P2P {
         public PacketReliability packetReliability = PacketReliability.ReliableOrdered;
         
         public enum GetPacketFrequency {
-            PerSecondFPS, PerSecond100, PerSecond50, PerSecond25
+            PerSecondx3FPS, PerSecondFPS, PerSecond100, PerSecond50, PerSecond25
         }
         [Header("PacketReceiver's Frequency/per seconds *Never more than game FPS.")]
         /// <summary>
