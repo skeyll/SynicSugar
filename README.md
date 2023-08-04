@@ -2,7 +2,7 @@
 # SynicSugar
 ![https://github.com/skeyll/SynicSugar/blob/main/LICENSE](https://img.shields.io/github/license/skeyll/SynicSugar) ![Unity](https://img.shields.io/badge/Unity-2021.3%2B-blue) [![openupm](https://img.shields.io/npm/v/net.skeyll.synicsugar?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/net.skeyll.synicsugar/) 
 
-SynicSugar is Unity High-Level Network Library with EpicOnlineServices. The concept is the syntax sugar of netcode. The process is sonic by pre-generating and IL weaving codes for your project. SynicSugar will be optimized for small-party (action) game
+SynicSugar is Unity High-Level Network Library with EpicOnlineServices. The concept is the syntax sugar of netcode. The runtime process is sonic by pre-generating and IL weaving codes for your project. SynicSugar will be optimized for small-party (action) game
 
 For more detail is [https://skeyll.github.io/SynicSugar/](https://skeyll.github.io/SynicSugar/).
 
@@ -56,10 +56,7 @@ public partial class Player {
 - [Mono.Cecil](https://github.com/jbevain/cecil)
 
  SynicSugar uses Roslyn SourceGenerator supported after 2021.3. SourceGenerator generates almost all codes for p2p connect on compile automatically.  
- Large dependencies is for performance. SynicSugar is a full-mesh p2p. All peers connect with each other instead of 1-to-many like dedicated server and client-server model. If we want to sync data with 63 peer in a full-mesh, we need to send data 63 times. Individual connection is fast but the whole is costly. So the core needs faster.  
-
-## Warning 
- SynicSugar is still in development. This library is made for my game and will be developed with my game. Therefore, It may bugs and fewer features. And will have destructive changes. So, I currently recommend using [Mirror](https://github.com/MirrorNetworking/Mirror) with [EOSRelay](https://github.com/FakeByte/EpicOnlineTransport) for a product.
+ Large dependencies is for performance. SynicSugar is mesh-topology p2p. All peers connect with each other instead of 1-to-many like dedicated server and client-server model. If we want to sync data with 63 peer in a full-mesh, we need to send data 63 times. Individual connection is fast but the whole is costly. So the core needs faster.  
 
 ## Getting started
 ### 1.Install SynicSugar and depended librarys.  
