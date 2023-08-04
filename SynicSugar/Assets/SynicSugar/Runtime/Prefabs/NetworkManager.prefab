@@ -49,6 +49,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxSearchResult: 5
   hostsTimeoutSec: 180
+  TimeoutSec: 180
   lobbyIdSaveType: 1
   playerprefsSaveKey: eos_lobbyid
   customSaveLobbyID:

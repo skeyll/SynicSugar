@@ -81,11 +81,11 @@ namespace  SynicSugar.Samples {
 
             if(canReconnect){
                 EOSDebug.Instance.Log($"Success Recconect! LobbyID:{MatchMakeManager.Instance.GetCurrentLobbyID()}");
-                SwitchGUIState(SceneState.inMatchMake);
+                SwitchGUIState(SceneState.ToGame);
                 return;
             }
             EOSDebug.Instance.Log("Failer Re-Connect Lobby.");
-            startMatchMake.gameObject.SetActive(true);
+            SwitchGUIState(SceneState.Standby);
         }
     #endregion
     // #region MatchMaking
