@@ -41,7 +41,7 @@ namespace SynicSugar.P2P {
         public bool HasReceivedAllSyncSynic => SyncSnyicNotifier.ReceivedAllSyncSynic();
         public byte SyncedSynicPhase => SyncSnyicNotifier.LastSyncedPhase;
         public UserId LastSyncedUserId => SyncSnyicNotifier.LastSyncedUserId;
-        
+
         public bool AcceptHostSynic => userIds.isJustReconnected;
         
         /// <summary>
@@ -49,7 +49,7 @@ namespace SynicSugar.P2P {
         /// </summary>
         /// <param name="targetId"></param>
         /// <returns></returns>
-        internal int GetCurrentLobbyMemberCount(){
+        public int GetCurrentConnectionMemberCount(){
             return 1 + userIds.RemoteUserIds.Count; 
         }
         /// <summary>
@@ -57,7 +57,7 @@ namespace SynicSugar.P2P {
         /// </summary>
         /// <param name="targetId"></param>
         /// <returns></returns>
-        internal int GetLobbyAllMemberCount(){
+        public int GetAllConnectionMemberCount(){
             return 1 + userIds.RemoteUserIds.Count + userIds.LeftUsers.Count; 
         }
     #region IsHost

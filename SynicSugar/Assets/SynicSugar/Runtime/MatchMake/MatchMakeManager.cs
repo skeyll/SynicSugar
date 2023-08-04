@@ -68,6 +68,10 @@ namespace SynicSugar.MatchMake {
         internal CancellationTokenSource matchingToken;
         public MatchGUIState matchState = new MatchGUIState();
 
+        public int GetCurrentLobbyMemberCount(){
+           return eosLobby.GetCurrentLobbyMemberCount();
+        }
+
         /// <summary>
         /// Set State from script
         /// </summary>
@@ -277,7 +281,7 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         /// <returns>string LobbyID</returns>
         public string GetCurrentLobbyID(){
-            return eosLobby.GetCurenntLobbyID();
+            return eosLobby.GetCurrentLobbyID();
         }
         
         /// <summary>

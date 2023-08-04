@@ -103,7 +103,7 @@ namespace SynicSugar.P2P {
                 LastSyncedPhase = phase;
             }
 
-            if(ReceivedUsers.Count == p2pInfo.Instance.GetCurrentLobbyMemberCount()){
+            if(ReceivedUsers.Count == p2pInfo.Instance.GetCurrentConnectionMemberCount()){
                 _receivedAllSyncSynic = true;
             }
 

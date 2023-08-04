@@ -1012,8 +1012,12 @@ namespace SynicSugar.MatchMake {
         /// For library user to save ID.
         /// </summary>
         /// <returns></returns>
-        internal string GetCurenntLobbyID(){
+        internal string GetCurrentLobbyID(){
             return CurrentLobby.LobbyId;
+        }
+        
+        internal int GetCurrentLobbyMemberCount(){
+           return CurrentLobby.Members.Count;
         }
     }
 }
