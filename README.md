@@ -1,4 +1,4 @@
-# <p align="center">[<img src="https://github.com/skeyll/SynicSugar/blob/main/Resources/Logo_top.png" width="15%">](https://skeyll.github.io/SynicSugar/)</p>
+# [<img src="https://github.com/skeyll/SynicSugar/blob/main/Resources/Logo_doc.png" width="40%">](https://skeyll.github.io/SynicSugar/)
 # SynicSugar
 ![https://github.com/skeyll/SynicSugar/blob/main/LICENSE](https://img.shields.io/github/license/skeyll/SynicSugar) ![Unity](https://img.shields.io/badge/Unity-2021.3%2B-blue) [![openupm](https://img.shields.io/npm/v/net.skeyll.synicsugar?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/net.skeyll.synicsugar/) 
 
