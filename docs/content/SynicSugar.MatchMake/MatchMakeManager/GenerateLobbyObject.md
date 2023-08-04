@@ -1,6 +1,6 @@
 +++
 title = "GenerateLobbyObject"
-weight = 17
+weight = 19
 +++
 ## GenerateLobbyObject
 <small>*Namespace: SynicSugar.MatchMake* <br>
@@ -21,8 +21,8 @@ LobbyAttribute needs Key, Value, and ComparisonOption. The Key is string. Value 
 ```cs
 using SynicSugar.MatchMake;
 
-public class MatchMakeCondition : MonoBehaviour {
-    void Lobby GetLobbyCondition(){
+public class MatchMakeCondition {
+    Lobby GetLobbyCondition(){
         Lobby lobbyCondition = MatchMakeManager.GenerateLobbyObject(new string[3]{"RANK", "ASIA", "SEA"});
         
         LobbyAttribute attribute = new LobbyAttribute();
