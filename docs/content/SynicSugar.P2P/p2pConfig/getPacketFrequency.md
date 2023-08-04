@@ -11,13 +11,15 @@ public GetPacketFrequency getPacketFrequency
 
 ```cs
     public enum GetPacketFrequency {
-        PerSecondFPS, PerSecond100, PerSecond50, PerSecond25
+        PerSecondx3FPS, PerSecondFPS, PerSecond100, PerSecond50, PerSecond25
     }
 ```
 
 ### Description
 Interval [ms] to get packet from the receiving buffer.<br>
-Whichever we choose, this can't exceed the FPS of the game. Excessive receiving will result in a drop in FPS. **I recommend PerSecond50 for Mobile games.**
+Whichever we choose, this can't exceed the FPS of the game. Excessive receiving will result in a drop in FPS. **I recommend PerSecond50 for Mobile games.**<br>
+
+**PerSecondx3FPS is in experimental.** User gets packets up to three times per fps on PerSecondx3FPS.
 
 
 Can set this value on UnityEditor.
