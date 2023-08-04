@@ -72,6 +72,9 @@ namespace SynicSugar.MatchMake {
            return eosLobby.GetCurrentLobbyMemberCount();
         }
 
+        public int GetMaxLobbyMemberCount(){
+           return eosLobby.GetMaxLobbyMemberCount();
+        }
         /// <summary>
         /// Set State from script
         /// </summary>

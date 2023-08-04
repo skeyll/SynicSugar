@@ -1019,6 +1019,9 @@ namespace SynicSugar.MatchMake {
         internal int GetCurrentLobbyMemberCount(){
            return CurrentLobby.Members.Count;
         }
+        internal int GetMaxLobbyMemberCount(){
+           return (int)CurrentLobby.MaxLobbyMembers;
+        }
     }
 }
 
