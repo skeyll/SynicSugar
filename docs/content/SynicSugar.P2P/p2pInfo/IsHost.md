@@ -1,8 +1,8 @@
 +++
 title = "IsHost"
-weight = 5
+weight = 6
 +++
-## IsLoaclUser
+## IsHost
 <small>*Namespace: SynicSugar.P2P* <br>
 *Class: p2pInfo* </small>
 

@@ -20,7 +20,6 @@ namespace SynicSugar.P2P {
             }
         }
 #endregion
-        [HideInInspector] internal UserIds userIds = new UserIds();
         [Obsolete("p2pInfo.Instance.ConnectionNotifier is new one.")]
         public ConnectionNotifier ConnectionNotifier => p2pInfo.Instance.ConnectionNotifier;
         ///Options 
@@ -44,7 +43,7 @@ namespace SynicSugar.P2P {
         public PacketReliability packetReliability = PacketReliability.ReliableOrdered;
         
         public enum GetPacketFrequency {
-            PerSecondFPS, PerSecond100, PerSecond50, PerSecond25
+            PerSecondx3FPS, PerSecondFPS, PerSecond100, PerSecond50, PerSecond25
         }
         [Header("PacketReceiver's Frequency/per seconds *Never more than game FPS.")]
         /// <summary>
@@ -52,7 +51,7 @@ namespace SynicSugar.P2P {
         /// Cannot exceed the recive's fps of the app's. </ br>
         /// </summary>
         public GetPacketFrequency getPacketFrequency = GetPacketFrequency.PerSecond50;
-
+        public bool UseDisconnectedEarlyNotify;
     #region Obolete
         public enum ReceiveInterval{
             Large, Moderate, Small
@@ -94,9 +93,9 @@ namespace SynicSugar.P2P {
         [Obsolete("This is old. You can use p2pConfig.Instance.XXX")]
         [HideInInspector] public UserIds userIds {
             get{
-                return p2pConfig.Instance.userIds;
+                return p2pInfo.Instance.userIds;
             } 
-            set { p2pConfig.Instance.userIds = value; }
+            set { p2pInfo.Instance.userIds = value; }
         }
         
         [Obsolete("This is old. You can use p2pConfig.Instance.XXX")]

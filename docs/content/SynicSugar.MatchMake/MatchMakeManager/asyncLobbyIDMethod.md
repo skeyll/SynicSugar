@@ -2,7 +2,7 @@
 title = "asyncLobbyIDMethod"
 weight = 7
 +++
-## lobbyIDMethod
+## asyncLobbyIDMethod
 <small>*Namespace: SynicSugar.MatchMake* <br>
 *Class: MatchMakeManager* </small>
 
@@ -16,7 +16,7 @@ If we don't use **public void Register(Func&lt;UniTask&gt; save, Func&lt;UniTask
 
 
 Save is called when matchmaking is complete. In other words, Lobby is filled and the matchmaking is closed, then call Save.<br>
-Delete is called on the last of ConnectHub *[ExitSession](../../SynicSugar.P2P/ConnectHub/exitsession)* or *[CloseSession](../../SynicSugar.P2P/ConnectHub/exitsession)*. If user disconnect the session in any other way, SynicSugar determined that the user needs to be reconnected.<br>
+Delete is called on the last of ConnectHub *[ExitSession](../../SynicSugar.P2P/ConnectHub/exitsession)* or *[CloseSession](../../SynicSugar.P2P/ConnectHub/closesession)*. If user disconnect the session in any other way, SynicSugar determined that the user needs to be reconnected.<br>
 Return result after finish these async process.
 
 ### Properity

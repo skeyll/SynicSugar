@@ -11,7 +11,7 @@ public sealed class NetworkCommonsAttribute : Attribute
 
 ### Description
 NetworkCommons has no UserID. All peers can call a process in this class to synchronize with other peers.<br>
-If pass true, *ConnectHub* has GetUserInstance<T>() for the class.
+If pass true, ConnectHub has GetUserInstance<T>() for the class.
 
 
 ### Constructor

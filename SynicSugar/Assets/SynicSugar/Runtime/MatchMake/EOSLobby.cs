@@ -13,8 +13,8 @@ namespace SynicSugar.MatchMake {
     internal class EOSLobby {
         Lobby CurrentLobby = new Lobby();
 
-        // Search
         bool waitingMatch;
+        bool waitLeave, canLeave;
         LobbySearch CurrentSearch;
         Dictionary<Lobby, LobbyDetails> SearchResults = new Dictionary<Lobby, LobbyDetails>();
         //User config
@@ -42,10 +42,13 @@ namespace SynicSugar.MatchMake {
         /// <param name="saveFn">To save LobbyID. If null, save ID to local by PlayerPrefs</param>
         /// <returns>True on success. If false, EOS backend have something problem. So, when you call this process again, should wait for some time.</returns>
         internal async UniTask<bool> StartMatching(Lobby lobbyCondition, CancellationToken token){
+            //Start timer 
+            var timer = TimeoutTimer(token);
             //Serach
             MatchMakeManager.Instance.matchState.stopAdditionalInput?.Invoke();
             MatchMakeManager.Instance.UpdateStateDescription(MatchState.Search);
             bool canJoin = await JoinExistingLobby(lobbyCondition, token);
+
             if(canJoin){
                 // Wait for SocketName to use p2p connection
                 // Chagne these value via MamberStatusUpdate notification.
@@ -53,14 +56,14 @@ namespace SynicSugar.MatchMake {
                 waitingMatch = true;
                 MatchMakeManager.Instance.matchState.acceptCancel?.Invoke();
 
-                await UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token);
+                await UniTask.WhenAny(UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token), timer);
 
                 if(token.IsCancellationRequested){
                     throw new OperationCanceledException();
                 }
 
                 if(isMatchSuccess){
-                    InitConnectConfig(ref p2pConfig.Instance.userIds);
+                    InitConnectConfig(ref p2pInfo.Instance.userIds);
                     p2pConnectorForOtherAssembly.Instance.OpenConnection();
                     await MatchMakeManager.Instance.OnSaveLobbyID();
                 }
@@ -76,18 +79,15 @@ namespace SynicSugar.MatchMake {
                 isMatchSuccess = false;
                 waitingMatch = true;
                 MatchMakeManager.Instance.matchState.acceptCancel?.Invoke();
-                await UniTask.WhenAny(UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token), UniTask.Delay(timeoutMS, cancellationToken: token));
+                await UniTask.WhenAny(UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token), timer);
                 
                 //Matching cancel
                 if(token.IsCancellationRequested){
                     throw new OperationCanceledException();
                 }
-
-            #if SYNICSUGAR_LOG
-                    Debug.Log("StartMatching: MatchMake isnot canceled.");
-            #endif
+                
                 if(isMatchSuccess){
-                    InitConnectConfig(ref p2pConfig.Instance.userIds);
+                    InitConnectConfig(ref p2pInfo.Instance.userIds);
                     p2pConnectorForOtherAssembly.Instance.OpenConnection();    
 
                     await MatchMakeManager.Instance.OnSaveLobbyID();
@@ -106,6 +106,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="token"></param>
         /// <returns>True on success. If false, EOS backend have something problem. So, when you call this process again, should wait for some time.</returns>
         internal async UniTask<bool> StartJustSearch(Lobby lobbyCondition, CancellationToken token){
+            var timer = TimeoutTimer(token);
             //Serach
             MatchMakeManager.Instance.matchState.stopAdditionalInput?.Invoke();
             MatchMakeManager.Instance.UpdateStateDescription(MatchState.Search);
@@ -116,7 +117,7 @@ namespace SynicSugar.MatchMake {
                 isMatchSuccess = false;
                 waitingMatch = true;
                 MatchMakeManager.Instance.matchState.acceptCancel?.Invoke();
-                await UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token);
+                await UniTask.WhenAny(UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token), timer);
 
                 //Matching cancel
                 if(token.IsCancellationRequested){
@@ -124,7 +125,7 @@ namespace SynicSugar.MatchMake {
                 }
 
                 if(isMatchSuccess){
-                    InitConnectConfig(ref p2pConfig.Instance.userIds);
+                    InitConnectConfig(ref p2pInfo.Instance.userIds);
                     p2pConnectorForOtherAssembly.Instance.OpenConnection();
                     
                     await MatchMakeManager.Instance.OnSaveLobbyID();
@@ -142,6 +143,8 @@ namespace SynicSugar.MatchMake {
         /// <param name="token"></param>
         /// <returns>True on success. If false, EOS backend have something problem. So, when you call this process again, should wait for some time.</returns>
         internal async UniTask<bool> StartJustCreate(Lobby lobbyCondition, CancellationToken token){
+            var timer = TimeoutTimer(token);
+
             MatchMakeManager.Instance.matchState.stopAdditionalInput?.Invoke();
             MatchMakeManager.Instance.UpdateStateDescription(MatchState.Wait);
             bool canCreate = await CreateLobby(lobbyCondition, token);
@@ -151,7 +154,7 @@ namespace SynicSugar.MatchMake {
                 isMatchSuccess = false;
                 waitingMatch = true;
                 MatchMakeManager.Instance.matchState.acceptCancel?.Invoke();
-                await UniTask.WhenAny(UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token), UniTask.Delay(timeoutMS, cancellationToken: token));
+                await UniTask.WhenAny(UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token), timer);
 
                 //Matching cancel
                 if(token.IsCancellationRequested){
@@ -159,7 +162,7 @@ namespace SynicSugar.MatchMake {
                 }
 
                 if(isMatchSuccess){
-                    InitConnectConfig(ref p2pConfig.Instance.userIds);
+                    InitConnectConfig(ref p2pInfo.Instance.userIds);
                     p2pConnectorForOtherAssembly.Instance.OpenConnection();
                     await MatchMakeManager.Instance.OnSaveLobbyID();
                     return true;
@@ -199,10 +202,20 @@ namespace SynicSugar.MatchMake {
                 EOSManager.Instance.GetEOSLobbyInterface().RemoveNotifyLobbyMemberStatusReceived(handle);
             });
             //Prep Connection
-            InitConnectConfig(ref p2pConfig.Instance.userIds);
-            p2pConfig.Instance.userIds.isJustReconnected = true;
+            InitConnectConfig(ref p2pInfo.Instance.userIds);
+            p2pInfo.Instance.userIds.isJustReconnected = true;
             p2pConnectorForOtherAssembly.Instance.OpenConnection();
             return true;
+        }
+        async UniTask TimeoutTimer(CancellationToken token){
+            await UniTask.Delay(timeoutMS, cancellationToken: token);
+            if(waitingMatch && !waitLeave){
+                bool canLeave = await LeaveLobby(true, token);
+                Debug.Log("cancel with TimeOut");
+                if(canLeave){
+                    MatchMakeManager.Instance.matchingToken?.Cancel();
+                }
+            }
         }
 //Host
 #region Create
@@ -357,91 +370,6 @@ namespace SynicSugar.MatchMake {
                 waitingMatch = false;
                 Debug.LogErrorFormat("Modify Lobby: error code: {0}", info.ResultCode);
                 // callback?.Invoke(info.ResultCode);
-                return;
-            }
-
-            OnLobbyUpdated(info.LobbyId);
-            isMatchSuccess = true;
-            waitingMatch = false;
-        }
-        /// <summary>
-        /// Add scoketName and remove search attributes.
-        /// This process is the preparation for p2p connect and re-Connect. <br />
-        /// Use lobbyID to connect on the problem, so save lobbyID in local somewhere.
-        /// </summary>
-        /// <param name="attributes"></param>
-        /// <param name="token"></param>
-        /// <param name="callback"></param>
-        /// <returns></returns>
-        void SwitchLobbyAttribute(){
-            if (!CurrentLobby.isHost()){
-#if SYNICSUGAR_LOG
-                Debug.LogError("Change Lobby: This user isn't lobby owner.");
-#endif
-                return;
-            }
-
-            UpdateLobbyModificationOptions options = new UpdateLobbyModificationOptions();
-            options.LobbyId = CurrentLobby.LobbyId;
-            options.LocalUserId = EOSManager.Instance.GetProductUserId();
-
-            //Create modify handle
-            LobbyInterface lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();
-            ResultE result = lobbyInterface.UpdateLobbyModification(ref options, out LobbyModification lobbyHandle);
-
-            if (result != ResultE.Success){
-                Debug.LogErrorFormat("Change Lobby: Could not create lobby modification. Error code: {0}", result);
-                return;
-            }
-            //Change permission level
-            LobbyModificationSetPermissionLevelOptions permissionOptions = new LobbyModificationSetPermissionLevelOptions();
-            permissionOptions.PermissionLevel = LobbyPermissionLevel.Joinviapresence;
-            result = lobbyHandle.SetPermissionLevel(ref permissionOptions);
-            if (result != ResultE.Success){
-                Debug.LogErrorFormat("Change Lobby: can't switch permission level. Error code: {0}", result);
-                return;
-            }
-
-            // Set SocketName
-            string socket = !string.IsNullOrEmpty(socketName) ? socketName : EOSp2pExtenstions.GenerateRandomSocketName();
-            AttributeData socketAttribute = new AttributeData();
-            socketAttribute.Key = "socket";
-            socketAttribute.Value = new AttributeDataValue(){
-                AsUtf8 = socket
-            };
-            
-            LobbyModificationAddAttributeOptions addAttributeOptions = new LobbyModificationAddAttributeOptions();
-
-            addAttributeOptions.Attribute = socketAttribute;
-            addAttributeOptions.Visibility = LobbyAttributeVisibility.Public;
-
-            result = lobbyHandle.AddAttribute(ref addAttributeOptions);
-            if (result != ResultE.Success){
-                Debug.LogErrorFormat("Change Lobby: could not add socket name. Error code: {0}", result);
-                return;
-            }
-
-            // Set attribute to handle in local
-            foreach(var attribute in CurrentLobby.Attributes){
-                LobbyModificationRemoveAttributeOptions removeAttributeOptions = new LobbyModificationRemoveAttributeOptions();
-                removeAttributeOptions.Key = attribute.Key;
-
-                result = lobbyHandle.RemoveAttribute(ref removeAttributeOptions);
-                if (result != ResultE.Success){
-                    Debug.LogErrorFormat("Change Lobby: could not remove attribute. Error code: {0}", result);
-                    return;
-                }
-            }
-            //Change lobby attributes with handle
-            UpdateLobbyOptions updateOptions = new UpdateLobbyOptions();
-            updateOptions.LobbyModificationHandle = lobbyHandle; 
-
-            lobbyInterface.UpdateLobby(ref updateOptions, null, OnSwitchLobbyAttribute);
-        }
-        void OnSwitchLobbyAttribute(ref UpdateLobbyCallbackInfo info){
-            if (info.ResultCode != ResultE.Success){
-                Debug.LogErrorFormat("Modify Lobby: error code: {0}", info.ResultCode);
-                waitingMatch = false;
                 return;
             }
 
@@ -740,7 +668,7 @@ namespace SynicSugar.MatchMake {
             //In game
             // Hosts changed?
             if (data.CurrentStatus == LobbyMemberStatus.Promoted){
-                p2pConfig.Instance.userIds.HostUserId = new UserId(CurrentLobby.LobbyOwner);
+                p2pInfo.Instance.userIds.HostUserId = new UserId(CurrentLobby.LobbyOwner);
 
                 #if SYNICSUGAR_LOG
                     Debug.Log($"MemberStatusNotyfy: {data.TargetUserId} is promoted to host.");
@@ -748,21 +676,21 @@ namespace SynicSugar.MatchMake {
                 if(!CurrentLobby.isHost()){
                     //MEMO: Now, if user disconnect from Lobby and then change hosts, the user become newbie.
                     //Guest Don't need to hold user id 
-                    p2pConfig.Instance.userIds.LeftUsers = new List<UserId>();
+                    p2pInfo.Instance.userIds.LeftUsers = new List<UserId>();
                 }
             }else if(data.CurrentStatus == LobbyMemberStatus.Left) {
                 #if SYNICSUGAR_LOG
                     Debug.Log($"MemberStatusNotyfy: {data.TargetUserId} left from lobby.");
                 #endif
-                p2pConfig.Instance.userIds.RemoveUserId(data.TargetUserId);
+                p2pInfo.Instance.userIds.RemoveUserId(data.TargetUserId);
             }else if(data.CurrentStatus == LobbyMemberStatus.Disconnected){
                 #if SYNICSUGAR_LOG
                     Debug.Log($"MemberStatusNotyfy: {data.TargetUserId} diconnect from lobby.");
                 #endif
-                p2pConfig.Instance.userIds.MoveTargetUserIdToLefts(data.TargetUserId);
+                p2pInfo.Instance.userIds.MoveTargetUserIdToLefts(data.TargetUserId);
                 p2pInfo.Instance.ConnectionNotifier.OnDisconnected(new UserId(data.TargetUserId), Reason.Disconnected);
             }else if(data.CurrentStatus == LobbyMemberStatus.Joined){
-                p2pConfig.Instance.userIds.MoveTargetUserIdToRemoteUsersFromLeft(data.TargetUserId);
+                p2pInfo.Instance.userIds.MoveTargetUserIdToRemoteUsersFromLeft(data.TargetUserId);
                 p2pInfo.Instance.ConnectionNotifier.OnConnected(new UserId(data.TargetUserId));
             }
         }
@@ -795,6 +723,91 @@ namespace SynicSugar.MatchMake {
         }
 #endregion
 #region Modify
+        /// <summary>
+        /// Add scoketName and remove search attributes.
+        /// This process is the preparation for p2p connect and re-Connect. <br />
+        /// Use lobbyID to connect on the problem, so save lobbyID in local somewhere.
+        /// </summary>
+        /// <param name="attributes"></param>
+        /// <param name="token"></param>
+        /// <param name="callback"></param>
+        /// <returns></returns>
+        void SwitchLobbyAttribute(){
+            if (!CurrentLobby.isHost()){
+#if SYNICSUGAR_LOG
+                Debug.LogError("Change Lobby: This user isn't lobby owner.");
+#endif
+                return;
+            }
+
+            UpdateLobbyModificationOptions options = new UpdateLobbyModificationOptions();
+            options.LobbyId = CurrentLobby.LobbyId;
+            options.LocalUserId = EOSManager.Instance.GetProductUserId();
+
+            //Create modify handle
+            LobbyInterface lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();
+            ResultE result = lobbyInterface.UpdateLobbyModification(ref options, out LobbyModification lobbyHandle);
+
+            if (result != ResultE.Success){
+                Debug.LogErrorFormat("Change Lobby: Could not create lobby modification. Error code: {0}", result);
+                return;
+            }
+            //Change permission level
+            LobbyModificationSetPermissionLevelOptions permissionOptions = new LobbyModificationSetPermissionLevelOptions();
+            permissionOptions.PermissionLevel = LobbyPermissionLevel.Joinviapresence;
+            result = lobbyHandle.SetPermissionLevel(ref permissionOptions);
+            if (result != ResultE.Success){
+                Debug.LogErrorFormat("Change Lobby: can't switch permission level. Error code: {0}", result);
+                return;
+            }
+
+            // Set SocketName
+            string socket = !string.IsNullOrEmpty(socketName) ? socketName : EOSp2pExtenstions.GenerateRandomSocketName();
+            AttributeData socketAttribute = new AttributeData();
+            socketAttribute.Key = "socket";
+            socketAttribute.Value = new AttributeDataValue(){
+                AsUtf8 = socket
+            };
+            
+            LobbyModificationAddAttributeOptions addAttributeOptions = new LobbyModificationAddAttributeOptions();
+
+            addAttributeOptions.Attribute = socketAttribute;
+            addAttributeOptions.Visibility = LobbyAttributeVisibility.Public;
+
+            result = lobbyHandle.AddAttribute(ref addAttributeOptions);
+            if (result != ResultE.Success){
+                Debug.LogErrorFormat("Change Lobby: could not add socket name. Error code: {0}", result);
+                return;
+            }
+
+            // Set attribute to handle in local
+            foreach(var attribute in CurrentLobby.Attributes){
+                LobbyModificationRemoveAttributeOptions removeAttributeOptions = new LobbyModificationRemoveAttributeOptions();
+                removeAttributeOptions.Key = attribute.Key;
+
+                result = lobbyHandle.RemoveAttribute(ref removeAttributeOptions);
+                if (result != ResultE.Success){
+                    Debug.LogErrorFormat("Change Lobby: could not remove attribute. Error code: {0}", result);
+                    return;
+                }
+            }
+            //Change lobby attributes with handle
+            UpdateLobbyOptions updateOptions = new UpdateLobbyOptions();
+            updateOptions.LobbyModificationHandle = lobbyHandle; 
+
+            lobbyInterface.UpdateLobby(ref updateOptions, null, OnSwitchLobbyAttribute);
+        }
+        void OnSwitchLobbyAttribute(ref UpdateLobbyCallbackInfo info){
+            if (info.ResultCode != ResultE.Success){
+                Debug.LogErrorFormat("Modify Lobby: error code: {0}", info.ResultCode);
+                waitingMatch = false;
+                return;
+            }
+
+            OnLobbyUpdated(info.LobbyId);
+            isMatchSuccess = true;
+            waitingMatch = false;
+        }
         void OnLobbyUpdated(string lobbyId){
             if (!string.IsNullOrEmpty(lobbyId) && CurrentLobby.LobbyId == lobbyId){
                 CurrentLobby.InitFromLobbyHandle(lobbyId);
@@ -847,7 +860,6 @@ namespace SynicSugar.MatchMake {
     }
 #endregion
 #region Leave
-        bool waitLeave, canLeave;
         //SynicSugar does not expect user to be in more than one Lobby at the same time.
         //So when joining in a new Lobby, the user needs to exit an old one.
         //It is not necessary to synchronize in most situations and can add Forget().
@@ -1000,8 +1012,15 @@ namespace SynicSugar.MatchMake {
         /// For library user to save ID.
         /// </summary>
         /// <returns></returns>
-        internal string GetCurenntLobbyID(){
+        internal string GetCurrentLobbyID(){
             return CurrentLobby.LobbyId;
+        }
+        
+        internal int GetCurrentLobbyMemberCount(){
+           return CurrentLobby.Members.Count;
+        }
+        internal int GetMaxLobbyMemberCount(){
+           return (int)CurrentLobby.MaxLobbyMembers;
         }
     }
 }

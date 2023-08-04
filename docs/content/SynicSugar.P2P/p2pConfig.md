@@ -15,10 +15,7 @@ This is config class for p2p.<br>
 This script is Mono's Singleton attached to NetworkManager. To generate NetworkManager, right-click on the Hierarchy and click SynicSugar/NetworkManager.<br>
 NetworkManager has **DontDestroy**, so ConnectManager will not be destroyed by scene transitions. <br>
 
-If this is no longer needed, we call *[CancelCurrentMatchMake](../../SynicSugar.MatchMake/MatchMakeManager/cancelcurrentmatchmake)*, *[ConnectHub.Instance.CloseSession(CancellationTokenSource)](../../SynicSugar.P2P/ConnectHub/exitsession)* or *[ConnectHub.Instance.ExitSession(CancellationTokenSource)](../../SynicSugar.P2P/ConnectHub/exitsession)*.
-
-
-If this is no longer needed, we call *[CancelCurrentMatchMake](../../SynicSugar.MatchMake/MatchMakeManager/cancelcurrentmatchmake)*, *[ConnectHub.Instance.CloseSession(CancellationTokenSource)](../../SynicSugar.P2P/ConnectHub/exitsession)* or *[ConnectHub.Instance.ExitSession(CancellationTokenSource)](../../SynicSugar.P2P/ConnectHub/exitsession)*.
+If this is no longer needed, we call *[CancelCurrentMatchMake](../../SynicSugar.MatchMake/MatchMakeManager/cancelcurrentmatchmake)*, *[ConnectHub.Instance.CloseSession(CancellationTokenSource)](../../SynicSugar.P2P/ConnectHub/closesession)* or *[ConnectHub.Instance.ExitSession(CancellationTokenSource)](../../SynicSugar.P2P/ConnectHub/exitsession)*.
 
 
 ### Properity
@@ -28,6 +25,7 @@ If this is no longer needed, we call *[CancelCurrentMatchMake](../../SynicSugar.
 | [autoSyncInterval](../p2pConfig/autosyncinterval) | Sending new value interval of SyncVar |
 | [GetPacketFrequency](../p2pConfig/getpacketfrequency) | Frequency of calling PacketReceiver |
 | [packetReliability](../p2pConfig/packetreliability) | The delivery reliability of a packet |
+| [UseDisconnectedEarlyNotify](../p2pConfig/usedisconnectedearlynotify) | Notify at the step of a connection interrupted. |
 
 
 ```cs

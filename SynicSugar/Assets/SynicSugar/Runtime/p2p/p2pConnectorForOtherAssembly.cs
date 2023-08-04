@@ -41,7 +41,7 @@ namespace SynicSugar.P2P {
             }}
         public SocketId SocketId { get; private set; }
 
-        ulong RequestNotifyId;
+        ulong RequestNotifyId, InterruptedNotify, EstablishedNotify;
         public CancellationTokenSource p2pToken;
         
         /// <summary>
@@ -73,23 +73,20 @@ namespace SynicSugar.P2P {
         /// <param name="isForced">If True, stop and clear current packet queue. </ br>
         /// If false, process current queue, then stop it.</param>
         /// <param name="token">For this task</param>
-        public async UniTask PauseConnections(bool isForced, CancellationTokenSource cancelToken){
+        public async UniTask PauseConnections(bool isForced, CancellationToken token){
             if(isForced){
                 ResetConnections();
                 return;
             }
             
             CloseConnection();
-            if(cancelToken == default(CancellationTokenSource)){
-                cancelToken = new CancellationTokenSource();
-            }
             
             GetPacketQueueInfoOptions options = new GetPacketQueueInfoOptions();
             PacketQueueInfo info = new PacketQueueInfo();
 
             while (info.IncomingPacketQueueCurrentPacketCount >= 0){
                 P2PHandle.GetPacketQueueInfo(ref options, out info);
-                await UniTask.Delay(receiverInterval, cancellationToken: cancelToken.Token);
+                await UniTask.Delay(receiverInterval, cancellationToken: token);
             }
 
             p2pToken.Cancel();
@@ -99,8 +96,6 @@ namespace SynicSugar.P2P {
         /// </summary>
         public void RestartConnections(){
             OpenConnection();
-
-            p2pToken = new CancellationTokenSource();
         }
     #endregion
         /// <summary>
@@ -139,13 +134,13 @@ namespace SynicSugar.P2P {
         public SugarPacket GetPacketFromBuffer(){
             //Set options
             ReceivePacketOptions options = new ReceivePacketOptions(){
-                LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
+                LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
                 MaxDataSizeBytes = 1170,
                 RequestedChannel = null
             };
             //Next packet size
             var getNextReceivedPacketSizeOptions = new GetNextReceivedPacketSizeOptions {
-                LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
+                LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
                 RequestedChannel = null
             };
 
@@ -171,11 +166,11 @@ namespace SynicSugar.P2P {
         /// </summary>
         void ClearPacketQueue(){
             ClearPacketQueueOptions options = new ClearPacketQueueOptions(){
-                LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
+                LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
                 SocketId = SocketId
             };
 
-            foreach(var id in p2pConfig.Instance.userIds.RemoteUserIds){
+            foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
                 options.RemoteUserId = id.AsEpic;
 
                 ResultE result = P2PHandle.ClearPacketQueue(ref options);
@@ -193,7 +188,7 @@ namespace SynicSugar.P2P {
         void AddNotifyPeerConnectionRequest(){
             if (RequestNotifyId == 0){
                 AddNotifyPeerConnectionRequestOptions options = new AddNotifyPeerConnectionRequestOptions(){
-                    LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
+                    LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
                     SocketId = SocketId
                 };
 
@@ -213,7 +208,7 @@ namespace SynicSugar.P2P {
             }
 
             AcceptConnectionOptions options = new AcceptConnectionOptions(){
-                LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
+                LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
                 RemoteUserId = data.RemoteUserId,
                 SocketId = SocketId
             };
@@ -237,9 +232,16 @@ namespace SynicSugar.P2P {
     /// Prep for p2p connections.
     /// Call from the library after the MatchMake is established.
     /// </summary>
+    //* Maybe: Some processes in InitConnectConfig need time to complete and the Member list will be created after that end. Therefore, we will add Notify first to spent time.
     internal void OpenConnection(){
-        AcceptAllConenctions();
         AddNotifyPeerConnectionRequest();
+
+        if(p2pConfig.Instance.UseDisconnectedEarlyNotify){     
+            AddNotifyPeerConnectionInterrupted();
+            AddNotifyPeerConnectionEstablished();
+        }
+
+        AcceptAllConenctions();
     }
     //Reason: This order(Receiver, Connection, Que) is that if the RPC includes Rpc to reply, the connections are automatically re-started.
     /// <summary>
@@ -255,11 +257,11 @@ namespace SynicSugar.P2P {
     /// </summary>
     void AcceptAllConenctions(){
         AcceptConnectionOptions options = new AcceptConnectionOptions(){
-                LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
+                LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
                 SocketId = SocketId
             };
         ResultE result = ResultE.Success;
-        foreach(var id in p2pConfig.Instance.userIds.RemoteUserIds){
+        foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
             options.RemoteUserId = id.AsEpic;
             result = P2PHandle.AcceptConnection(ref options);
 
@@ -276,12 +278,80 @@ namespace SynicSugar.P2P {
         #endif
     }
 #endregion
+#region Early Disconnected Notify
+    void AddNotifyPeerConnectionInterrupted(){
+        if (InterruptedNotify == 0){
+            AddNotifyPeerConnectionInterruptedOptions options = new AddNotifyPeerConnectionInterruptedOptions(){
+                LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
+                SocketId = SocketId
+            };
+
+            InterruptedNotify = P2PHandle.AddNotifyPeerConnectionInterrupted(ref options, null, OnPeerConnectionInterruptedCallback);
+            
+            if (InterruptedNotify == 0){
+                Debug.Log("Connection Request: could not subscribe, bad notification id returned.");
+            }
+        }
+    }
+    // Call from SubscribeToConnectionRequest.
+    // This function will only be called if the connection has not been accepted yet.
+    void OnPeerConnectionInterruptedCallback(ref OnPeerConnectionInterruptedInfo data){
+        if (!(bool)data.SocketId?.SocketName.Equals(ScoketName)){
+            Debug.LogError("InterruptedCallback: unknown socket id. This peer should be no lobby member.");
+            return;
+        }
+        p2pInfo.Instance.ConnectionNotifier.OnEarlyDisconnected(new UserId(data.RemoteUserId), Reason.Interrupted);
+    #if SYNICSUGAR_LOG
+        Debug.Log("PeerConnectionInterrupted: Connection lost now.");
+    #endif
+    }
+    void RemoveNotifyPeerConnectionInterrupted(){
+        P2PHandle.RemoveNotifyPeerConnectionInterrupted(InterruptedNotify);
+        InterruptedNotify = 0;
+    }
+    void AddNotifyPeerConnectionEstablished(){
+        if (EstablishedNotify == 0){
+            AddNotifyPeerConnectionEstablishedOptions options = new AddNotifyPeerConnectionEstablishedOptions(){
+                LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
+                SocketId = SocketId
+            };
+
+            EstablishedNotify = P2PHandle.AddNotifyPeerConnectionEstablished(ref options, null, OnPeerConnectionEstablishedCallback);
+            
+            if (EstablishedNotify == 0){
+                Debug.Log("Connection Request: could not subscribe, bad notification id returned.");
+            }
+        }
+    }
+    // Call from SubscribeToConnectionRequest.
+    // This function will only be called if the connection has not been accepted yet.
+    void OnPeerConnectionEstablishedCallback(ref OnPeerConnectionEstablishedInfo data){
+        if (!(bool)data.SocketId?.SocketName.Equals(ScoketName)){
+            Debug.LogError("EstablishedCallback: unknown socket id. This peer should be no lobby member.");
+            return;
+        }
+        if(data.ConnectionType == ConnectionEstablishedType.Reconnection){
+            p2pInfo.Instance.ConnectionNotifier.OnRestored(new UserId(data.RemoteUserId));
+    #if SYNICSUGAR_LOG
+        Debug.Log("EstablishedCallback: Connection is restored.");
+    #endif
+        }
+    }
+    void RemoveNotifyPeerConnectionnEstablished(){
+        P2PHandle.RemoveNotifyPeerConnectionEstablished(EstablishedNotify);
+        EstablishedNotify = 0;
+    }
+#endregion
 #region Disconnect
         void CloseConnection (){
             RemoveNotifyPeerConnectionRequest();
+            if(p2pConfig.Instance.UseDisconnectedEarlyNotify){
+                RemoveNotifyPeerConnectionInterrupted();
+                RemoveNotifyPeerConnectionnEstablished();
+            }
 
             var closeOptions = new CloseConnectionsOptions(){
-                LocalUserId = p2pConfig.Instance.userIds.LocalUserId.AsEpic,
+                LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
                 SocketId = SocketId
             };
             ResultE result = P2PHandle.CloseConnections(ref closeOptions);
@@ -292,10 +362,18 @@ namespace SynicSugar.P2P {
         }
 #endregion
         /// <summary>
+        /// Update SyncedInfo, then Invoke SyncedSynic event.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="phase"></param> <summary>
+        public void UpdateSyncedState(string id, byte phase){
+            p2pInfo.Instance.SyncSnyicNotifier.UpdateSyncedState(id, phase);
+        }
+        /// <summary>
         /// Change AcceptHostsSynic to false. Call from ConnectHub
         /// </summary>
         public void CloseHostSynic(){
-            p2pConfig.Instance.userIds.isJustReconnected = false;
+            p2pInfo.Instance.userIds.isJustReconnected = false;
         }
     }
 }

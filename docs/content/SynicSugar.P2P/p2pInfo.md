@@ -24,10 +24,14 @@ If this is no longer needed, we call *[CancelCurrentMatchMake](../../SynicSugar.
 | [LocalUserId](../p2pInfo/localuserid) | UserID of this local |
 | [RemoteUserIds](../p2pInfo/remoteuserids) | UserIDs list of this connection |
 | [AcceptHostSynic](../p2pInfo/accepthostsynic) | If true, host overwrite this local user instnace |
-| [ConnectionNotifier](../p2pInfo/connectionnotifier) | Invoked when a user connects or disconnects |
+| [ConnectionNotifier](../p2pInfo/connectionnotifier) | Notifers when a user connects or disconnects |
 | LastDisconnectedUsersReason | The reason of last disconnected user |
 | LastDisconnectedUsersId | UserID of last Disconnected user |
 | LastConnectedUsersId | UserID of last Connected user |
+| [SyncSnyicNotifier](../p2pInfo/syncsnyicnotifier) | Notifers when a user get SynicVariables |
+| HasReceivedAllSyncSynic | Return True only once after local user receives all SyncSyncs |
+| SyncedSynicPhase | The SyncSynic phase of last received |
+| LastSyncedUserId | The UserID of last synced SyncSynic |
 
 
 ### Function
@@ -35,6 +39,8 @@ If this is no longer needed, we call *[CancelCurrentMatchMake](../../SynicSugar.
 |---|---|
 | [IsLoaclUser](../p2pInfo/isloacluser) | If target is LocalUser, return true |
 | [IsHost](../p2pInfo/ishost) | If local or target user is host, return true |
+| [GetCurrentConnectionMemberCount](../p2pInfo/getcurrentconnectionmembercount) | Get the current member count in connection |
+| [GetAllConnectionMemberCount](../p2pInfo/getallconnectionmembercount) | Get the all member's count of current and left connection |
 
 
 

@@ -21,9 +21,9 @@ If this is no longer needed, we call *[CancelCurrentMatchMake](../MatchMakeManag
 | API | description |
 |---|---|
 | [maxSearchResult](../MatchMakeManager/maxsearchresult)  | The amount of search results |
-| [hostsTimeoutSec](../MatchMakeManager/hoststimeoutsec) | Timeout seconds for Host to leave not filled lobby |
+| [TimeoutSec](../MatchMakeManager/timeoutsec) | Timeout seconds for user to exit no-filled lobby |
 | [lobbyIdSaveType](../MatchMakeManager/lobbyidsavetype) | The way to return to the disconnected lobby |
-| [playerprefsSaveKey](../MatchMakeManager/playerprefssavekey) | the key to save LobbyID |
+| [playerprefsSaveKey](../MatchMakeManager/playerprefssavekey) | The key to save LobbyID |
 | [customSaveLobbyID](../MatchMakeManager/customsavelobbyid) | UnityEvent to save LobbyID |
 | [customDeleteLobbyID](../MatchMakeManager/customdeletelobbyid) | UnityEvent to delete LobbyID |
 | [lobbyIDMethod](../MatchMakeManager/lobbyidmethod) | Actions to recconect Lobby |
@@ -42,6 +42,8 @@ If this is no longer needed, we call *[CancelCurrentMatchMake](../MatchMakeManag
 | [CancelCurrentMatchMake](../MatchMakeManager/cancelcurrentmatchmake) | Stop the current matchmaking |
 | [GetCurrentLobbyID](../MatchMakeManager/getcurrentlobbyid) | Get LobbyID that a user participating |
 | [GetReconnectLobbyID](../MatchMakeManager/getreconnectlobbyid) | Get LobbyID by Playerprefs |
+| [GetCurrentLobbyMemberCount](../MatchMakeManager/getcurrentlobbymembercount) | Get the current member count in Lobby |
+| [GetMaxLobbyMemberCount](../MatchMakeManager/getmaxlobbymembercount) | Get the current lobby's member limit |
 | [GenerateLobbyObject](../MatchMakeManager/generatelobbyobject) | Generate a lobby object for conditions |
 
 

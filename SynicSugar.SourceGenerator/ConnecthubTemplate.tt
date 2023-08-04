@@ -35,6 +35,10 @@ namespace SynicSugar.P2P {
         public void StartPacketReceiver(){
             if(p2pConnectorForOtherAssembly.Instance.p2pToken == null || p2pConnectorForOtherAssembly.Instance.p2pToken.IsCancellationRequested){
                 p2pConnectorForOtherAssembly.Instance.p2pToken = new CancellationTokenSource();
+                if(p2pConfig.Instance.getPacketFrequency == p2pConfig.GetPacketFrequency.PerSecondx3FPS){
+                    ReciveThreePackets().Forget();
+                    return;
+                }
                 RecivePacket().Forget();
             }
         }
@@ -58,14 +62,17 @@ namespace SynicSugar.P2P {
         /// <param name="isForced">If True, force to stop and clear current packet queue. <br />
         /// If false, process current queue, then stop it.</param>
         public async UniTask PauseConnections(bool isForced = false, CancellationTokenSource cancelToken = default(CancellationTokenSource)){
-            await p2pConnectorForOtherAssembly.Instance.PauseConnections(isForced, cancelToken);
+            if(cancelToken == default(CancellationTokenSource)){
+                cancelToken = new CancellationTokenSource();
+            }
+            await p2pConnectorForOtherAssembly.Instance.PauseConnections(isForced, cancelToken.Token);
         }
         /// <summary>
         /// Prepare to receive packets in advance. If user sent a packet, it can also open connection to get packets without this.
         /// </summary>
         public void RestartConnections(){
             p2pConnectorForOtherAssembly.Instance.RestartConnections();
-            RecivePacket().Forget();
+            StartPacketReceiver();
         }
         
         /// <summary>
@@ -74,6 +81,9 @@ namespace SynicSugar.P2P {
         /// To exit from lobby alone during a game(= not whole, only one battle). Usually use CloseSession().
         /// </summary>
         public async UniTask<bool> ExitSession(CancellationTokenSource cancelToken = default(CancellationTokenSource)){
+            if(cancelToken == default(CancellationTokenSource)){
+                cancelToken = new CancellationTokenSource();
+            }
             bool isSuccess = await p2pConnectorForOtherAssembly.Instance.ExitSession(cancelToken.Token);
             ClearReferenceDictionaries();
             return isSuccess;
@@ -83,6 +93,9 @@ namespace SynicSugar.P2P {
         /// Then, Host closees and Guest leaves the lobby.
         /// </summary>
         public async UniTask<bool> CloseSession(CancellationTokenSource cancelToken = default(CancellationTokenSource)){
+            if(cancelToken == default(CancellationTokenSource)){
+                cancelToken = new CancellationTokenSource();
+            }
             bool isSuccess = await p2pConnectorForOtherAssembly.Instance.CloseSession(cancelToken.Token);
             ClearReferenceDictionaries();
             return isSuccess;
@@ -96,7 +109,33 @@ namespace SynicSugar.P2P {
                 }
                 await UniTask.Delay(p2pConnectorForOtherAssembly.Instance.receiverInterval);
 
-                if(p2pConnectorForOtherAssembly.Instance.p2pToken.IsCancellationRequested){
+                if(p2pConnectorForOtherAssembly.Instance == null || p2pConnectorForOtherAssembly.Instance.p2pToken.IsCancellationRequested){
+                    break;
+                }
+            }
+        }
+        
+        async UniTask ReciveThreePackets(){
+            while(!p2pConnectorForOtherAssembly.Instance.p2pToken.IsCancellationRequested){
+                //1st
+                SugarPacket recivePacket = p2pConnectorForOtherAssembly.Instance.GetPacketFromBuffer();
+                if(recivePacket != null){
+                    ConnectHub.Instance.ConvertFromPacket(recivePacket);
+                    //2nd
+                    recivePacket = p2pConnectorForOtherAssembly.Instance.GetPacketFromBuffer();
+                    if(recivePacket != null){
+                        ConnectHub.Instance.ConvertFromPacket(recivePacket);
+                        //3rd
+                        recivePacket = p2pConnectorForOtherAssembly.Instance.GetPacketFromBuffer();
+                        if(recivePacket != null){
+                            ConnectHub.Instance.ConvertFromPacket(recivePacket);
+                        }
+                    }
+                }
+
+                await UniTask.Yield(PlayerLoopTiming.Update);
+
+                if(p2pConnectorForOtherAssembly.Instance == null || p2pConnectorForOtherAssembly.Instance.p2pToken.IsCancellationRequested){
                     break;
                 }
             }
@@ -147,6 +186,9 @@ namespace SynicSugar.P2P {
                         return;
                     }
                     SyncedSynic(packet.UserID);
+
+                    p2pConnectorForOtherAssembly.Instance.UpdateSyncedState(packet.UserID, packetInfo[packet.UserID].phase);
+
                     //Init
                     buffer.Remove(packet.UserID);
                     packetInfo.Remove(packet.UserID);
@@ -155,6 +197,7 @@ namespace SynicSugar.P2P {
                     if(p2pInfo.Instance.IsLoaclUser(packet.UserID)){
                         p2pConnectorForOtherAssembly.Instance.CloseHostSynic();
                     }
+                    
                 return;
             }
         }

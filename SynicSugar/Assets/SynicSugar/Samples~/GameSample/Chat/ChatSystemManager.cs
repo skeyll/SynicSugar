@@ -1,7 +1,6 @@
 using SynicSugar.P2P;
 using UnityEngine;
 using UnityEngine.UI;
-
 namespace SynicSugar.Samples {
     public partial class ChatSystemManager : MonoBehaviour {
         [SerializeField] GameObject matchmakeCanvas, chatCanvas;
@@ -28,9 +27,9 @@ namespace SynicSugar.Samples {
             
         }
         void OnConnected(){
-            chatText.text += $"{p2pInfo.Instance.LastDisconnectedUsersId} Join {System.Environment.NewLine}";
+            chatText.text += $"{p2pInfo.Instance.LastConnectedUsersId} Join {System.Environment.NewLine}";
             //Send local data
-            ConnectHub.Instance.SyncSynic(p2pInfo.Instance.LastDisconnectedUsersId, 0, false, true);
+            ConnectHub.Instance.SyncSynic(p2pInfo.Instance.LastConnectedUsersId, 0, false, true);
         }
     }
 }

@@ -1,6 +1,6 @@
 +++
 title = "GenerateLobbyObject"
-weight = 17
+weight = 19
 +++
 ## GenerateLobbyObject
 <small>*Namespace: SynicSugar.MatchMake* <br>
@@ -15,14 +15,14 @@ Create a Lobby object for search and hosting conditions in local. Generate Lobby
 args bucket is important condition like game-mode, region, map.<br>
 player is 2-64.
 
-LobbyAttribute needs Key, Value, and ComparisonOption. The Key is string. Value can be bool, int, double, and string. ComparisonOption's detail is [EOS document](https://dev.epicgames.com/docs/en-US/game-services/lobbies#comparison-operators).
+LobbyAttribute needs Key, Value, and ComparisonOption. The Key is string. Value can be bool, int, double, and string. ComparisonOption's detail is *[EOS document](https://dev.epicgames.com/docs/en-US/game-services/lobbies#comparison-operators)*.
 
 
 ```cs
 using SynicSugar.MatchMake;
 
-public class MatchMakeCondition : MonoBehaviour {
-    void Lobby GetLobbyCondition(){
+public class MatchMakeCondition {
+    Lobby GetLobbyCondition(){
         Lobby lobbyCondition = MatchMakeManager.GenerateLobbyObject(new string[3]{"RANK", "ASIA", "SEA"});
         
         LobbyAttribute attribute = new LobbyAttribute();

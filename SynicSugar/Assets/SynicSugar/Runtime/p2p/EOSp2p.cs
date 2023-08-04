@@ -28,7 +28,7 @@ namespace SynicSugar.P2P {
             };
 
             ResultE result;
-            foreach(var id in p2pConfig.Instance.userIds.RemoteUserIds){
+            foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
                 options.RemoteUserId = id.AsEpic;
                 result = p2pConnectorForOtherAssembly.Instance.P2PHandle.SendPacket(ref options);
 
@@ -136,6 +136,6 @@ namespace SynicSugar.P2P {
         }
     }
     public enum Reason {
-        Left, Disconnected, Unknown
+        Left, Disconnected, Interrupted, Unknown
     }
 }

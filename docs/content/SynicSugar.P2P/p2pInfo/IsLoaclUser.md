@@ -1,6 +1,6 @@
 +++
 title = "IsLoaclUser"
-weight = 4
+weight = 5
 +++
 ## IsLoaclUser
 <small>*Namespace: SynicSugar.P2P* <br>

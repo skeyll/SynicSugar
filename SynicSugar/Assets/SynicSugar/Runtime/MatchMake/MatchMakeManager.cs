@@ -17,7 +17,7 @@ namespace SynicSugar.MatchMake {
             Instance = this;
             DontDestroyOnLoad(this);
 
-            eosLobby = new EOSLobby(maxSearchResult, hostsTimeoutSec);
+            eosLobby = new EOSLobby(maxSearchResult, TimeoutSec);
 
             if(lobbyIdSaveType == RecconectLobbyIdSaveType.CustomMethod){
                 if(customSaveLobbyID != null && customDeleteLobbyID != null){
@@ -38,7 +38,10 @@ namespace SynicSugar.MatchMake {
 #endregion
         //Option
         public uint maxSearchResult = 5;
-        public int hostsTimeoutSec = 180;
+        
+        [HideInInspector] public int hostsTimeoutSec = 180;
+        [Range(20f, 600f)]
+        public int TimeoutSec = 180;
     #region TODO: Change this to Enum and display only one field for the selected way on UnityEditor.
         public enum RecconectLobbyIdSaveType {
             NoReconnection, Playerprefs, CustomMethod, AsyncCustomMethod
@@ -62,9 +65,16 @@ namespace SynicSugar.MatchMake {
         public AsyncLobbyIDMethod asyncLobbyIDMethod = new AsyncLobbyIDMethod();
     #endregion
         EOSLobby eosLobby;
-        CancellationTokenSource matchingToken;
+        internal CancellationTokenSource matchingToken;
         public MatchGUIState matchState = new MatchGUIState();
 
+        public int GetCurrentLobbyMemberCount(){
+           return eosLobby.GetCurrentLobbyMemberCount();
+        }
+
+        public int GetMaxLobbyMemberCount(){
+           return eosLobby.GetMaxLobbyMemberCount();
+        }
         /// <summary>
         /// Set State from script
         /// </summary>
@@ -274,7 +284,7 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         /// <returns>string LobbyID</returns>
         public string GetCurrentLobbyID(){
-            return eosLobby.GetCurenntLobbyID();
+            return eosLobby.GetCurrentLobbyID();
         }
         
         /// <summary>

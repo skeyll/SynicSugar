@@ -2,7 +2,7 @@
 title = "GetInstance"
 weight = 10
 +++
-## GetUserInstance
+## GetInstance
 <small>*Namespace: SynicSugar.P2P* <br>
 *Class: ConnectHub* </small>
 

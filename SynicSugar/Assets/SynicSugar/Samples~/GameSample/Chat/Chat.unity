@@ -639,6 +639,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1127570235843273856, guid: e18422c96d27f49489abe8b774c3a6b9, type: 3}
+      propertyPath: hostsTimeoutSec
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 1535193180786485604, guid: e18422c96d27f49489abe8b774c3a6b9, type: 3}
       propertyPath: m_RootOrder
       value: 5
