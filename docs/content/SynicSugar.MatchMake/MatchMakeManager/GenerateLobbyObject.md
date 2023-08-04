@@ -15,7 +15,7 @@ Create a Lobby object for search and hosting conditions in local. Generate Lobby
 args bucket is important condition like game-mode, region, map.<br>
 player is 2-64.
 
-LobbyAttribute needs Key, Value, and ComparisonOption. The Key is string. Value can be bool, int, double, and string. ComparisonOption's detail is [EOS document](https://dev.epicgames.com/docs/en-US/game-services/lobbies#comparison-operators).
+LobbyAttribute needs Key, Value, and ComparisonOption. The Key is string. Value can be bool, int, double, and string. ComparisonOption's detail is *[EOS document](https://dev.epicgames.com/docs/en-US/game-services/lobbies#comparison-operators)*.
 
 
 ```cs
