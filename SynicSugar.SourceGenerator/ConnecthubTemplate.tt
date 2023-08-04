@@ -156,6 +156,9 @@ namespace SynicSugar.P2P {
                         return;
                     }
                     SyncedSynic(packet.UserID);
+
+                    p2pConnectorForOtherAssembly.Instance.UpdateSyncedState(packet.UserID, packetInfo[packet.UserID].phase);
+
                     //Init
                     buffer.Remove(packet.UserID);
                     packetInfo.Remove(packet.UserID);
@@ -164,6 +167,7 @@ namespace SynicSugar.P2P {
                     if(p2pInfo.Instance.IsLoaclUser(packet.UserID)){
                         p2pConnectorForOtherAssembly.Instance.CloseHostSynic();
                     }
+                    
                 return;
             }
         }

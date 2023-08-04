@@ -175,6 +175,9 @@ namespace SynicSugarGenerator
                         return;
                     }
                     SyncedSynic(packet.UserID);
+
+                    p2pConnectorForOtherAssembly.Instance.UpdateSyncedState(packet.UserID, packetInfo[packet.UserID].phase);
+
                     //Init
                     buffer.Remove(packet.UserID);
                     packetInfo.Remove(packet.UserID);
@@ -183,13 +186,14 @@ namespace SynicSugarGenerator
                     if(p2pInfo.Instance.IsLoaclUser(packet.UserID)){
                         p2pConnectorForOtherAssembly.Instance.CloseHostSynic();
                     }
+                    
                 return;
             }
         }
 
         ");
             
-            #line 171 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 175 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
  if (needSyncSynic) { 
             
             #line default
@@ -219,14 +223,14 @@ namespace SynicSugarGenerator
                     "oArray(), targetId, syncedPhase, syncSinglePhase, false);\r\n        }\r\n\r\n        " +
                     "");
             
-            #line 202 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 206 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GenerateSynicContainer));
             
             #line default
             #line hidden
             this.Write("\r\n        ");
             
-            #line 203 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 207 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
  } 
             
             #line default
@@ -266,7 +270,7 @@ namespace SynicSugarGenerator
                     "    bool syncSinglePhase = packetInfo[overwriterUserId].syncSinglePhase;\r\n\r\n    " +
                     "        switch(phase){");
             
-            #line 255 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 259 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(SyncedInvoker));
             
             #line default
@@ -274,7 +278,7 @@ namespace SynicSugarGenerator
             this.Write("\r\n                default:\r\n                goto case 9;\r\n            }\r\n        " +
                     "}\r\n        ");
             
-            #line 260 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 264 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(SyncedItems));
             
             #line default

@@ -69,7 +69,20 @@ namespace SynicSugar.P2P {
     }
     
     public class SyncSnyicNotifier {
-        internal byte SyncSynicPhase;
+        /// <summary>
+        /// Invoke when Synic variables is synced.
+        /// </summary>
+        public event Action SyncedSynic;
+        
+        public void Register(Action syncedSynic){
+            SyncedSynic += syncedSynic;
+        }
+        internal void Clear(){
+            SyncedSynic = null;
+        }
+
+        internal UserId LastSyncedUserId { get; private set; }
+        internal byte LastSyncedPhase { get; private set; }
         bool _receivedAllSyncSynic;
         List<string> ReceivedUsers = new List<string>();
         internal bool ReceivedAllSyncSynic(){
@@ -83,17 +96,18 @@ namespace SynicSugar.P2P {
             return false;
         }
         //Access this from public method in p2pAssembleXXX.　We can move this to that for calling cast.
-        internal void UpdateReceivedList(string id){
+        internal void UpdateSyncedState(string id, byte phase){
             if (!ReceivedUsers.Contains(id)){
                 ReceivedUsers.Add(id);
+                LastSyncedUserId = new UserId(id);
+                LastSyncedPhase = phase;
             }
 
             if(ReceivedUsers.Count == p2pInfo.Instance.GetCurrentLobbyMemberCount()){
                 _receivedAllSyncSynic = true;
             }
+
+            SyncedSynic?.Invoke();
         }
-        
-
     }
-
 }

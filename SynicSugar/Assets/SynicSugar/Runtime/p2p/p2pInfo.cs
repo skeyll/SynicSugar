@@ -17,6 +17,7 @@ namespace SynicSugar.P2P {
         void OnDestroy() {
             if( Instance == this ) {
                 ConnectionNotifier.Clear();
+                SyncSnyicNotifier.Clear();
 
                 Instance = null;
             }
@@ -37,8 +38,10 @@ namespace SynicSugar.P2P {
         /// After return true, all variable for this flag is initialized and returns False again.
         /// </summary>
         /// <returns></returns>
-        public bool ReceivedAllSyncSynic => SyncSnyicNotifier.ReceivedAllSyncSynic();
-        public byte SyncSynicPhase => SyncSnyicNotifier.SyncSynicPhase;
+        public bool HasReceivedAllSyncSynic => SyncSnyicNotifier.ReceivedAllSyncSynic();
+        public byte SyncedSynicPhase => SyncSnyicNotifier.LastSyncedPhase;
+        public UserId LastSyncedUserId => SyncSnyicNotifier.LastSyncedUserId;
+        
         public bool AcceptHostSynic => userIds.isJustReconnected;
         
         /// <summary>

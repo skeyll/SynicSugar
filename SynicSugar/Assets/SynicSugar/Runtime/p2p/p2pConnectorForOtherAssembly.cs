@@ -363,6 +363,14 @@ namespace SynicSugar.P2P {
         }
 #endregion
         /// <summary>
+        /// Update SyncedInfo, then Invoke SyncedSynic event.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="phase"></param> <summary>
+        public void UpdateSyncedState(string id, byte phase){
+            p2pInfo.Instance.SyncSnyicNotifier.UpdateSyncedState(id, phase);
+        }
+        /// <summary>
         /// Change AcceptHostsSynic to false. Call from ConnectHub
         /// </summary>
         public void CloseHostSynic(){
