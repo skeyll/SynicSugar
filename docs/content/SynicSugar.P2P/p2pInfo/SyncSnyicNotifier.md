@@ -10,7 +10,7 @@ public SyncSnyicNotifier SyncSnyicNotifier
 
 
 ### Description
-Invoke the registereds event when synced some Synic variables by *[SyncSynic](../../../SynicSugar.P2P/ConnectHub/syncsynic)*.<br>
+Invoke the registereds event when synced some Synic variables by *[SyncSynic](../../SynicSugar.P2P/ConnectHub/syncsynic)*.<br>
 
 ### Properity
 | API | description |
