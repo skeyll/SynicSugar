@@ -4,7 +4,7 @@ using UnityEngine;
 namespace SynicSugar.Editor {
     public class Menu : MonoBehaviour {
         private const string DevPath = "Assets/SynicSugar/Editor/Extensions/SynicSugarPrefabs.asset";
-        private const string LibraryPath = "Packages/SynicSugar/Editor/Extensions/SynicSugarPrefabs.asset";
+        private const string LibraryPath = "Packages/net.skeyll.synicsugar/Editor/Extensions/SynicSugarPrefabs.asset";
 
         [MenuItem("GameObject/SynicSugar/EOSManager")]
         static void GenerateEOSManager(){
