@@ -13,6 +13,7 @@ namespace SynicSugar.P2P {
                 return;
             }
             Instance = this;
+            userIds = new ();
         }
         void OnDestroy() {
             if( Instance == this ) {
@@ -24,7 +25,7 @@ namespace SynicSugar.P2P {
             }
         }
 #endregion
-        internal UserIds userIds = new UserIds();
+        internal UserIds userIds;
         public UserId LocalUserId => userIds.LocalUserId;
         public List<UserId> RemoteUserIds => userIds.RemoteUserIds;
 

@@ -18,18 +18,20 @@ namespace SynicSugar.P2P {
         /// <param name="token"></param>
         /// <returns></returns>
         public static async UniTaskVoid SendPacketToAll(byte ch, byte[] value){
-            SendPacketOptions options = new SendPacketOptions(){
-                LocalUserId = EOSManager.Instance.GetProductUserId(),
-                SocketId = p2pConnectorForOtherAssembly.Instance.SocketId,
-                Channel = ch,
-                AllowDelayedDelivery = false,
-                Reliability = PacketReliability.ReliableOrdered,
-                Data = new ArraySegment<byte>(value != null ? value : Array.Empty<byte>())
-            };
+            ArraySegment<byte> data = value is not null ? value : Array.Empty<byte>();
 
             ResultE result;
             foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
-                options.RemoteUserId = id.AsEpic;
+                SendPacketOptions options = new SendPacketOptions(){
+                    LocalUserId = EOSManager.Instance.GetProductUserId(),
+                    RemoteUserId = id.AsEpic,
+                    SocketId = p2pConnectorForOtherAssembly.Instance.SocketId,
+                    Channel = ch,
+                    AllowDelayedDelivery = false,
+                    Reliability = PacketReliability.ReliableOrdered,
+                    Data = data
+                };
+
                 result = p2pConnectorForOtherAssembly.Instance.P2PHandle.SendPacket(ref options);
 
                 await UniTask.Delay(p2pConfig.Instance.interval_sendToAll);
