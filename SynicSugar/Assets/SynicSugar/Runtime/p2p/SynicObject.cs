@@ -28,7 +28,7 @@ namespace SynicSugar.P2P {
 
             //Remote Users
             foreach(UserId id in p2pInfo.Instance.userIds.RemoteUserIds){
-                objcs.Add(Instantiate(p2pInfo.Instance.userIds.LocalUserId, original, parent));
+                objcs.Add(Instantiate(id, original, parent));
             }
             return objcs;
         }
@@ -39,7 +39,7 @@ namespace SynicSugar.P2P {
 
             //Remote Users
             foreach(UserId id in p2pInfo.Instance.userIds.RemoteUserIds){
-                objcs.Add(Instantiate(p2pInfo.Instance.userIds.LocalUserId, original, parent, instantiateInWorldSpace));
+                objcs.Add(Instantiate(id, original, parent, instantiateInWorldSpace));
             }
             return objcs;
         }
@@ -50,7 +50,7 @@ namespace SynicSugar.P2P {
 
             //Remote Users
             foreach(UserId id in p2pInfo.Instance.userIds.RemoteUserIds){
-                objcs.Add(Instantiate(p2pInfo.Instance.userIds.LocalUserId, original, position, rotation));
+                objcs.Add(Instantiate(id, original, position, rotation));
             }
             return objcs;
         }
@@ -61,7 +61,7 @@ namespace SynicSugar.P2P {
             
             //Remote Users
             foreach(UserId id in p2pInfo.Instance.userIds.RemoteUserIds){
-                objcs.Add(Instantiate(p2pInfo.Instance.userIds.LocalUserId, original, position, rotation, parent));
+                objcs.Add(Instantiate(id, original, position, rotation, parent));
             }
             return objcs;
         }
@@ -76,40 +76,40 @@ namespace SynicSugar.P2P {
         /// <returns></returns>
         public static GameObject Instantiate(UserId id, GameObject original){
             GameObject obj = UnityEngine.Object.Instantiate (original);
-            var ids = obj.GetComponents<INetworkOwner>();
-            foreach(var i in ids){
+            var nos = obj.GetComponents<INetworkOwner>();
+            foreach(var i in nos){
                 i.SetOwnerID(id);
             }
             return obj; 
         }
         public static GameObject Instantiate(UserId id, GameObject original, Transform parent){
             GameObject obj = UnityEngine.Object.Instantiate (original, parent);
-            var ids = obj.GetComponents<INetworkOwner>();
-            foreach(var i in ids){
+            var nos = obj.GetComponents<INetworkOwner>();
+            foreach(var i in nos){
                 i.SetOwnerID(id);
             }
             return obj; 
         }
         public static GameObject Instantiate(UserId id, GameObject original, Transform parent, bool instantiateInWorldSpace){
             GameObject obj = UnityEngine.Object.Instantiate (original, parent, instantiateInWorldSpace);
-            var ids = obj.GetComponents<INetworkOwner>();
-            foreach(var i in ids){
+            var nos = obj.GetComponents<INetworkOwner>();
+            foreach(var i in nos){
                 i.SetOwnerID(id);
             }
             return obj; 
         }
         public static GameObject Instantiate(UserId id, GameObject original, Vector3 position, Quaternion rotation){
             GameObject obj = UnityEngine.Object.Instantiate (original, position, rotation);
-            var ids = obj.GetComponents<INetworkOwner>();
-            foreach(var i in ids){
+            var nos = obj.GetComponents<INetworkOwner>();
+            foreach(var i in nos){
                 i.SetOwnerID(id);
             }
             return obj; 
         }
         public static GameObject Instantiate(UserId id, GameObject original, Vector3 position, Quaternion rotation, Transform parent){
             GameObject obj = UnityEngine.Object.Instantiate (original, position, rotation, parent);
-            var ids = obj.GetComponents<INetworkOwner>();
-            foreach(var i in ids){
+            var nos = obj.GetComponents<INetworkOwner>();
+            foreach(var i in nos){
                 i.SetOwnerID(id);
             }
             return obj; 
