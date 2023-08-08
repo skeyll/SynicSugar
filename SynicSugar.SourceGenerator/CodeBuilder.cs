@@ -35,7 +35,7 @@
             string paramName = string.IsNullOrEmpty(param) ? System.String.Empty : $", MemoryPackSerializer.Deserialize<{GetFullName(paramNs, param)}>(packet.payload)";
             return $@"
                 case CHANNELLIST.{method}:
-                    {rootName}[packet.UserID].{method}(new UserId(packet.UserID){paramName});
+                    {rootName}[packet.UserID].{method}(UserId.GetUserId(packet.UserID){paramName});
                 return;";
         }
         //RPC

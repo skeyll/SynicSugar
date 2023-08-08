@@ -1,4 +1,4 @@
-using Epic.OnlineServices.P2P;
+using Epic.OnlineServices;
 using UnityEngine;
 using System;
 using System.Collections.Generic;
@@ -16,6 +16,7 @@ namespace SynicSugar.P2P {
         }
         void OnDestroy() {
             if( Instance == this ) {
+                UserId.CacheClear();
                 ConnectionNotifier.Clear();
                 SyncSnyicNotifier.Clear();
 
@@ -23,7 +24,7 @@ namespace SynicSugar.P2P {
             }
         }
 #endregion
-        [HideInInspector] internal UserIds userIds = new UserIds();
+        internal UserIds userIds = new UserIds();
         public UserId LocalUserId => userIds.LocalUserId;
         public List<UserId> RemoteUserIds => userIds.RemoteUserIds;
 

@@ -668,7 +668,7 @@ namespace SynicSugar.MatchMake {
             //In game
             // Hosts changed?
             if (data.CurrentStatus == LobbyMemberStatus.Promoted){
-                p2pInfo.Instance.userIds.HostUserId = new UserId(CurrentLobby.LobbyOwner);
+                p2pInfo.Instance.userIds.HostUserId = UserId.GetUserId(CurrentLobby.LobbyOwner);
 
                 #if SYNICSUGAR_LOG
                     Debug.Log($"MemberStatusNotyfy: {data.TargetUserId} is promoted to host.");
@@ -688,10 +688,10 @@ namespace SynicSugar.MatchMake {
                     Debug.Log($"MemberStatusNotyfy: {data.TargetUserId} diconnect from lobby.");
                 #endif
                 p2pInfo.Instance.userIds.MoveTargetUserIdToLefts(data.TargetUserId);
-                p2pInfo.Instance.ConnectionNotifier.OnDisconnected(new UserId(data.TargetUserId), Reason.Disconnected);
+                p2pInfo.Instance.ConnectionNotifier.OnDisconnected(UserId.GetUserId(data.TargetUserId), Reason.Disconnected);
             }else if(data.CurrentStatus == LobbyMemberStatus.Joined){
                 p2pInfo.Instance.userIds.MoveTargetUserIdToRemoteUsersFromLeft(data.TargetUserId);
-                p2pInfo.Instance.ConnectionNotifier.OnConnected(new UserId(data.TargetUserId));
+                p2pInfo.Instance.ConnectionNotifier.OnConnected(UserId.GetUserId(data.TargetUserId));
             }
         }
         /// <summary>
@@ -989,7 +989,7 @@ namespace SynicSugar.MatchMake {
             for(uint i = 0; i < memberCount; i++){
                 memberOptions.MemberIndex = i;
                 if(userIds.LocalUserId.AsEpic != lobbyHandle.GetMemberByIndex(ref memberOptions)){
-                    userIds.RemoteUserIds.Add(new UserId(lobbyHandle.GetMemberByIndex(ref memberOptions)));
+                    userIds.RemoteUserIds.Add(UserId.GetUserId(lobbyHandle.GetMemberByIndex(ref memberOptions)));
                 }
             }
             //Get lobby's attribute count
@@ -1003,7 +1003,7 @@ namespace SynicSugar.MatchMake {
             }
             p2pConnectorForOtherAssembly.Instance.ScoketName = EOSLobbyExtenstions.GenerateLobbyAttribute(socket).STRING;
             //For options
-            userIds.HostUserId = new UserId(CurrentLobby.LobbyOwner);
+            userIds.HostUserId = UserId.GetUserId(CurrentLobby.LobbyOwner);
             userIds.LeftUsers = new List<UserId>();
             lobbyHandle.Release();
             return true;

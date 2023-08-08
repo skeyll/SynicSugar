@@ -99,7 +99,7 @@ namespace SynicSugar.P2P {
         internal void UpdateSyncedState(string id, byte phase){
             if (!ReceivedUsers.Contains(id)){
                 ReceivedUsers.Add(id);
-                LastSyncedUserId = new UserId(id);
+                LastSyncedUserId = UserId.GetUserId(id);
                 LastSyncedPhase = phase;
             }
 
