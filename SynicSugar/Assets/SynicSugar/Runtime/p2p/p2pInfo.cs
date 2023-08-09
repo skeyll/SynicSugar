@@ -1,6 +1,5 @@
-using Epic.OnlineServices;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
-using System;
 using System.Collections.Generic;
 namespace SynicSugar.P2P {
     public class p2pInfo : MonoBehaviour {
@@ -101,5 +100,16 @@ namespace SynicSugar.P2P {
             return targetId == userIds.LocalUserId.ToString();
         }
     #endregion
+        /// <summary>
+        /// For initial connection. But, after 10 sec, always end.
+        /// </summary>
+        /// <returns></returns>
+        async internal UniTask WaitConnectPreparation(){
+            await UniTask.WhenAny(UniTask.WaitWhile(() => p2pInfo.Instance.ConnectionNotifier.completeConnectPreparetion), UniTask.Delay(10000));
+
+            if(!p2pConfig.Instance.UseDisconnectedEarlyNotify){
+                p2pConnectorForOtherAssembly.Instance.RemoveNotifyPeerConnectionnEstablished();
+            }
+        }
     }
 }

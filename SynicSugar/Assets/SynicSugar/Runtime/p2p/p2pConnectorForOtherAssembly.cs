@@ -233,12 +233,14 @@ namespace SynicSugar.P2P {
     /// Call from the library after the MatchMake is established.
     /// </summary>
     //* Maybe: Some processes in InitConnectConfig need time to complete and the Member list will be created after that end. Therefore, we will add Notify first to spent time.
-    internal void OpenConnection(){
+    internal void OpenConnection(bool checkInitConnect = false){
         AddNotifyPeerConnectionRequest();
 
+        if(checkInitConnect || p2pConfig.Instance.UseDisconnectedEarlyNotify){
+            AddNotifyPeerConnectionEstablished();
+        }
         if(p2pConfig.Instance.UseDisconnectedEarlyNotify){     
             AddNotifyPeerConnectionInterrupted();
-            AddNotifyPeerConnectionEstablished();
         }
 
         AcceptAllConenctions();
@@ -256,13 +258,14 @@ namespace SynicSugar.P2P {
     /// For the end of matchmaking.
     /// </summary>
     void AcceptAllConenctions(){
-        AcceptConnectionOptions options = new AcceptConnectionOptions(){
-                LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
-                SocketId = SocketId
-            };
         ResultE result = ResultE.Success;
         foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
-            options.RemoteUserId = id.AsEpic;
+            AcceptConnectionOptions options = new AcceptConnectionOptions(){
+                LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
+                RemoteUserId = id.AsEpic,
+                SocketId = SocketId
+            };
+            
             result = P2PHandle.AcceptConnection(ref options);
 
             if (result != ResultE.Success){
@@ -278,7 +281,7 @@ namespace SynicSugar.P2P {
         #endif
     }
 #endregion
-#region Early Disconnected Notify
+#region Early Connected Notify
     void AddNotifyPeerConnectionInterrupted(){
         if (InterruptedNotify == 0){
             AddNotifyPeerConnectionInterruptedOptions options = new AddNotifyPeerConnectionInterruptedOptions(){
@@ -336,8 +339,12 @@ namespace SynicSugar.P2P {
         Debug.Log("EstablishedCallback: Connection is restored.");
     #endif
         }
+        if(data.ConnectionType == ConnectionEstablishedType.NewConnection &&
+            p2pInfo.Instance.userIds.RemoteUserIds.Contains(UserId.GetUserId(data.RemoteUserId))){
+            p2pInfo.Instance.ConnectionNotifier.OnEstablished();
+        }
     }
-    void RemoveNotifyPeerConnectionnEstablished(){
+    internal void RemoveNotifyPeerConnectionnEstablished(){
         P2PHandle.RemoveNotifyPeerConnectionEstablished(EstablishedNotify);
         EstablishedNotify = 0;
     }

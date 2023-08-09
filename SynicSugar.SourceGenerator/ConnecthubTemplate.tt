@@ -33,14 +33,17 @@ namespace SynicSugar.P2P {
         /// </summary>
         // Default Relay Setting is AllowRelay. To change this, get NatType.
         public void StartPacketReceiver(){
-            if(p2pConnectorForOtherAssembly.Instance.p2pToken == null || p2pConnectorForOtherAssembly.Instance.p2pToken.IsCancellationRequested){
-                p2pConnectorForOtherAssembly.Instance.p2pToken = new CancellationTokenSource();
-                if(p2pConfig.Instance.getPacketFrequency == p2pConfig.GetPacketFrequency.PerSecondx3FPS){
-                    ReciveThreePackets().Forget();
-                    return;
-                }
-                RecivePacket().Forget();
+            if(p2pConnectorForOtherAssembly.Instance.p2pToken != null && !p2pConnectorForOtherAssembly.Instance.p2pToken.IsCancellationRequested){
+                p2pConnectorForOtherAssembly.Instance.p2pToken.Cancel();
             }
+
+            p2pConnectorForOtherAssembly.Instance.p2pToken = new CancellationTokenSource();
+
+            if(p2pConfig.Instance.getPacketFrequency == p2pConfig.GetPacketFrequency.PerSecond3xFPS){
+                ReciveThreePackets().Forget();
+                return;
+            }
+            RecivePacket().Forget();
         }
         //Pause receiver
         /// <summary>

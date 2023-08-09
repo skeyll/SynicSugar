@@ -1,7 +1,6 @@
 using Epic.OnlineServices.P2P;
 using UnityEngine;
 using System;
-using System.Collections.Generic;
 namespace SynicSugar.P2P {
     public class p2pConfig : MonoBehaviour {
 #region Singleton
@@ -13,6 +12,7 @@ namespace SynicSugar.P2P {
                 return;
             }
             Instance = this;
+            AllowDelayedDelivery = InitialConnection == InitialConnectionType.PacketBuffered;
         }
         void OnDestroy() {
             if( Instance == this ) {
@@ -43,7 +43,7 @@ namespace SynicSugar.P2P {
         public PacketReliability packetReliability = PacketReliability.ReliableOrdered;
         
         public enum GetPacketFrequency {
-            PerSecondx3FPS, PerSecondFPS, PerSecond100, PerSecond50, PerSecond25
+            PerSecond3xFPS, PerSecondFPS, PerSecond100, PerSecond50, PerSecond25
         }
         [Header("PacketReceiver's Frequency/per seconds *Never more than game FPS.")]
         /// <summary>
@@ -52,84 +52,19 @@ namespace SynicSugar.P2P {
         /// </summary>
         public GetPacketFrequency getPacketFrequency = GetPacketFrequency.PerSecond50;
         public bool UseDisconnectedEarlyNotify;
-    #region Obolete
-        public enum ReceiveInterval{
-            Large, Moderate, Small
+        public enum InitialConnectionType {
+            Stable, PacketBuffered, Casual
         }
-        [Obsolete("getPacketFrequency is new one"), HideInInspector]
-        public ReceiveInterval receiveInterval { 
-            get {
-                switch(getPacketFrequency){
-                    case GetPacketFrequency.PerSecond100:
-                    return ReceiveInterval.Small;
-                    case GetPacketFrequency.PerSecond50:
-                    return ReceiveInterval.Moderate;
-                    default:
-                    return ReceiveInterval.Large;
-                }
-            }
-            set {
-                switch(value){
-                    case ReceiveInterval.Large:
-                    getPacketFrequency = GetPacketFrequency.PerSecond25;
-                    break;
-                    case ReceiveInterval.Moderate:
-                    getPacketFrequency = GetPacketFrequency.PerSecond50;
-                    break;
-                    default:
-                    getPacketFrequency = GetPacketFrequency.PerSecond100;
-                    break;
-                }
-            }
-        }
-    #endregion
-    }
-#region Obsolete
-    public class p2pManager {
-        private p2pManager(){}
-        [Obsolete("This is old. You can use p2pConfig.Instance.XXX().")]
-        public static p2pManager Instance { get; private set; }
-        
-        [Obsolete("This is old. You can use p2pConfig.Instance.XXX")]
-        [HideInInspector] public UserIds userIds {
-            get{
-                return p2pInfo.Instance.userIds;
-            } 
-            set { p2pInfo.Instance.userIds = value; }
-        }
-        
-        [Obsolete("This is old. You can use p2pConfig.Instance.XXX")]
-        public int interval_sendToAll {
-            get{
-                return p2pConfig.Instance.interval_sendToAll;
-            } 
-            set { p2pConfig.Instance.interval_sendToAll = value; }
-        }
-
-        [Obsolete("This is old. You can use p2pConfig.Instance.XXX")]
-        public int autoSyncInterval{
-            get{
-                return p2pConfig.Instance.autoSyncInterval;
-            } 
-            set { p2pConfig.Instance.autoSyncInterval = value; }
-        }
-        public enum ReceiveInterval{
-            Large, Moderate, Small
-        }
-        
-        [Obsolete("This is old. You can use p2pConfig.Instance.XXX")]
         /// <summary>
-        /// Frequency of calling PacketReceiver. [Small 10ms, Moderate 25ms, Large 50ms]</ br>
-        /// Cannot exceed the recive's fps of the app's. </ br>
-        /// Recommend: Moderate. (-8peers, mobile game, non large-party acion game)
+        /// Delay time to return true after matchmaking.</ br>
+        /// Stable returns true after have finished all connection preparations completely (Up to 10 sec).</ br>
+        /// PacketBuffered change the packets type to reaching buffering's. This presses on the receiving buffer and PauseConnections() will stop that work.</ br>
+        /// Casual returns true after just send a connection request. Other peers will discard the initial some packets that the user sends during about 50-200ms after getting true. (Depends on the ping, and probably about 3fps)
         /// </summary>
-        public ReceiveInterval receiveInterval = ReceiveInterval.Moderate;
+        public InitialConnectionType InitialConnection;
         /// <summary>
-        /// Quality of connection
+        /// MEMO: Can't change this in game for performance now.
         /// </summary>
-        /// 
-        [Obsolete("This is old. You can use p2pConfig.Instance.XXX")]
-        public PacketReliability packetReliability = PacketReliability.ReliableOrdered;
+        internal bool AllowDelayedDelivery;
     }
-#endregion
 }

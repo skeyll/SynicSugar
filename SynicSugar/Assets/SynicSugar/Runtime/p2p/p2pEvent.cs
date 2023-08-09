@@ -46,6 +46,8 @@ namespace SynicSugar.P2P {
             Connected = null;
             EarlyDisconnected = null;
             Restored = null;
+            establishedMemberCounts = 0;
+            completeConnectPreparetion = false;
         }
         internal void OnDisconnected(UserId id, Reason reason){
             ClosedReason = reason;
@@ -66,6 +68,14 @@ namespace SynicSugar.P2P {
             ConnectUserId = id;
             Connected?.Invoke();
         }
+        internal void OnEstablished(){
+            establishedMemberCounts++;
+            completeConnectPreparetion = p2pInfo.Instance.userIds.RemoteUserIds.Count == establishedMemberCounts;
+        }
+        
+        private int establishedMemberCounts;
+        internal bool completeConnectPreparetion; 
+
     }
     
     public class SyncSnyicNotifier {

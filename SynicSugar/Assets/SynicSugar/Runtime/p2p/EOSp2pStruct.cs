@@ -8,18 +8,18 @@ namespace SynicSugar.P2P {
     /// <summary>
     /// Hold user ids in Room player.
     /// </summary>
-    public class UserIds {
-        public UserId LocalUserId;
-        public List<UserId> RemoteUserIds;
+    internal class UserIds {
+        internal UserId LocalUserId;
+        internal List<UserId> RemoteUserIds;
 
         //Options
-        public UserId HostUserId;
+        internal UserId HostUserId;
         // For the Host to pass the user's data to the player.
         internal List<UserId> LeftUsers = new List<UserId>();
         // If true, host can manage the this local user's data in direct.
         // If not, only the local user can manipulate the local user's data.
         // For Anti-Cheat to rewrite other player data.
-        public bool isJustReconnected;
+        internal bool isJustReconnected;
         internal UserIds(){
             LocalUserId = UserId.GetUserId(EOSManager.Instance.GetProductUserId());
         }

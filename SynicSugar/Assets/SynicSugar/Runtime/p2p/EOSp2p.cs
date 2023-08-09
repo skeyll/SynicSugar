@@ -4,7 +4,6 @@ using UnityEngine;
 using Cysharp.Threading.Tasks;
 using Epic.OnlineServices.P2P;
 using ResultE = Epic.OnlineServices.Result;
-using MemoryPack;
 
 namespace SynicSugar.P2P {
     public static class EOSp2p {
@@ -27,7 +26,7 @@ namespace SynicSugar.P2P {
                     RemoteUserId = id.AsEpic,
                     SocketId = p2pConnectorForOtherAssembly.Instance.SocketId,
                     Channel = ch,
-                    AllowDelayedDelivery = false,
+                    AllowDelayedDelivery = p2pConfig.Instance.AllowDelayedDelivery,
                     Reliability = PacketReliability.ReliableOrdered,
                     Data = data
                 };
@@ -59,7 +58,7 @@ namespace SynicSugar.P2P {
                 RemoteUserId = targetId.AsEpic,
                 SocketId = p2pConnectorForOtherAssembly.Instance.SocketId,
                 Channel = ch,
-                AllowDelayedDelivery = false,
+                AllowDelayedDelivery = p2pConfig.Instance.AllowDelayedDelivery,
                 Reliability = p2pConfig.Instance.packetReliability,
                 Data = new ArraySegment<byte>(value != null ? value : Array.Empty<byte>())
             };
@@ -97,7 +96,7 @@ namespace SynicSugar.P2P {
                 //Add header
                 Span<byte> payload = new byte[header.Length + length];
                 header.CopyTo(payload);
-                _payload.CopyTo(payload.Slice(header.Length));
+                _payload.CopyTo(payload.Slice(5));
 
                 SendPacketOptions options = new SendPacketOptions(){
                     LocalUserId = EOSManager.Instance.GetProductUserId(),

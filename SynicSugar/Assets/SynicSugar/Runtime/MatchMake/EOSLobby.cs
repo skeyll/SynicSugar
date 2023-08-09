@@ -63,8 +63,17 @@ namespace SynicSugar.MatchMake {
                 }
 
                 if(isMatchSuccess){
-                    InitConnectConfig(ref p2pInfo.Instance.userIds);
-                    p2pConnectorForOtherAssembly.Instance.OpenConnection();
+                    bool canInit = InitConnectConfig(ref p2pInfo.Instance.userIds);
+                    if(!canInit){
+                        Debug.LogError("Fail InitConnectConfig");
+                        return false;
+                    }
+                    bool isStableConnect = p2pConfig.Instance.InitialConnection == p2pConfig.InitialConnectionType.Stable;
+                    p2pConnectorForOtherAssembly.Instance.OpenConnection(isStableConnect);
+                    if(isStableConnect){
+                        await p2pInfo.Instance.WaitConnectPreparation();
+                    }
+
                     await MatchMakeManager.Instance.OnSaveLobbyID();
                 }
                 return isMatchSuccess;
@@ -79,6 +88,7 @@ namespace SynicSugar.MatchMake {
                 isMatchSuccess = false;
                 waitingMatch = true;
                 MatchMakeManager.Instance.matchState.acceptCancel?.Invoke();
+
                 await UniTask.WhenAny(UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token), timer);
                 
                 //Matching cancel
@@ -87,8 +97,17 @@ namespace SynicSugar.MatchMake {
                 }
                 
                 if(isMatchSuccess){
-                    InitConnectConfig(ref p2pInfo.Instance.userIds);
-                    p2pConnectorForOtherAssembly.Instance.OpenConnection();    
+                    bool canInit = InitConnectConfig(ref p2pInfo.Instance.userIds);
+                    if(!canInit){
+                        Debug.LogError("Fail InitConnectConfig");
+                        return false;
+                    }
+
+                    bool isStableConnect = p2pConfig.Instance.InitialConnection == p2pConfig.InitialConnectionType.Stable;
+                    p2pConnectorForOtherAssembly.Instance.OpenConnection(isStableConnect);
+                    if(isStableConnect){
+                        await p2pInfo.Instance.WaitConnectPreparation();
+                    }
 
                     await MatchMakeManager.Instance.OnSaveLobbyID();
 
@@ -125,8 +144,17 @@ namespace SynicSugar.MatchMake {
                 }
 
                 if(isMatchSuccess){
-                    InitConnectConfig(ref p2pInfo.Instance.userIds);
-                    p2pConnectorForOtherAssembly.Instance.OpenConnection();
+                    bool canInit = InitConnectConfig(ref p2pInfo.Instance.userIds);
+                    if(!canInit){
+                        Debug.LogError("Fail InitConnectConfig");
+                        return false;
+                    }
+
+                    bool isStableConnect = p2pConfig.Instance.InitialConnection == p2pConfig.InitialConnectionType.Stable;
+                    p2pConnectorForOtherAssembly.Instance.OpenConnection(isStableConnect);
+                    if(isStableConnect){
+                        await p2pInfo.Instance.WaitConnectPreparation();
+                    }
                     
                     await MatchMakeManager.Instance.OnSaveLobbyID();
                 }
@@ -162,8 +190,18 @@ namespace SynicSugar.MatchMake {
                 }
 
                 if(isMatchSuccess){
-                    InitConnectConfig(ref p2pInfo.Instance.userIds);
-                    p2pConnectorForOtherAssembly.Instance.OpenConnection();
+                    bool canInit = InitConnectConfig(ref p2pInfo.Instance.userIds);
+                    if(!canInit){
+                        Debug.LogError("Fail InitConnectConfig");
+                        return false;
+                    }
+
+                    bool isStableConnect = p2pConfig.Instance.InitialConnection == p2pConfig.InitialConnectionType.Stable;
+                    p2pConnectorForOtherAssembly.Instance.OpenConnection(isStableConnect);
+                    if(isStableConnect){
+                        await p2pInfo.Instance.WaitConnectPreparation();
+                    }
+
                     await MatchMakeManager.Instance.OnSaveLobbyID();
                     return true;
                 }
@@ -202,9 +240,20 @@ namespace SynicSugar.MatchMake {
                 EOSManager.Instance.GetEOSLobbyInterface().RemoveNotifyLobbyMemberStatusReceived(handle);
             });
             //Prep Connection
-            InitConnectConfig(ref p2pInfo.Instance.userIds);
+            bool canInit = InitConnectConfig(ref p2pInfo.Instance.userIds);
+            if(!canInit){
+                Debug.LogError("Fail InitConnectConfig");
+                return false;
+            }
+
             p2pInfo.Instance.userIds.isJustReconnected = true;
-            p2pConnectorForOtherAssembly.Instance.OpenConnection();
+
+            bool isStableConnect = p2pConfig.Instance.InitialConnection == p2pConfig.InitialConnectionType.Stable;
+            p2pConnectorForOtherAssembly.Instance.OpenConnection(isStableConnect);
+            if(isStableConnect){
+                await p2pInfo.Instance.WaitConnectPreparation();
+            }
+            
             return true;
         }
         async UniTask TimeoutTimer(CancellationToken token){
@@ -286,9 +335,6 @@ namespace SynicSugar.MatchMake {
                 waitingMatch = false;
                 return;
             }
-
-            // OnLobbyCallback callback = info.ClientData as OnLobbyCallback;
-            // callback?.Invoke(Result.Success);
 
             CurrentLobby.LobbyId = info.LobbyId;
 
@@ -676,7 +722,7 @@ namespace SynicSugar.MatchMake {
                 if(!CurrentLobby.isHost()){
                     //MEMO: Now, if user disconnect from Lobby and then change hosts, the user become newbie.
                     //Guest Don't need to hold user id 
-                    p2pInfo.Instance.userIds.LeftUsers = new List<UserId>();
+                    // p2pInfo.Instance.userIds.LeftUsers = new List<UserId>();
                 }
             }else if(data.CurrentStatus == LobbyMemberStatus.Left) {
                 #if SYNICSUGAR_LOG
@@ -961,9 +1007,10 @@ namespace SynicSugar.MatchMake {
         bool InitConnectConfig(ref UserIds userIds){
             //Crate copy handle
             LobbyInterface lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();
-            CopyLobbyDetailsHandleOptions options = new CopyLobbyDetailsHandleOptions();
-            options.LobbyId = CurrentLobby.LobbyId;
-            options.LocalUserId = EOSManager.Instance.GetProductUserId();
+            CopyLobbyDetailsHandleOptions options = new CopyLobbyDetailsHandleOptions(){
+                LobbyId = CurrentLobby.LobbyId,
+                LocalUserId = EOSManager.Instance.GetProductUserId()
+            };
 
             ResultE result = lobbyInterface.CopyLobbyDetailsHandle(ref options, out LobbyDetails lobbyHandle );
 
@@ -1004,7 +1051,7 @@ namespace SynicSugar.MatchMake {
             p2pConnectorForOtherAssembly.Instance.ScoketName = EOSLobbyExtenstions.GenerateLobbyAttribute(socket).STRING;
             //For options
             userIds.HostUserId = UserId.GetUserId(CurrentLobby.LobbyOwner);
-            userIds.LeftUsers = new List<UserId>();
+            userIds.LeftUsers = new();
             lobbyHandle.Release();
             return true;
         }
