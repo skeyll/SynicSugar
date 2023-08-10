@@ -18,7 +18,6 @@ namespace SynicSugar.P2P {
         /// <returns></returns>
         public static async UniTaskVoid SendPacketToAll(byte ch, byte[] value){
             ArraySegment<byte> data = value is not null ? value : Array.Empty<byte>();
-
             ResultE result;
             foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
                 SendPacketOptions options = new SendPacketOptions(){
@@ -32,13 +31,13 @@ namespace SynicSugar.P2P {
                 };
 
                 result = p2pConnectorForOtherAssembly.Instance.P2PHandle.SendPacket(ref options);
-
-                await UniTask.Delay(p2pConfig.Instance.interval_sendToAll);
                 if(result != ResultE.Success){
                     Debug.LogErrorFormat("Send Packet: can't send packet, code: {0}", result);
-                    break;
+                    continue;
                 }
-                if(p2pConnectorForOtherAssembly.Instance.p2pToken.IsCancellationRequested){
+                await UniTask.Delay(p2pConfig.Instance.interval_sendToAll);
+
+                if(p2pConnectorForOtherAssembly.Instance.p2pToken != null && p2pConnectorForOtherAssembly.Instance.p2pToken.IsCancellationRequested){
             #if SYNICSUGAR_LOG
                     Debug.Log("Send Packet: get out of the loop by Cancel");
             #endif
@@ -135,8 +134,5 @@ namespace SynicSugar.P2P {
                 return result;
             }
         }
-    }
-    public enum Reason {
-        Left, Disconnected, Interrupted, Unknown
     }
 }

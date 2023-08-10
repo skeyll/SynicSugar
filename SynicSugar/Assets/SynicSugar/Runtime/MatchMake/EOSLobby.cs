@@ -71,7 +71,7 @@ namespace SynicSugar.MatchMake {
                     bool isStableConnect = p2pConfig.Instance.InitialConnection == p2pConfig.InitialConnectionType.Stable;
                     p2pConnectorForOtherAssembly.Instance.OpenConnection(isStableConnect);
                     if(isStableConnect){
-                        await p2pInfoMethods.WaitConnectPreparation();
+                        await p2pInfoMethod.WaitConnectPreparation();
                     }
 
                     await MatchMakeManager.Instance.OnSaveLobbyID();
@@ -106,7 +106,7 @@ namespace SynicSugar.MatchMake {
                     bool isStableConnect = p2pConfig.Instance.InitialConnection == p2pConfig.InitialConnectionType.Stable;
                     p2pConnectorForOtherAssembly.Instance.OpenConnection(isStableConnect);
                     if(isStableConnect){
-                        await p2pInfoMethods.WaitConnectPreparation();
+                        await p2pInfoMethod.WaitConnectPreparation();
                     }
 
                     await MatchMakeManager.Instance.OnSaveLobbyID();
@@ -153,7 +153,7 @@ namespace SynicSugar.MatchMake {
                     bool isStableConnect = p2pConfig.Instance.InitialConnection == p2pConfig.InitialConnectionType.Stable;
                     p2pConnectorForOtherAssembly.Instance.OpenConnection(isStableConnect);
                     if(isStableConnect){
-                        await p2pInfoMethods.WaitConnectPreparation();
+                        await p2pInfoMethod.WaitConnectPreparation();
                     }
                     
                     await MatchMakeManager.Instance.OnSaveLobbyID();
@@ -199,7 +199,7 @@ namespace SynicSugar.MatchMake {
                     bool isStableConnect = p2pConfig.Instance.InitialConnection == p2pConfig.InitialConnectionType.Stable;
                     p2pConnectorForOtherAssembly.Instance.OpenConnection(isStableConnect);
                     if(isStableConnect){
-                        await p2pInfoMethods.WaitConnectPreparation();
+                        await p2pInfoMethod.WaitConnectPreparation();
                     }
 
                     await MatchMakeManager.Instance.OnSaveLobbyID();
@@ -251,7 +251,7 @@ namespace SynicSugar.MatchMake {
             bool isStableConnect = p2pConfig.Instance.InitialConnection == p2pConfig.InitialConnectionType.Stable;
             p2pConnectorForOtherAssembly.Instance.OpenConnection(isStableConnect);
             if(isStableConnect){
-                await p2pInfoMethods.WaitConnectPreparation();
+                await p2pInfoMethod.WaitConnectPreparation();
             }
             
             return true;
