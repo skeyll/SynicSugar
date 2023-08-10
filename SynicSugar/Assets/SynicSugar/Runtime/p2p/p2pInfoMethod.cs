@@ -29,6 +29,14 @@ namespace SynicSugar.P2P {
             }
         }
         /// <summary>
+        /// For initial connection. After 10 sec, make it false.
+        /// </summary>
+        /// <returns></returns>
+        static async internal UniTask DisableDelayedDeliveryAfterElapsed(){
+            await UniTask.Delay(10000);
+            p2pConfig.Instance.AllowDelayedDelivery = false;
+        }
+        /// <summary>
         /// Query the current NAT-type of our connection.
         /// </summary>
         async internal UniTask QueryNATType(){

@@ -68,11 +68,8 @@ namespace SynicSugar.MatchMake {
                         Debug.LogError("Fail InitConnectConfig");
                         return false;
                     }
-                    bool isStableConnect = p2pConfig.Instance.InitialConnection == p2pConfig.InitialConnectionType.Stable;
-                    p2pConnectorForOtherAssembly.Instance.OpenConnection(isStableConnect);
-                    if(isStableConnect){
-                        await p2pInfoMethod.WaitConnectPreparation();
-                    }
+
+                    await OpenConnection();
 
                     await MatchMakeManager.Instance.OnSaveLobbyID();
                 }
@@ -103,11 +100,7 @@ namespace SynicSugar.MatchMake {
                         return false;
                     }
 
-                    bool isStableConnect = p2pConfig.Instance.InitialConnection == p2pConfig.InitialConnectionType.Stable;
-                    p2pConnectorForOtherAssembly.Instance.OpenConnection(isStableConnect);
-                    if(isStableConnect){
-                        await p2pInfoMethod.WaitConnectPreparation();
-                    }
+                    await OpenConnection();
 
                     await MatchMakeManager.Instance.OnSaveLobbyID();
 
@@ -149,12 +142,8 @@ namespace SynicSugar.MatchMake {
                         Debug.LogError("Fail InitConnectConfig");
                         return false;
                     }
-
-                    bool isStableConnect = p2pConfig.Instance.InitialConnection == p2pConfig.InitialConnectionType.Stable;
-                    p2pConnectorForOtherAssembly.Instance.OpenConnection(isStableConnect);
-                    if(isStableConnect){
-                        await p2pInfoMethod.WaitConnectPreparation();
-                    }
+    
+                    await OpenConnection();
                     
                     await MatchMakeManager.Instance.OnSaveLobbyID();
                 }
@@ -196,11 +185,7 @@ namespace SynicSugar.MatchMake {
                         return false;
                     }
 
-                    bool isStableConnect = p2pConfig.Instance.InitialConnection == p2pConfig.InitialConnectionType.Stable;
-                    p2pConnectorForOtherAssembly.Instance.OpenConnection(isStableConnect);
-                    if(isStableConnect){
-                        await p2pInfoMethod.WaitConnectPreparation();
-                    }
+                    await OpenConnection();
 
                     await MatchMakeManager.Instance.OnSaveLobbyID();
                     return true;
@@ -248,11 +233,7 @@ namespace SynicSugar.MatchMake {
 
             p2pInfo.Instance.userIds.isJustReconnected = true;
 
-            bool isStableConnect = p2pConfig.Instance.InitialConnection == p2pConfig.InitialConnectionType.Stable;
-            p2pConnectorForOtherAssembly.Instance.OpenConnection(isStableConnect);
-            if(isStableConnect){
-                await p2pInfoMethod.WaitConnectPreparation();
-            }
+            await OpenConnection();
             
             return true;
         }
@@ -1054,6 +1035,21 @@ namespace SynicSugar.MatchMake {
             userIds.LeftUsers = new();
             lobbyHandle.Release();
             return true;
+        }
+        async UniTask OpenConnection(){
+            p2pConnectorForOtherAssembly.Instance.OpenConnection(p2pConfig.Instance.FirstConnection == p2pConfig.FirstConnectionType.Strict);
+            switch(p2pConfig.Instance.FirstConnection){
+                case p2pConfig.FirstConnectionType.Strict:
+                    await p2pInfoMethod.WaitConnectPreparation();
+                    //Pingの取得
+                return;
+                case p2pConfig.FirstConnectionType.TempDelayedDelivery:
+                    p2pInfoMethod.DisableDelayedDeliveryAfterElapsed().Forget();
+                return;
+                case p2pConfig.FirstConnectionType.Casual:
+                case p2pConfig.FirstConnectionType.DelayedDelivery:
+                return;
+            }
         }
         /// <summary>
         /// For library user to save ID.

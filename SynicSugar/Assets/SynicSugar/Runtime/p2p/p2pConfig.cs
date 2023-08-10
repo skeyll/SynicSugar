@@ -12,7 +12,7 @@ namespace SynicSugar.P2P {
                 return;
             }
             Instance = this;
-            AllowDelayedDelivery = InitialConnection == InitialConnectionType.PacketBuffered;
+            AllowDelayedDelivery = FirstConnection == FirstConnectionType.TempDelayedDelivery || FirstConnection == FirstConnectionType.DelayedDelivery;
         }
         void OnDestroy() {
             if( Instance == this ) {
@@ -25,15 +25,15 @@ namespace SynicSugar.P2P {
         ///Options 
         [Header("Interval of sending each users[ms]. Recommend: 3ms-")]
         /// <summary>
-        /// Interval ms on sending to each user in Rpc. </ br>
-        /// If interval is too short and the sending buffer becomes full, the next packets will be discarded.</ br>
+        /// Interval ms on sending to each user in Rpc. <br />>
+        /// If interval is too short and the sending buffer becomes full, the next packets will be discarded.<br />
         /// Recommend: 3ms-
         /// </summary>
         public int interval_sendToAll = 3;
         [Header("Interval until sending next new value[ms]. Recommend: 1000-3000ms.")]
         /// <summary>
-        /// Interval ms that a SyncVar dosen't been send even if the value changes after send that SyncVar.</ br>
-        /// If set short value, may get congesting the band.</ br>
+        /// Interval ms that a SyncVar dosen't been send even if the value changes after send that SyncVar.<br />
+        /// If set short value, may get congesting the band.<br />
         /// Recommend: 1000-3000ms.
         /// </summary>
         public int autoSyncInterval = 1000;
@@ -47,21 +47,39 @@ namespace SynicSugar.P2P {
         }
         [Header("PacketReceiver's Frequency/per seconds *Never more than game FPS.")]
         /// <summary>
-        /// Frequency of calling PacketReceiver.</ br>
-        /// Cannot exceed the recive's fps of the app's. </ br>
+        /// Frequency of calling PacketReceiver.<br />
+        /// Cannot exceed the recive's fps of the app's. <br />
         /// </summary>
         public GetPacketFrequency getPacketFrequency = GetPacketFrequency.PerSecond50;
         public bool UseDisconnectedEarlyNotify;
-        public enum InitialConnectionType {
-            Stable, PacketBuffered, Casual
-        }
         /// <summary>
-        /// Delay time to return true after matchmaking.</ br>
-        /// Stable returns true after have finished all connection preparations completely (Up to 10 sec).</ br>
-        /// PacketBuffered change the packets type to reaching buffering's. This presses on the receiving buffer and PauseConnections() will stop that work.</ br>
-        /// Casual returns true after just send a connection request. Other peers will discard the initial some packets that the user sends during about 50-200ms after getting true. (Depends on the ping, and probably about 3fps)
+        /// Delay time to return true after matchmaking.<br />
+        /// After the connection is established, EOS has a lag before actual communication is possible.  This is the setting of how to handle it.
         /// </summary>
-        public InitialConnectionType InitialConnection;
+        public enum FirstConnectionType{
+            /// <summary>
+            /// Return true after getting Ping. The first connection is sent on SynicSugar, so this is reliable but has a lag.
+            /// </summary>
+            Strict, 
+            /// <summary>
+            /// Return true after just sending connect request. Other peers will discard the initial some packets that the user sends during about 1sec after getting true. (Depends on the ping)
+            /// </summary>
+            Casual, 
+            /// <summary>
+            /// Return true after just sending connect request. Packets in 10 sec after matching are stored in the receive buffer even if the peer haven't accept the connection.
+            /// </summary>
+            TempDelayedDelivery, 
+            /// <summary>
+            /// Return true after just sending connect request. All packets are stored in the receive buffer even if the peer haven't accept the connection. PauseConnections() stops the work.
+            /// </summary>
+            DelayedDelivery
+        }
+        
+        /// <summary>
+        /// Delay time to return true after matchmaking.<br />
+        /// After the connection is established, EOS has a lag before actual communication is possible.  This is the setting of how to handle it.<br />
+        /// </summary>
+        public FirstConnectionType FirstConnection;
         /// <summary>
         /// MEMO: Can't change this in game for performance now.
         /// </summary>
