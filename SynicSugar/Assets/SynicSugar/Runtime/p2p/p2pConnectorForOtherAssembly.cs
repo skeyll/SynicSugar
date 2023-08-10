@@ -83,10 +83,11 @@ namespace SynicSugar.P2P {
             
             GetPacketQueueInfoOptions options = new GetPacketQueueInfoOptions();
             PacketQueueInfo info = new PacketQueueInfo();
+            P2PHandle.GetPacketQueueInfo(ref options, out info);
 
-            while (info.IncomingPacketQueueCurrentPacketCount >= 0){
-                P2PHandle.GetPacketQueueInfo(ref options, out info);
+            while (info.IncomingPacketQueueCurrentPacketCount > 0){
                 await UniTask.Delay(receiverInterval, cancellationToken: token);
+                P2PHandle.GetPacketQueueInfo(ref options, out info);
             }
 
             p2pToken.Cancel();
@@ -218,9 +219,6 @@ namespace SynicSugar.P2P {
             if (result != ResultE.Success){
                 Debug.LogErrorFormat("p2p connect request: error while accepting connection, code: {0}", result);
             }
-        #if SYNICSUGAR_LOG
-            Debug.Log("p2p connect request: Success Connect Request");
-        #endif
         }
         void RemoveNotifyPeerConnectionRequest(){
             P2PHandle.RemoveNotifyPeerConnectionRequest(RequestNotifyId);
@@ -235,6 +233,7 @@ namespace SynicSugar.P2P {
     //* Maybe: Some processes in InitConnectConfig need time to complete and the Member list will be created after that end. Therefore, we will add Notify first to spent time.
     internal void OpenConnection(bool checkInitConnect = false){
         AddNotifyPeerConnectionRequest();
+        AcceptAllConenctions();
 
         if(checkInitConnect || p2pConfig.Instance.UseDisconnectedEarlyNotify){
             AddNotifyPeerConnectionEstablished();
@@ -242,8 +241,6 @@ namespace SynicSugar.P2P {
         if(p2pConfig.Instance.UseDisconnectedEarlyNotify){     
             AddNotifyPeerConnectionInterrupted();
         }
-
-        AcceptAllConenctions();
     }
     //Reason: This order(Receiver, Connection, Que) is that if the RPC includes Rpc to reply, the connections are automatically re-started.
     /// <summary>
@@ -273,12 +270,6 @@ namespace SynicSugar.P2P {
                 break;
             }
         }
-        if(result != ResultE.Success){
-            return;
-        }
-        #if SYNICSUGAR_LOG
-            Debug.Log("Accept All Connections: Success accept Connections");
-        #endif
     }
 #endregion
 #region Early Connected Notify
@@ -336,12 +327,14 @@ namespace SynicSugar.P2P {
         if(data.ConnectionType == ConnectionEstablishedType.Reconnection){
             p2pInfo.Instance.ConnectionNotifier.OnRestored(UserId.GetUserId(data.RemoteUserId));
     #if SYNICSUGAR_LOG
-        Debug.Log("EstablishedCallback: Connection is restored.");
+            Debug.Log("EstablishedCallback: Connection is restored.");
     #endif
+            return;
         }
         if(data.ConnectionType == ConnectionEstablishedType.NewConnection &&
             p2pInfo.Instance.userIds.RemoteUserIds.Contains(UserId.GetUserId(data.RemoteUserId))){
             p2pInfo.Instance.ConnectionNotifier.OnEstablished();
+            return;
         }
     }
     internal void RemoveNotifyPeerConnectionnEstablished(){
@@ -362,7 +355,6 @@ namespace SynicSugar.P2P {
                 SocketId = SocketId
             };
             ResultE result = P2PHandle.CloseConnections(ref closeOptions);
-            Debug.Log($"close result is {result} / {ScoketName}");
             if(result != ResultE.Success){
                 Debug.LogErrorFormat("CloseConnections: Failed to disconnect {0}", result);
             }
