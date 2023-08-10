@@ -68,14 +68,12 @@ namespace SynicSugar.P2P {
             ConnectUserId = id;
             Connected?.Invoke();
         }
+        private int establishedMemberCounts;
+        internal bool completeConnectPreparetion; 
         internal void OnEstablished(){
             establishedMemberCounts++;
             completeConnectPreparetion = p2pInfo.Instance.userIds.RemoteUserIds.Count == establishedMemberCounts;
         }
-        
-        private int establishedMemberCounts;
-        internal bool completeConnectPreparetion; 
-
     }
     
     public class SyncSnyicNotifier {
