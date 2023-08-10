@@ -70,7 +70,7 @@ namespace SynicSugar.P2P {
             }
         }
         /// <summary>
-        /// Send a large packet to a specific peer. To send returner. </ br>
+        /// Send a large packet to a specific peer. To send returner. <br />
         /// Add header to sent divided packets.
         /// *Current: We can use this from a specific API.
         /// </summary>

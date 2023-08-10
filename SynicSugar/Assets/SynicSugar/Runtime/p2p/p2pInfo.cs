@@ -14,6 +14,7 @@ namespace SynicSugar.P2P {
             }
             Instance = this;
             userIds = new ();
+            infoMethod = new();
         }
         void OnDestroy() {
             if( Instance == this ) {
@@ -25,7 +26,7 @@ namespace SynicSugar.P2P {
             }
         }
 #endregion
-        internal p2pInfoMethod infoMethod = new p2pInfoMethod();
+        internal p2pInfoMethod infoMethod;
         internal UserIds userIds;
         public UserId LocalUserId => userIds.LocalUserId;
         public List<UserId> RemoteUserIds => userIds.RemoteUserIds;
@@ -37,7 +38,7 @@ namespace SynicSugar.P2P {
 
         public SyncSnyicNotifier SyncSnyicNotifier = new SyncSnyicNotifier();
         /// <summary>
-        /// Return True only once when this local user is received SyncSync from every other peers of the current session. </ br>
+        /// Return True only once when this local user is received SyncSync from every other peers of the current session. <br />
         /// After return true, all variable for this flag is initialized and returns False again.
         /// </summary>
         /// <returns></returns>
@@ -64,13 +65,13 @@ namespace SynicSugar.P2P {
             return 1 + userIds.RemoteUserIds.Count + userIds.LeftUsers.Count; 
         }
         /// <summary>
-        /// Update NATType to the latest state.
+        /// Update local user's NATType to the latest state.
         /// </summary>
         public async UniTask QueryNATType() => await infoMethod.QueryNATType();
         /// <summary>
-        /// Get our last-queried NAT-type, if it has been successfully queried.
+        /// Get last-queried NAT-type, if it has been successfully queried.
         /// </summary>
-        /// <returns>Open means pure-p2p. Otherwise, the connection may be via Epic relay.</returns>
+        /// <returns>Open means being able connect with direct p2p. Otherwise, the connection may be via Epic relay.</returns>
         public NATType GetNATType() => infoMethod.GetNATType();
     #region IsHost
         /// <summary>
