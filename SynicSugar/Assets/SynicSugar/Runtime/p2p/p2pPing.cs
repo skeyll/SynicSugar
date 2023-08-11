@@ -14,7 +14,7 @@ namespace SynicSugar.P2P {
         /// Send 0 + Utc. Measure ping at the time of return 1 + UTC.
         /// </summary> 
         // MEMO: Replace SendPacketToAll when it can be made more efficient.
-        internal async UniTask<bool> RefreshPings(){
+        internal async UniTask<bool> RefreshPings(CancellationToken token){
             if(isRefreshing){
                 return false;
             }
@@ -31,8 +31,8 @@ namespace SynicSugar.P2P {
                 }
                 await UniTask.Yield();
             }
-            await UniTask.WhenAny(UniTask.WaitUntil(() => refreshMembers == p2pInfo.Instance.userIds.RemoteUserIds.Count, cancellationToken: p2pConnectorForOtherAssembly.Instance.p2pToken.Token),
-            UniTask.Delay(10000, cancellationToken: p2pConnectorForOtherAssembly.Instance.p2pToken.Token));
+            await UniTask.WhenAny(UniTask.WaitUntil(() => refreshMembers == p2pInfo.Instance.userIds.RemoteUserIds.Count, cancellationToken: token),
+            UniTask.Delay(10000, cancellationToken: token));
 
             isRefreshing = false;
             return true;

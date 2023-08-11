@@ -369,6 +369,15 @@ namespace SynicSugar.P2P {
         public void UpdateSyncedState(string id, byte phase){
             p2pInfo.Instance.SyncSnyicNotifier.UpdateSyncedState(id, phase);
         }
+        public async UniTask AutoRefreshPings(CancellationToken token){
+            await UniTask.Delay(p2pConfig.Instance.PingAutoRefreshRateSec * 1000);
+            if(token.IsCancellationRequested){ return; }
+
+            await p2pInfo.Instance.pings.RefreshPings(token);
+            if(token.IsCancellationRequested){ return; }
+            
+            AutoRefreshPings(token).Forget();
+        }
         /// <summary>
         /// Change AcceptHostsSynic to false. Call from ConnectHub
         /// </summary>

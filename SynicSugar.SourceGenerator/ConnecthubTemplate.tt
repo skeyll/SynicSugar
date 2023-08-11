@@ -39,6 +39,10 @@ namespace SynicSugar.P2P {
 
             p2pConnectorForOtherAssembly.Instance.p2pToken = new CancellationTokenSource();
 
+            if(p2pConfig.Instance.AutoRefreshPing){
+                p2pConnectorForOtherAssembly.Instance.AutoRefreshPings(p2pConnectorForOtherAssembly.Instance.p2pToken.Token).Forget();
+            }
+
             if(p2pConfig.Instance.getPacketFrequency == p2pConfig.GetPacketFrequency.PerSecond3xFPS){
                 ReciveThreePackets().Forget();
                 return;
@@ -180,6 +184,12 @@ namespace SynicSugar.P2P {
         //SendPacket(for elements)
         public void ConvertFromPacket(SugarPacket packet){
             switch((CHANNELLIST)packet.ch){<#= PacketConvert #>
+                case CHANNELLIST.ObtainPing:
+                    EOSp2p.SendPacket((byte)CHANNELLIST.ReturnPong, packet.payload, UserId.GetUserId(packet.UserID));
+                return;
+                case CHANNELLIST.ReturnPong:
+                    p2pConnectorForOtherAssembly.Instance.GetPong(packet.UserID, packet.payload);
+                return;
                 case CHANNELLIST.Synic:
                     bool restoredPacket = RestorePackets(ref packet);
                     if(!restoredPacket){

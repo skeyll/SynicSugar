@@ -119,7 +119,7 @@ namespace SynicSugar.P2P {
             return pings.pingInfo[id.ToString()].Ping;
         }
         public async UniTask RefreshPing(){
-            await pings.RefreshPings();
+            await pings.RefreshPings(p2pConnectorForOtherAssembly.Instance.p2pToken.Token);
         }
     #endregion
 
