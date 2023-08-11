@@ -69,7 +69,7 @@ namespace SynicSugar.MatchMake {
                         return false;
                     }
 
-                    await OpenConnection();
+                    await OpenConnection(token);
 
                     await MatchMakeManager.Instance.OnSaveLobbyID();
                 }
@@ -100,7 +100,7 @@ namespace SynicSugar.MatchMake {
                         return false;
                     }
 
-                    await OpenConnection();
+                    await OpenConnection(token);
 
                     await MatchMakeManager.Instance.OnSaveLobbyID();
 
@@ -143,7 +143,7 @@ namespace SynicSugar.MatchMake {
                         return false;
                     }
     
-                    await OpenConnection();
+                    await OpenConnection(token);
                     
                     await MatchMakeManager.Instance.OnSaveLobbyID();
                 }
@@ -185,7 +185,7 @@ namespace SynicSugar.MatchMake {
                         return false;
                     }
 
-                    await OpenConnection();
+                    await OpenConnection(token);
 
                     await MatchMakeManager.Instance.OnSaveLobbyID();
                     return true;
@@ -233,7 +233,7 @@ namespace SynicSugar.MatchMake {
 
             p2pInfo.Instance.userIds.isJustReconnected = true;
 
-            await OpenConnection();
+            await OpenConnection(token);
             
             return true;
         }
@@ -396,7 +396,6 @@ namespace SynicSugar.MatchMake {
             if (info.ResultCode != ResultE.Success){
                 waitingMatch = false;
                 Debug.LogErrorFormat("Modify Lobby: error code: {0}", info.ResultCode);
-                // callback?.Invoke(info.ResultCode);
                 return;
             }
 
@@ -1036,12 +1035,12 @@ namespace SynicSugar.MatchMake {
             lobbyHandle.Release();
             return true;
         }
-        async UniTask OpenConnection(){
+        async UniTask OpenConnection(CancellationToken token){
+            Debug.Log("OpenConnect");
             p2pConnectorForOtherAssembly.Instance.OpenConnection(p2pConfig.Instance.FirstConnection == p2pConfig.FirstConnectionType.Strict);
             switch(p2pConfig.Instance.FirstConnection){
                 case p2pConfig.FirstConnectionType.Strict:
                     await p2pInfoMethod.WaitConnectPreparation();
-                    //Pingの取得
                 return;
                 case p2pConfig.FirstConnectionType.TempDelayedDelivery:
                     p2pInfoMethod.DisableDelayedDeliveryAfterElapsed().Forget();

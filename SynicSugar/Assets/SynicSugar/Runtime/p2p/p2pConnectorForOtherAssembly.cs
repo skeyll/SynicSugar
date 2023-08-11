@@ -162,6 +162,35 @@ namespace SynicSugar.P2P {
             }
             return new SugarPacket(){ ch = outChannel, UserID = peerId.ToString(), payload = dataSegment}; 
         }
+        public SugarPacket GetPacketFromBuffer(byte channel){
+            //Set options
+            ReceivePacketOptions options = new ReceivePacketOptions(){
+                LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
+                MaxDataSizeBytes = 1170,
+                RequestedChannel = channel
+            };
+            //Next packet size
+            var getNextReceivedPacketSizeOptions = new GetNextReceivedPacketSizeOptions {
+                LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
+                RequestedChannel = channel
+            };
+
+            P2PHandle.GetNextReceivedPacketSize(ref getNextReceivedPacketSizeOptions, out uint nextPacketSizeBytes);
+
+            byte[] data = new byte[nextPacketSizeBytes];
+            var dataSegment = new ArraySegment<byte>(data);
+            ResultE result = P2PHandle.ReceivePacket(ref options, out ProductUserId peerId, out SocketId socketId, out byte outChannel, dataSegment, out uint bytesWritten);
+            
+            if (result != ResultE.Success){
+#if SYNICSUGAR_LOG //This range is for performance since this is called every frame.
+                if(result == ResultE.InvalidParameters){
+                    Debug.LogErrorFormat("Get Packets: input was invalid: {0}", result);
+                }
+#endif
+                return null; //No packet
+            }
+            return new SugarPacket(){ ch = outChannel, UserID = peerId.ToString(), payload = dataSegment}; 
+        }
         /// <summary>
         /// Clear the packet queues.
         /// Just for PausePacketXXX.
@@ -332,6 +361,7 @@ namespace SynicSugar.P2P {
     #endif
             return;
         }
+        
         if(data.ConnectionType == ConnectionEstablishedType.NewConnection &&
             p2pInfo.Instance.userIds.RemoteUserIds.Contains(UserId.GetUserId(data.RemoteUserId))){
             p2pInfo.Instance.ConnectionNotifier.OnEstablished();

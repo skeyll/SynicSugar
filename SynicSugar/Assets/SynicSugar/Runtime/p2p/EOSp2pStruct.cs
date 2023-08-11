@@ -62,7 +62,6 @@ namespace SynicSugar.P2P {
         readonly ProductUserId value;
         readonly string value_s;
         private UserId(ProductUserId id){
-            UnityEngine.Debug.Log("idCacheCount:" + idCache.Count);
             if(id is null){
                 return;
             }
@@ -129,6 +128,11 @@ namespace SynicSugar.P2P {
         public byte phase;
         public bool syncSinglePhase;
         public int currentSize;
+    }
+    public class PingInformation {
+        internal int Ping;
+        internal DateTime LastUpdatedLocalUTC;
+        internal List<double> tmpPings = new List<double>();
     }
     [MemoryPackable]
     // This way is bad performance. Please let me know if you have a good idea to serialize and send data.

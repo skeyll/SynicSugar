@@ -89,6 +89,7 @@ namespace SynicSugar.P2P {
         /// <param name="value"></param>
         /// <param name="targetId"></param>
         public static void SendPacket(byte ch, byte[] value, UserId targetId){
+            Debug.Log("Send Packet");
             SendPacketOptions options = new SendPacketOptions(){
                 LocalUserId = EOSManager.Instance.GetProductUserId(),
                 RemoteUserId = targetId.AsEpic,
@@ -114,6 +115,7 @@ namespace SynicSugar.P2P {
         /// <param name="value"></param>
         /// <param name="targetId"></param>
         public static void SendPacket(byte ch, ArraySegment<byte> value, UserId targetId){
+            Debug.Log("Return Pong");
             SendPacketOptions options = new SendPacketOptions(){
                 LocalUserId = EOSManager.Instance.GetProductUserId(),
                 RemoteUserId = targetId.AsEpic,

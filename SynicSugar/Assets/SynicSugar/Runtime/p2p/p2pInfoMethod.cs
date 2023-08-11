@@ -1,5 +1,4 @@
 using PlayEveryWare.EpicOnlineServices;
-using Epic.OnlineServices;
 using Epic.OnlineServices.P2P;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
@@ -14,12 +13,13 @@ namespace SynicSugar.P2P {
         }
 
         bool gettingNATType;
+        // MEMO: Maybe, this has bug now. In fact, the packets are discarded until about 2 secs after this.
         /// <summary>
         /// For initial connection. But, after 10 sec, always end.
         /// </summary>
         /// <returns></returns>
         static async internal UniTask WaitConnectPreparation(){
-            await UniTask.WhenAny(UniTask.WaitUntil(() => !p2pInfo.Instance.ConnectionNotifier.completeConnectPreparetion), UniTask.Delay(10000));
+            await UniTask.WhenAny(UniTask.WaitUntil(() => p2pInfo.Instance.ConnectionNotifier.completeConnectPreparetion), UniTask.Delay(10000));
 
             #if SYNICSUGAR_LOG
                 Debug.Log("All connections ready.");
