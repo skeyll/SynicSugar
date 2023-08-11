@@ -6,6 +6,7 @@ using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using SynicSugar.MatchMake;
+using MemoryPack;
 using ResultE = Epic.OnlineServices.Result;
 //We can't call the main-Assembly from own-assemblies.
 //So, use such processes through this assembly.
@@ -373,6 +374,9 @@ namespace SynicSugar.P2P {
         /// </summary>
         public void CloseHostSynic(){
             p2pInfo.Instance.userIds.isJustReconnected = false;
+        }
+        public void GetPong(string id, ArraySegment<byte> utc){
+            p2pInfo.Instance.pings.GetPong(id, utc);
         }
     }
 }

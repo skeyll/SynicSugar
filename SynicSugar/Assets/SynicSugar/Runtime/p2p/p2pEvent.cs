@@ -1,3 +1,4 @@
+#pragma warning disable CS0414 //The field is assigned but its value is never used
 using System;
 using System.Collections.Generic;
 

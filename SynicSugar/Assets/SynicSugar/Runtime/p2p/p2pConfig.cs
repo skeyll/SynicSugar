@@ -84,5 +84,12 @@ namespace SynicSugar.P2P {
         /// MEMO: Can't change this in game for performance now.
         /// </summary>
         internal bool AllowDelayedDelivery;
+        
+        [Range(1, 4)]
+        public byte SamplesPerPing;
+        [Header("If false, need call RefreshPing to GetPing.")]
+        public bool AutoRefreshPing;
+        [Range(1, 60)]
+        public int PingAutoRefreshRateSec = 10;
     }
 }
