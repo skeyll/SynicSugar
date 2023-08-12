@@ -19,7 +19,6 @@ namespace SynicSugar.Samples {
         public string Name;
         [Synic(0)]
         public int submitCount;
-        ChatPlayer opponent; //Maybe: For tmp version
         void Start(){
             GameObject chatCanvas = GameObject.Find("Chat");
             systemManager = chatCanvas.GetComponent<ChatSystemManager>();
@@ -34,23 +33,11 @@ namespace SynicSugar.Samples {
                 uiSets = Instantiate(systemManager.uiSetsPrefabs, chatCanvas.transform);
                 RegisterButtonEvent();
                 EOSDebug.Instance.Log("Chat Mode: Start");
-
-                //These are just Large packet test
-                opponent = ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.RemoteUserIds[0]);
-                GetOpponentLargePacket().Forget();
             }
 
             string GenerateBasicName(){
                 return $"User{OwnerUserID.ToString().Substring(4, 8)}";
             }
-        }
-        //Maybe: For tmp version
-        //Overwrite largepacket and display it on Chat when LargePacket is updated.
-        //Alternate. Current, we don't get the notify to receive SyncSynic packet.
-        async UniTask GetOpponentLargePacket(){
-            await UniTask.WaitUntil(() => !string.IsNullOrEmpty(opponent.LargePacket));
-            EOSDebug.Instance.Log("GetLargePacket");
-            systemManager.chatText.text = opponent.LargePacket;
         }
         void RegisterButtonEvent(){
             uiSets.transform.Find("Submit").GetComponent<Button>().onClick.AddListener(DecideChat);
@@ -69,11 +56,11 @@ namespace SynicSugar.Samples {
 
         [Rpc] //On call, send this ch byte with args.
         public void UpdateChatText(string message){
-            //SynicSugar inserts "SendProcess" here.
-            //We can't put "if" or another on the top of this method.
-            //So, when we need the condition for this process, call this from the other.
+            //SynicSugar inserts "SendProcess" into IL.
+            //We can't put "if" or another on the top of this method.(At the top is always the sending process).
+            //So, if we need the condition to send or not, call this after that condition from the other method.
             //
-            // --- Inserted Process --- 
+            // --- On IL(Like Binary), Inserted Senging Process --- 
             //
 
 
@@ -122,7 +109,7 @@ namespace SynicSugar.Samples {
             systemManager.chatText.text += LargePacket;
             //When the 3rd arg is true, this becomea the rpc to send large packet.
             //Pass false to 4th arg. The opponent will drop the packets for self data except for the moment re-cconect.
-            ConnectHub.Instance.SyncSynic(opponent.OwnerUserID, 1, true, false);
+            ConnectHub.Instance.SyncSynic(p2pInfo.Instance.RemoteUserIds[0], 1, true, false);
         }
         public void DecideUserName(){
             UpdateName(systemManager.nameField.text);

@@ -1,7 +1,6 @@
 using Epic.OnlineServices.P2P;
 using UnityEngine;
 using System;
-using System.Collections.Generic;
 namespace SynicSugar.P2P {
     public class p2pConfig : MonoBehaviour {
 #region Singleton
@@ -13,6 +12,7 @@ namespace SynicSugar.P2P {
                 return;
             }
             Instance = this;
+            AllowDelayedDelivery = FirstConnection == FirstConnectionType.TempDelayedDelivery || FirstConnection == FirstConnectionType.DelayedDelivery;
         }
         void OnDestroy() {
             if( Instance == this ) {
@@ -25,15 +25,15 @@ namespace SynicSugar.P2P {
         ///Options 
         [Header("Interval of sending each users[ms]. Recommend: 3ms-")]
         /// <summary>
-        /// Interval ms on sending to each user in Rpc. </ br>
-        /// If interval is too short and the sending buffer becomes full, the next packets will be discarded.</ br>
+        /// Interval ms on sending to each user in Rpc. <br />>
+        /// If interval is too short and the sending buffer becomes full, the next packets will be discarded.<br />
         /// Recommend: 3ms-
         /// </summary>
         public int interval_sendToAll = 3;
         [Header("Interval until sending next new value[ms]. Recommend: 1000-3000ms.")]
         /// <summary>
-        /// Interval ms that a SyncVar dosen't been send even if the value changes after send that SyncVar.</ br>
-        /// If set short value, may get congesting the band.</ br>
+        /// Interval ms that a SyncVar dosen't been send even if the value changes after send that SyncVar.<br />
+        /// If set short value, may get congesting the band.<br />
         /// Recommend: 1000-3000ms.
         /// </summary>
         public int autoSyncInterval = 1000;
@@ -43,93 +43,53 @@ namespace SynicSugar.P2P {
         public PacketReliability packetReliability = PacketReliability.ReliableOrdered;
         
         public enum GetPacketFrequency {
-            PerSecondx3FPS, PerSecondFPS, PerSecond100, PerSecond50, PerSecond25
+            PerSecond3xFPS, PerSecondFPS, PerSecond100, PerSecond50, PerSecond25
         }
         [Header("PacketReceiver's Frequency/per seconds *Never more than game FPS.")]
         /// <summary>
-        /// Frequency of calling PacketReceiver.</ br>
-        /// Cannot exceed the recive's fps of the app's. </ br>
+        /// Frequency of calling PacketReceiver.<br />
+        /// Cannot exceed the recive's fps of the app's. <br />
         /// </summary>
         public GetPacketFrequency getPacketFrequency = GetPacketFrequency.PerSecond50;
         public bool UseDisconnectedEarlyNotify;
-    #region Obolete
-        public enum ReceiveInterval{
-            Large, Moderate, Small
-        }
-        [Obsolete("getPacketFrequency is new one"), HideInInspector]
-        public ReceiveInterval receiveInterval { 
-            get {
-                switch(getPacketFrequency){
-                    case GetPacketFrequency.PerSecond100:
-                    return ReceiveInterval.Small;
-                    case GetPacketFrequency.PerSecond50:
-                    return ReceiveInterval.Moderate;
-                    default:
-                    return ReceiveInterval.Large;
-                }
-            }
-            set {
-                switch(value){
-                    case ReceiveInterval.Large:
-                    getPacketFrequency = GetPacketFrequency.PerSecond25;
-                    break;
-                    case ReceiveInterval.Moderate:
-                    getPacketFrequency = GetPacketFrequency.PerSecond50;
-                    break;
-                    default:
-                    getPacketFrequency = GetPacketFrequency.PerSecond100;
-                    break;
-                }
-            }
-        }
-    #endregion
-    }
-#region Obsolete
-    public class p2pManager {
-        private p2pManager(){}
-        [Obsolete("This is old. You can use p2pConfig.Instance.XXX().")]
-        public static p2pManager Instance { get; private set; }
-        
-        [Obsolete("This is old. You can use p2pConfig.Instance.XXX")]
-        [HideInInspector] public UserIds userIds {
-            get{
-                return p2pInfo.Instance.userIds;
-            } 
-            set { p2pInfo.Instance.userIds = value; }
-        }
-        
-        [Obsolete("This is old. You can use p2pConfig.Instance.XXX")]
-        public int interval_sendToAll {
-            get{
-                return p2pConfig.Instance.interval_sendToAll;
-            } 
-            set { p2pConfig.Instance.interval_sendToAll = value; }
-        }
-
-        [Obsolete("This is old. You can use p2pConfig.Instance.XXX")]
-        public int autoSyncInterval{
-            get{
-                return p2pConfig.Instance.autoSyncInterval;
-            } 
-            set { p2pConfig.Instance.autoSyncInterval = value; }
-        }
-        public enum ReceiveInterval{
-            Large, Moderate, Small
-        }
-        
-        [Obsolete("This is old. You can use p2pConfig.Instance.XXX")]
         /// <summary>
-        /// Frequency of calling PacketReceiver. [Small 10ms, Moderate 25ms, Large 50ms]</ br>
-        /// Cannot exceed the recive's fps of the app's. </ br>
-        /// Recommend: Moderate. (-8peers, mobile game, non large-party acion game)
+        /// Delay time to return true after matchmaking.<br />
+        /// After the connection is established, EOS has a lag before actual communication is possible.  This is the setting of how to handle it.
         /// </summary>
-        public ReceiveInterval receiveInterval = ReceiveInterval.Moderate;
+        public enum FirstConnectionType{
+            /// <summary>
+            /// Return true after getting Ping. The first connection is sent on SynicSugar, so this is reliable but has a lag.
+            /// </summary>
+            Strict, 
+            /// <summary>
+            /// Return true after just sending connect request. Other peers will discard the initial some packets that the user sends during about 1sec after getting true. (Depends on the ping)
+            /// </summary>
+            Casual, 
+            /// <summary>
+            /// Return true after just sending connect request. Packets in 10 sec after matching are stored in the receive buffer even if the peer haven't accept the connection.
+            /// </summary>
+            TempDelayedDelivery, 
+            /// <summary>
+            /// Return true after just sending connect request. All packets are stored in the receive buffer even if the peer haven't accept the connection. PauseConnections() stops the work.
+            /// </summary>
+            DelayedDelivery
+        }
+        
         /// <summary>
-        /// Quality of connection
+        /// Delay time to return true after matchmaking.<br />
+        /// After the connection is established, EOS has a lag before actual communication is possible.  This is the setting of how to handle it.<br />
         /// </summary>
-        /// 
-        [Obsolete("This is old. You can use p2pConfig.Instance.XXX")]
-        public PacketReliability packetReliability = PacketReliability.ReliableOrdered;
+        public FirstConnectionType FirstConnection;
+        /// <summary>
+        /// MEMO: Can't change this in game for performance now.
+        /// </summary>
+        internal bool AllowDelayedDelivery;
+        
+        [Range(1, 4)]
+        public byte SamplesPerPing;
+        [Header("If false, need call RefreshPing to GetPing.")]
+        public bool AutoRefreshPing;
+        [Range(1, 60)]
+        public int PingAutoRefreshRateSec = 10;
     }
-#endregion
 }

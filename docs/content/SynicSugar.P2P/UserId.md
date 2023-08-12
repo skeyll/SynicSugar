@@ -8,21 +8,17 @@ weight = 3
 
 
 ### Description
-ValueObject for UserID to mediate between SynicSugar and EOSSDK.
-
-
-### Constructor
-| API | description |
-|---|---|
-| UserId(ProductUserId id) | Generate UserID with EOS's UserID |
-| UserId(UserId id) | Generate UserID with this type's UserID |
-| UserId(string idString) | Generate UserID with string UserID |
+Object for UserID to mediate between SynicSugar and EOSSDK.<br>
+This caches all Ids for the duration of a one session.
 
 
 ### Function 
 | API | description |
 |---|---|
 | AsEpic | Convert SynicSugar UserID to EOS's UserID |
+| GetUserId(ProductUserId id) | Instantiate UserID from EOS's UserID or return cache |
+| GetUserId(UserId id) | Return id cache or null |
+| GetUserId(string id) | Return id cache or null |
 
 
 ```cs

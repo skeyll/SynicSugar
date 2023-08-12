@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using SynicSugar.P2P;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,6 +13,7 @@ namespace SynicSugar.Samples {
         void Start() {
             p2pInfo.Instance.ConnectionNotifier.Disconnected += OnDisconect;
             p2pInfo.Instance.ConnectionNotifier.Connected += OnConnected;
+            p2pInfo.Instance.SyncSnyicNotifier.SyncedSynic += OnSyncedSynic;
             //At first, instantiate network objects.
             //It are registered to ConnectHub automatically.
             SynicObject.AllSpawn(chatPlayerPrefab);
@@ -30,6 +32,20 @@ namespace SynicSugar.Samples {
             chatText.text += $"{p2pInfo.Instance.LastConnectedUsersId} Join {System.Environment.NewLine}";
             //Send local data
             ConnectHub.Instance.SyncSynic(p2pInfo.Instance.LastConnectedUsersId, 0, false, true);
+        }
+        //Called each time a SyncSynic packet is received
+        async void OnSyncedSynic(){
+            //As for the reconnect process, it is done in the local user event.
+            if(p2pInfo.Instance.IsLoaclUser(p2pInfo.Instance.LastSyncedUserId) && p2pInfo.Instance.AcceptHostSynic){
+                await UniTask.WaitUntil(() => p2pInfo.Instance.HasReceivedAllSyncSynic);
+                //Update counter
+                inputCount.text = $"ChatCount: {ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.LocalUserId).submitCount} / {ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.RemoteUserIds[0]).submitCount}";
+                return;
+            }
+            if(p2pInfo.Instance.SyncedSynicPhase == 1){  
+                EOSDebug.Instance.Log("GetLargePacket");
+                chatText.text = ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.RemoteUserIds[0]).LargePacket;
+            }
         }
     }
 }

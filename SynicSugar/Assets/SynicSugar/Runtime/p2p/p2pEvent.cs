@@ -1,3 +1,4 @@
+#pragma warning disable CS0414 //The field is assigned but its value is never used
 using System;
 using System.Collections.Generic;
 
@@ -46,6 +47,8 @@ namespace SynicSugar.P2P {
             Connected = null;
             EarlyDisconnected = null;
             Restored = null;
+            establishedMemberCounts = 0;
+            completeConnectPreparetion = false;
         }
         internal void OnDisconnected(UserId id, Reason reason){
             ClosedReason = reason;
@@ -65,6 +68,12 @@ namespace SynicSugar.P2P {
         internal void OnRestored(UserId id){
             ConnectUserId = id;
             Connected?.Invoke();
+        }
+        private int establishedMemberCounts;
+        internal bool completeConnectPreparetion; 
+        internal void OnEstablished(){
+            establishedMemberCounts++;
+            completeConnectPreparetion = p2pInfo.Instance.userIds.RemoteUserIds.Count == establishedMemberCounts;
         }
     }
     
@@ -99,7 +108,7 @@ namespace SynicSugar.P2P {
         internal void UpdateSyncedState(string id, byte phase){
             if (!ReceivedUsers.Contains(id)){
                 ReceivedUsers.Add(id);
-                LastSyncedUserId = new UserId(id);
+                LastSyncedUserId = UserId.GetUserId(id);
                 LastSyncedPhase = phase;
             }
 

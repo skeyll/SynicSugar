@@ -4,8 +4,6 @@ using System;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.SceneManagement;
-
 
 namespace  SynicSugar.Samples {
     public class MatchMake : MonoBehaviour{
@@ -14,16 +12,12 @@ namespace  SynicSugar.Samples {
         [SerializeField] Button startMatchMake, closeLobby, startGame, backtoMenu;
         [SerializeField] MatchGUIState descriptions;
         [SerializeField] MatchMakeConditions matchConditions;
-        [SerializeField] Text buttonText;
+        [SerializeField] Text buttonText, matchmakeState;
         [SerializeField] GameModeSelect modeSelect; //For tankmatchmaking scene, and to cancel matchmake then return to menu.
         //For Tank
         public InputField nameField;
         [SerializeField] Text playerName;
         int level;
-        enum GameMode{
-            Tank, ReadHearts, Chat
-        }
-        GameMode gameMode;
         enum SceneState{
             Standby, inMatchMake, ToGame
         }
@@ -33,28 +27,14 @@ namespace  SynicSugar.Samples {
                 matchmakeContainer = Instantiate(matchmakePrefab);
             }
             SetGUIState();
-            SetGameMode();
         }
         void SetGUIState(){
             descriptions = MatchMakeConfig.SetMatchingText(MatchMakeConfig.Langugage.EN);
+            descriptions.state = matchmakeState;
             descriptions.stopAdditionalInput.AddListener(StopAdditionalInput);
             descriptions.acceptCancel.AddListener(() => ActivateCancelButton(false));
 
             MatchMakeManager.Instance.SetGUIState(descriptions);
-        }
-        void SetGameMode(){
-            string scene = SceneManager.GetActiveScene().ToString();
-            switch(scene){
-                case "TankMatchMake":
-                gameMode = GameMode.Tank;
-                break;
-                case "ReadHearts":
-                gameMode = GameMode.ReadHearts;
-                break;
-                case "Chat":
-                gameMode = GameMode.Chat;
-                break;
-            }
         }
     #endregion
     #region For Recconect
@@ -84,7 +64,7 @@ namespace  SynicSugar.Samples {
                 SwitchGUIState(SceneState.ToGame);
                 return;
             }
-            EOSDebug.Instance.Log("Failer Re-Connect Lobby.");
+            EOSDebug.Instance.Log("Fail to Re-Connect Lobby.");
             SwitchGUIState(SceneState.Standby);
         }
     #endregion
@@ -195,18 +175,18 @@ namespace  SynicSugar.Samples {
             }
         }
         void SwitchGUIState(SceneState state){
-            startMatchMake.gameObject.SetActive(state == SceneState.Standby);
-            closeLobby.gameObject.SetActive(state == SceneState.ToGame);
-            startGame.gameObject.SetActive(state == SceneState.ToGame);
-            backtoMenu.gameObject.SetActive(false);
-        }
-        /// <summary>
-        /// Is there a Lobby that should be reconnected?<br />
-        /// XXX Dependent on the location to save, change the way to check ID.
-        /// </summary>
-        /// <returns></returns>
-        string GetParticipatingLobbyID(){
-            return PlayerPrefs.GetString ("eos_lobbyid", System.String.Empty);
+            if(startMatchMake != null){
+                startMatchMake.gameObject.SetActive(state == SceneState.Standby);
+            }
+            if(closeLobby != null){
+                closeLobby.gameObject.SetActive(state == SceneState.ToGame);
+            }
+            if(startGame != null){
+                startGame.gameObject.SetActive(state == SceneState.ToGame);
+            }
+            if(backtoMenu != null){
+                backtoMenu.gameObject.SetActive(false);
+            }
         }
     }
 }

@@ -74,7 +74,7 @@ namespace SynicSugarGenerator
         public UserId OwnerUserID {
             get { return _ownerUserID; }
             set {
-                _ownerUserID = new UserId(value);
+                _ownerUserID = UserId.GetUserId(value);
                 ConnectHub.Instance.RegisterInstance(_ownerUserID, this);
             }
         }
@@ -84,7 +84,7 @@ namespace SynicSugarGenerator
         /// <summary>
         /// Is this the instance's local? Invalid in Awake. 
         /// </summary>
-        public bool isLocal { get { return _ownerUserID == p2pInfo.Instance.LocalUserId; } }
+        public bool isLocal { get { return p2pInfo.Instance.IsLoaclUser(_ownerUserID); } }
         
         /// <summary>
         /// Is this the id's instance? Invalid in Awake. 

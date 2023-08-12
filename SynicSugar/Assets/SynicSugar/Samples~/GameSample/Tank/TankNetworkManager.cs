@@ -2,33 +2,68 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using SynicSugar.P2P;
 using UnityEngine;
+using UnityEngine.UI;
 namespace  SynicSugar.Samples {
     public class TankNetworkManager : MonoBehaviour{
+        [SerializeField] GameModeSelect modeSelect;
         [SerializeField] GameObject playerPrefab;
-        public TankPlayerData localPlayer;
+        [SerializeField] Text pingText;
         void Start(){
-            //Generate other player to get packet
+            //Generate other player data class
             foreach(var id in p2pInfo.Instance.RemoteUserIds){
-                TankPlayerData playerData = new TankPlayerData(){ OwnerUserID = id };
+                new TankPlayerData(){ OwnerUserID = id };
             }
-            localPlayer = new TankPlayerData();
+            //For local player data class
+            TankPlayerData localPlayer = new TankPlayerData();
             localPlayer.SetOwnerID(p2pInfo.Instance.LocalUserId);
-            //Generate all player model
+
+            //Generate player models
             SynicObject.AllSpawn(playerPrefab);
+
+            p2pInfo.Instance.ConnectionNotifier.Disconnected += OnDisconnected;
+            p2pInfo.Instance.ConnectionNotifier.EarlyDisconnected += OnEarlyDisconnected;
+            p2pInfo.Instance.ConnectionNotifier.Restored += OnRestored;
             //After creating the instances for receive in local, start Packet Receiver.
             ConnectHub.Instance.StartPacketReceiver();
-            //Set Player Name(Sync)
-            localPlayer.PlayerName = TankPassedData.PlayerName;
+            //Set Player Name and Activate PlayerObject
+            //Even if it just sends, each instance must have a UserID in this local.
+            localPlayer.SetPlayerUserName(TankPassedData.PlayerName);
+
+            DisplayPing(this.GetCancellationTokenOnDestroy()).Forget();
         }
 
+        public async UniTaskVoid DisplayPing(CancellationToken token){
+            while(!token.IsCancellationRequested){
+                string pings = p2pInfo.Instance.GetNATType().ToString() + System.Environment.NewLine;
+
+                foreach(var id in p2pInfo.Instance.RemoteUserIds){
+                    pings += $"{ConnectHub.Instance.GetUserInstance<TankPlayerData>(id).PlayerName}: {p2pInfo.Instance.GetPing(id)}{System.Environment.NewLine}";
+                }
+                
+                pingText.text = pings;
+                await UniTask.Delay(3000, cancellationToken: token);
+            }
+        } 
+
+        void OnEarlyDisconnected(){
+            ConnectHub.Instance.GetUserInstance<TankPlayer>(p2pInfo.Instance.LastDisconnectedUsersId).gameObject.SetActive(false);
+        }
+        void OnRestored(){
+            ConnectHub.Instance.GetUserInstance<TankPlayer>(p2pInfo.Instance.LastDisconnectedUsersId).gameObject.SetActive(true);
+        }
+        void OnDisconnected(){
+            //This sample doesn't allow reconnection, so this distinction doesn't matters not to need hold the disconnected user data.
+            //However, if your project allows to recconect, Host should hold the objects in order to send data with SyncSynic.
+            if(!p2pInfo.Instance.IsHost()){
+                Destroy(ConnectHub.Instance.GetUserInstance<TankPlayer>(p2pInfo.Instance.LastDisconnectedUsersId).gameObject);
+            }
+        }
         public void ReturnToTitle(){
             AsyncReturnToTitle().Forget();
         }
         async UniTask AsyncReturnToTitle(){
-            CancellationTokenSource cnsToken = new CancellationTokenSource();
             await ConnectHub.Instance.CloseSession();
             
-            GameModeSelect modeSelect = new GameModeSelect();
             modeSelect.ChangeGameScene(GameModeSelect.GameScene.MainMenu.ToString());
         }
     }

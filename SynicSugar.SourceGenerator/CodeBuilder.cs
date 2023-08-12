@@ -13,17 +13,17 @@
         }
         //SyncVar
         internal string CreatePlayerSyncVarPacketConvert(string name, string variable, string param, string nameSpace, bool isPublic) {
-            string assignment = isPublic ? $"MemoryPackSerializer.Deserialize<{GetFullName(nameSpace, param)}>(packet.payload, ref {name}[packet.UserID].{variable});" :
-              $"{name}[packet.UserID].SetLocal{variable}(MemoryPackSerializer.Deserialize<{GetFullName(nameSpace, param)}>(packet.payload));";
+            string assignment = isPublic ? $"MemoryPackSerializer.Deserialize<{GetFullName(nameSpace, param)}>(payload, ref {name}[id].{variable});" :
+              $"{name}[id].SetLocal{variable}(MemoryPackSerializer.Deserialize<{GetFullName(nameSpace, param)}>(payload));";
             return $@"
                 case CHANNELLIST.{variable}:
                     {assignment}
                 return;";
         }
         internal string CreateCommonsSyncVarPacketConvert(string name, string variable, string param, string nameSpace, bool isPublic){
-            string assignment = isPublic ? $"MemoryPackSerializer.Deserialize<{GetFullName(nameSpace, param)}>(packet.payload, ref {name}.{variable});" :
+            string assignment = isPublic ? $"MemoryPackSerializer.Deserialize<{GetFullName(nameSpace, param)}>(payload, ref {name}.{variable});" :
              $@"{name}.isLocalCall = false;
-                    {name}.SetLocal{variable}(MemoryPackSerializer.Deserialize<{GetFullName(nameSpace, param)}>(packet.payload));
+                    {name}.SetLocal{variable}(MemoryPackSerializer.Deserialize<{GetFullName(nameSpace, param)}>(payload));
                     {name}.isLocalCall = true;";
             return $@"
                 case CHANNELLIST.{variable}:
@@ -32,23 +32,23 @@
         }
         //TargetRPC
         internal string CreatePlayerTargetRpcPacketConvert(string rootName, string method, string param, string paramNs){
-            string paramName = string.IsNullOrEmpty(param) ? System.String.Empty : $", MemoryPackSerializer.Deserialize<{GetFullName(paramNs, param)}>(packet.payload)";
+            string paramName = string.IsNullOrEmpty(param) ? System.String.Empty : $", MemoryPackSerializer.Deserialize<{GetFullName(paramNs, param)}>(payload)";
             return $@"
                 case CHANNELLIST.{method}:
-                    {rootName}[packet.UserID].{method}(new UserId(packet.UserID){paramName});
+                    {rootName}[id].{method}(UserId.GetUserId(id){paramName});
                 return;";
         }
         //RPC
         internal string CreatePlayerRpcPacketConvert(string rootName, string method, string param, string paramNs){
-            string paramName = string.IsNullOrEmpty(param) ? System.String.Empty : $"MemoryPackSerializer.Deserialize<{GetFullName(paramNs, param)}>(packet.payload)";
+            string paramName = string.IsNullOrEmpty(param) ? System.String.Empty : $"MemoryPackSerializer.Deserialize<{GetFullName(paramNs, param)}>(payload)";
             return $@"
                 case CHANNELLIST.{method}:
-                    {rootName}[packet.UserID].{method}({paramName});
+                    {rootName}[id].{method}({paramName});
                 return;";
         }
         internal string CreateCommonsRpcPacketConvert(string rootName, string method, string param, string paramNs){
-            //string fixedParam = string.IsNullOrEmpty(param) ? System.String.Empty : $"MemoryPackSerializer.Deserialize<{GetFullName(paramNameSpace, param)}>(packet.payload))";
-            string paramName = string.IsNullOrEmpty(param) ? System.String.Empty : $"MemoryPackSerializer.Deserialize<{GetFullName(paramNs, param)}>(packet.payload)";
+            //string fixedParam = string.IsNullOrEmpty(param) ? System.String.Empty : $"MemoryPackSerializer.Deserialize<{GetFullName(paramNameSpace, param)}>(payload))";
+            string paramName = string.IsNullOrEmpty(param) ? System.String.Empty : $"MemoryPackSerializer.Deserialize<{GetFullName(paramNs, param)}>(payload)";
             return $@"
                 case CHANNELLIST.{method}:
                     {rootName}.isLocalCall = false;

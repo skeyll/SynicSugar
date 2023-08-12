@@ -45,24 +45,24 @@ namespace SynicSugar.P2P{
 
             EOSp2p.SendLargePacket(255, compressor.ToArray(), targetId, syncedHierarchy, syncSingleHierarchy);
         }
-        public void ConvertFormPacket(SugarPacket packet){
-            switch((CHANNELLIST)packet.ch){
-                case CHANNELLIST.Test:
-                break;
-                case CHANNELLIST.None:
-                bool restoredPacket = RestorePackets(packet);
+    //     public void ConvertFormPacket(SugarPacket packet){
+    //         switch((CHANNELLIST)packet.ch){
+    //             case CHANNELLIST.Test:
+    //             break;
+    //             case CHANNELLIST.None:
+    //             bool restoredPacket = RestorePackets(packet);
 
-                if(!restoredPacket){
-    #if SYNICSUGAR_LOG 
-                    Debug.LogFormat("ConvertFormPacket: Restore packet is in progress. From {0}", packet.UserID);
-    #endif
-                    break;
-                }
-                // 受信処理(LargePacketInfomation)
-                //Data二つを=nullして開放
-                break;
-            }
-        }
+    //             if(!restoredPacket){
+    // #if SYNICSUGAR_LOG 
+    //                 Debug.LogFormat("ConvertFormPacket: Restore packet is in progress. From {0}", packet.UserID);
+    // #endif
+    //                 break;
+    //             }
+    //             // 受信処理(LargePacketInfomation)
+    //             //Data二つを=nullして開放
+    //             break;
+    //         }
+    //     }
         // Dictionary<string, List<ArraySegment<byte>>> buffer = new Dictionary<string, List<ArraySegment<byte>>>();
         // Dictionary<string, LargePacketInfomation> packetInfo = new Dictionary<string, LargePacketInfomation>();
         // void SyncedSynics(UserId targetId, byte[] restoredPacket){
@@ -99,24 +99,24 @@ namespace SynicSugar.P2P{
         
         Dictionary<string, byte[]> buffer = new Dictionary<string, byte[]>();
         Dictionary<string, LargePacketInfomation> packetInfo = new Dictionary<string, LargePacketInfomation>();
-        bool RestorePackets(SugarPacket packet){
-            if(!buffer.ContainsKey(packet.UserID)){
-                packetInfo.Add(packet.UserID, new LargePacketInfomation(){  chunk = packet.payload[1], 
-                                                                            hierarchy = packet.payload[2], 
-                                                                            syncSpecificHierarchy = packet.payload[3] == 1 ? true : false });
-                //Prep enough byte[]
-                buffer.Add(packet.UserID, new byte[packet.payload[1] * 1100]);
-            }
-            int packetIndex = packet.payload[0];
-            int offset = packetIndex * 1100;
+        // bool RestorePackets(SugarPacket packet){
+        //     if(!buffer.ContainsKey(packet.UserID)){
+        //         packetInfo.Add(packet.UserID, new LargePacketInfomation(){  chunk = packet.payload[1], 
+        //                                                                     phase = packet.payload[2], 
+        //                                                                     syncSinglePhase = packet.payload[3] == 1 ? true : false });
+        //         //Prep enough byte[]
+        //         buffer.Add(packet.UserID, new byte[packet.payload[1] * 1100]);
+        //     }
+        //     int packetIndex = packet.payload[0];
+        //     int offset = packetIndex * 1100;
 
-            Span<byte> packetPayload = packet.payload.Slice(4);
-            //Copy Byte from what come in
-            Buffer.BlockCopy(packetPayload.ToArray(), 0, buffer[packet.UserID], offset, packetPayload.Length);
-            packetInfo[packet.UserID].chunk --;
-            //Comming all?
-            return packetInfo[packet.UserID].chunk == 0 ? true : false;
-        }
+        //     Span<byte> packetPayload = packet.payload.Slice(4);
+        //     //Copy Byte from what come in
+        //     Buffer.BlockCopy(packetPayload.ToArray(), 0, buffer[packet.UserID], offset, packetPayload.Length);
+        //     packetInfo[packet.UserID].chunk --;
+        //     //Comming all?
+        //     return packetInfo[packet.UserID].chunk == 0 ? true : false;
+        // }
 
             // LargePacketInfomation これにIntCountかなにかの項目を追加して
 

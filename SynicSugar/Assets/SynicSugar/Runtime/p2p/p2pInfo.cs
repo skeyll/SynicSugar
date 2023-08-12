@@ -1,6 +1,6 @@
-using Epic.OnlineServices.P2P;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
-using System;
+using System.Threading;
 using System.Collections.Generic;
 namespace SynicSugar.P2P {
     public class p2pInfo : MonoBehaviour {
@@ -13,9 +13,13 @@ namespace SynicSugar.P2P {
                 return;
             }
             Instance = this;
+            userIds = new ();
+            infoMethod = new();
+            pings = new();
         }
         void OnDestroy() {
             if( Instance == this ) {
+                UserId.CacheClear();
                 ConnectionNotifier.Clear();
                 SyncSnyicNotifier.Clear();
 
@@ -23,7 +27,9 @@ namespace SynicSugar.P2P {
             }
         }
 #endregion
-        [HideInInspector] internal UserIds userIds = new UserIds();
+        internal p2pInfoMethod infoMethod;
+        internal UserIds userIds;
+        internal p2pPing pings;
         public UserId LocalUserId => userIds.LocalUserId;
         public List<UserId> RemoteUserIds => userIds.RemoteUserIds;
 
@@ -34,7 +40,7 @@ namespace SynicSugar.P2P {
 
         public SyncSnyicNotifier SyncSnyicNotifier = new SyncSnyicNotifier();
         /// <summary>
-        /// Return True only once when this local user is received SyncSync from every other peers of the current session. </ br>
+        /// Return True only once when this local user is received SyncSync from every other peers of the current session. <br />
         /// After return true, all variable for this flag is initialized and returns False again.
         /// </summary>
         /// <returns></returns>
@@ -60,6 +66,15 @@ namespace SynicSugar.P2P {
         public int GetAllConnectionMemberCount(){
             return 1 + userIds.RemoteUserIds.Count + userIds.LeftUsers.Count; 
         }
+        /// <summary>
+        /// Update local user's NATType to the latest state.
+        /// </summary>
+        public async UniTask QueryNATType() => await infoMethod.QueryNATType();
+        /// <summary>
+        /// Get last-queried NAT-type, if it has been successfully queried.
+        /// </summary>
+        /// <returns>Open means being able connect with direct p2p. Otherwise, the connection may be via Epic relay.</returns>
+        public NATType GetNATType() => infoMethod.GetNATType();
     #region IsHost
         /// <summary>
         /// Is this local user Game Host?
@@ -99,5 +114,14 @@ namespace SynicSugar.P2P {
             return targetId == userIds.LocalUserId.ToString();
         }
     #endregion
+    #region 
+        public int GetPing(UserId id){
+            return pings.pingInfo[id.ToString()].Ping;
+        }
+        public async UniTask RefreshPing(){
+            await pings.RefreshPings(p2pConnectorForOtherAssembly.Instance.p2pToken.Token);
+        }
+    #endregion
+
     }
 }

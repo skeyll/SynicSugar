@@ -8,7 +8,7 @@ namespace SynicSugar.P2P {
     /// <summary>
     /// Hold user ids in Room player.
     /// </summary>
-    public class UserIds {
+    internal class UserIds {
         internal UserId LocalUserId;
         internal List<UserId> RemoteUserIds;
 
@@ -21,24 +21,26 @@ namespace SynicSugar.P2P {
         // For Anti-Cheat to rewrite other player data.
         internal bool isJustReconnected;
         internal UserIds(){
-            LocalUserId = new UserId(EOSManager.Instance.GetProductUserId());
+            LocalUserId = UserId.GetUserId(EOSManager.Instance.GetProductUserId());
         }
         /// <summary>
         /// Remove user ID of leaving lobby.<br />
         /// </summary>
         /// <param name="targetId"></param>
         internal void RemoveUserId(ProductUserId targetId){
-            UserId userId = new UserId(targetId);
+            UserId userId = UserId.GetUserId(targetId);
             RemoteUserIds.Remove(userId);
+            p2pInfo.Instance.pings.pingInfo.Remove(userId.ToString());
         }
         /// <summary>
         /// Move UserID from RemotoUserIDs to LeftUsers not to SendPacketToALl in vain.<br />
         /// </summary>
         /// <param name="targetId"></param>
         internal void MoveTargetUserIdToLefts(ProductUserId targetId){
-            UserId userId = new UserId(targetId);
+            UserId userId = UserId.GetUserId(targetId);
             RemoteUserIds.Remove(userId);
             LeftUsers.Add(userId);
+            p2pInfo.Instance.pings.pingInfo[userId.ToString()].Ping = -1;
         }
         /// <summary>
         /// Move UserID to RemotoUserIDs from LeftUsers on reconnect.
@@ -46,53 +48,88 @@ namespace SynicSugar.P2P {
         /// <param name="targetId"></param>
         /// <returns></returns>
         internal void MoveTargetUserIdToRemoteUsersFromLeft(ProductUserId targetId){
-            UserId userId = new UserId(targetId);
+            UserId userId = UserId.GetUserId(targetId);
             LeftUsers.Remove(userId);
             RemoteUserIds.Add(userId);
         }
     }
-    public struct UserId {
-        #nullable enable
-        readonly ProductUserId? value;
-        #nullable disable
-        readonly string stringValue;
-        public UserId(ProductUserId id){
+    public class UserId {
+    #region Cache
+        static internal Dictionary<string, UserId> idCache = new();
+        static internal void CacheClear(){
+            idCache.Clear();
+        }
+    #endregion
+
+        readonly ProductUserId value;
+        readonly string value_s;
+        private UserId(ProductUserId id){
+            if(id is null){
+                return;
+            }
             this.value = id;
-            this.stringValue = id != null ? id.ToString() : System.String.Empty;
+            this.value_s = id.ToString();
         }
-        public UserId(UserId id){
-            this.value = id.AsEpic;
-            this.stringValue = id != null ? id.ToString() : System.String.Empty;
+
+        /// <summary>
+        /// We can only create a new UserID Instance from Epic's product UserID.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns> <summary>
+        static public UserId GetUserId(ProductUserId id){
+            string s = id.ToString();
+            if(idCache.ContainsKey(s)){
+                return idCache[s];
+            }
+            UserId obj = new UserId(id);
+            idCache.Add(s, obj);
+            return obj;
         }
-        public UserId(string idString){
-            this.value = ProductUserId.FromString(idString);
-            this.stringValue = idString;
+        static public UserId GetUserId(UserId id){
+            string s = id.ToString();
+            if(idCache.ContainsKey(s)){
+                return idCache[s];
+            }
+            return null;
         }
-        public readonly ProductUserId AsEpic => value;
-        public static explicit operator ProductUserId(UserId id) => id.value;
-        public static explicit operator UserId(ProductUserId value) => new UserId(value);
+        static public UserId GetUserId(string id){
+            if(idCache.ContainsKey(id)){
+                return idCache[id];
+            }
+            return null;
+        }
+        static private UserId ToUserId(ProductUserId id){
+            string key = id.ToString();
+            if(idCache.ContainsKey(key)){
+                return idCache[key];
+            }
+            return null;
+        }
+        public ProductUserId AsEpic => value;
+
+        public static explicit operator ProductUserId(UserId id) => GetUserId(id).value;
+        public static explicit operator UserId(ProductUserId value) => ToUserId(value);
+
         public bool Equals(UserId other) => value.Equals(other.value);
-        #nullable enable
-        public override bool Equals(object? obj){
+        public override bool Equals(object obj){
             if (obj is null || obj.GetType() != typeof(UserId)) { return false; }
             return Equals((UserId)obj);
         }
-        #nullable restore
         public override int GetHashCode() => value.GetHashCode();
-        public override string ToString() => stringValue;
+        public override string ToString() => value_s;
         public static bool operator ==(in UserId x, in UserId y) => x.value.Equals(y.value);
         public static bool operator !=(in UserId x, in UserId y) => !x.value.Equals(y.value);
-    }
-    public class SugarPacket {
-        public byte ch;
-        public string UserID;
-        public ArraySegment<byte> payload;
     }
     public class LargePacketInfomation {
         public byte chunk;
         public byte phase;
         public bool syncSinglePhase;
         public int currentSize;
+    }
+    public class PingInformation {
+        internal int Ping;
+        internal DateTime LastUpdatedLocalUTC;
+        internal List<double> tmpPings = new List<double>();
     }
     [MemoryPackable]
     // This way is bad performance. Please let me know if you have a good idea to serialize and send data.

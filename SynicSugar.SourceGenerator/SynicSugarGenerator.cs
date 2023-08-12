@@ -216,7 +216,7 @@ namespace SynicSugar.Generator {
                     }
                 }
                 //For library api
-                SyncList.Append("Synic = 255");
+                SyncList.Append("ObtainPing = 253, ReturnPong = 254, Synic = 255");
 
                 //Set base class data
                 StringBuilder Reference = new StringBuilder();

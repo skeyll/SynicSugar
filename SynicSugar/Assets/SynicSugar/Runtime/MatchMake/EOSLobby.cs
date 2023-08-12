@@ -63,8 +63,15 @@ namespace SynicSugar.MatchMake {
                 }
 
                 if(isMatchSuccess){
-                    InitConnectConfig(ref p2pInfo.Instance.userIds);
-                    p2pConnectorForOtherAssembly.Instance.OpenConnection();
+                    MatchMakeManager.Instance.matchState.stopAdditionalInput?.Invoke();
+                    bool canInit = InitConnectConfig(ref p2pInfo.Instance.userIds);
+                    if(!canInit){
+                        Debug.LogError("Fail InitConnectConfig");
+                        return false;
+                    }
+
+                    await OpenConnection();
+
                     await MatchMakeManager.Instance.OnSaveLobbyID();
                 }
                 return isMatchSuccess;
@@ -79,6 +86,7 @@ namespace SynicSugar.MatchMake {
                 isMatchSuccess = false;
                 waitingMatch = true;
                 MatchMakeManager.Instance.matchState.acceptCancel?.Invoke();
+
                 await UniTask.WhenAny(UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token), timer);
                 
                 //Matching cancel
@@ -87,8 +95,14 @@ namespace SynicSugar.MatchMake {
                 }
                 
                 if(isMatchSuccess){
-                    InitConnectConfig(ref p2pInfo.Instance.userIds);
-                    p2pConnectorForOtherAssembly.Instance.OpenConnection();    
+                    MatchMakeManager.Instance.matchState.stopAdditionalInput?.Invoke();
+                    bool canInit = InitConnectConfig(ref p2pInfo.Instance.userIds);
+                    if(!canInit){
+                        Debug.LogError("Fail InitConnectConfig");
+                        return false;
+                    }
+
+                    await OpenConnection();
 
                     await MatchMakeManager.Instance.OnSaveLobbyID();
 
@@ -125,8 +139,14 @@ namespace SynicSugar.MatchMake {
                 }
 
                 if(isMatchSuccess){
-                    InitConnectConfig(ref p2pInfo.Instance.userIds);
-                    p2pConnectorForOtherAssembly.Instance.OpenConnection();
+                    MatchMakeManager.Instance.matchState.stopAdditionalInput?.Invoke();
+                    bool canInit = InitConnectConfig(ref p2pInfo.Instance.userIds);
+                    if(!canInit){
+                        Debug.LogError("Fail InitConnectConfig");
+                        return false;
+                    }
+    
+                    await OpenConnection();
                     
                     await MatchMakeManager.Instance.OnSaveLobbyID();
                 }
@@ -162,8 +182,15 @@ namespace SynicSugar.MatchMake {
                 }
 
                 if(isMatchSuccess){
-                    InitConnectConfig(ref p2pInfo.Instance.userIds);
-                    p2pConnectorForOtherAssembly.Instance.OpenConnection();
+                    MatchMakeManager.Instance.matchState.stopAdditionalInput?.Invoke();
+                    bool canInit = InitConnectConfig(ref p2pInfo.Instance.userIds);
+                    if(!canInit){
+                        Debug.LogError("Fail InitConnectConfig");
+                        return false;
+                    }
+
+                    await OpenConnection();
+
                     await MatchMakeManager.Instance.OnSaveLobbyID();
                     return true;
                 }
@@ -202,9 +229,16 @@ namespace SynicSugar.MatchMake {
                 EOSManager.Instance.GetEOSLobbyInterface().RemoveNotifyLobbyMemberStatusReceived(handle);
             });
             //Prep Connection
-            InitConnectConfig(ref p2pInfo.Instance.userIds);
+            bool canInit = InitConnectConfig(ref p2pInfo.Instance.userIds);
+            if(!canInit){
+                Debug.LogError("Fail InitConnectConfig");
+                return false;
+            }
+
             p2pInfo.Instance.userIds.isJustReconnected = true;
-            p2pConnectorForOtherAssembly.Instance.OpenConnection();
+
+            await OpenConnection();
+            
             return true;
         }
         async UniTask TimeoutTimer(CancellationToken token){
@@ -287,9 +321,6 @@ namespace SynicSugar.MatchMake {
                 return;
             }
 
-            // OnLobbyCallback callback = info.ClientData as OnLobbyCallback;
-            // callback?.Invoke(Result.Success);
-
             CurrentLobby.LobbyId = info.LobbyId;
 
             isMatchSuccess = true;
@@ -369,7 +400,6 @@ namespace SynicSugar.MatchMake {
             if (info.ResultCode != ResultE.Success){
                 waitingMatch = false;
                 Debug.LogErrorFormat("Modify Lobby: error code: {0}", info.ResultCode);
-                // callback?.Invoke(info.ResultCode);
                 return;
             }
 
@@ -668,7 +698,7 @@ namespace SynicSugar.MatchMake {
             //In game
             // Hosts changed?
             if (data.CurrentStatus == LobbyMemberStatus.Promoted){
-                p2pInfo.Instance.userIds.HostUserId = new UserId(CurrentLobby.LobbyOwner);
+                p2pInfo.Instance.userIds.HostUserId = UserId.GetUserId(CurrentLobby.LobbyOwner);
 
                 #if SYNICSUGAR_LOG
                     Debug.Log($"MemberStatusNotyfy: {data.TargetUserId} is promoted to host.");
@@ -676,7 +706,7 @@ namespace SynicSugar.MatchMake {
                 if(!CurrentLobby.isHost()){
                     //MEMO: Now, if user disconnect from Lobby and then change hosts, the user become newbie.
                     //Guest Don't need to hold user id 
-                    p2pInfo.Instance.userIds.LeftUsers = new List<UserId>();
+                    // p2pInfo.Instance.userIds.LeftUsers = new List<UserId>();
                 }
             }else if(data.CurrentStatus == LobbyMemberStatus.Left) {
                 #if SYNICSUGAR_LOG
@@ -688,10 +718,10 @@ namespace SynicSugar.MatchMake {
                     Debug.Log($"MemberStatusNotyfy: {data.TargetUserId} diconnect from lobby.");
                 #endif
                 p2pInfo.Instance.userIds.MoveTargetUserIdToLefts(data.TargetUserId);
-                p2pInfo.Instance.ConnectionNotifier.OnDisconnected(new UserId(data.TargetUserId), Reason.Disconnected);
+                p2pInfo.Instance.ConnectionNotifier.OnDisconnected(UserId.GetUserId(data.TargetUserId), Reason.Disconnected);
             }else if(data.CurrentStatus == LobbyMemberStatus.Joined){
                 p2pInfo.Instance.userIds.MoveTargetUserIdToRemoteUsersFromLeft(data.TargetUserId);
-                p2pInfo.Instance.ConnectionNotifier.OnConnected(new UserId(data.TargetUserId));
+                p2pInfo.Instance.ConnectionNotifier.OnConnected(UserId.GetUserId(data.TargetUserId));
             }
         }
         /// <summary>
@@ -961,9 +991,10 @@ namespace SynicSugar.MatchMake {
         bool InitConnectConfig(ref UserIds userIds){
             //Crate copy handle
             LobbyInterface lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();
-            CopyLobbyDetailsHandleOptions options = new CopyLobbyDetailsHandleOptions();
-            options.LobbyId = CurrentLobby.LobbyId;
-            options.LocalUserId = EOSManager.Instance.GetProductUserId();
+            CopyLobbyDetailsHandleOptions options = new CopyLobbyDetailsHandleOptions(){
+                LobbyId = CurrentLobby.LobbyId,
+                LocalUserId = EOSManager.Instance.GetProductUserId()
+            };
 
             ResultE result = lobbyInterface.CopyLobbyDetailsHandle(ref options, out LobbyDetails lobbyHandle );
 
@@ -989,7 +1020,7 @@ namespace SynicSugar.MatchMake {
             for(uint i = 0; i < memberCount; i++){
                 memberOptions.MemberIndex = i;
                 if(userIds.LocalUserId.AsEpic != lobbyHandle.GetMemberByIndex(ref memberOptions)){
-                    userIds.RemoteUserIds.Add(new UserId(lobbyHandle.GetMemberByIndex(ref memberOptions)));
+                    userIds.RemoteUserIds.Add(UserId.GetUserId(lobbyHandle.GetMemberByIndex(ref memberOptions)));
                 }
             }
             //Get lobby's attribute count
@@ -1003,10 +1034,26 @@ namespace SynicSugar.MatchMake {
             }
             p2pConnectorForOtherAssembly.Instance.ScoketName = EOSLobbyExtenstions.GenerateLobbyAttribute(socket).STRING;
             //For options
-            userIds.HostUserId = new UserId(CurrentLobby.LobbyOwner);
-            userIds.LeftUsers = new List<UserId>();
+            userIds.HostUserId = UserId.GetUserId(CurrentLobby.LobbyOwner);
+            userIds.LeftUsers = new();
             lobbyHandle.Release();
             return true;
+        }
+        async UniTask OpenConnection(){
+            p2pConnectorForOtherAssembly.Instance.OpenConnection(p2pConfig.Instance.FirstConnection == p2pConfig.FirstConnectionType.Strict);
+            p2pInfo.Instance.infoMethod.Init();
+            p2pInfo.Instance.pings.Init();
+            switch(p2pConfig.Instance.FirstConnection){
+                case p2pConfig.FirstConnectionType.Strict:
+                    await p2pInfoMethod.WaitConnectPreparation();
+                return;
+                case p2pConfig.FirstConnectionType.TempDelayedDelivery:
+                    p2pInfoMethod.DisableDelayedDeliveryAfterElapsed().Forget();
+                return;
+                case p2pConfig.FirstConnectionType.Casual:
+                case p2pConfig.FirstConnectionType.DelayedDelivery:
+                return;
+            }
         }
         /// <summary>
         /// For library user to save ID.
