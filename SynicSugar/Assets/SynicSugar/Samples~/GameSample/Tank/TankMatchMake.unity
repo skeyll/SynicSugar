@@ -1973,6 +1973,22 @@ PrefabInstance:
       propertyPath: m_Name
       value: NetworkManager
       objectReference: {fileID: 0}
+    - target: {fileID: 2114254298220440419, guid: e18422c96d27f49489abe8b774c3a6b9, type: 3}
+      propertyPath: SamplesPerPing
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2114254298220440419, guid: e18422c96d27f49489abe8b774c3a6b9, type: 3}
+      propertyPath: AutoRefreshPing
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2114254298220440419, guid: e18422c96d27f49489abe8b774c3a6b9, type: 3}
+      propertyPath: FirstConnection
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2114254298220440419, guid: e18422c96d27f49489abe8b774c3a6b9, type: 3}
+      propertyPath: UseDisconnectedEarlyNotify
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

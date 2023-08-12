@@ -1,7 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using SynicSugar.P2P;
-using MemoryPack;
+using System;
 namespace  SynicSugar.Samples {
     [NetworkPlayer(true)]
     public partial class TankPlayer : MonoBehaviour {
@@ -9,86 +10,78 @@ namespace  SynicSugar.Samples {
             Stay, Move
         }
         CurrentState currentState;
-        PositionInfo positionInfo;
+        public enum Direction{
+            Up, Left, Down, Right, Neutral
+        }
+        public enum Key{
+            W, A, S, D
+        }
+        Direction direction = Direction.Neutral;
+        //Fix to exact position every 3 seconds.
+        [SyncVar(3000)] Vector3 playerPos;
+
         [SerializeField] Text playerName;
         void Start(){
-            positionInfo = new PositionInfo(){
-                playerPos = this.transform.position,
-                direction = PositionInfo.Direction.Neutral
-            };
+            //In local, register player event to EventTrigger
+            if(isLocal){
+                RegisterButtonEvents();
+            }
+        }
+        void RegisterButtonEvents(){
+            GameObject padParent = GameObject.Find("UICanvas").gameObject.transform.Find("InputPads").gameObject;
+
+            foreach(var k in Enum.GetValues(typeof(Key))){
+                Key tmp = (Key)k;
+                RegisterEventTrigger(padParent, tmp);
+            }
+        }
+        void RegisterEventTrigger(GameObject parent, Key key){
+            GameObject keyObject = parent.transform.Find(key.ToString()).gameObject;
+            keyObject.AddComponent<EventTrigger>();
+
+            EventTrigger trigger = keyObject.GetComponent<EventTrigger>();
+
+            EventTrigger.Entry move = new EventTrigger.Entry();
+            move.eventID = EventTriggerType.PointerDown;
+            move.callback.AddListener((d) => {Move((int)key);});
+            trigger.triggers.Add(move);
+
+            EventTrigger.Entry stop = new EventTrigger.Entry();
+            stop.eventID = EventTriggerType.PointerUp;
+            stop.callback.AddListener((d) => {Stop();});
+            trigger.triggers.Add(stop);
         }
         void Update(){
-            //Change local player state
-            if(isLocal){
-                if(!(Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D))){
-                    if(currentState == CurrentState.Move){
-                        Stop();
-                    }
-                    return;
-                    
-                }
-                if(currentState == CurrentState.Stay){
-                    Move();
-                }
-                PositionInfo.Direction newDirection = positionInfo.direction;
-                if(Input.GetKey(KeyCode.W)){
-                    newDirection = PositionInfo.Direction.Up;
-                }else if(Input.GetKey(KeyCode.A)){
-                    newDirection = PositionInfo.Direction.Left;
-                }else if(Input.GetKey(KeyCode.S)){
-                    newDirection = PositionInfo.Direction.Down;
-                }else if(Input.GetKey(KeyCode.D)){
-                    newDirection = PositionInfo.Direction.Right;
-                }
-                //Need "new()" to Sync.
-                //But new Vector3() is heacy, so instantiate only on changing direction.
-                //In other player client, instance every three seconds (call syncVar).
-                if(newDirection != positionInfo.direction){
-                    PositionInfo newPosInfo = new PositionInfo(){
-                        playerPos = this.transform.position,
-                        direction = newDirection
-                    };
-                    UpdateCurrentDirection(newPosInfo);
-                }
-            }
-
             if(currentState == CurrentState.Move){
-                float moveDelta = 5 * Time.deltaTime;
-                //Sing
-                moveDelta *= positionInfo.direction == PositionInfo.Direction.Up || positionInfo.direction == PositionInfo.Direction.Right ? 1 : -1;
+                //Reflects current value
+                playerPos = this.transform.position;
 
-                if(positionInfo.direction == PositionInfo.Direction.Up || positionInfo.direction == PositionInfo.Direction.Down){
-                    this.transform.position += new Vector3(0f, 0f, moveDelta);
+                float moveDelta = 5 * Time.deltaTime;
+                //+ or -?
+                moveDelta *= direction == Direction.Up || direction == Direction.Right ? 1 : -1;
+
+                if(direction == Direction.Up || direction == Direction.Down){
+                    playerPos += new Vector3(0f, 0f, moveDelta);
                 }else{
-                    this.transform.position += new Vector3(moveDelta, 0f, 0f);
+                    playerPos += new Vector3(moveDelta, 0f, 0f);
                 }
+
+                this.transform.position = playerPos;
             }
         }
 
         [Rpc]
-        public void Move(){
+        public void Move(int direction){
             currentState = CurrentState.Move;
+            this.direction = (Direction)direction;
         }
         [Rpc]
         public void Stop(){
             currentState = CurrentState.Stay;
-            positionInfo.direction = PositionInfo.Direction.Neutral;
-        }
-        [Rpc]
-        public void UpdateCurrentDirection(PositionInfo posInfo){
-            positionInfo.direction = posInfo.direction;
-            positionInfo.playerPos = new Vector3(posInfo.playerPos.x, posInfo.playerPos.y, posInfo.playerPos.z);
+            direction = Direction.Neutral;
         }
         public void SetNameText(string name){
             playerName.text = name;
         }
-    }
-    [MemoryPackable]
-    public partial class PositionInfo{
-        public Vector3 playerPos;
-        public enum Direction{
-            Neutral, Up, Left, Down, Right
-        }
-        public Direction direction;
     }
 }
