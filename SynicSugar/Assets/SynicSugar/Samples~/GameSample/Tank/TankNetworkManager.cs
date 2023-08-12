@@ -34,7 +34,7 @@ namespace  SynicSugar.Samples {
 
         public async UniTaskVoid DisplayPing(CancellationToken token){
             while(!token.IsCancellationRequested){
-                string pings = System.String.Empty;
+                string pings = p2pInfo.Instance.GetNATType().ToString() + System.Environment.NewLine;
 
                 foreach(var id in p2pInfo.Instance.RemoteUserIds){
                     pings += $"{ConnectHub.Instance.GetUserInstance<TankPlayerData>(id).PlayerName}: {p2pInfo.Instance.GetPing(id)}{System.Environment.NewLine}";

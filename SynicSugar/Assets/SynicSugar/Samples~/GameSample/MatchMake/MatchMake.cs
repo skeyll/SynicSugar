@@ -4,8 +4,6 @@ using System;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.SceneManagement;
-
 
 namespace  SynicSugar.Samples {
     public class MatchMake : MonoBehaviour{
@@ -14,7 +12,7 @@ namespace  SynicSugar.Samples {
         [SerializeField] Button startMatchMake, closeLobby, startGame, backtoMenu;
         [SerializeField] MatchGUIState descriptions;
         [SerializeField] MatchMakeConditions matchConditions;
-        [SerializeField] Text buttonText;
+        [SerializeField] Text buttonText, matchmakeState;
         [SerializeField] GameModeSelect modeSelect; //For tankmatchmaking scene, and to cancel matchmake then return to menu.
         //For Tank
         public InputField nameField;
@@ -32,6 +30,7 @@ namespace  SynicSugar.Samples {
         }
         void SetGUIState(){
             descriptions = MatchMakeConfig.SetMatchingText(MatchMakeConfig.Langugage.EN);
+            descriptions.state = matchmakeState;
             descriptions.stopAdditionalInput.AddListener(StopAdditionalInput);
             descriptions.acceptCancel.AddListener(() => ActivateCancelButton(false));
 

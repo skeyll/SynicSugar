@@ -951,6 +951,7 @@ MonoBehaviour:
     trycancel: 
   matchConditions: {fileID: 837676607}
   buttonText: {fileID: 37820300}
+  matchmakeState: {fileID: 355272012}
   modeSelect: {fileID: 837676608}
   nameField: {fileID: 1082632817}
   playerName: {fileID: 970822384}
@@ -1979,7 +1980,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2114254298220440419, guid: e18422c96d27f49489abe8b774c3a6b9, type: 3}
       propertyPath: AutoRefreshPing
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2114254298220440419, guid: e18422c96d27f49489abe8b774c3a6b9, type: 3}
       propertyPath: FirstConnection
