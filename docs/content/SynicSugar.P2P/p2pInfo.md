@@ -41,6 +41,10 @@ If this is no longer needed, we call *[CancelCurrentMatchMake](../../SynicSugar.
 | [IsHost](../p2pInfo/ishost) | If local or target user is host, return true |
 | [GetCurrentConnectionMemberCount](../p2pInfo/getcurrentconnectionmembercount) | Get the current member count in connection |
 | [GetAllConnectionMemberCount](../p2pInfo/getallconnectionmembercount) | Get the all member's count of current and left connection |
+| [QueryNATType](../p2pInfo/querynattype) | Update local user's NATType to the latest |
+| [GetNATType](../p2pInfo/getnattype) | Get last-queried NAT-type |
+| [GetPing](../p2pInfo/getping) | Get a ping with a peer from cache |
+| [RefreshPing](../p2pInfo/refreshping) | Refresh ping with other all peers |
 
 
 

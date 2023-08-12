@@ -10,17 +10,6 @@ weight = 6
 ### Description
 **The objects is used internally.**
 
-### SugarPacket
-The object to get data from receiver.
-
-#### Properity
-| API | description |
-|---|---|
-| ch | CHANNELLIST's index |
-| UserId | UserID of sending this packet |
-| payload | args |
-
-
 ### LargePacketInfomation
 The object to rebuild packets of SyncSynic.
 
