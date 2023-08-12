@@ -7,7 +7,8 @@ using NATTypeE = Epic.OnlineServices.P2P.NATType;
 namespace SynicSugar.P2P {
     internal class p2pInfoMethod {
         internal P2PInterface P2PHandle;
-        internal p2pInfoMethod(){
+
+        internal void Init(){
             P2PHandle = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface();
             QueryNATType().Forget();
         }
@@ -22,7 +23,7 @@ namespace SynicSugar.P2P {
             await UniTask.WhenAny(UniTask.WaitUntil(() => p2pInfo.Instance.ConnectionNotifier.completeConnectPreparetion), UniTask.Delay(10000));
 
             #if SYNICSUGAR_LOG
-                Debug.Log("All connections ready.");
+                Debug.Log("All connections is ready.");
             #endif
             if(!p2pConfig.Instance.UseDisconnectedEarlyNotify){
                 p2pConnectorForOtherAssembly.Instance.RemoveNotifyPeerConnectionnEstablished();

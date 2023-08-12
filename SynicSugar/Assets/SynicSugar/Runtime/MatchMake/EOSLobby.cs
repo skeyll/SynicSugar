@@ -63,13 +63,14 @@ namespace SynicSugar.MatchMake {
                 }
 
                 if(isMatchSuccess){
+                    MatchMakeManager.Instance.matchState.stopAdditionalInput?.Invoke();
                     bool canInit = InitConnectConfig(ref p2pInfo.Instance.userIds);
                     if(!canInit){
                         Debug.LogError("Fail InitConnectConfig");
                         return false;
                     }
 
-                    await OpenConnection(token);
+                    await OpenConnection();
 
                     await MatchMakeManager.Instance.OnSaveLobbyID();
                 }
@@ -94,13 +95,14 @@ namespace SynicSugar.MatchMake {
                 }
                 
                 if(isMatchSuccess){
+                    MatchMakeManager.Instance.matchState.stopAdditionalInput?.Invoke();
                     bool canInit = InitConnectConfig(ref p2pInfo.Instance.userIds);
                     if(!canInit){
                         Debug.LogError("Fail InitConnectConfig");
                         return false;
                     }
 
-                    await OpenConnection(token);
+                    await OpenConnection();
 
                     await MatchMakeManager.Instance.OnSaveLobbyID();
 
@@ -137,13 +139,14 @@ namespace SynicSugar.MatchMake {
                 }
 
                 if(isMatchSuccess){
+                    MatchMakeManager.Instance.matchState.stopAdditionalInput?.Invoke();
                     bool canInit = InitConnectConfig(ref p2pInfo.Instance.userIds);
                     if(!canInit){
                         Debug.LogError("Fail InitConnectConfig");
                         return false;
                     }
     
-                    await OpenConnection(token);
+                    await OpenConnection();
                     
                     await MatchMakeManager.Instance.OnSaveLobbyID();
                 }
@@ -179,13 +182,14 @@ namespace SynicSugar.MatchMake {
                 }
 
                 if(isMatchSuccess){
+                    MatchMakeManager.Instance.matchState.stopAdditionalInput?.Invoke();
                     bool canInit = InitConnectConfig(ref p2pInfo.Instance.userIds);
                     if(!canInit){
                         Debug.LogError("Fail InitConnectConfig");
                         return false;
                     }
 
-                    await OpenConnection(token);
+                    await OpenConnection();
 
                     await MatchMakeManager.Instance.OnSaveLobbyID();
                     return true;
@@ -233,7 +237,7 @@ namespace SynicSugar.MatchMake {
 
             p2pInfo.Instance.userIds.isJustReconnected = true;
 
-            await OpenConnection(token);
+            await OpenConnection();
             
             return true;
         }
@@ -1035,9 +1039,10 @@ namespace SynicSugar.MatchMake {
             lobbyHandle.Release();
             return true;
         }
-        async UniTask OpenConnection(CancellationToken token){
-            Debug.Log("OpenConnect");
+        async UniTask OpenConnection(){
             p2pConnectorForOtherAssembly.Instance.OpenConnection(p2pConfig.Instance.FirstConnection == p2pConfig.FirstConnectionType.Strict);
+            p2pInfo.Instance.infoMethod.Init();
+            p2pInfo.Instance.pings.Init();
             switch(p2pConfig.Instance.FirstConnection){
                 case p2pConfig.FirstConnectionType.Strict:
                     await p2pInfoMethod.WaitConnectPreparation();

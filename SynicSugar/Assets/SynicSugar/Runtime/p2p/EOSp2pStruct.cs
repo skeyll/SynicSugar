@@ -30,6 +30,7 @@ namespace SynicSugar.P2P {
         internal void RemoveUserId(ProductUserId targetId){
             UserId userId = UserId.GetUserId(targetId);
             RemoteUserIds.Remove(userId);
+            p2pInfo.Instance.pings.pingInfo.Remove(userId.ToString());
         }
         /// <summary>
         /// Move UserID from RemotoUserIDs to LeftUsers not to SendPacketToALl in vain.<br />
@@ -39,6 +40,7 @@ namespace SynicSugar.P2P {
             UserId userId = UserId.GetUserId(targetId);
             RemoteUserIds.Remove(userId);
             LeftUsers.Add(userId);
+            p2pInfo.Instance.pings.pingInfo[userId.ToString()].Ping = -1;
         }
         /// <summary>
         /// Move UserID to RemotoUserIDs from LeftUsers on reconnect.
@@ -117,11 +119,6 @@ namespace SynicSugar.P2P {
         public override string ToString() => value_s;
         public static bool operator ==(in UserId x, in UserId y) => x.value.Equals(y.value);
         public static bool operator !=(in UserId x, in UserId y) => !x.value.Equals(y.value);
-    }
-    public class SugarPacket {
-        public byte ch;
-        public string UserID;
-        public ArraySegment<byte> payload;
     }
     public class LargePacketInfomation {
         public byte chunk;

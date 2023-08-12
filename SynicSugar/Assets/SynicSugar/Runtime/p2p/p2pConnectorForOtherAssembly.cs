@@ -133,7 +133,7 @@ namespace SynicSugar.P2P {
         /// <summary>
         /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll.
         /// </summary>
-        public SugarPacket GetPacketFromBuffer(){
+        public bool GetPacketFromBuffer(ref byte ch, ref string id, ref ArraySegment<byte> payload){
             //Set options
             ReceivePacketOptions options = new ReceivePacketOptions(){
                 LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
@@ -158,39 +158,43 @@ namespace SynicSugar.P2P {
                     Debug.LogErrorFormat("Get Packets: input was invalid: {0}", result);
                 }
 #endif
-                return null; //No packet
+                return false; //No packet
             }
-            return new SugarPacket(){ ch = outChannel, UserID = peerId.ToString(), payload = dataSegment}; 
+            ch = outChannel;
+            id = peerId.ToString();
+            payload = new ArraySegment<byte>(dataSegment.Array, dataSegment.Offset, (int)bytesWritten);;
+
+            return true;
         }
-        public SugarPacket GetPacketFromBuffer(byte channel){
-            //Set options
-            ReceivePacketOptions options = new ReceivePacketOptions(){
-                LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
-                MaxDataSizeBytes = 1170,
-                RequestedChannel = channel
-            };
-            //Next packet size
-            var getNextReceivedPacketSizeOptions = new GetNextReceivedPacketSizeOptions {
-                LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
-                RequestedChannel = channel
-            };
+//         public SugarPacket GetPacketFromBuffer(byte channel){
+//             //Set options
+//             ReceivePacketOptions options = new ReceivePacketOptions(){
+//                 LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
+//                 MaxDataSizeBytes = 1170,
+//                 RequestedChannel = channel
+//             };
+//             //Next packet size
+//             var getNextReceivedPacketSizeOptions = new GetNextReceivedPacketSizeOptions {
+//                 LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
+//                 RequestedChannel = channel
+//             };
 
-            P2PHandle.GetNextReceivedPacketSize(ref getNextReceivedPacketSizeOptions, out uint nextPacketSizeBytes);
+//             P2PHandle.GetNextReceivedPacketSize(ref getNextReceivedPacketSizeOptions, out uint nextPacketSizeBytes);
 
-            byte[] data = new byte[nextPacketSizeBytes];
-            var dataSegment = new ArraySegment<byte>(data);
-            ResultE result = P2PHandle.ReceivePacket(ref options, out ProductUserId peerId, out SocketId socketId, out byte outChannel, dataSegment, out uint bytesWritten);
+//             byte[] data = new byte[nextPacketSizeBytes];
+//             var dataSegment = new ArraySegment<byte>(data);
+//             ResultE result = P2PHandle.ReceivePacket(ref options, out ProductUserId peerId, out SocketId socketId, out byte outChannel, dataSegment, out uint bytesWritten);
             
-            if (result != ResultE.Success){
-#if SYNICSUGAR_LOG //This range is for performance since this is called every frame.
-                if(result == ResultE.InvalidParameters){
-                    Debug.LogErrorFormat("Get Packets: input was invalid: {0}", result);
-                }
-#endif
-                return null; //No packet
-            }
-            return new SugarPacket(){ ch = outChannel, UserID = peerId.ToString(), payload = dataSegment}; 
-        }
+//             if (result != ResultE.Success){
+// #if SYNICSUGAR_LOG //This range is for performance since this is called every frame.
+//                 if(result == ResultE.InvalidParameters){
+//                     Debug.LogErrorFormat("Get Packets: input was invalid: {0}", result);
+//                 }
+// #endif
+//                 return null; //No packet
+//             }
+//             return new SugarPacket(){ ch = outChannel, UserID = peerId.ToString(), payload = dataSegment}; 
+//         }
         /// <summary>
         /// Clear the packet queues.
         /// Just for PausePacketXXX.
