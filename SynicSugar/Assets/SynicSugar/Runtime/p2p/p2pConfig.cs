@@ -54,15 +54,15 @@ namespace SynicSugar.P2P {
         public bool UseDisconnectedEarlyNotify;
         /// <summary>
         /// Delay time to return true after matchmaking.<br />
-        /// After the connection is established, EOS has a lag before actual communication is possible.  This is the setting of how to handle it.
+        /// After the matchmaking is established, EOS need to request and accept connections with each other. This is the setting of how to handle it.
         /// </summary>
         public enum FirstConnectionType{
             /// <summary>
-            /// Return true after getting Ping. The first connection is sent on SynicSugar, so this is reliable but has a lag.
+            /// Return true after having connected with all peers. This is reliable but need a time.
             /// </summary>
             Strict, 
             /// <summary>
-            /// Return true after just sending connect request. Other peers will discard the initial some packets that the user sends during about 1sec after getting true. (Depends on the ping)
+            /// Return true after just sending connect request. Other peers will discard the initial some packets that the user sends during about 1-2sec after getting true. (Depends on the ping)
             /// </summary>
             Casual, 
             /// <summary>
@@ -70,7 +70,7 @@ namespace SynicSugar.P2P {
             /// </summary>
             TempDelayedDelivery, 
             /// <summary>
-            /// Return true after just sending connect request. All packets are stored in the receive buffer even if the peer haven't accept the connection. PauseConnections() stops the work.
+            /// Return true after just sending connect request. All packets are stored in the receive buffer even if the peer haven't accept the connection. PauseConnections() stops the work on this type.
             /// </summary>
             DelayedDelivery
         }
