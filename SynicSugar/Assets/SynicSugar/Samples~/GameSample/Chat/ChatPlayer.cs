@@ -1,10 +1,8 @@
-using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using SynicSugar.P2P;
 using UnityEngine;
 using UnityEngine.UI;
-
 
 namespace SynicSugar.Samples {
     //To use "ConnectHub.Instance.GetUserInstance<ChatPlayer>(UserID), make this [NetworkPlayer(true)].
@@ -41,6 +39,7 @@ namespace SynicSugar.Samples {
         }
         void RegisterButtonEvent(){
             uiSets.transform.Find("Submit").GetComponent<Button>().onClick.AddListener(DecideChat);
+            uiSets.transform.Find("Resend").GetComponent<Button>().onClick.AddListener(ResendPreContent);
             uiSets.transform.Find("Test").GetComponent<Button>().onClick.AddListener(DoStressTest);
             uiSets.transform.Find("TestL").GetComponent<Button>().onClick.AddListener(DoLargePacketTest);
             uiSets.transform.Find("Name").GetComponent<Button>().onClick.AddListener(DecideUserName);
@@ -54,7 +53,7 @@ namespace SynicSugar.Samples {
             uiSets.transform.Find("Close").GetComponent<Button>().onClick.AddListener(CloseSession);
         }
 
-        [Rpc] //On call, send this ch byte with args.
+        [Rpc(true)] //On call, send this ch byte with args.
         public void UpdateChatText(string message){
             //SynicSugar inserts "SendProcess" into IL.
             //We can't put "if" or another on the top of this method.(At the top is always the sending process).
@@ -74,7 +73,18 @@ namespace SynicSugar.Samples {
         public void UpdateName(string newName){
             Name = newName;
         }
+        //This main use is to send data when the disconnected user returns to session.
+        //So, we don't use LastTargetRPCPayload in local again, but if want use it, deserialize byte[] with MemoryPack.
+        public void ResendPreContent(){
+            ConnectHub.Instance.ResendLastRPC();
+            Debug.Log("SendLast Content!");
 
+            string chat = $"{Name}: {MemoryPack.MemoryPackSerializer.Deserialize<string>(p2pInfo.Instance.LastRPCPayload)}{System.Environment.NewLine}";
+            systemManager.chatText.text += chat;
+
+            submitCount++;
+            systemManager.inputCount.text = $"ChatCount: {ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.LocalUserId).submitCount} / {ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.RemoteUserIds[0]).submitCount}";
+        }
         //---For button
         public void DecideChat(){
             if(string.IsNullOrEmpty(systemManager.contentField.text)){
