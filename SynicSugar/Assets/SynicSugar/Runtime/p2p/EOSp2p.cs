@@ -12,10 +12,8 @@ namespace SynicSugar.P2P {
         /// Normally, <c>generated functions (have [RPC]) call this</c>, but we can also use this.
         /// We can SendPacketToAll(...).Forget()
         /// </summary>
-        /// <param name="ch"></param>
-        /// <param name="value"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
+        /// <param name="ch">(byte)ConnectHub.CHANNELLIST</param>
+        /// <param name="value">Payload</param>
         public static async UniTaskVoid SendPacketToAll(byte ch, byte[] value){
             ArraySegment<byte> data = value is not null ? value : Array.Empty<byte>();
             ResultE result;
@@ -50,9 +48,50 @@ namespace SynicSugar.P2P {
         /// Normally, <c>generated functions (have [RPC]) call this</c>, but we can also use this.
         /// We can SendPacketToAll(...).Forget()
         /// </summary>
-        /// <param name="ch"></param>
-        /// <param name="value"></param>
-        /// <param name="token"></param>
+        /// <param name="ch">(byte)ConnectHub.CHANNELLIST</param>
+        /// <param name="value">Payload</param>
+        /// <param name="recordPacketInfo">If true, hold the last info in p2pInfo.</param>
+        /// <returns></returns>
+        public static async UniTaskVoid SendPacketToAll(byte ch, byte[] value, bool recordPacketInfo){
+            ArraySegment<byte> data = value is not null ? value : Array.Empty<byte>();
+            if(recordPacketInfo){
+                p2pInfo.Instance.lastTargetRPCInfo.ch = ch;
+                p2pInfo.Instance.lastTargetRPCInfo.payload = value;
+            }
+            ResultE result;
+            foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
+                SendPacketOptions options = new SendPacketOptions(){
+                    LocalUserId = EOSManager.Instance.GetProductUserId(),
+                    RemoteUserId = id.AsEpic,
+                    SocketId = p2pConnectorForOtherAssembly.Instance.SocketId,
+                    Channel = ch,
+                    AllowDelayedDelivery = p2pConfig.Instance.AllowDelayedDelivery,
+                    Reliability = PacketReliability.ReliableOrdered,
+                    Data = data
+                };
+
+                result = p2pConnectorForOtherAssembly.Instance.P2PHandle.SendPacket(ref options);
+                if(result != ResultE.Success){
+                    Debug.LogErrorFormat("Send Packet: can't send packet, code: {0}", result);
+                    continue;
+                }
+                await UniTask.Delay(p2pConfig.Instance.interval_sendToAll);
+
+                if(p2pConnectorForOtherAssembly.Instance.p2pToken != null && p2pConnectorForOtherAssembly.Instance.p2pToken.IsCancellationRequested){
+            #if SYNICSUGAR_LOG
+                    Debug.Log("Send Packet: get out of the loop by Cancel");
+            #endif
+                    break;
+                }
+            }
+        }
+        /// <summary>
+        /// Send a packet to all remote peers. <br />
+        /// Normally, <c>generated functions (have [RPC]) call this</c>, but we can also use this.
+        /// We can SendPacketToAll(...).Forget()
+        /// </summary>
+        /// <param name="ch">(byte)ConnectHub.CHANNELLIST</param>
+        /// <param name="value">Payload</param>
         /// <returns></returns>
         public static async UniTaskVoid SendPacketToAll(byte ch, ArraySegment<byte> value){
             ResultE result;
@@ -85,10 +124,40 @@ namespace SynicSugar.P2P {
         /// <summary>
         /// Send a packet to a specific peer.
         /// </summary>
-        /// <param name="ch"></param>
-        /// <param name="value"></param>
-        /// <param name="targetId"></param>
+        /// <param name="ch">(byte)ConnectHub.CHANNELLIST</param>
+        /// <param name="value">Payload</param>
+        /// <param name="targetId">Target to send</param>
         public static void SendPacket(byte ch, byte[] value, UserId targetId){
+            SendPacketOptions options = new SendPacketOptions(){
+                LocalUserId = EOSManager.Instance.GetProductUserId(),
+                RemoteUserId = targetId.AsEpic,
+                SocketId = p2pConnectorForOtherAssembly.Instance.SocketId,
+                Channel = ch,
+                AllowDelayedDelivery = p2pConfig.Instance.AllowDelayedDelivery,
+                Reliability = p2pConfig.Instance.packetReliability,
+                Data = new ArraySegment<byte>(value != null ? value : Array.Empty<byte>())
+            };
+
+            ResultE result = p2pConnectorForOtherAssembly.Instance.P2PHandle.SendPacket(ref options);
+
+            if(result != ResultE.Success){
+                Debug.LogErrorFormat("Send Packet: can't send packet, code: {0}", result);
+                return;
+            }
+        }
+        /// <summary>
+        /// Send a packet to a specific peer.
+        /// </summary>
+        /// <param name="ch">(byte)ConnectHub.CHANNELLIST</param>
+        /// <param name="value">Payload</param>
+        /// <param name="targetId">Target to send</param>
+        /// <param name="recordPacketInfo">If true, hold the last info in p2pInfo.</param>
+        public static void SendPacket(byte ch, byte[] value, UserId targetId, bool recordPacketInfo){
+            if(recordPacketInfo){
+                p2pInfo.Instance.lastTargetRPCInfo.ch = ch;
+                p2pInfo.Instance.lastTargetRPCInfo.payload = value;
+                p2pInfo.Instance.lastTargetRPCInfo.target = targetId;
+            }
             SendPacketOptions options = new SendPacketOptions(){
                 LocalUserId = EOSManager.Instance.GetProductUserId(),
                 RemoteUserId = targetId.AsEpic,
@@ -110,9 +179,9 @@ namespace SynicSugar.P2P {
         /// <summary>
         /// Send a packet to a specific peer.
         /// </summary>
-        /// <param name="ch"></param>
-        /// <param name="value"></param>
-        /// <param name="targetId"></param>
+        /// <param name="ch">(byte)ConnectHub.CHANNELLIST</param>
+        /// <param name="value">Payload</param>
+        /// <param name="targetId">Target to send</param>
         public static void SendPacket(byte ch, ArraySegment<byte> value, UserId targetId){
             SendPacketOptions options = new SendPacketOptions(){
                 LocalUserId = EOSManager.Instance.GetProductUserId(),
