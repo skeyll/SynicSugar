@@ -36,6 +36,9 @@ Each assembly can have max 254 variables and functions with Network attribute (S
 | [GetInstance](../ConnectHub/getinstance) | Get a NetworkCommons instance registered to ConenctHub |
 | [SyncSynic](../ConnectHub/syncsynic) | Synchronize all own Synic variables at once to TargetUser |
 | ConvertFromPacket | SynicSugar uses internally |
+| [ResendLastRPC](../ConnectHub/resendlastrpc) | Re-Send RPC with last recorded information |
+| [ResendLastRPCToTarget](../ConnectHub/resendlastrpctotarget) | Re-Send RPC to the specific target with last recorded information |
+| [ResendLastTargetRPC](../ConnectHub/resendlasttargetrpc) | Re-Send TargetRPC with last recorded information.< |
 
 
 ```cs
