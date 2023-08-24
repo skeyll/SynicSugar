@@ -73,6 +73,14 @@ namespace SynicSugar.Generator {
                         contentsInfo[ci].rootName = classesInfo[classI()].name;
                         contentsInfo[ci].contentName = method.Identifier.ValueText;
 
+
+                        //Get attribute arg
+                        var attributeArg = methodAttribute.FirstOrDefault(a => a.Name.ToString() is RPC or TARGETRPC);
+                        if (attributeArg is not null && (attributeArg.ArgumentList?.Arguments.Count ?? 0) > 0){
+                            //User
+                            contentsInfo[ci].boolAttributeArg = (bool)(attributeArg.ArgumentList.Arguments[0].Expression as LiteralExpressionSyntax).Token.Value;
+                        }
+                        //Get method info
                         if (hasRpc){
                             if (method.ParameterList.Parameters.Count <= 0){
                                 continue;
@@ -112,14 +120,14 @@ namespace SynicSugar.Generator {
                             else if(argsCount == 1){
                                 var args = (syncvarSyntax.ArgumentList.Arguments[0].Expression as LiteralExpressionSyntax).Token.Value;
                                 if (args is bool){
-                                    contentsInfo[ci].isOnlyHost = (bool)(syncvarSyntax.ArgumentList.Arguments[0].Expression as LiteralExpressionSyntax).Token.Value;
+                                    contentsInfo[ci].boolAttributeArg = (bool)(syncvarSyntax.ArgumentList.Arguments[0].Expression as LiteralExpressionSyntax).Token.Value;
                                 }else if(args is int){
-                                    contentsInfo[ci].argOption = (int)(syncvarSyntax.ArgumentList.Arguments[0].Expression as LiteralExpressionSyntax).Token.Value;
+                                    contentsInfo[ci].intAttributeArg = (int)(syncvarSyntax.ArgumentList.Arguments[0].Expression as LiteralExpressionSyntax).Token.Value;
                                 }
                             }
                             else{
-                                contentsInfo[ci].isOnlyHost  = (bool)(syncvarSyntax.ArgumentList.Arguments[0].Expression as LiteralExpressionSyntax).Token.Value;
-                                contentsInfo[ci].argOption = (int)(syncvarSyntax.ArgumentList.Arguments[1].Expression as LiteralExpressionSyntax).Token.Value;
+                                contentsInfo[ci].boolAttributeArg = (bool)(syncvarSyntax.ArgumentList.Arguments[0].Expression as LiteralExpressionSyntax).Token.Value;
+                                contentsInfo[ci].intAttributeArg = (int)(syncvarSyntax.ArgumentList.Arguments[1].Expression as LiteralExpressionSyntax).Token.Value;
                             }
                         }
                         
@@ -130,10 +138,10 @@ namespace SynicSugar.Generator {
                             //Set attribute data
                             var argsCount = synicSyntax.ArgumentList?.Arguments.Count ?? 0;
                             if (argsCount == 0){
-                                contentsInfo[ci].argOption = 0;
+                                contentsInfo[ci].intAttributeArg = 0;
                             }
                             else {
-                                contentsInfo[ci].argOption = (int)(synicSyntax.ArgumentList.Arguments[0].Expression as LiteralExpressionSyntax).Token.Value;
+                                contentsInfo[ci].intAttributeArg = (int)(synicSyntax.ArgumentList.Arguments[0].Expression as LiteralExpressionSyntax).Token.Value;
                             }
                         }
                         void AddInfoWithBasicData(int ci, bool isSyncVar){
@@ -174,7 +182,7 @@ namespace SynicSugar.Generator {
 
                 foreach (var info in contentsInfo) {
                     if (info.type == ContentInfo.Type.Synic) {
-                        SynicItems[info.argOption].Append(cb.CreateSynicItemVariable(info.contentName, info.paramNamespace, info.param));
+                        SynicItems[info.intAttributeArg].Append(cb.CreateSynicItemVariable(info.contentName, info.paramNamespace, info.param));
                     }else{
                         SyncList.Append($"{info.contentName}, ");
                     }
@@ -182,36 +190,36 @@ namespace SynicSugar.Generator {
                     if (info.isNetworkPlayer) {
                         switch (info.type) {
                             case ContentInfo.Type.Rpc:
-                                rpcs[cb.GetFullName(info.rootNameSpace, info.rootName)].Append(cb.CreatePlayerRpcMethod(info.contentName, info.paramNamespace, info.param));
+                                rpcs[cb.GetFullName(info.rootNameSpace, info.rootName)].Append(cb.CreatePlayerRpcMethod(info.contentName, info.paramNamespace, info.param, info.boolAttributeArg));
                                 PacketConvert.Append(cb.CreatePlayerRpcPacketConvert(info.rootName, info.contentName, info.param, info.paramNamespace));
                            continue;
                             case ContentInfo.Type.TargetRpc:
-                                rpcs[cb.GetFullName(info.rootNameSpace, info.rootName)].Append(cb.CreatePlayerTargetRpcMethod(info.contentName, info.paramNamespace, info.param));
+                                rpcs[cb.GetFullName(info.rootNameSpace, info.rootName)].Append(cb.CreatePlayerTargetRpcMethod(info.contentName, info.paramNamespace, info.param, info.boolAttributeArg));
                                 PacketConvert.Append(cb.CreatePlayerTargetRpcPacketConvert(info.rootName, info.contentName, info.param, info.paramNamespace));
                             continue;
                             case ContentInfo.Type.SyncVar:
-                                syncvars[cb.GetFullName(info.rootNameSpace, info.rootName)].Append(cb.CreateSyncVarMethod(info.contentName, info.paramNamespace, info.param, info.argOption, info.isPublicVar, false, false));
+                                syncvars[cb.GetFullName(info.rootNameSpace, info.rootName)].Append(cb.CreateSyncVarMethod(info.contentName, info.paramNamespace, info.param, info.intAttributeArg, info.isPublicVar, false, false));
                                 PacketConvert.Append(cb.CreatePlayerSyncVarPacketConvert(info.rootName, info.contentName, info.param, info.paramNamespace, info.isPublicVar));
                             continue;
                             case ContentInfo.Type.Synic:
-                                SyncPlayer[info.argOption].Append(cb.CreateSyncSynicContent(info.contentName, info.rootName, true));
-                                SyncedPlayer[info.argOption].Append(cb.CreateSyncedContent(info.contentName, info.rootName, true));
+                                SyncPlayer[info.intAttributeArg].Append(cb.CreateSyncSynicContent(info.contentName, info.rootName, true));
+                                SyncedPlayer[info.intAttributeArg].Append(cb.CreateSyncedContent(info.contentName, info.rootName, true));
                             continue;
                         }
                     }
-
+                    //for Commons
                     switch (info.type){
                         case ContentInfo.Type.Rpc:
-                            rpcs[cb.GetFullName(info.rootNameSpace, info.rootName)].Append(cb.CreateCommonsRpcMethod(info.contentName, info.paramNamespace, info.param));
+                            rpcs[cb.GetFullName(info.rootNameSpace, info.rootName)].Append(cb.CreateCommonsRpcMethod(info.contentName, info.paramNamespace, info.param, info.boolAttributeArg));
                             PacketConvert.Append(cb.CreateCommonsRpcPacketConvert(info.rootName, info.contentName, info.param, info.paramNamespace));
                         continue;
                         case ContentInfo.Type.SyncVar:
-                            syncvars[cb.GetFullName(info.rootNameSpace, info.rootName)].Append(cb.CreateSyncVarMethod(info.contentName, info.paramNamespace, info.param, info.argOption, info.isPublicVar, info.isOnlyHost, true));
+                            syncvars[cb.GetFullName(info.rootNameSpace, info.rootName)].Append(cb.CreateSyncVarMethod(info.contentName, info.paramNamespace, info.param, info.intAttributeArg, info.isPublicVar, info.boolAttributeArg, true));
                             PacketConvert.Append(cb.CreateCommonsSyncVarPacketConvert(info.rootName, info.contentName, info.param, info.paramNamespace, info.isPublicVar));
                         continue;
                         case ContentInfo.Type.Synic:
-                            SyncCommons[info.argOption].Append(cb.CreateSyncSynicContent(info.contentName, info.rootName, false));
-                            SyncedCommons[info.argOption].Append(cb.CreateSyncedContent(info.contentName, info.rootName, false));
+                            SyncCommons[info.intAttributeArg].Append(cb.CreateSyncSynicContent(info.contentName, info.rootName, false));
+                            SyncedCommons[info.intAttributeArg].Append(cb.CreateSyncedContent(info.contentName, info.rootName, false));
                         continue;
                     }
                 }
@@ -314,9 +322,9 @@ namespace SynicSugar.Generator {
             public string nameSpace, name;
         }
         public class ContentInfo{
-            public bool isNetworkPlayer, isOnlyHost;
+            public bool isNetworkPlayer, boolAttributeArg;
             public string rootNameSpace, rootName, contentName, param, paramNamespace;
-            public int argOption;
+            public int intAttributeArg;
             public bool isPublicVar;
             public Type type;
             public enum Type{
@@ -367,7 +375,7 @@ namespace SynicSugar.P2P {{
             public void OnVisitSyntaxNode(SyntaxNode syntaxNode){
                 if (syntaxNode is ClassDeclarationSyntax classDeclarationSyntax
                     && classDeclarationSyntax.AttributeLists.Count > 0
-                    && classDeclarationSyntax.AttributeLists.Any(al => al.Attributes.Any(a => a.Name.ToString() == NETWORKPLAYER || a.Name.ToString() == NETWORKCOMMONS)))
+                    && classDeclarationSyntax.AttributeLists.Any(al => al.Attributes.Any(a => a.Name.ToString() is NETWORKPLAYER or NETWORKCOMMONS)))
                     Targets.Add(classDeclarationSyntax);
                     //&& !Targets.Contains(classDeclarationSyntax)
             }

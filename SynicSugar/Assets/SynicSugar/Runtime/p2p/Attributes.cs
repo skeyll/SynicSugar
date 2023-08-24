@@ -74,6 +74,9 @@ namespace SynicSugar.P2P {
     Inherited = false)]
     public sealed class RpcAttribute : Attribute {
         public bool recordLastPacket;
+        /// <summary>
+        /// For NetworkPlayer and NetoworkCommons.
+        /// </summary>
         public RpcAttribute(){}
         /// <summary>
         /// If true, hold the last RPC data for the manual resend.
@@ -87,6 +90,9 @@ namespace SynicSugar.P2P {
     Inherited = false)]
     public sealed class TargetRpcAttribute : Attribute {
         public bool recordLastPacket;
+        /// <summary>
+        /// For NetworkPlayer.
+        /// </summary>
         public TargetRpcAttribute(){}
         /// <summary>
         /// If true, hold the last RPC data for the manual resend.

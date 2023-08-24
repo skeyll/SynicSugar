@@ -218,6 +218,32 @@ namespace SynicSugar.P2P {
             }
         }
 
+        /// <summary>
+        /// Re-Send RPC with last recorded information.<br />
+        /// To send disconnected peers after some time. SynicSugar retransmit to connecting-peers.<br />
+        /// To record, pass true to attribute.
+        /// </summary>
+        public void ResendLastRPC(){
+            EOSp2p.SendPacketToAll(p2pInfo.Instance.LastRPCch, p2pInfo.Instance.LastRPCPayload).Forget();
+        }
+        /// <summary>
+        /// Re-Send RPC to the specific target with last recorded information.<br />
+        /// In order to send disconnected peers after the some time. SynicSugar has retransmission to connecting-peers for the reliability.<br />
+        /// To record, pass true to attribute.
+        /// </summary>
+        /// <param name="target"></param>
+        public void ResendLastRPCToTarget(UserId target){
+            EOSp2p.SendPacket(p2pInfo.Instance.LastRPCch, p2pInfo.Instance.LastRPCPayload, target);
+        }
+        /// <summary>
+        /// Re-Send TargetRPC with last recorded information.<br />
+        /// In order to send disconnected peers after the some time. SynicSugar has retransmission to connecting-peers for the reliability.<br />
+        /// To record, pass true to attribute.
+        /// </summary>
+        public void ResendLastTargetRPC(){
+            EOSp2p.SendPacket(p2pInfo.Instance.LastTargetRPCch, p2pInfo.Instance.LastTargetRPCPayload, p2pInfo.Instance.LastTargetRPCUserId);
+        }
+
         <# if (needSyncSynic) { #>
 
         /// <summary>
