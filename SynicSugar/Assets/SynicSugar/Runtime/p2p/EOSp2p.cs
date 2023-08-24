@@ -55,8 +55,14 @@ namespace SynicSugar.P2P {
         public static async UniTaskVoid SendPacketToAll(byte ch, byte[] value, bool recordPacketInfo){
             ArraySegment<byte> data = value is not null ? value : Array.Empty<byte>();
             if(recordPacketInfo){
-                p2pInfo.Instance.lastTargetRPCInfo.ch = ch;
-                p2pInfo.Instance.lastTargetRPCInfo.payload = value;
+                p2pInfo.Instance.lastRpcInfo.ch = ch;
+                p2pInfo.Instance.lastRpcInfo.payload = value;
+                // Current byte[] value is serialize just before call RPC, so we don't need to create new byte[] for this process.
+                // No one can't use this "value" from elsewhere.
+                // For readability and extensibility, we should create new array.
+                // Now, we hold reference for performance.
+                // ... = new byte[value.Length];
+                // Array.Copy(value, p2pInfo.Instance.lastRpcInfo.payload, value.Length);
             }
             ResultE result;
             foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
