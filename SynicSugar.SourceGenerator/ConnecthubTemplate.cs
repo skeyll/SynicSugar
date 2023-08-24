@@ -190,41 +190,43 @@ namespace SynicSugarGenerator
             
             #line default
             #line hidden
-            this.Write(@"
-                case CHANNELLIST.ObtainPing:
-                    EOSp2p.SendPacket((byte)CHANNELLIST.ReturnPong, payload, UserId.GetUserId(id));
-                return;
-                case CHANNELLIST.ReturnPong:
-                    p2pConnectorForOtherAssembly.Instance.GetPong(id, payload);
-                return;
-                case CHANNELLIST.Synic:
-                    bool restoredPacket = RestorePackets(ref ch, ref id, ref payload);
-                    if(!restoredPacket){
-    #if SYNICSUGAR_LOG 
-                        Debug.LogFormat(""ConvertFormPacket: Restore packet is in progress. for {0}"", id);
-    #endif
-                        return;
-                    }
-                    SyncedSynic(id);
-
-                    p2pConnectorForOtherAssembly.Instance.UpdateSyncedState(id, packetInfo[id].phase);
-
-                    //Init
-                    buffer.Remove(id);
-                    packetInfo.Remove(id);
-
-                    //Change AcceptHostsSynic flag.
-                    if(p2pInfo.Instance.IsLoaclUser(id)){
-                        p2pConnectorForOtherAssembly.Instance.CloseHostSynic();
-                    }
-                    
-                return;
-            }
-        }
-
-        ");
+            this.Write("\r\n                case CHANNELLIST.ObtainPing:\r\n                    EOSp2p.SendPa" +
+                    "cket((byte)CHANNELLIST.ReturnPong, payload, UserId.GetUserId(id));\r\n            " +
+                    "    return;\r\n                case CHANNELLIST.ReturnPong:\r\n                    p" +
+                    "2pConnectorForOtherAssembly.Instance.GetPong(id, payload);\r\n                retu" +
+                    "rn;\r\n                case CHANNELLIST.Synic:\r\n                    bool restoredP" +
+                    "acket = RestorePackets(ref ch, ref id, ref payload);\r\n                    if(!re" +
+                    "storedPacket){\r\n    #if SYNICSUGAR_LOG \r\n                        Debug.LogFormat" +
+                    "(\"ConvertFormPacket: Restore packet is in progress. for {0}\", id);\r\n    #endif\r\n" +
+                    "                        return;\r\n                    }\r\n                    Sync" +
+                    "edSynic(id);\r\n\r\n                    p2pConnectorForOtherAssembly.Instance.Update" +
+                    "SyncedState(id, packetInfo[id].phase);\r\n\r\n                    //Init\r\n          " +
+                    "          buffer.Remove(id);\r\n                    packetInfo.Remove(id);\r\n\r\n    " +
+                    "                //Change AcceptHostsSynic flag.\r\n                    if(p2pInfo." +
+                    "Instance.IsLoaclUser(id)){\r\n                        p2pConnectorForOtherAssembly" +
+                    ".Instance.CloseHostSynic();\r\n                    }\r\n                    \r\n      " +
+                    "          return;\r\n            }\r\n        }\r\n\r\n        /// <summary>\r\n        //" +
+                    "/ Re-Send RPC with last recorded information.<br />\r\n        /// To send disconn" +
+                    "ected peers after some time. SynicSugar retransmit to connecting-peers.<br />\r\n " +
+                    "       /// To record, pass true to attribute.\r\n        /// </summary>\r\n        p" +
+                    "ublic void ResendLastRPC(){\r\n            EOSp2p.SendPacketToAll(p2pInfo.Instance" +
+                    ".LastRPCch, p2pInfo.Instance.LastRPCPayload).Forget();\r\n        }\r\n        /// <" +
+                    "summary>\r\n        /// Re-Send RPC to the specific target with last recorded info" +
+                    "rmation.<br />\r\n        /// In order to send disconnected peers after the some t" +
+                    "ime. SynicSugar has retransmission to connecting-peers for the reliability.<br /" +
+                    ">\r\n        /// To record, pass true to attribute.\r\n        /// </summary>\r\n     " +
+                    "   /// <param name=\"target\"></param>\r\n        public void ResendLastRPCToTarget(" +
+                    "UserId target){\r\n            EOSp2p.SendPacket(p2pInfo.Instance.LastRPCch, p2pIn" +
+                    "fo.Instance.LastRPCPayload, target);\r\n        }\r\n        /// <summary>\r\n        " +
+                    "/// Re-Send TargetRPC with last recorded information.<br />\r\n        /// In orde" +
+                    "r to send disconnected peers after the some time. SynicSugar has retransmission " +
+                    "to connecting-peers for the reliability.<br />\r\n        /// To record, pass true" +
+                    " to attribute.\r\n        /// </summary>\r\n        public void ResendLastTargetRPC(" +
+                    "){\r\n            EOSp2p.SendPacket(p2pInfo.Instance.LastTargetRPCch, p2pInfo.Inst" +
+                    "ance.LastTargetRPCPayload, p2pInfo.Instance.LastTargetRPCUserId);\r\n        }\r\n\r\n" +
+                    "        ");
             
-            #line 221 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 247 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
  if (needSyncSynic) { 
             
             #line default
@@ -254,14 +256,14 @@ namespace SynicSugarGenerator
                     "oArray(), targetId, syncedPhase, syncSinglePhase, false);\r\n        }\r\n\r\n        " +
                     "");
             
-            #line 252 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 278 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GenerateSynicContainer));
             
             #line default
             #line hidden
             this.Write("\r\n        ");
             
-            #line 253 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 279 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
  } 
             
             #line default
@@ -299,7 +301,7 @@ namespace SynicSugarGenerator
                     "Id].phase;\r\n            bool syncSinglePhase = packetInfo[overwriterUserId].sync" +
                     "SinglePhase;\r\n\r\n            switch(phase){");
             
-            #line 305 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 331 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(SyncedInvoker));
             
             #line default
@@ -307,7 +309,7 @@ namespace SynicSugarGenerator
             this.Write("\r\n                default:\r\n                goto case 9;\r\n            }\r\n        " +
                     "}\r\n        ");
             
-            #line 310 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 336 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(SyncedItems));
             
             #line default

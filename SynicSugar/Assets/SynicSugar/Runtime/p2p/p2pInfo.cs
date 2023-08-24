@@ -16,6 +16,8 @@ namespace SynicSugar.P2P {
             userIds = new ();
             infoMethod = new();
             pings = new();
+            lastRpcInfo = new();
+            lastTargetRPCInfo = new();
         }
         void OnDestroy() {
             if( Instance == this ) {
@@ -30,14 +32,35 @@ namespace SynicSugar.P2P {
         internal p2pInfoMethod infoMethod;
         internal UserIds userIds;
         internal p2pPing pings;
+        internal RPCInformation lastRpcInfo;
+        internal TargetRPCInformation lastTargetRPCInfo;
+        /// <summary>
+        /// UserId of this local user.
+        /// </summary>
         public UserId LocalUserId => userIds.LocalUserId;
+        /// <summary>
+        /// UserIds of current session.
+        /// </summary>
         public List<UserId> RemoteUserIds => userIds.RemoteUserIds;
-
+        /// <summary>
+        /// The notify events for connection and disconection on current session.
+        /// </summary>
         public ConnectionNotifier ConnectionNotifier = new ConnectionNotifier();
+        /// <summary>
+        /// Reason of the user disconnected from p2p.
+        /// </summary>
         public Reason LastDisconnectedUsersReason => ConnectionNotifier.ClosedReason;
+        /// <summary>
+        /// UserId of the user disconnected from p2p.
+        /// </summary>
         public UserId LastDisconnectedUsersId => ConnectionNotifier.CloseUserId;
+        /// <summary>
+        /// UserId of the reconnecter disconnected from p2p.
+        /// </summary>
         public UserId LastConnectedUsersId => ConnectionNotifier.ConnectUserId;
-
+        /// <summary>
+        /// The notify events for SyncSynic for recconecter and large packet.
+        /// </summary>
         public SyncSnyicNotifier SyncSnyicNotifier = new SyncSnyicNotifier();
         /// <summary>
         /// Return True only once when this local user is received SyncSync from every other peers of the current session. <br />
@@ -45,9 +68,17 @@ namespace SynicSugar.P2P {
         /// </summary>
         /// <returns></returns>
         public bool HasReceivedAllSyncSynic => SyncSnyicNotifier.ReceivedAllSyncSynic();
+        /// <summary>
+        /// Phase of the last SyncSynic to receive to this local.
+        /// </summary>
         public byte SyncedSynicPhase => SyncSnyicNotifier.LastSyncedPhase;
+        /// <summary>
+        /// UserId of the last SyncSynic to receive to this local.
+        /// </summary>
         public UserId LastSyncedUserId => SyncSnyicNotifier.LastSyncedUserId;
-
+        /// <summary>
+        /// Always return false. Just on reconnect, returns true until getting SyncSynic for self data from Host.
+        /// </summary>
         public bool AcceptHostSynic => userIds.isJustReconnected;
         
         /// <summary>
@@ -114,14 +145,42 @@ namespace SynicSugar.P2P {
             return targetId == userIds.LocalUserId.ToString();
         }
     #endregion
-    #region 
+    #region Ping
+        /// <summary>
+        /// Get last Ping of specific user from local data.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public int GetPing(UserId id){
             return pings.pingInfo[id.ToString()].Ping;
         }
+        /// <summary>
+        /// Manually update Ping data to latest with RPC.
+        /// </summary>
+        /// <returns></returns>
         public async UniTask RefreshPing(){
             await pings.RefreshPings(p2pConnectorForOtherAssembly.Instance.p2pToken.Token);
         }
     #endregion
-
+        /// <summary>
+        /// the last byte array sent with RPC that record data.
+        /// </summary>
+        public byte[] LastRPCPayload => lastRpcInfo.payload;
+        /// <summary>
+        /// the last byte array sent with TargetRPC that record data.
+        /// </summary>
+        public byte[] LastTargetRPCPayload => lastTargetRPCInfo.payload;
+        /// <summary>
+        /// the last ch sent with RPC that record data.
+        /// </summary>
+        public byte LastRPCch => lastRpcInfo.ch;
+        /// <summary>
+        /// the last ch sent with TargetRPC that record data.
+        /// </summary>
+        public byte LastTargetRPCch => lastTargetRPCInfo.ch;
+        /// <summary>
+        /// the last UserId sent with TargetRPC that record data.
+        /// </summary>
+        public UserId LastTargetRPCUserId => lastTargetRPCInfo.target;
     }
 }

@@ -131,6 +131,15 @@ namespace SynicSugar.P2P {
         internal DateTime LastUpdatedLocalUTC;
         internal List<double> tmpPings = new List<double>();
     }
+    public class RPCInformation {
+        internal byte[] payload;
+        internal byte ch;
+    }
+    public class TargetRPCInformation {
+        internal byte[] payload;
+        internal byte ch;
+        internal UserId target;
+    }
     [MemoryPackable]
     // This way is bad performance. Please let me know if you have a good idea to serialize and send data.
     public partial class SynicContainer {

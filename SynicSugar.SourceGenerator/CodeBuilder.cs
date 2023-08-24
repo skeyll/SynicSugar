@@ -152,33 +152,36 @@
 ";
         }
         //Rpc Method
-        internal string CreatePlayerRpcMethod(string fnName, string paramNs, string paramType){
+        internal string CreatePlayerRpcMethod(string fnName, string paramNs, string paramType, bool recordLastInfo){
             string arg = string.IsNullOrEmpty(paramType) ? "" : $"{GetFullName(paramNs, paramType)} value";
             string serializer = string.IsNullOrEmpty(arg) ? "null" : "MemoryPack.MemoryPackSerializer.Serialize(value)";
+            string recordOption = recordLastInfo ? ", true" : "";
             return $@"
         void SynicSugarRpc_{fnName}({arg}) {{
             if(isLocal){{
-                EOSp2p.SendPacketToAll((byte)ConnectHub.CHANNELLIST.{fnName}, {serializer}).Forget();
+                EOSp2p.SendPacketToAll((byte)ConnectHub.CHANNELLIST.{fnName}, {serializer}{recordOption}).Forget();
             }}
         }}";
         }
-        internal string CreatePlayerTargetRpcMethod(string fnName, string paramNs, string paramType){
+        internal string CreatePlayerTargetRpcMethod(string fnName, string paramNs, string paramType, bool recordLastInfo){
             string arg = string.IsNullOrEmpty(paramType) ? "" : $", {GetFullName(paramNs, paramType)} value";
             string serializer = string.IsNullOrEmpty(arg) ? "null" : "MemoryPack.MemoryPackSerializer.Serialize(value)";
+            string recordOption = recordLastInfo ? ", true" : "";
             return $@"
         void SynicSugarRpc_{fnName}(UserId id{arg}) {{
             if(isLocal){{
-                EOSp2p.SendPacket((byte)ConnectHub.CHANNELLIST.{fnName}, {serializer}, id);
+                EOSp2p.SendPacket((byte)ConnectHub.CHANNELLIST.{fnName}, {serializer}, id{recordOption});
             }}
         }}";
         }
-        internal string CreateCommonsRpcMethod(string fnName, string paramNs, string paramType){
+        internal string CreateCommonsRpcMethod(string fnName, string paramNs, string paramType, bool recordLastInfo){
             string arg = string.IsNullOrEmpty(paramType) ? "" : $"{GetFullName(paramNs, paramType)} value";
             string serializer = string.IsNullOrEmpty(arg) ? "null" : "MemoryPack.MemoryPackSerializer.Serialize(value)";
+            string recordOption = recordLastInfo ? ", true" : "";
             return $@"
         void SynicSugarRpc_{fnName}({arg}) {{
             if(isLocalCall){{
-                EOSp2p.SendPacketToAll((byte)ConnectHub.CHANNELLIST.{fnName}, {serializer}).Forget();
+                EOSp2p.SendPacketToAll((byte)ConnectHub.CHANNELLIST.{fnName}, {serializer}{recordOption}).Forget();
             }}
             isLocalCall = true;
         }}";

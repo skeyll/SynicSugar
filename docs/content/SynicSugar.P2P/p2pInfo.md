@@ -29,10 +29,14 @@ If this is no longer needed, we call *[CancelCurrentMatchMake](../../SynicSugar.
 | LastDisconnectedUsersId | UserID of last Disconnected user |
 | LastConnectedUsersId | UserID of last Connected user |
 | [SyncSnyicNotifier](../p2pInfo/syncsnyicnotifier) | Notifers when a user get SynicVariables |
-| HasReceivedAllSyncSynic | Return True only once after local user receives all SyncSyncs |
+| HasReceivedAllSyncSynic | Return True only once after local user receives all SyncSynics |
 | SyncedSynicPhase | The SyncSynic phase of last received |
 | LastSyncedUserId | The UserID of last synced SyncSynic |
-
+| LastRPCPayload | The last byte array sent with RPC that record data |
+| LastRPCch | The last ch sent with RPC that record data |
+| LastTargetRPCPayload | The last byte array sent with TargetRPC that record data |
+| LastTargetRPCch | The last ch sent with TargetRPC that record data |
+| LastTargetRPCUserId | The last UserId sent with TargetRPC that record data |
 
 ### Function
 | API | description |
