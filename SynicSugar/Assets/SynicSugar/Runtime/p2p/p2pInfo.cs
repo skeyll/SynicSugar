@@ -16,6 +16,8 @@ namespace SynicSugar.P2P {
             userIds = new ();
             infoMethod = new();
             pings = new();
+            lastRpcInfo = new();
+            lastTargetRPCInfo = new();
         }
         void OnDestroy() {
             if( Instance == this ) {
@@ -30,6 +32,9 @@ namespace SynicSugar.P2P {
         internal p2pInfoMethod infoMethod;
         internal UserIds userIds;
         internal p2pPing pings;
+        internal RPCInformation lastRpcInfo;
+        internal TargetRPCInformation lastTargetRPCInfo;
+
         public UserId LocalUserId => userIds.LocalUserId;
         public List<UserId> RemoteUserIds => userIds.RemoteUserIds;
 
@@ -114,7 +119,7 @@ namespace SynicSugar.P2P {
             return targetId == userIds.LocalUserId.ToString();
         }
     #endregion
-    #region 
+    #region Ping
         public int GetPing(UserId id){
             return pings.pingInfo[id.ToString()].Ping;
         }
@@ -122,6 +127,10 @@ namespace SynicSugar.P2P {
             await pings.RefreshPings(p2pConnectorForOtherAssembly.Instance.p2pToken.Token);
         }
     #endregion
-
+        public byte[] LastRPCPayload => lastRpcInfo.payload;
+        public byte[] LastTargetRPCPayload => lastTargetRPCInfo.payload;
+        public byte LastRPCch => lastRpcInfo.ch;
+        public byte LastTargetRPCch => lastTargetRPCInfo.ch;
+        public UserId LastTargetRPCUserId => lastTargetRPCInfo.target;
     }
 }
