@@ -270,13 +270,15 @@ namespace SynicSugar.MatchMake {
             }
 
             //Lobby Option
-            CreateLobbyOptions createLobbyOptions = new CreateLobbyOptions();
-            createLobbyOptions.LocalUserId = EOSManager.Instance.GetProductUserId();
-            createLobbyOptions.MaxLobbyMembers = lobbyCondition.MaxLobbyMembers;
-            createLobbyOptions.PermissionLevel = lobbyCondition.PermissionLevel;
-            createLobbyOptions.BucketId = lobbyCondition.BucketId;
-            createLobbyOptions.PresenceEnabled = false;
-            createLobbyOptions.AllowInvites = lobbyCondition.bAllowInvites;
+            CreateLobbyOptions createLobbyOptions = new CreateLobbyOptions(){
+                LocalUserId = EOSManager.Instance.GetProductUserId(),
+                MaxLobbyMembers = lobbyCondition.MaxLobbyMembers,
+                PermissionLevel = lobbyCondition.PermissionLevel,
+                BucketId = lobbyCondition.BucketId,
+                PresenceEnabled = false,
+                AllowInvites = lobbyCondition.bAllowInvites,
+                EnableRTCRoom = lobbyCondition.bEnableRTCRoom
+            };
 
             // Init for async
             waitingMatch = true;
@@ -454,8 +456,9 @@ namespace SynicSugar.MatchMake {
         async UniTask<bool> RetriveLobbyByAttribute(Lobby lobbyCondition, CancellationToken token){
             //Create Search handle on local
             // Create new handle 
-            CreateLobbySearchOptions searchOptions = new CreateLobbySearchOptions();
-            searchOptions.MaxResults = MAX_SEARCH_RESULT; 
+            CreateLobbySearchOptions searchOptions = new CreateLobbySearchOptions(){
+                MaxResults = MAX_SEARCH_RESULT
+            };
 
             LobbyInterface lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();
             ResultE result = lobbyInterface.CreateLobbySearch(ref searchOptions, out LobbySearch lobbySearchHandle);
@@ -1032,7 +1035,7 @@ namespace SynicSugar.MatchMake {
                 lobbyHandle.Release();
                 return false;
             }
-            p2pConnectorForOtherAssembly.Instance.ScoketName = EOSLobbyExtenstions.GenerateLobbyAttribute(socket).STRING;
+            p2pConnectorForOtherAssembly.Instance.ScoketName = EOSLobbyExtensions.GenerateLobbyAttribute(socket).STRING;
             //For options
             userIds.HostUserId = UserId.GetUserId(CurrentLobby.LobbyOwner);
             userIds.LeftUsers = new();

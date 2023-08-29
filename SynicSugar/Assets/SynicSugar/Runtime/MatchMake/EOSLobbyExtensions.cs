@@ -2,7 +2,7 @@ using Epic.OnlineServices;
 using Epic.OnlineServices.Lobby;
 using UnityEngine;
 namespace SynicSugar.MatchMake {
-    internal static class EOSLobbyExtenstions {
+    internal static class EOSLobbyExtensions {
         internal static AttributeData AsLobbyAttribute(this LobbyAttribute attribute){
             AttributeData data = new AttributeData();
             data.Key = attribute.Key;
