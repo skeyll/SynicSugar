@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
 using ResultE = Epic.OnlineServices.Result;
+using SynicSugar.RTC;
 
 namespace SynicSugar.MatchMake {
     public class Lobby {
@@ -82,6 +83,9 @@ namespace SynicSugar.MatchMake {
             LobbyOwner = new ProductUserId();
             Attributes.Clear();
             Members.Clear();
+            if(hasConnectedRTCRoom){
+                RTCManager.Instance.UnsubscribeFromRTCEvents();
+            }
         }
 
         /// <summary>

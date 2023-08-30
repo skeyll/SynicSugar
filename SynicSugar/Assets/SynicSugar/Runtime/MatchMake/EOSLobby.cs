@@ -8,6 +8,7 @@ using Cysharp.Threading.Tasks;
 using SynicSugar.P2P;
 using UnityEngine;
 using ResultE = Epic.OnlineServices.Result;
+using SynicSugar.RTC;
 
 namespace SynicSugar.MatchMake {
     internal class EOSLobby {
@@ -992,6 +993,8 @@ namespace SynicSugar.MatchMake {
         /// <param name="userIds"></param>
         /// <returns></returns>
         bool InitConnectConfig(ref UserIds userIds){
+            //Prep RTC(Voice Chat)
+            RTCManager.Instance.SubscribeToRTCEvents();
             //Crate copy handle
             LobbyInterface lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();
             CopyLobbyDetailsHandleOptions options = new CopyLobbyDetailsHandleOptions(){
