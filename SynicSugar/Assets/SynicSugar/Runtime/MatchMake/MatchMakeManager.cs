@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using SynicSugar.RTC;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -64,7 +65,7 @@ namespace SynicSugar.MatchMake {
         public LobbyIDMethod lobbyIDMethod = new LobbyIDMethod();
         public AsyncLobbyIDMethod asyncLobbyIDMethod = new AsyncLobbyIDMethod();
     #endregion
-        EOSLobby eosLobby;
+        internal EOSLobby eosLobby { get; private set; }
         internal CancellationTokenSource matchingToken;
         public MatchGUIState matchState = new MatchGUIState();
 
@@ -337,6 +338,7 @@ namespace SynicSugar.MatchMake {
         public string GetReconnectLobbyID(){
             return PlayerPrefs.GetString (playerprefsSaveKey, System.String.Empty);
         }
+    #endregion
         /// <summary>
         /// For search conditions.<br />
         /// About attributes, use GenerateLobbyAttribute to set.
@@ -344,10 +346,11 @@ namespace SynicSugar.MatchMake {
         /// <param name="bucket">important condition like game-mode, region, map</param>
         /// <param name="MaxPlayers">Max number of user allowed in the lobby</param>
         /// <returns></returns>
-        public static Lobby GenerateLobbyObject(string[] bucket, uint MaxPlayers = 2){
+        public static Lobby GenerateLobbyObject(string[] bucket, uint MaxPlayers = 2, bool useVoiceChat = false){
             Lobby lobby = new Lobby();
             lobby.SetBucketID(bucket);
             lobby.MaxLobbyMembers = MaxPlayers;
+            lobby.bEnableRTCRoom = useVoiceChat;
 
             return lobby;
         }
@@ -361,49 +364,5 @@ namespace SynicSugar.MatchMake {
             }
             matchState.state.text = matchState.GetDiscription(state);
         }
-
-    #region Obsolete
-        [Obsolete("This is old. ReconnecLobby() is new one.")]
-        public async UniTask<bool> ReconnectParticipatingLobby(string LobbyID, CancellationTokenSource token){
-            return await ReconnectLobby(LobbyID, token);
-        }
-        /// <summary>
-        /// For search conditions.<br />
-        /// About attributes, use GenerateLobbyAttribute to set.
-        /// </summary>
-        /// <param name="mode">For BucletID</param>
-        /// <param name="region">For BucletID</param>
-        /// <param name="mapName">For BucletID</param>
-        /// <returns></returns>
-        [Obsolete("This is old. GenerateLobbyObject(string[] bucket, uint MaxPlayers, bool bPresenceEnabled) is new one.")]
-        public static Lobby GenerateLobby(string mode = "", string region = "",
-                                            string mapName = "", uint MaxPlayers = 2,
-                                            bool bPresenceEnabled = false){
-            Lobby lobby = new Lobby();
-            lobby.SetBucketID(new string[3]{ mode, region, mapName });
-            lobby.MaxLobbyMembers = MaxPlayers;
-
-            return lobby;
-        }
-    #endregion
-        [Obsolete("This is old. GenerateLobbyObject(string[] bucket, uint MaxPlayers, bool bPresenceEnabled) is new one.")]
-        public static Lobby GenerateLobby(string[] bucket, uint MaxPlayers = 2,
-                                            bool bPresenceEnabled = false){
-            Lobby lobby = new Lobby();
-            lobby.SetBucketID(bucket);
-            lobby.MaxLobbyMembers = MaxPlayers;
-
-            return lobby;
-        }
-
-        [Obsolete("MatchMakeManager.Instance.lobbyIDMethod.Register(Action save, Action delete, bool changeType = true) is new one")]
-        public void RegisterLobbyIDFunctions(Action save, Action delete, bool changeType = true){
-            lobbyIDMethod.Register(save, delete, changeType);
-        }
-        [Obsolete("MatchMakeManager.Instance.asyncLobbyIDMethod.Register(Func<UniTask> save, Func<UniTask> delete, bool changeType = true is new one")]
-        public void RegisterAsyncLobbyIDFunctions(Func<UniTask> save, Func<UniTask> delete, bool changeType = true){
-            asyncLobbyIDMethod.Register(save, delete, changeType);
-        }
-    #endregion
     }
 }

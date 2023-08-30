@@ -11,7 +11,7 @@ using ResultE = Epic.OnlineServices.Result;
 
 namespace SynicSugar.MatchMake {
     internal class EOSLobby {
-        Lobby CurrentLobby = new Lobby();
+        internal Lobby CurrentLobby { get; private set; } = new Lobby();
 
         bool waitingMatch;
         bool waitLeave, canLeave;
@@ -264,7 +264,7 @@ namespace SynicSugar.MatchMake {
             // Check if there is current session. Leave it.
             if (CurrentLobby.isValid()){
 #if SYNICSUGAR_LOG
-                Debug.LogWarningFormat("Lobbies (Create Lobby): Leaving Current Lobby '{0}'", CurrentLobby.LobbyId);
+                Debug.LogWarningFormat("Create Lobby: Leaving Current Lobby '{0}'", CurrentLobby.LobbyId);
 #endif
                 LeaveLobby(true, token).Forget();
             }
