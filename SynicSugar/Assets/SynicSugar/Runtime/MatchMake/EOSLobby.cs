@@ -325,6 +325,7 @@ namespace SynicSugar.MatchMake {
             }
 
             CurrentLobby.LobbyId = info.LobbyId;
+            RTCManager.Instance.AddNotifyParticipantStatusChanged();
 
             isMatchSuccess = true;
             waitingMatch = false;
@@ -645,6 +646,7 @@ namespace SynicSugar.MatchMake {
             }
 
             CurrentLobby.InitFromLobbyHandle(data.LobbyId);
+            RTCManager.Instance.AddNotifyParticipantStatusChanged();
 
             waitingMatch = false;
         }

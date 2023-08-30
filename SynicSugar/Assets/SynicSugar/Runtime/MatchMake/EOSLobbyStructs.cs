@@ -52,9 +52,8 @@ namespace SynicSugar.MatchMake {
         #region RTC
         internal string RTCRoomName = System.String.Empty;
         internal bool hasConnectedRTCRoom = false;
-        internal NotifyEventHandle RTCRoomConnectionChanged;
         //new players or players leaving
-        internal NotifyEventHandle RTCRoomParticipantUpdate; 
+        internal NotifyEventHandle RTCParticipantStatusChanged; 
         //talking status or mute changes
         internal NotifyEventHandle RTCRoomParticipantAudioUpdate;
         #endregion
@@ -83,9 +82,7 @@ namespace SynicSugar.MatchMake {
             LobbyOwner = new ProductUserId();
             Attributes.Clear();
             Members.Clear();
-            if(hasConnectedRTCRoom){
-                RTCManager.Instance.UnsubscribeFromRTCEvents();
-            }
+            RTCManager.Instance.UnsubscribeFromRTCEvents();
         }
 
         /// <summary>
