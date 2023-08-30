@@ -52,10 +52,10 @@ namespace SynicSugar.MatchMake {
         #region RTC
         internal string RTCRoomName = System.String.Empty;
         internal bool hasConnectedRTCRoom = false;
-        //new players or players leaving
+        //for joing or leaving
         internal NotifyEventHandle RTCParticipantStatusChanged; 
-        //talking status or mute changes
-        internal NotifyEventHandle RTCRoomParticipantAudioUpdate;
+        //for speaking or non-speaking
+        internal NotifyEventHandle RTCParticipantUpdated;
         #endregion
 
         /// <summary>

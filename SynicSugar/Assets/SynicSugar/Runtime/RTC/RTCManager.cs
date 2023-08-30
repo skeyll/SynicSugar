@@ -40,10 +40,10 @@ namespace SynicSugar.RTC {
             }
             CurrentLobby.RTCRoomName = GetRTCRoomName();
             if(System.String.IsNullOrEmpty(CurrentLobby.RTCRoomName)){
-                Debug.LogError("SubscribeToRTCEvents: Could not find RTC room.");
+                Debug.LogError("SubscribeToRTCEvents: This user does't have not find RTC room.");
                 return;
             }
-            // Has this user joined RTC Room?
+            //Validation of RTC room
             LobbyInterface lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();
 
             IsRTCRoomConnectedOptions isConnectedOptions = new IsRTCRoomConnectedOptions(){
@@ -57,28 +57,15 @@ namespace SynicSugar.RTC {
             }
             CurrentLobby.hasConnectedRTCRoom = isConnected;
             
-            // Notify to get a user's joining and leaving
-            RTCInterface rtcInterface = EOSManager.Instance.GetEOSRTCInterface();
 
-            AddNotifyParticipantStatusChangedOptions addNotifyParticipantsStatusChangedOptions = new AddNotifyParticipantStatusChangedOptions(){
-                LocalUserId = EOSManager.Instance.GetProductUserId(),
-                RoomName = CurrentLobby.RTCRoomName
-            };
-            CurrentLobby.RTCRoomParticipantUpdate = new NotifyEventHandle(rtcInterface.AddNotifyParticipantStatusChanged(ref addNotifyParticipantsStatusChangedOptions, null, OnRTCRoomParticipantStatusChanged), (ulong handle) =>{
-                EOSManager.Instance.GetEOSRTCInterface().RemoveNotifyParticipantStatusChanged(handle);
-            });
-            if(!CurrentLobby.RTCRoomParticipantUpdate.IsValid()){
-                Debug.LogError("SubscribeToRTCEvents: RTCRoomParticipantUpdate is invalid.");
-            }
-
-            // Notify to get user talking status
+            //Notify to get user talking status
             RTCAudioInterface rtcAudioInterface = rtcInterface.GetAudioInterface();
             AddNotifyParticipantUpdatedOptions addNotifyParticipantUpdatedOptions = new AddNotifyParticipantUpdatedOptions(){
                 LocalUserId = EOSManager.Instance.GetProductUserId(),
                 RoomName = CurrentLobby.RTCRoomName
             };
 
-            CurrentLobby.RTCRoomParticipantAudioUpdate = new NotifyEventHandle(rtcAudioInterface.AddNotifyParticipantUpdated(ref addNotifyParticipantUpdatedOptions, null, OnRTCRoomParticipantUpdate), (ulong handle) =>{
+            CurrentLobby.RTCParticipantUpdated = new NotifyEventHandle(rtcAudioInterface.AddNotifyParticipantUpdated(ref addNotifyParticipantUpdatedOptions, null, OnRTCRoomParticipantUpdate), (ulong handle) =>{
                 EOSManager.Instance.GetEOSRTCInterface().GetAudioInterface().RemoveNotifyParticipantUpdated(handle);
             });
             
@@ -87,8 +74,8 @@ namespace SynicSugar.RTC {
                     LobbyId = CurrentLobby.LobbyId,
                     LocalUserId = EOSManager.Instance.GetProductUserId()
                 };
-
-                ResultE result = EOSManager.Instance.GetEOSLobbyInterface().GetRTCRoomName(ref options, out Utf8String roomName);
+                var lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();
+                ResultE result = lobbyInterface.GetRTCRoomName(ref options, out Utf8String roomName);
 
                 if(result != ResultE.Success){
                     Debug.LogErrorFormat("GetRTCRoomName: Could not get Room Name. Error Code: {0}", result);
@@ -101,12 +88,35 @@ namespace SynicSugar.RTC {
         /// Call this close or leave lobby.
         /// </summary>
         internal void UnsubscribeFromRTCEvents(){
-            CurrentLobby.RTCRoomParticipantAudioUpdate.Dispose();
-            CurrentLobby.RTCRoomParticipantUpdate.Dispose();
-            CurrentLobby.RTCRoomConnectionChanged.Dispose();
+            if(!CurrentLobby.bEnableRTCRoom){
+                return;
+            }
+            CurrentLobby.RTCParticipantStatusChanged.Dispose();
+            CurrentLobby.RTCParticipantUpdated.Dispose();
 
             CurrentLobby.RTCRoomName = System.String.Empty;
             CurrentLobby.hasConnectedRTCRoom = false;
+        }
+        /// <summary>
+        /// When using RTC, call OnComplete of Create and Join.
+        /// </summary>
+        internal void AddNotifyParticipantStatusChanged(){      
+            if(!CurrentLobby.bEnableRTCRoom){
+                return;
+            }
+            // Notify to get a user's joining and leaving
+            RTCInterface rtcInterface = EOSManager.Instance.GetEOSRTCInterface();
+
+            AddNotifyParticipantStatusChangedOptions addNotifyParticipantsStatusChangedOptions = new AddNotifyParticipantStatusChangedOptions(){
+                LocalUserId = EOSManager.Instance.GetProductUserId(),
+                RoomName = CurrentLobby.RTCRoomName
+            };
+            CurrentLobby.RTCParticipantStatusChanged = new NotifyEventHandle(rtcInterface.AddNotifyParticipantStatusChanged(ref addNotifyParticipantsStatusChangedOptions, null, OnRTCRoomParticipantStatusChanged), (ulong handle) =>{
+                EOSManager.Instance.GetEOSRTCInterface().RemoveNotifyParticipantStatusChanged(handle);
+            });
+            if(!CurrentLobby.RTCParticipantStatusChanged.IsValid()){
+                Debug.LogError("AddNotifyParticipantStatusChanged: RTCRoomParticipantUpdate isn't regisered.");
+            }
         }
         /// <summary>
         /// Notifications when a participant's status changes (oin or leave the room), or when the participant is added or removed from an applicable block list.
