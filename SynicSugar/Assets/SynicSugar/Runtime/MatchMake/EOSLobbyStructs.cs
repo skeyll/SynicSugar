@@ -112,12 +112,10 @@ namespace SynicSugar.MatchMake {
 
             InitFromLobbyDetails(outLobbyDetailsHandle);
         }
-
-        //-------------------------------------------------------------------------
         /// <summary>
-        /// Initializing the given <c>LobbyDetails</c> handle and caches all relevant attributes
+        /// Initializing the given LobbyDetails handle and caches all relevant attributes
         /// </summary>
-        /// <param name="lobbyId">Specified <c>LobbyDetails</c> handle</param>
+        /// <param name="lobbyId">Specified LobbyDetails handle</param>
         internal void InitFromLobbyDetails(LobbyDetails outLobbyDetailsHandle){
             // get owner
             var lobbyDetailsGetLobbyOwnerOptions = new LobbyDetailsGetLobbyOwnerOptions();

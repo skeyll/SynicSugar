@@ -388,8 +388,9 @@ namespace SynicSugar.MatchMake {
             }
 
             //Add attribute with handle
-            UpdateLobbyOptions updateOptions = new UpdateLobbyOptions();
-            updateOptions.LobbyModificationHandle = lobbyHandle; 
+            UpdateLobbyOptions updateOptions = new UpdateLobbyOptions(){
+                LobbyModificationHandle = lobbyHandle
+            };
             // Init for async
             waitingMatch = true;
             isMatchSuccess = false;
@@ -540,9 +541,9 @@ namespace SynicSugar.MatchMake {
             CurrentSearch = lobbySearchHandle;
 
             // Set Lobby ID
-            LobbySearchSetLobbyIdOptions setLobbyOptions = new LobbySearchSetLobbyIdOptions();
-            setLobbyOptions.LobbyId = lobbyId;
-
+            LobbySearchSetLobbyIdOptions setLobbyOptions = new LobbySearchSetLobbyIdOptions(){
+                LobbyId = lobbyId
+            };
             result = lobbySearchHandle.SetLobbyId(ref setLobbyOptions);
 
             if (result != ResultE.Success){
@@ -625,10 +626,11 @@ namespace SynicSugar.MatchMake {
         /// If can join a lobby, then update local lobby infomation in callback.
         /// </summary>
         void JoinLobby(LobbyDetails lobbyDetails, Action<Result> callback = null){
-            JoinLobbyOptions joinOptions = new JoinLobbyOptions();
-            joinOptions.LobbyDetailsHandle = lobbyDetails;
-            joinOptions.LocalUserId = EOSManager.Instance.GetProductUserId();
-            joinOptions.PresenceEnabled = false;
+            JoinLobbyOptions joinOptions = new JoinLobbyOptions(){
+                LocalUserId = EOSManager.Instance.GetProductUserId(),
+                LobbyDetailsHandle = lobbyDetails,
+                PresenceEnabled = false
+            };
 
             LobbyInterface lobbyInterface = EOSManager.Instance.GetEOSPlatformInterface().GetLobbyInterface();
             lobbyInterface.JoinLobby(ref joinOptions, callback, OnJoinLobbyCompleted);
@@ -828,8 +830,9 @@ namespace SynicSugar.MatchMake {
                 }
             }
             //Change lobby attributes with handle
-            UpdateLobbyOptions updateOptions = new UpdateLobbyOptions();
-            updateOptions.LobbyModificationHandle = lobbyHandle; 
+            UpdateLobbyOptions updateOptions = new UpdateLobbyOptions(){
+                LobbyModificationHandle = lobbyHandle
+            };
 
             lobbyInterface.UpdateLobby(ref updateOptions, null, OnSwitchLobbyAttribute);
         }
@@ -911,9 +914,10 @@ namespace SynicSugar.MatchMake {
                 return false;
             }
 
-            LeaveLobbyOptions options = new LeaveLobbyOptions();
-            options.LobbyId = CurrentLobby.LobbyId;
-            options.LocalUserId = EOSManager.Instance.GetProductUserId();
+            LeaveLobbyOptions options = new LeaveLobbyOptions(){
+                LobbyId = CurrentLobby.LobbyId,
+                LocalUserId = EOSManager.Instance.GetProductUserId()
+            };
 
             waitLeave = true;
             canLeave = false;
@@ -960,9 +964,10 @@ namespace SynicSugar.MatchMake {
 #endif
                 return false;
             }
-            DestroyLobbyOptions options = new DestroyLobbyOptions();
-            options.LocalUserId = EOSManager.Instance.GetProductUserId();
-            options.LobbyId = CurrentLobby.LobbyId;
+            DestroyLobbyOptions options = new DestroyLobbyOptions(){
+                LocalUserId = EOSManager.Instance.GetProductUserId(),
+                LobbyId = CurrentLobby.LobbyId
+            };
 
             LobbyInterface lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();
 
