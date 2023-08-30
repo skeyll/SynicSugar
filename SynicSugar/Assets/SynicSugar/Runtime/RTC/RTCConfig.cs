@@ -1,7 +1,5 @@
-using System.Collections;
 using System.Collections.Generic;
 using PlayEveryWare.EpicOnlineServices;
-using Epic.OnlineServices;
 using Epic.OnlineServices.RTC;
 using Epic.OnlineServices.RTCAudio;
 using UnityEngine;
@@ -139,26 +137,6 @@ namespace SynicSugar.RTC {
         #if SYNICSUGAR_LOG
             Debug.Log("ChangeOutputVolume: can change audio volume.");
         #endif
-        }
-    }
-    public class AudioInputDeviceInfo{
-        public Utf8String DeviceId { get; private set; }
-        public Utf8String DeviceName { get; private set; }
-        public bool DefaultDevice { get; private set; }
-        internal AudioInputDeviceInfo(Epic.OnlineServices.RTCAudio.AudioInputDeviceInfo? info){
-            DeviceId = info?.DeviceId;
-            DeviceName = info?.DeviceName;
-            DefaultDevice = info?.DefaultDevice ?? false;
-        }
-    }
-    public class AudioOutputDeviceInfo{
-        public Utf8String DeviceId { get; private set; }
-        public Utf8String DeviceName { get; private set; }
-        public bool DefaultDevice { get; private set; }
-        internal AudioOutputDeviceInfo(Epic.OnlineServices.RTCAudio.AudioOutputDeviceInfo? info){
-            DeviceId = info?.DeviceId;
-            DeviceName = info?.DeviceName;
-            DefaultDevice = info?.DefaultDevice ?? false;
         }
     }
 }
