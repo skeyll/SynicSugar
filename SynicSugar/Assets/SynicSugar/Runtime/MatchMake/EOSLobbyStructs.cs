@@ -27,9 +27,9 @@ namespace SynicSugar.MatchMake {
         }
         internal LobbyPermissionLevel PermissionLevel = LobbyPermissionLevel.Publicadvertised;
         public string BucketId = System.String.Empty;
-        // bool bPresenceEnabled = false;
         internal bool bAllowInvites = false;
         internal bool bDisableHostMigration = true;
+        internal bool bEnableRTCRoom = false;
         public List<LobbyAttribute> Attributes = new List<LobbyAttribute>();
         internal uint AvailableSlots = 0;
         internal void SetBucketID(string[] conditions){
@@ -46,8 +46,17 @@ namespace SynicSugar.MatchMake {
         internal List<LobbyMember> Members = new List<LobbyMember>();
 
         // Utility data
-        internal bool _SearchResult = false;
         internal bool _BeingCreated = false;
+
+        #region RTC
+        internal string RTCRoomName = System.String.Empty;
+        internal bool hasConnectedRTCRoom = false;
+        internal NotifyEventHandle RTCRoomConnectionChanged;
+        //new players or players leaving
+        internal NotifyEventHandle RTCRoomParticipantUpdate; 
+        //talking status or mute changes
+        internal NotifyEventHandle RTCRoomParticipantAudioUpdate;
+        #endregion
 
         /// <summary>
         /// Checks if Lobby Id is valid
@@ -132,6 +141,7 @@ namespace SynicSugar.MatchMake {
             MaxLobbyMembers = (uint)(outLobbyDetailsInfo?.MaxMembers);
             PermissionLevel = (LobbyPermissionLevel)(outLobbyDetailsInfo?.PermissionLevel);
             bAllowInvites = (bool)(outLobbyDetailsInfo?.AllowInvites);
+            bEnableRTCRoom = (bool)(outLobbyDetailsInfo?.RTCRoomEnabled);
             AvailableSlots = (uint)(outLobbyDetailsInfo?.AvailableSlots);
             BucketId = outLobbyDetailsInfo?.BucketId;
 
@@ -144,7 +154,7 @@ namespace SynicSugar.MatchMake {
                 attrOptions.AttrIndex = i;
                 ResultE copyAttrResult = outLobbyDetailsHandle.CopyAttributeByIndex(ref attrOptions, out Epic.OnlineServices.Lobby.Attribute? outAttribute);
                 if (copyAttrResult == ResultE.Success && outAttribute != null && outAttribute?.Data != null){
-                    LobbyAttribute attr = EOSLobbyExtenstions.GenerateLobbyAttribute(outAttribute);
+                    LobbyAttribute attr = EOSLobbyExtensions.GenerateLobbyAttribute(outAttribute);
                     Attributes.Add(attr);
                 }
             }
@@ -174,7 +184,7 @@ namespace SynicSugar.MatchMake {
                         continue;
                     }
 
-                    LobbyAttribute newAttribute = EOSLobbyExtenstions.GenerateLobbyAttribute(outAttribute);
+                    LobbyAttribute newAttribute = EOSLobbyExtensions.GenerateLobbyAttribute(outAttribute);
  
                     Members[memberIndex].MemberAttributes.Add(newAttribute.Key, newAttribute);
                 }
@@ -187,6 +197,23 @@ namespace SynicSugar.MatchMake {
     internal class LobbyMember {
         public ProductUserId ProductId;
         public Dictionary<string, LobbyAttribute> MemberAttributes = new Dictionary<string, LobbyAttribute>();
+        
+        public LobbyRTCState RTCState = new LobbyRTCState();
+    }
+
+    public class LobbyRTCState{
+        // Is this person currently connected to the RTC room?
+        public bool IsInRTCRoom = false;
+        // Is this person currently talking (audible sounds from their audio output)
+        public bool IsTalking = false;
+        // We have locally muted this person (others can still hear them)
+        public bool IsLocalMuted = false;
+        // Has this person muted their own audio output (nobody can hear them)
+        public bool IsAudioOutputDisabled = false;
+        // Are we currently muting this person?
+        public bool MuteActionInProgress = false;
+        // Has this person enabled press to talk
+        public bool PressToTalkEnabled = false;
     }
     /// <summary>
     /// Class represents all Lobby Attribute properties

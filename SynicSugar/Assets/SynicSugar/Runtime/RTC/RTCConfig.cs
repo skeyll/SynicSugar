@@ -6,6 +6,9 @@ using UnityEngine;
 using ResultE = Epic.OnlineServices.Result;
 
 namespace SynicSugar.RTC {
+    /// <summary>
+    /// Setting on local.
+    /// </summary>
     public class RTCConfig {
         /// <summary>
         /// Get Device List to input vc.
