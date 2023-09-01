@@ -216,7 +216,7 @@ namespace SynicSugar.RTC {
             }
         }
         /// <summary>
-        /// Switch Input setting of Local user sending on this SESSION.
+        /// Switch Input setting of Local user sending on this Session.
         /// </summary>
         /// <param name="isEnable">If true, send VC. If false, stop VC.</param>
         void ToggleLocalUserSending(bool isEnable){
@@ -241,9 +241,9 @@ namespace SynicSugar.RTC {
     #endif
         }
         /// <summary>
-        /// Switch Output setting(Enable or Mute) of receiving from target user on this SESSION.
+        /// Switch Output setting(Enable or Mute) of receiving from target user on this Session.
         /// </summary>
-        /// <param name="targetId">if null, effect to all remote users</param>
+        /// <param name="targetId">If null, effect to all remote users</param>
         /// <param name="isEnable">If true, receive vc from target. If false, mute target.</param>
         public void ToggleReceiveingFromTarget(UserId targetId, bool isEnable){
             if(!CurrentLobby.isValid() || System.String.IsNullOrEmpty(CurrentLobby.RTCRoomName)){
@@ -265,6 +265,39 @@ namespace SynicSugar.RTC {
             }
     #if SYNICSUGAR_LOG
             Debug.Log("OnUpdateReceiving: the toggle is successful.");
+    #endif
+        }
+        /// <summary>
+        /// Change the receiving volume on this Session.
+        /// </summary>
+        /// <param name="targetId">If null, effect to all remote users</param>
+        /// <param name="volume">Range 0.0 - 100. 50 means that the audio volume is not modified and stays in its source value.</param>
+        public void UpdateReceiveingVolumeFromTarget(UserId targetId, float volume){
+            if(!CurrentLobby.isValid() || System.String.IsNullOrEmpty(CurrentLobby.RTCRoomName)){
+                Debug.LogError("ToggleReceiveingFromTargetUser: the room is invalid.");
+                return;
+            }
+            if(volume < 0){
+                volume = 0f;
+            }
+            if(volume > 100){
+                volume = 100f;
+            }
+            var receiveOptions = new UpdateParticipantVolumeOptions(){
+                LocalUserId = EOSManager.Instance.GetProductUserId(),
+                RoomName = CurrentLobby.RTCRoomName,
+                ParticipantId = targetId == null ? null : targetId.AsEpic,
+                Volume = volume
+            };
+            audioInterface.UpdateParticipantVolume(ref receiveOptions, null, OnUpdateParticipantVolume);
+        }
+        void OnUpdateParticipantVolume(ref UpdateParticipantVolumeCallbackInfo info){
+            if(info.ResultCode != ResultE.Success){
+                Debug.LogErrorFormat("OnUpdateParticipantVolume: could not toggle setting. : {0}", info.ResultCode);
+                return;
+            }
+    #if SYNICSUGAR_LOG
+            Debug.LogFormat("OnUpdateParticipantVolume: volume change is successful. target: {0} / Volume:{1}", info.ParticipantId, info.Volume);
     #endif
         }
         /// <summary>
