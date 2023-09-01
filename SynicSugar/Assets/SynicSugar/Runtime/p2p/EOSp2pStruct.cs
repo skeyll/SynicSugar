@@ -53,6 +53,7 @@ namespace SynicSugar.P2P {
             RemoteUserIds.Add(userId);
         }
     }
+    //MEMO: If we pass this with null in an argument, this will not be null. So, when we use AsEpic to that instance, this returns error.
     public class UserId {
     #region Cache
         static internal Dictionary<string, UserId> idCache = new();
@@ -109,11 +110,9 @@ namespace SynicSugar.P2P {
 
         public static explicit operator ProductUserId(UserId id) => GetUserId(id).value;
         public static explicit operator UserId(ProductUserId value) => ToUserId(value);
-
-        public bool Equals(UserId other) => value.Equals(other.value);
+        public bool Equals(UserId other) => value is not null && value.Equals(other.value);
         public override bool Equals(object obj){
-            if (obj is null || obj.GetType() != typeof(UserId)) { return false; }
-            return Equals((UserId)obj);
+            return obj is not null && obj.GetType() == typeof(UserId) && Equals((UserId)obj);
         }
         public override int GetHashCode() => value.GetHashCode();
         public override string ToString() => value_s;

@@ -1001,7 +1001,7 @@ namespace SynicSugar.MatchMake {
         /// <returns></returns>
         bool InitConnectConfig(ref UserIds userIds){
             //Prep RTC(Voice Chat)
-            RTCManager.Instance.SubscribeToRTCEvents();
+            RTCManager.Instance.StartVoiceChat();
             //Crate copy handle
             LobbyInterface lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();
             CopyLobbyDetailsHandleOptions options = new CopyLobbyDetailsHandleOptions(){

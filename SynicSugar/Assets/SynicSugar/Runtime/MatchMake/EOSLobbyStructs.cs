@@ -5,8 +5,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
-using ResultE = Epic.OnlineServices.Result;
 using SynicSugar.RTC;
+using ResultE = Epic.OnlineServices.Result;
+using SynicSugar.P2P;
 
 namespace SynicSugar.MatchMake {
     public class Lobby {
@@ -43,8 +44,8 @@ namespace SynicSugar.MatchMake {
                 BucketId += i == 0 ? conditions[i] : (":" + conditions[i]);
             }
         }
-
-        internal List<LobbyMember> Members = new List<LobbyMember>();
+ 
+        internal Dictionary<string, MemberState> Members = new();
 
         // Utility data
         internal bool _BeingCreated = false;
@@ -117,14 +118,14 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         /// <param name="lobbyId">Specified LobbyDetails handle</param>
         internal void InitFromLobbyDetails(LobbyDetails outLobbyDetailsHandle){
-            // get owner
+            // Get owner
             var lobbyDetailsGetLobbyOwnerOptions = new LobbyDetailsGetLobbyOwnerOptions();
             ProductUserId newLobbyOwner = outLobbyDetailsHandle.GetLobbyOwner(ref lobbyDetailsGetLobbyOwnerOptions);
             if (newLobbyOwner != LobbyOwner){
                 LobbyOwner = newLobbyOwner;
             }
 
-            // copy lobby info
+            // Copy lobby info
             var lobbyDetailsCopyInfoOptions = new LobbyDetailsCopyInfoOptions();
             ResultE infoResult = outLobbyDetailsHandle.CopyInfo(ref lobbyDetailsCopyInfoOptions, out LobbyDetailsInfo? outLobbyDetailsInfo);
             if (infoResult != ResultE.Success){
@@ -144,7 +145,7 @@ namespace SynicSugar.MatchMake {
             AvailableSlots = (uint)(outLobbyDetailsInfo?.AvailableSlots);
             BucketId = outLobbyDetailsInfo?.BucketId;
 
-            // get attributes
+            // Get attributes
             Attributes.Clear();
             var lobbyDetailsGetAttributeCountOptions = new LobbyDetailsGetAttributeCountOptions();
             uint attrCount = outLobbyDetailsHandle.GetAttributeCount(ref lobbyDetailsGetAttributeCountOptions);
@@ -158,8 +159,9 @@ namespace SynicSugar.MatchMake {
                 }
             }
 
-            // get members
-            List<LobbyMember> OldMembers = new List<LobbyMember>(Members);
+            // Get members
+            // List<LobbyMember> OldMembers = new List<LobbyMember>(Members);
+            Dictionary<string, MemberState> tmp = new (Members);
             Members.Clear();
 
             var lobbyDetailsGetMemberCountOptions = new LobbyDetailsGetMemberCountOptions();
@@ -168,9 +170,9 @@ namespace SynicSugar.MatchMake {
             for (int memberIndex = 0; memberIndex < memberCount; memberIndex++){
                 var lobbyDetailsGetMemberByIndexOptions = new LobbyDetailsGetMemberByIndexOptions() { MemberIndex = (uint)memberIndex };
                 ProductUserId memberId = outLobbyDetailsHandle.GetMemberByIndex(ref lobbyDetailsGetMemberByIndexOptions);
-                Members.Insert((int)memberIndex, new LobbyMember() { ProductId = memberId });
+                Members.Add(UserId.GetUserId(memberId).ToString(), new MemberState(){});
 
-                // member attributes
+                // Add member attributes
                 var lobbyDetailsGetMemberAttributeCountOptions = new LobbyDetailsGetMemberAttributeCountOptions() { TargetUserId = memberId };
                 int memberAttributeCount = (int)outLobbyDetailsHandle.GetMemberAttributeCount(ref lobbyDetailsGetMemberAttributeCountOptions);
 
@@ -185,7 +187,7 @@ namespace SynicSugar.MatchMake {
 
                     LobbyAttribute newAttribute = EOSLobbyExtensions.GenerateLobbyAttribute(outAttribute);
  
-                    Members[memberIndex].MemberAttributes.Add(newAttribute.Key, newAttribute);
+                    Members[memberId.ToString()].MemberAttributes.Add(newAttribute.Key, newAttribute);
                 }
             }
         }
@@ -193,19 +195,16 @@ namespace SynicSugar.MatchMake {
     /// <summary>
     /// Class represents all Lobby Member properties
     /// </summary>
-    internal class LobbyMember {
-        public ProductUserId ProductId;
+    internal class MemberState {
         public Dictionary<string, LobbyAttribute> MemberAttributes = new Dictionary<string, LobbyAttribute>();    
         public LobbyRTCState RTCState = new LobbyRTCState();
     }
 
     public class LobbyRTCState{
         public bool IsInRTCRoom = false;
-        public bool IsTalking = false;
+        public bool IsSpeakinging = false;
         public bool IsLocalMuted = false;
         public bool IsAudioOutputDisabled = false;
-        public bool MuteActionInProgress = false;
-        public bool PressToTalkEnabled = false;
     }
     /// <summary>
     /// Class represents all Lobby Attribute properties

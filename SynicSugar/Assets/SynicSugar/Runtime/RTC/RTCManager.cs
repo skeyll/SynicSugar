@@ -35,6 +35,7 @@ namespace SynicSugar.RTC {
         RTCInterface rtcInterface;
         RTCAudioInterface audioInterface;
         CancellationTokenSource pttToken;
+        ulong ParticipantStatusId, ParticipantUpdatedId;
         /// <summary>
         /// This is valid only before matching. If we want to switch OpenVC and PTT after matching, call ToggleLocalUserSending() ourself.
         /// </summary>
@@ -47,19 +48,68 @@ namespace SynicSugar.RTC {
 #endif
     #region RTC Notify
         /// <summary>
-        /// Register events and notify to use RTC.<br />
+        /// Register event to get VC status, then start VC.<br />
         /// Must call this to use after Created ot Join Lobby.
         /// </summary>
-        internal void SubscribeToRTCEvents(){
-            //Need RTC?
+        internal void StartVoiceChat(){
             if(!CurrentLobby.bEnableRTCRoom){
                 return;
             }
-            CurrentLobby.RTCRoomName = GetRTCRoomName();
             if(System.String.IsNullOrEmpty(CurrentLobby.RTCRoomName)){
-                Debug.LogError("SubscribeToRTCEvents: This user does't have not find RTC room.");
+                Debug.LogError("AddNotifyParticipantUpdatedOptions: This user does't have not find RTC room.");
                 return;
             }
+            
+            //Notify to get user talking status
+            if(ParticipantUpdatedId == 0){
+                AddNotifyParticipantUpdatedOptions addNotifyParticipantUpdatedOptions = new AddNotifyParticipantUpdatedOptions(){
+                    LocalUserId = EOSManager.Instance.GetProductUserId(),
+                    RoomName = CurrentLobby.RTCRoomName
+                };
+                ParticipantUpdatedId = audioInterface.AddNotifyParticipantUpdated(ref addNotifyParticipantUpdatedOptions, null, OnRTCRoomParticipantUpdate);
+                if(ParticipantUpdatedId == 0){
+                    Debug.LogError("StartVoiceChat: AddNotifyParticipantUpdated can not be regisered.");
+                    return;
+                }
+            }
+            //Start Voice Chat
+            if(UseOpenVC){
+                ToggleLocalUserSending(true);
+            }else{
+                StartAcceptingToPushToTalk();
+            }
+            ToggleReceiveingFromTarget(null, true);
+            // ToggleLocalUserReceiveing(true);
+        }
+        /// <summary>
+        /// Call this close or leave lobby.
+        /// </summary>
+        internal void UnsubscribeFromRTCEvents(){
+            if(!CurrentLobby.bEnableRTCRoom){
+                return;
+            }
+            // CurrentLobby.RTCParticipantStatusChanged.Dispose();
+            if(ParticipantStatusId != 0){
+                rtcInterface.RemoveNotifyParticipantStatusChanged(ParticipantStatusId);
+            }
+            if(ParticipantUpdatedId != 0){
+                rtcInterface.GetAudioInterface().RemoveNotifyParticipantUpdated(ParticipantUpdatedId);
+            }
+
+            CurrentLobby.RTCRoomName = System.String.Empty;
+            CurrentLobby.hasConnectedRTCRoom = false;
+        }
+        /// <summary>
+        /// When using RTC, call OnComplete of Create and Join.
+        /// </summary>
+        internal void AddNotifyParticipantStatusChanged(){      
+            if(!CurrentLobby.bEnableRTCRoom){
+                return;
+            }
+            
+            rtcInterface = EOSManager.Instance.GetEOSRTCInterface();
+            audioInterface = rtcInterface.GetAudioInterface();
+
             //Validation of RTC room
             LobbyInterface lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();
 
@@ -69,30 +119,32 @@ namespace SynicSugar.RTC {
             };
             ResultE result = lobbyInterface.IsRTCRoomConnected(ref isConnectedOptions, out bool isConnected);
             if (result != ResultE.Success){
-                Debug.LogFormat("SubscribeToRTCEvents: This user is not participating in the RTC room.: {0}", result);
+                Debug.LogFormat("AddNotifyParticipantStatusChanged: This user is not participating in the RTC room.: {0}", result);
                 return;
             }
-            CurrentLobby.hasConnectedRTCRoom = isConnected;
+
+            MatchMakeManager.Instance.eosLobby.CurrentLobby.hasConnectedRTCRoom = isConnected;
+            MatchMakeManager.Instance.eosLobby.CurrentLobby.RTCRoomName = GetRTCRoomName();
+
+            //Check audio devices
+            var audioOptions = new GetAudioInputDevicesCountOptions();
+            audioInterface.GetAudioInputDevicesCount(ref audioOptions);
+
+            var audioOutputOptions = new GetAudioOutputDevicesCountOptions();
+            audioInterface.GetAudioOutputDevicesCount(ref audioOutputOptions);
             
+            if(ParticipantStatusId == 0){
+                // Notify to get a user's joining and leaving
+                AddNotifyParticipantStatusChangedOptions StatusChangedOptions = new AddNotifyParticipantStatusChangedOptions(){
+                    LocalUserId = EOSManager.Instance.GetProductUserId(),
+                    RoomName = CurrentLobby.RTCRoomName
+                };
+                ParticipantStatusId = rtcInterface.AddNotifyParticipantStatusChanged(ref StatusChangedOptions, null, OnRTCRoomParticipantStatusChanged);
 
-            //Notify to get user talking status
-            RTCAudioInterface rtcAudioInterface = rtcInterface.GetAudioInterface();
-            AddNotifyParticipantUpdatedOptions addNotifyParticipantUpdatedOptions = new AddNotifyParticipantUpdatedOptions(){
-                LocalUserId = EOSManager.Instance.GetProductUserId(),
-                RoomName = CurrentLobby.RTCRoomName
-            };
-
-            CurrentLobby.RTCParticipantUpdated = new NotifyEventHandle(rtcAudioInterface.AddNotifyParticipantUpdated(ref addNotifyParticipantUpdatedOptions, null, OnRTCRoomParticipantUpdate), (ulong handle) =>{
-                EOSManager.Instance.GetEOSRTCInterface().GetAudioInterface().RemoveNotifyParticipantUpdated(handle);
-            });
-            //Start Voice Chat
-            if(UseOpenVC){
-                ToggleLocalUserSending(true);
-            }else{
-                StartAcceptingToPushToTalk();
+                if(ParticipantStatusId == 0){
+                    Debug.LogError("AddNotifyParticipantStatusChanged: RTCRoomParticipantUpdate can not be regisered.");
+                }
             }
-            ToggleReceiveingFromTargetUser(null, true);
-
             string GetRTCRoomName(){
                 GetRTCRoomNameOptions options = new GetRTCRoomNameOptions(){
                     LobbyId = CurrentLobby.LobbyId,
@@ -109,67 +161,21 @@ namespace SynicSugar.RTC {
             }
         }
         /// <summary>
-        /// Call this close or leave lobby.
-        /// </summary>
-        internal void UnsubscribeFromRTCEvents(){
-            if(!CurrentLobby.bEnableRTCRoom){
-                return;
-            }
-            CurrentLobby.RTCParticipantStatusChanged.Dispose();
-            CurrentLobby.RTCParticipantUpdated.Dispose();
-
-            CurrentLobby.RTCRoomName = System.String.Empty;
-            CurrentLobby.hasConnectedRTCRoom = false;
-        }
-        /// <summary>
-        /// When using RTC, call OnComplete of Create and Join.
-        /// </summary>
-        internal void AddNotifyParticipantStatusChanged(){      
-            if(!CurrentLobby.bEnableRTCRoom){
-                return;
-            }
-            //Check audio devices
-            var audioOptions = new GetAudioInputDevicesCountOptions();
-            audioInterface.GetAudioInputDevicesCount(ref audioOptions);
-
-            var audioOutputOptions = new GetAudioOutputDevicesCountOptions();
-            audioInterface.GetAudioOutputDevicesCount(ref audioOutputOptions);
-
-            // Notify to get a user's joining and leaving
-            RTCInterface rtcInterface = EOSManager.Instance.GetEOSRTCInterface();
-
-            AddNotifyParticipantStatusChangedOptions addNotifyParticipantsStatusChangedOptions = new AddNotifyParticipantStatusChangedOptions(){
-                LocalUserId = EOSManager.Instance.GetProductUserId(),
-                RoomName = CurrentLobby.RTCRoomName
-            };
-            CurrentLobby.RTCParticipantStatusChanged = new NotifyEventHandle(rtcInterface.AddNotifyParticipantStatusChanged(ref addNotifyParticipantsStatusChangedOptions, null, OnRTCRoomParticipantStatusChanged), (ulong handle) =>{
-                EOSManager.Instance.GetEOSRTCInterface().RemoveNotifyParticipantStatusChanged(handle);
-            });
-            if(!CurrentLobby.RTCParticipantStatusChanged.IsValid()){
-                Debug.LogError("AddNotifyParticipantStatusChanged: RTCRoomParticipantUpdate isn't regisered.");
-            }
-        }
-        /// <summary>
         /// Notifications when a participant's status changes (oin or leave the room), or when the participant is added or removed from an applicable block list.
         /// </summary>
         /// <param name="data"></param>
         void OnRTCRoomParticipantStatusChanged(ref ParticipantStatusChangedCallbackInfo data){
-            if (string.IsNullOrEmpty(CurrentLobby.RTCRoomName) || CurrentLobby.RTCRoomName == data.RoomName){
+            if (string.IsNullOrEmpty(CurrentLobby.RTCRoomName) || CurrentLobby.RTCRoomName != data.RoomName){
                 Debug.LogError("OnRTCRoomParticipantStatusChanged: this room is invalid");
                 return;
             }
+            MemberState member = CurrentLobby.Members[UserId.GetUserId(data.ParticipantId).ToString()];
 
-            foreach (var member in CurrentLobby.Members){
-                if(member.ProductId != data.ParticipantId){
-                    continue;
-                }
-                if (data.ParticipantStatus == RTCParticipantStatus.Joined){
-                    member.RTCState.IsInRTCRoom = true;
-                }else{
-                    member.RTCState.IsInRTCRoom = false;
-                    member.RTCState.IsTalking = false;
-                }
-                break;
+            if (data.ParticipantStatus == RTCParticipantStatus.Joined){
+                member.RTCState.IsInRTCRoom = true;
+            }else{
+                member.RTCState.IsInRTCRoom = false;
+                member.RTCState.IsSpeakinging = false;
             }
         }
         /// <summary>
@@ -177,19 +183,14 @@ namespace SynicSugar.RTC {
         /// </summary>
         /// <param name="data"></param>
         void OnRTCRoomParticipantUpdate(ref ParticipantUpdatedCallbackInfo data){
-            if (string.IsNullOrEmpty(CurrentLobby.RTCRoomName) || CurrentLobby.RTCRoomName == data.RoomName){
+            if (string.IsNullOrEmpty(CurrentLobby.RTCRoomName) || CurrentLobby.RTCRoomName != data.RoomName){
                 Debug.LogError("OnRTCRoomParticipantUpdate: this room is invalid");
                 return;
             }
 
-            foreach(var member in CurrentLobby.Members){
-                if(member.ProductId != data.ParticipantId){
-                    continue;
-                }
-                member.RTCState.IsTalking = data.Speaking;
-                member.RTCState.IsAudioOutputDisabled = data.AudioStatus != RTCAudioStatus.Enabled;
-                break;
-            }
+            MemberState member = CurrentLobby.Members[UserId.GetUserId(data.ParticipantId).ToString()];
+            member.RTCState.IsSpeakinging = data.Speaking;
+            member.RTCState.IsAudioOutputDisabled = data.AudioStatus != RTCAudioStatus.Enabled;
         }
     #endregion
     #region Audio Send and Receive
@@ -219,11 +220,10 @@ namespace SynicSugar.RTC {
     #endif
         }
         /// <summary>
-        /// Switch Output setting of receiving from target user on this SESSION.
+        /// Switch Output settings of receiving from other all users on this SESSION.
         /// </summary>
-        /// <param name="targetId">if null, effect for all remote users</param>
         /// <param name="isEnable">If true, receive vc from target. If false, mute target.</param>
-        public void ToggleReceiveingFromTargetUser(UserId targetId, bool isEnable){
+        public void ToggleLocalUserReceiveing(bool isEnable){
             if(!CurrentLobby.isValid() || System.String.IsNullOrEmpty(CurrentLobby.RTCRoomName)){
                 Debug.LogError("ToggleReceiveingFromTargetUser: the room is invalid.");
                 return;
@@ -231,7 +231,25 @@ namespace SynicSugar.RTC {
             var receiveOptions = new UpdateReceivingOptions(){
                 LocalUserId = EOSManager.Instance.GetProductUserId(),
                 RoomName = CurrentLobby.RTCRoomName,
-                ParticipantId = targetId != null ? targetId.AsEpic : null,
+                ParticipantId = null,
+                AudioEnabled = isEnable
+            };
+            audioInterface.UpdateReceiving(ref receiveOptions, null, OnUpdateReceiving);
+        }
+        /// <summary>
+        /// Switch Output setting of receiving from target user on this SESSION.
+        /// </summary>
+        /// <param name="targetId">if null, effect to all remote users</param>
+        /// <param name="isEnable">If true, receive vc from target. If false, mute target.</param>
+        public void ToggleReceiveingFromTarget(UserId targetId, bool isEnable){
+            if(!CurrentLobby.isValid() || System.String.IsNullOrEmpty(CurrentLobby.RTCRoomName)){
+                Debug.LogError("ToggleReceiveingFromTargetUser: the room is invalid.");
+                return;
+            }
+            var receiveOptions = new UpdateReceivingOptions(){
+                LocalUserId = EOSManager.Instance.GetProductUserId(),
+                RoomName = CurrentLobby.RTCRoomName,
+                ParticipantId = targetId == null ? null : targetId.AsEpic,
                 AudioEnabled = isEnable
             };
             audioInterface.UpdateReceiving(ref receiveOptions, null, OnUpdateReceiving);
@@ -272,20 +290,20 @@ namespace SynicSugar.RTC {
         /// <param name="token"></param>
         /// <returns></returns>
         async UniTask PushToTalkLoop(CancellationToken token){
-            while(!token.IsCancellationRequested && !RTCManager.Instance.UseOpenVC){
+            while(!token.IsCancellationRequested && !UseOpenVC){
 #if ENABLE_LEGACY_INPUT_MANAGER
                 await UniTask.WaitUntil(() => Input.GetKeyDown(KeyToPushToTalk), cancellationToken: token);
-                if(RTCManager.Instance.UseOpenVC){ break; }
+                if(UseOpenVC){ break; }
                 ToggleLocalUserSending(true);
                 await UniTask.WaitUntil(() => Input.GetKeyUp(KeyToPushToTalk), cancellationToken: token);
-                if(RTCManager.Instance.UseOpenVC){ break; }
+                if(UseOpenVC){ break; }
                 ToggleLocalUserSending(false);
 #else
                 await UniTask.WaitUntil(() => Keyboard.current[KeyToPushToTalk].wasPressedThisFrame, cancellationToken: token);
-                if(RTCManager.Instance.UseOpenVC){ break; }
+                if(UseOpenVC){ break; }
                 ToggleLocalUserSending(true);
                 await UniTask.WaitUntil(() => Keyboard.current[KeyToPushToTalk].wasReleasedThisFrame, cancellationToken: token);
-                if(RTCManager.Instance.UseOpenVC){ break; }
+                if(UseOpenVC){ break; }
                 ToggleLocalUserSending(false);
 #endif
             }
