@@ -31,7 +31,7 @@ namespace SynicSugar.RTC {
             }
         }
         // RTCRoom CurrentRoom = new();
-        Lobby CurrentLobby { get { return MatchMakeManager.Instance.eosLobby.CurrentLobby; }}
+        internal Lobby CurrentLobby { get { return MatchMakeManager.Instance.eosLobby.CurrentLobby; }}
         RTCInterface rtcInterface;
         RTCAudioInterface audioInterface;
         CancellationTokenSource pttToken;
@@ -51,7 +51,7 @@ namespace SynicSugar.RTC {
         /// Register event to get VC status, then start VC.<br />
         /// Must call this to use after Created ot Join Lobby.
         /// </summary>
-        internal void StartVoiceChat(){
+        internal void AddNotifyParticipantUpdated(){
             if(!CurrentLobby.bEnableRTCRoom){
                 return;
             }
@@ -68,18 +68,10 @@ namespace SynicSugar.RTC {
                 };
                 ParticipantUpdatedId = audioInterface.AddNotifyParticipantUpdated(ref addNotifyParticipantUpdatedOptions, null, OnRTCRoomParticipantUpdate);
                 if(ParticipantUpdatedId == 0){
-                    Debug.LogError("StartVoiceChat: AddNotifyParticipantUpdated can not be regisered.");
+                    Debug.LogError("AddNotifyParticipantUpdated: can not be regisered.");
                     return;
                 }
             }
-            //Start Voice Chat
-            if(UseOpenVC){
-                ToggleLocalUserSending(true);
-            }else{
-                StartAcceptingToPushToTalk();
-            }
-            ToggleReceiveingFromTarget(null, true);
-            // ToggleLocalUserReceiveing(true);
         }
         /// <summary>
         /// Call this close or leave lobby.
@@ -195,10 +187,39 @@ namespace SynicSugar.RTC {
     #endregion
     #region Audio Send and Receive
         /// <summary>
+        /// Starts local user sending voice chat. <br />
+        /// This is enabled after a MatchMaking method returns true(= finish matchmaking). The receiving starts on StartPacketReceiver().
+        /// </summary>
+        public void StartVoiceSending(){
+            if(!CurrentLobby.bEnableRTCRoom){
+                Debug.LogError("StartVoiceSending: This lobby doesn't have RTC room.");
+                return;
+            }
+            if(UseOpenVC){
+                ToggleLocalUserSending(true);
+            }else{
+                StartAcceptingToPushToTalk();
+            }
+        }
+        /// <summary>
+        /// Stop local user sending voice chat. (= Mute) <br />
+        /// </summary>
+        public void StopVoiceSending(){
+            if(!CurrentLobby.bEnableRTCRoom){
+                Debug.LogError("StartVoiceSending: This lobby doesn't have RTC room.");
+                return;
+            }
+            if(UseOpenVC){
+                ToggleLocalUserSending(false);
+            }else{
+                StopAcceptingToPushToTalk();
+            }
+        }
+        /// <summary>
         /// Switch Input setting of Local user sending on this SESSION.
         /// </summary>
         /// <param name="isEnable">If true, send VC. If false, stop VC.</param>
-        public void ToggleLocalUserSending(bool isEnable){
+        void ToggleLocalUserSending(bool isEnable){
             if(!CurrentLobby.isValid() || System.String.IsNullOrEmpty(CurrentLobby.RTCRoomName)){
                 Debug.LogError("MuteSendingOfLocalUserOnSession: the room is invalid.");
                 return;
@@ -220,24 +241,7 @@ namespace SynicSugar.RTC {
     #endif
         }
         /// <summary>
-        /// Switch Output settings of receiving from other all users on this SESSION.
-        /// </summary>
-        /// <param name="isEnable">If true, receive vc from target. If false, mute target.</param>
-        public void ToggleLocalUserReceiveing(bool isEnable){
-            if(!CurrentLobby.isValid() || System.String.IsNullOrEmpty(CurrentLobby.RTCRoomName)){
-                Debug.LogError("ToggleReceiveingFromTargetUser: the room is invalid.");
-                return;
-            }
-            var receiveOptions = new UpdateReceivingOptions(){
-                LocalUserId = EOSManager.Instance.GetProductUserId(),
-                RoomName = CurrentLobby.RTCRoomName,
-                ParticipantId = null,
-                AudioEnabled = isEnable
-            };
-            audioInterface.UpdateReceiving(ref receiveOptions, null, OnUpdateReceiving);
-        }
-        /// <summary>
-        /// Switch Output setting of receiving from target user on this SESSION.
+        /// Switch Output setting(Enable or Mute) of receiving from target user on this SESSION.
         /// </summary>
         /// <param name="targetId">if null, effect to all remote users</param>
         /// <param name="isEnable">If true, receive vc from target. If false, mute target.</param>
@@ -263,12 +267,11 @@ namespace SynicSugar.RTC {
             Debug.Log("OnUpdateReceiving: the toggle is successful.");
     #endif
         }
-    #endregion
         /// <summary>
         /// Start to accept PushToTalk key. <br />
         /// This switches the sending state with ToggleLocalUserSending() on user's input automatically.
         /// </summary>
-        public void StartAcceptingToPushToTalk(){
+        void StartAcceptingToPushToTalk(){
             if(pttToken != null && pttToken.Token.CanBeCanceled){
                 pttToken.Cancel();
             }
@@ -278,7 +281,7 @@ namespace SynicSugar.RTC {
         /// <summary>
         /// Stop to accept PushToTalk key.
         /// </summary>
-        public void StopAcceptingToPushToTalk(){
+        void StopAcceptingToPushToTalk(){
             if(pttToken == null){
                 return;
             }
@@ -308,6 +311,7 @@ namespace SynicSugar.RTC {
 #endif
             }
         }
+    #endregion
     }
 }
 

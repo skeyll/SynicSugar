@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using SynicSugar.RTC;
 namespace SynicSugar.P2P {
     internal sealed class ConnectHub {
         //Singleton
@@ -51,6 +52,9 @@ namespace SynicSugar.P2P {
                 return;
             }
             RecivePacket().Forget();
+            if(p2pConnectorForOtherAssembly.Instance.IsEnableRTC){
+                RTCManager.Instance.ToggleReceiveingFromTarget(null, true);
+            }
         }
         //Pause receiver
         /// <summary>
