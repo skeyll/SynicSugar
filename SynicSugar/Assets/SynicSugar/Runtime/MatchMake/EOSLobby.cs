@@ -71,7 +71,7 @@ namespace SynicSugar.MatchMake {
                         return false;
                     }
 
-                    await OpenConnection();
+                    await OpenConnection(token);
 
                     await MatchMakeManager.Instance.OnSaveLobbyID();
                 }
@@ -103,7 +103,7 @@ namespace SynicSugar.MatchMake {
                         return false;
                     }
 
-                    await OpenConnection();
+                    await OpenConnection(token);
 
                     await MatchMakeManager.Instance.OnSaveLobbyID();
 
@@ -147,7 +147,7 @@ namespace SynicSugar.MatchMake {
                         return false;
                     }
     
-                    await OpenConnection();
+                    await OpenConnection(token);
                     
                     await MatchMakeManager.Instance.OnSaveLobbyID();
                 }
@@ -190,7 +190,7 @@ namespace SynicSugar.MatchMake {
                         return false;
                     }
 
-                    await OpenConnection();
+                    await OpenConnection(token);
 
                     await MatchMakeManager.Instance.OnSaveLobbyID();
                     return true;
@@ -238,7 +238,7 @@ namespace SynicSugar.MatchMake {
 
             p2pInfo.Instance.userIds.isJustReconnected = true;
 
-            await OpenConnection();
+            await OpenConnection(token);
             
             return true;
         }
@@ -1000,8 +1000,10 @@ namespace SynicSugar.MatchMake {
         /// <param name="userIds"></param>
         /// <returns></returns>
         bool InitConnectConfig(ref UserIds userIds){
+            Debug.Log("Top of Init Config");
             //Prep RTC(Voice Chat)
             RTCManager.Instance.AddNotifyParticipantUpdated();
+            Debug.Log("after notify");
             //Crate copy handle
             LobbyInterface lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();
             CopyLobbyDetailsHandleOptions options = new CopyLobbyDetailsHandleOptions(){
@@ -1052,13 +1054,13 @@ namespace SynicSugar.MatchMake {
             lobbyHandle.Release();
             return true;
         }
-        async UniTask OpenConnection(){
+        async UniTask OpenConnection(CancellationToken token){
             p2pConnectorForOtherAssembly.Instance.OpenConnection(p2pConfig.Instance.FirstConnection == p2pConfig.FirstConnectionType.Strict);
             p2pInfo.Instance.infoMethod.Init();
             p2pInfo.Instance.pings.Init();
             switch(p2pConfig.Instance.FirstConnection){
                 case p2pConfig.FirstConnectionType.Strict:
-                    await p2pInfoMethod.WaitConnectPreparation();
+                    await p2pInfoMethod.WaitConnectPreparation(token);
                 return;
                 case p2pConfig.FirstConnectionType.TempDelayedDelivery:
                     p2pInfoMethod.DisableDelayedDeliveryAfterElapsed().Forget();
