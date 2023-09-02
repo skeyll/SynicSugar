@@ -4,12 +4,115 @@ using Epic.OnlineServices.RTC;
 using Epic.OnlineServices.RTCAudio;
 using UnityEngine;
 using ResultE = Epic.OnlineServices.Result;
+using System;
+using Cysharp.Threading.Tasks;
 
 namespace SynicSugar.RTC {
     /// <summary>
     /// Setting on local.
     /// </summary>
     public class RTCConfig {
+        private static readonly RTCConfig instance = new RTCConfig();
+        private RTCConfig(){}
+        public static RTCConfig Instance { get { return instance; } }
+        ulong AudioDevicesChangedId;
+        public AudioDeviceChangedNotifier AudioDeviceChangedNotifier = new();
+        /// <summary>
+        /// Register to receive notifications when an audio device is added or removed to the system.<br />
+        /// Action is triggered when the device is added or removed.<br />
+        /// The way to cancel this notifier is in MANUAL by calling RemoteNotifyAudioDevicesChanged(), or in AUTO when the current scene changes or when the object becomes inactive.<br />
+        /// This needs MANUAL remove.
+        /// </summary>
+        /// <param name="OnDeviceChangedAction">Notification is called when the list on OS of Input and Output devices is changes, and this event is invoked. <br />
+        /// This notify is mainly used when the user switches the device configuration on the setting screen (to display new devices on dropdown). <br />
+        /// In normal, Library automatically switches removed device to the available one.<br />
+        /// https://dev.epicgames.com/docs/ja/api-ref/functions/eos-rtc-audio-add-notify-audio-devices-changed
+        /// </param>
+        public void AddNotifyAudioDevicesChanged(Action OnDeviceChangedAction = null){
+            if(AudioDevicesChangedId == 0){
+                RTCInterface rtcInterface = EOSManager.Instance.GetEOSRTCInterface();
+                RTCAudioInterface audioInterface = rtcInterface.GetAudioInterface();
+                if(OnDeviceChangedAction != null){
+                    AudioDeviceChangedNotifier.DeviceChanged += OnDeviceChangedAction;
+                }
+
+                var changedOptions = new AddNotifyAudioDevicesChangedOptions();
+                AudioDevicesChangedId = audioInterface.AddNotifyAudioDevicesChanged(ref changedOptions, null, OnAudioDevicesChanged);
+                if(AudioDevicesChangedId == 0){
+                    Debug.LogError("AddNotifyAudioDevicesChanged: is failed");
+                }
+            }
+        }
+        /// <summary>
+        /// Register to receive notifications when an audio device is added or removed to the system.<br />
+        /// Action is triggered when the device is added or removed.<br />
+        /// The way to cancel this notifier is in MANUAL by calling RemoteNotifyAudioDevicesChanged(), or in AUTO when the current scene changes or when the object becomes inactive.<br />
+        /// This notify is removed automatically when scene is changed.
+        /// </summary>
+        /// <param name="currentSceneName">Notify is automatically removes when scene is moved from this scene.</param>
+        /// <param name="OnDeviceChangedAction">Notification is called when the list on OS of Input and Output devices is changes, and this event is invoked. <br />
+        /// This notify is mainly used when the user switches the device configuration on the setting screen (to display new devices on dropdown). <br />
+        /// In normal, Library automatically switches removed device to the available one.<br />
+        /// https://dev.epicgames.com/docs/ja/api-ref/functions/eos-rtc-audio-add-notify-audio-devices-changed
+        /// </param>
+        public void AddNotifyAudioDevicesChanged(string currentSceneName, Action OnDeviceChangedAction = null){
+            if(AudioDevicesChangedId == 0){
+                RTCInterface rtcInterface = EOSManager.Instance.GetEOSRTCInterface();
+                RTCAudioInterface audioInterface = rtcInterface.GetAudioInterface();
+                if(OnDeviceChangedAction != null){
+                    AudioDeviceChangedNotifier.DeviceChanged += OnDeviceChangedAction;
+                }
+                AudioDeviceChangedNotifier.MonitorGameToUnsubscribe(currentSceneName).Forget();
+
+                var changedOptions = new AddNotifyAudioDevicesChangedOptions();
+                AudioDevicesChangedId = audioInterface.AddNotifyAudioDevicesChanged(ref changedOptions, null, OnAudioDevicesChanged);
+                if(AudioDevicesChangedId == 0){
+                    Debug.LogError("AddNotifyAudioDevicesChanged: is failed");
+                }
+            }
+        }
+        /// <summary>
+        /// Register to receive notifications when an audio device is added or removed to the system.<br />
+        /// Action is triggered when the device is added or removed.<br />
+        /// The way to cancel this notifier is in MANUAL by calling RemoteNotifyAudioDevicesChanged(), or in AUTO when the current scene changes or when the object becomes inactive.<br />
+        /// This notify is removed automatically when scene is changed.
+        /// </summary>
+        /// <param name="MoniterTargetObject">Notify is automatically removes when the target is unactivated.</param>
+        /// <param name="OnDeviceChangedAction">Notification is called when the list on OS of Input and Output devices is changes, and this event is invoked. <br />
+        /// This notify is mainly used when the user switches the device configuration on the setting screen (to display new devices on dropdown). <br />
+        /// In normal, Library automatically switches removed device to the available one.<br />
+        /// https://dev.epicgames.com/docs/ja/api-ref/functions/eos-rtc-audio-add-notify-audio-devices-changed
+        /// </param>
+        public void AddNotifyAudioDevicesChanged(GameObject MoniterTargetObject, Action OnDeviceChangedAction = null){
+            if(AudioDevicesChangedId == 0){
+                RTCInterface rtcInterface = EOSManager.Instance.GetEOSRTCInterface();
+                RTCAudioInterface audioInterface = rtcInterface.GetAudioInterface();
+                if(OnDeviceChangedAction != null){
+                    AudioDeviceChangedNotifier.DeviceChanged += OnDeviceChangedAction;
+                }
+                AudioDeviceChangedNotifier.MonitorGameToUnsubscribe(MoniterTargetObject).Forget();
+                
+                var changedOptions = new AddNotifyAudioDevicesChangedOptions();
+                AudioDevicesChangedId = audioInterface.AddNotifyAudioDevicesChanged(ref changedOptions, null, OnAudioDevicesChanged);
+                if(AudioDevicesChangedId == 0){
+                    Debug.LogError("AddNotifyAudioDevicesChanged: is failed");
+                }
+            }
+        }
+        void OnAudioDevicesChanged(ref AudioDevicesChangedCallbackInfo info){
+        #if SYNICSUGAR_LOG
+            Debug.Log("OnAudioDevicesChanged: audio device is changed.");
+        #endif
+            AudioDeviceChangedNotifier.OnDeviceChanged();
+        }
+        public void RemoveNotifyAudioDevicesChanged(){
+            if(AudioDevicesChangedId != 0){
+                RTCInterface rtcInterface = EOSManager.Instance.GetEOSRTCInterface();
+                RTCAudioInterface audioInterface = rtcInterface.GetAudioInterface();
+                audioInterface.RemoveNotifyAudioDevicesChanged(AudioDevicesChangedId);
+                AudioDevicesChangedId = 0;
+            }
+        }
         /// <summary>
         /// Get Device List to input vc.
         /// </summary>
