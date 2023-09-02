@@ -27,6 +27,8 @@ namespace SynicSugar.RTC {
         }
         void OnDestroy() {
             if( Instance == this ) {
+                ParticipantUpdatedNotifier.Clear();
+
                 Instance = null;
             }
         }
@@ -36,6 +38,7 @@ namespace SynicSugar.RTC {
         RTCAudioInterface audioInterface;
         CancellationTokenSource pttToken;
         ulong ParticipantStatusId, ParticipantUpdatedId;
+        public ParticipantUpdatedNotifier ParticipantUpdatedNotifier = new();
         /// <summary>
         /// This is valid only before matching. If we want to switch OpenVC and PTT after matching, call ToggleLocalUserSending() ourself.
         /// </summary>
@@ -66,7 +69,7 @@ namespace SynicSugar.RTC {
                     LocalUserId = EOSManager.Instance.GetProductUserId(),
                     RoomName = CurrentLobby.RTCRoomName
                 };
-                ParticipantUpdatedId = audioInterface.AddNotifyParticipantUpdated(ref addNotifyParticipantUpdatedOptions, null, OnRTCRoomParticipantUpdate);
+                ParticipantUpdatedId = audioInterface.AddNotifyParticipantUpdated(ref addNotifyParticipantUpdatedOptions, null, OnParticipantUpdated);
                 if(ParticipantUpdatedId == 0){
                     Debug.LogError("AddNotifyParticipantUpdated: can not be regisered.");
                     return;
@@ -76,11 +79,10 @@ namespace SynicSugar.RTC {
         /// <summary>
         /// Call this close or leave lobby.
         /// </summary>
-        internal void UnsubscribeFromRTCEvents(){
+        internal void RemoveRTCEvents(){
             if(!CurrentLobby.bEnableRTCRoom){
                 return;
             }
-            // CurrentLobby.RTCParticipantStatusChanged.Dispose();
             if(ParticipantStatusId != 0){
                 rtcInterface.RemoveNotifyParticipantStatusChanged(ParticipantStatusId);
             }
@@ -131,7 +133,7 @@ namespace SynicSugar.RTC {
                     LocalUserId = EOSManager.Instance.GetProductUserId(),
                     RoomName = CurrentLobby.RTCRoomName
                 };
-                ParticipantStatusId = rtcInterface.AddNotifyParticipantStatusChanged(ref StatusChangedOptions, null, OnRTCRoomParticipantStatusChanged);
+                ParticipantStatusId = rtcInterface.AddNotifyParticipantStatusChanged(ref StatusChangedOptions, null, OnParticipantStatusChanged);
 
                 if(ParticipantStatusId == 0){
                     Debug.LogError("AddNotifyParticipantStatusChanged: RTCRoomParticipantUpdate can not be regisered.");
@@ -156,9 +158,9 @@ namespace SynicSugar.RTC {
         /// Notifications when a participant's status changes (oin or leave the room), or when the participant is added or removed from an applicable block list.
         /// </summary>
         /// <param name="data"></param>
-        void OnRTCRoomParticipantStatusChanged(ref ParticipantStatusChangedCallbackInfo data){
+        void OnParticipantStatusChanged(ref ParticipantStatusChangedCallbackInfo data){
             if (string.IsNullOrEmpty(CurrentLobby.RTCRoomName) || CurrentLobby.RTCRoomName != data.RoomName){
-                Debug.LogError("OnRTCRoomParticipantStatusChanged: this room is invalid");
+                Debug.LogError("OnParticipantStatusChanged: this room is invalid");
                 return;
             }
             MemberState member = CurrentLobby.Members[UserId.GetUserId(data.ParticipantId).ToString()];
@@ -174,15 +176,20 @@ namespace SynicSugar.RTC {
         /// Notifications when a room participant audio status is updated.
         /// </summary>
         /// <param name="data"></param>
-        void OnRTCRoomParticipantUpdate(ref ParticipantUpdatedCallbackInfo data){
+        void OnParticipantUpdated(ref ParticipantUpdatedCallbackInfo data){
             if (string.IsNullOrEmpty(CurrentLobby.RTCRoomName) || CurrentLobby.RTCRoomName != data.RoomName){
-                Debug.LogError("OnRTCRoomParticipantUpdate: this room is invalid");
+                Debug.LogError("OnParticipantUpdate: this room is invalid");
                 return;
             }
 
             MemberState member = CurrentLobby.Members[UserId.GetUserId(data.ParticipantId).ToString()];
             member.RTCState.IsSpeakinging = data.Speaking;
             member.RTCState.IsAudioOutputDisabled = data.AudioStatus != RTCAudioStatus.Enabled;
+            if(data.Speaking){
+                ParticipantUpdatedNotifier.OnStartTalking(UserId.GetUserId(data.ParticipantId));
+            }else{
+                ParticipantUpdatedNotifier.OnStopTalking(UserId.GetUserId(data.ParticipantId));
+            }
         }
     #endregion
     #region Audio Send and Receive

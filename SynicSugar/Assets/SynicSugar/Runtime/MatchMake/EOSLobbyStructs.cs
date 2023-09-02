@@ -83,7 +83,7 @@ namespace SynicSugar.MatchMake {
             LobbyOwner = new ProductUserId();
             Attributes.Clear();
             Members.Clear();
-            RTCManager.Instance.UnsubscribeFromRTCEvents();
+            RTCManager.Instance.RemoveRTCEvents();
         }
 
         /// <summary>
