@@ -1,6 +1,7 @@
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using SynicSugar.P2P;
+using SynicSugar.RTC;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -51,6 +52,8 @@ namespace SynicSugar.Samples {
             uiSets.transform.Find("Restart").GetComponent<Button>().onClick.AddListener(RestartSession);
             uiSets.transform.Find("Leave").GetComponent<Button>().onClick.AddListener(LeaveSession);
             uiSets.transform.Find("Close").GetComponent<Button>().onClick.AddListener(CloseSession);
+            uiSets.transform.Find("StartVC").GetComponent<Button>().onClick.AddListener(StartVC);
+            uiSets.transform.Find("StopVC").GetComponent<Button>().onClick.AddListener(StopVC);
         }
 
         [Rpc(true)] //On call, send this ch byte with args.
@@ -145,6 +148,14 @@ namespace SynicSugar.Samples {
             EOSDebug.Instance.Log("Chat Mode: Restart");
             systemManager.chatText.text = System.String.Empty;
             ConnectHub.Instance.RestartConnections();
+        }
+
+        
+        public void StartVC(){
+            RTCManager.Instance.StartVoiceSending();
+        }
+        public void StopVC(){
+            RTCManager.Instance.StopVoiceSending();
         }
         public async void LeaveSession(){
             isStressTesting = false;

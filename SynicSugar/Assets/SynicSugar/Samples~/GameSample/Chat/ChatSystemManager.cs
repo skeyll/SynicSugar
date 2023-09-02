@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using SynicSugar.P2P;
+using SynicSugar.RTC;
 using UnityEngine;
 using UnityEngine.UI;
 namespace SynicSugar.Samples {
@@ -19,6 +20,7 @@ namespace SynicSugar.Samples {
             SynicObject.AllSpawn(chatPlayerPrefab);
 
             ConnectHub.Instance.StartPacketReceiver();
+            RTCManager.Instance.StartVoiceSending();
         }
         public void SwitchPanelContent(){
             matchmakeCanvas.SetActive(false);

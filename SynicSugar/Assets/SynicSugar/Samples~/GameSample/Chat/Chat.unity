@@ -699,6 +699,10 @@ PrefabInstance:
       propertyPath: getPacketFrequency
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4569237702368255570, guid: e18422c96d27f49489abe8b774c3a6b9, type: 3}
+      propertyPath: UseOpenVC
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1158,6 +1162,7 @@ MonoBehaviour:
     trycancel: 
   matchConditions: {fileID: 837676607}
   buttonText: {fileID: 37820300}
+  matchmakeState: {fileID: 355272012}
   modeSelect: {fileID: 837676608}
   nameField: {fileID: 0}
   playerName: {fileID: 0}
@@ -3597,11 +3602,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2118036903, guid: 2f424f4f715bed9448f8282eb6dffdd1, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -679
+      value: -369
       objectReference: {fileID: 0}
     - target: {fileID: 2118036903, guid: 2f424f4f715bed9448f8282eb6dffdd1, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -172
+      value: 250
       objectReference: {fileID: 0}
     - target: {fileID: 6240895368143145570, guid: 2f424f4f715bed9448f8282eb6dffdd1, type: 3}
       propertyPath: m_SizeDelta.x
@@ -3649,7 +3654,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6240895368363005572, guid: 2f424f4f715bed9448f8282eb6dffdd1, type: 3}
       propertyPath: m_RootOrder
-      value: 6
+      value: -1
       objectReference: {fileID: 0}
     - target: {fileID: 6240895368363005572, guid: 2f424f4f715bed9448f8282eb6dffdd1, type: 3}
       propertyPath: m_AnchorMax.x

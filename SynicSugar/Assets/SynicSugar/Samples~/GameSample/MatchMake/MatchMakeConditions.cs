@@ -18,8 +18,9 @@ namespace SynicSugar.Samples{
         }
 
         public Lobby GetLobbyCondition(){
+            bool useVC = SceneManager.GetActiveScene().name == "Chat";
             //Create conditions
-            Lobby lobbyCondition = MatchMakeManager.GenerateLobbyObject(new string[3]{SceneManager.GetActiveScene().name, mode.ToString(), region.ToString()});
+            Lobby lobbyCondition = MatchMakeManager.GenerateLobbyObject(new string[3]{SceneManager.GetActiveScene().name, mode.ToString(), region.ToString()}, useVoiceChat: useVC);
             
             lobbyCondition.MaxLobbyMembers = 2; //2-64
 

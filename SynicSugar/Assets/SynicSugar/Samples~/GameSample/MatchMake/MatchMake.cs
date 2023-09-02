@@ -68,7 +68,6 @@ namespace  SynicSugar.Samples {
             SwitchGUIState(SceneState.Standby);
         }
     #endregion
-    // #region MatchMaking
         public void StartMatchMake(){
             EOSDebug.Instance.Log("Start MatchMake.");
             StartMatchMakeEntity().Forget();
@@ -83,6 +82,7 @@ namespace  SynicSugar.Samples {
         }
         //We can't set NOT void process to Unity Event.
         //So, register StartMatchMake() to Button instead of this.
+        //Or, change this to async void StartMatchMakeEntity() at the expense of performance. We can pass async void to UnityEvents.
         async UniTask StartMatchMakeEntity(){
             //We have two ways to call SearchAndCreateLobby.
             //If pass self caneltoken, we should use Try-catch.
