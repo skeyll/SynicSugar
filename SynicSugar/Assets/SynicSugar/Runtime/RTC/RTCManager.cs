@@ -49,50 +49,6 @@ namespace SynicSugar.RTC {
 #else
         public UnityEngine.InputSystem.Key KeyToPushToTalk = UnityEngine.InputSystem.Key.Space;
 #endif
-    #region Notify
-        /// <summary>
-        /// Register event to get VC status, then start VC.<br />
-        /// Must call this to use after Created ot Join Lobby.
-        /// </summary>
-        internal void AddNotifyParticipantUpdated(){
-            if(!CurrentLobby.bEnableRTCRoom){
-                return;
-            }
-            if(System.String.IsNullOrEmpty(CurrentLobby.RTCRoomName)){
-                Debug.LogError("AddNotifyParticipantUpdatedOptions: This user does't have not find RTC room.");
-                return;
-            }
-            
-            //Notify to get user talking status
-            if(ParticipantUpdatedId == 0){
-                AddNotifyParticipantUpdatedOptions addNotifyParticipantUpdatedOptions = new AddNotifyParticipantUpdatedOptions(){
-                    LocalUserId = EOSManager.Instance.GetProductUserId(),
-                    RoomName = CurrentLobby.RTCRoomName
-                };
-                ParticipantUpdatedId = audioInterface.AddNotifyParticipantUpdated(ref addNotifyParticipantUpdatedOptions, null, OnParticipantUpdated);
-                if(ParticipantUpdatedId == 0){
-                    Debug.LogError("AddNotifyParticipantUpdated: can not be regisered.");
-                    return;
-                }
-            }
-        }
-        /// <summary>
-        /// Call this close or leave lobby.
-        /// </summary>
-        internal void RemoveRTCEvents(){
-            if(!CurrentLobby.bEnableRTCRoom){
-                return;
-            }
-            if(ParticipantStatusId != 0){
-                rtcInterface.RemoveNotifyParticipantStatusChanged(ParticipantStatusId);
-            }
-            if(ParticipantUpdatedId != 0){
-                rtcInterface.GetAudioInterface().RemoveNotifyParticipantUpdated(ParticipantUpdatedId);
-            }
-
-            CurrentLobby.RTCRoomName = System.String.Empty;
-            CurrentLobby.hasConnectedRTCRoom = false;
-        }
         /// <summary>
         /// When using RTC, call OnComplete of Create and Join.
         /// </summary>
@@ -173,27 +129,70 @@ namespace SynicSugar.RTC {
             }
         }
         /// <summary>
+        /// Register event to get VC status, then start VC.<br />
+        /// Must call this to use after Created ot Join Lobby.
+        /// </summary>
+        internal void AddNotifyParticipantUpdated(){
+            if(!CurrentLobby.bEnableRTCRoom){
+                return;
+            }
+            if(System.String.IsNullOrEmpty(CurrentLobby.RTCRoomName)){
+                Debug.LogError("AddNotifyParticipantUpdatedOptions: This user does't have not find RTC room.");
+                return;
+            }
+            
+            //Notify to get user talking status
+            if(ParticipantUpdatedId == 0){
+                AddNotifyParticipantUpdatedOptions addNotifyParticipantUpdatedOptions = new AddNotifyParticipantUpdatedOptions(){
+                    LocalUserId = EOSManager.Instance.GetProductUserId(),
+                    RoomName = CurrentLobby.RTCRoomName
+                };
+                ParticipantUpdatedId = audioInterface.AddNotifyParticipantUpdated(ref addNotifyParticipantUpdatedOptions, null, OnParticipantUpdated);
+                if(ParticipantUpdatedId == 0){
+                    Debug.LogError("AddNotifyParticipantUpdated: can not be regisered.");
+                    return;
+                }
+            }
+        }
+        /// <summary>
         /// Notifications when a room participant audio status is updated.
         /// </summary>
-        /// <param name="data"></param>
-        void OnParticipantUpdated(ref ParticipantUpdatedCallbackInfo data){
-            if (CurrentLobby.RTCRoomName != data.RoomName){
+        /// <param name="info"></param>
+        void OnParticipantUpdated(ref ParticipantUpdatedCallbackInfo info){
+            if (CurrentLobby.RTCRoomName != info.RoomName){
                 Debug.LogError("OnParticipantUpdate: this room is invalid");
                 return;
             }
         #if SYNICSUGAR_LOG
-            Debug.LogFormat("OnParticipantUpdate: Change Paticipant State. UserId: {0} IsSpeaking: {1}", data.ParticipantId, data.Speaking);
+            Debug.LogFormat("OnParticipantUpdate: Change Paticipant State. UserId: {0} IsSpeaking: {1}", info.ParticipantId, info.Speaking);
         #endif
-            MemberState member = CurrentLobby.Members[UserId.GetUserId(data.ParticipantId).ToString()];
-            member.RTCState.IsSpeakinging = data.Speaking;
-            member.RTCState.IsAudioOutputDisabled = data.AudioStatus != RTCAudioStatus.Enabled;
-            if(data.Speaking){
-                ParticipantUpdatedNotifier.OnStartTalking(UserId.GetUserId(data.ParticipantId));
+            MemberState member = CurrentLobby.Members[UserId.GetUserId(info.ParticipantId).ToString()];
+            member.RTCState.IsSpeakinging = info.Speaking;
+            member.RTCState.IsAudioOutputEnabled = info.AudioStatus == RTCAudioStatus.Enabled;
+
+            if(info.Speaking){
+                ParticipantUpdatedNotifier.OnStartTalking(UserId.GetUserId(info.ParticipantId));
             }else{
-                ParticipantUpdatedNotifier.OnStopTalking(UserId.GetUserId(data.ParticipantId));
+                ParticipantUpdatedNotifier.OnStopTalking(UserId.GetUserId(info.ParticipantId));
             }
         }
-    #endregion
+        /// <summary>
+        /// Call this close or leave lobby.
+        /// </summary>
+        internal void RemoveRTCEvents(){
+            if(!CurrentLobby.bEnableRTCRoom){
+                return;
+            }
+            if(ParticipantStatusId != 0){
+                rtcInterface.RemoveNotifyParticipantStatusChanged(ParticipantStatusId);
+            }
+            if(ParticipantUpdatedId != 0){
+                rtcInterface.GetAudioInterface().RemoveNotifyParticipantUpdated(ParticipantUpdatedId);
+            }
+
+            CurrentLobby.RTCRoomName = System.String.Empty;
+            CurrentLobby.hasConnectedRTCRoom = false;
+        }
     #region Audio Send and Receive
         /// <summary>
         /// Starts local user sending voice chat. <br />
@@ -276,10 +275,10 @@ namespace SynicSugar.RTC {
             }
             if(info.ParticipantId == null){
                 foreach(var member in CurrentLobby.Members){
-                    member.Value.RTCState.IsLocalMuted = !info.AudioEnabled;
+                    member.Value.RTCState.IsLocalMute = !info.AudioEnabled;
                 }
             }else{
-                CurrentLobby.Members[UserId.GetUserId(info.ParticipantId).ToString()].RTCState.IsLocalMuted = !info.AudioEnabled;
+                CurrentLobby.Members[UserId.GetUserId(info.ParticipantId).ToString()].RTCState.IsLocalMute = !info.AudioEnabled;
             }
             
     #if SYNICSUGAR_LOG
@@ -325,6 +324,37 @@ namespace SynicSugar.RTC {
 
     #if SYNICSUGAR_LOG
             Debug.LogFormat("OnUpdateParticipantVolume: volume change is successful. target: {0} / Volume:{1}", info.ParticipantId, info.Volume);
+    #endif
+        }
+        /// <summary>
+        /// Host user mutes target user('s input). The target can't speak but can hear other members of the lobby .
+        /// </summary>
+        /// <param name="target">Muted Target</param>
+        public void HardMuteTargetUser(UserId target, bool isMuted){
+            if(!CurrentLobby.bEnableRTCRoom || !CurrentLobby.isHost()){
+                return;
+            }
+            LobbyInterface lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();
+            var muteOptions = new HardMuteMemberOptions(){
+                LobbyId = CurrentLobby.LobbyId,
+                LocalUserId = EOSManager.Instance.GetProductUserId(),
+                TargetUserId = target.AsEpic,
+                HardMute = isMuted
+            };
+            CurrentLobby.Members[target.ToString()].RTCState.IsHardMuted = isMuted;
+            lobbyInterface.HardMuteMember(ref muteOptions, null, OnHardMuteMember);
+        }
+        void OnHardMuteMember(ref HardMuteMemberCallbackInfo info){         
+            if(info.LobbyId != CurrentLobby.LobbyId || info.ResultCode != ResultE.Success){
+                Debug.LogErrorFormat("OnHardMuteMember: could not mute target. : {0}", info.ResultCode);
+                return;
+            }
+            if(info.ResultCode != ResultE.Success){
+                Debug.LogErrorFormat("OnHardMuteMember: is failed: {0}", info.ResultCode);
+                return;
+            }
+    #if SYNICSUGAR_LOG
+            Debug.LogFormat("OnHardMuteMember: hard mute is successful. target: {0} / Volume:{1}", info.TargetUserId);
     #endif
         }
         /// <summary>
@@ -374,6 +404,31 @@ namespace SynicSugar.RTC {
     #endregion
         public UserId LastStateUpdatedUserId { get { return ParticipantUpdatedNotifier.TargetId;} } 
         public bool LastStateUpdatedUserStartTalking { get { return ParticipantUpdatedNotifier.IsTalkling; } }
+        /// <summary>
+        /// This is outputed volume on this local. We don't know target local setting.
+        /// </summary>
+        /// <param name="target"></param>
+        /// <returns>0-100. 50 means source volume.</returns>
+        public float TargetOutputedVolumeOnLocal(UserId target) { 
+            return CurrentLobby.Members[target.ToString()].RTCState.LocalOutputedVolume;
+        }
+        /// <summary>
+        /// Has this local muted target user?
+        /// </summary>
+        /// <param name="target"></param>
+        /// <returns></returns>
+        public bool IsTargetMutedOnLocal(UserId target) { 
+            return CurrentLobby.Members[target.ToString()].RTCState.IsLocalMute;
+        }
+        /// <summary>
+        /// Has this hard muted target user by this local Host?<br />
+        /// This is valid only for Lobby Host.
+        /// </summary>
+        /// <param name="target"></param>
+        /// <returns></returns>
+        public bool IsTargetHardMuted(UserId target) { 
+            return CurrentLobby.Members[target.ToString()].RTCState.IsHardMuted;
+        }
     }
 }
 
