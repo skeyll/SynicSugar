@@ -1000,10 +1000,8 @@ namespace SynicSugar.MatchMake {
         /// <param name="userIds"></param>
         /// <returns></returns>
         bool InitConnectConfig(ref UserIds userIds){
-            Debug.Log("Top of Init Config");
             //Prep RTC(Voice Chat)
             RTCManager.Instance.AddNotifyParticipantUpdated();
-            Debug.Log("after notify");
             //Crate copy handle
             LobbyInterface lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();
             CopyLobbyDetailsHandleOptions options = new CopyLobbyDetailsHandleOptions(){

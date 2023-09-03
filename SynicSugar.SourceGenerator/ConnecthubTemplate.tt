@@ -49,9 +49,9 @@ namespace SynicSugar.P2P {
 
             if(p2pConfig.Instance.getPacketFrequency == p2pConfig.GetPacketFrequency.PerSecond3xFPS){
                 ReciveThreePackets().Forget();
-                return;
+            }else{
+                RecivePacket().Forget();
             }
-            RecivePacket().Forget();
             if(p2pConnectorForOtherAssembly.Instance.IsEnableRTC){
                 RTCManager.Instance.ToggleReceiveingFromTarget(null, true);
             }
