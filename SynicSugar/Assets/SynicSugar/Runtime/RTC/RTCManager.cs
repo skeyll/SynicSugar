@@ -49,7 +49,7 @@ namespace SynicSugar.RTC {
 #else
         public UnityEngine.InputSystem.Key KeyToPushToTalk = UnityEngine.InputSystem.Key.Space;
 #endif
-    #region RTC Notify
+    #region Notify
         /// <summary>
         /// Register event to get VC status, then start VC.<br />
         /// Must call this to use after Created ot Join Lobby.
@@ -159,7 +159,7 @@ namespace SynicSugar.RTC {
         /// </summary>
         /// <param name="data"></param>
         void OnParticipantStatusChanged(ref ParticipantStatusChangedCallbackInfo data){
-            if (string.IsNullOrEmpty(CurrentLobby.RTCRoomName) || CurrentLobby.RTCRoomName != data.RoomName){
+            if (CurrentLobby.RTCRoomName != data.RoomName){
                 Debug.LogError("OnParticipantStatusChanged: this room is invalid");
                 return;
             }
@@ -177,11 +177,13 @@ namespace SynicSugar.RTC {
         /// </summary>
         /// <param name="data"></param>
         void OnParticipantUpdated(ref ParticipantUpdatedCallbackInfo data){
-            if (string.IsNullOrEmpty(CurrentLobby.RTCRoomName) || CurrentLobby.RTCRoomName != data.RoomName){
+            if (CurrentLobby.RTCRoomName != data.RoomName){
                 Debug.LogError("OnParticipantUpdate: this room is invalid");
                 return;
             }
-
+        #if SYNICSUGAR_LOG
+            Debug.LogFormat("OnParticipantUpdate: Change Paticipant State. UserId: {0} IsSpeaking: {1}", data.ParticipantId, data.Speaking);
+        #endif
             MemberState member = CurrentLobby.Members[UserId.GetUserId(data.ParticipantId).ToString()];
             member.RTCState.IsSpeakinging = data.Speaking;
             member.RTCState.IsAudioOutputDisabled = data.AudioStatus != RTCAudioStatus.Enabled;
@@ -257,6 +259,7 @@ namespace SynicSugar.RTC {
                 Debug.LogError("ToggleReceiveingFromTargetUser: the room is invalid.");
                 return;
             }
+            Debug.Log(targetId == null);
             var receiveOptions = new UpdateReceivingOptions(){
                 LocalUserId = EOSManager.Instance.GetProductUserId(),
                 RoomName = CurrentLobby.RTCRoomName,
@@ -352,6 +355,8 @@ namespace SynicSugar.RTC {
             }
         }
     #endregion
+        public UserId LastStateUpdatedUserId { get { return ParticipantUpdatedNotifier.TargetId;} } 
+        public bool LastStateUpdatedUserStartTalking { get { return ParticipantUpdatedNotifier.IsTalkling; } }
     }
 }
 
