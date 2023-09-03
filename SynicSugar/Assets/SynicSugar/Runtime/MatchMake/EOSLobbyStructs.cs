@@ -197,14 +197,16 @@ namespace SynicSugar.MatchMake {
     /// </summary>
     internal class MemberState {
         public Dictionary<string, LobbyAttribute> MemberAttributes = new Dictionary<string, LobbyAttribute>();    
-        public LobbyRTCState RTCState = new LobbyRTCState();
+        public RTCState RTCState = new RTCState();
     }
 
-    public class LobbyRTCState{
-        public bool IsInRTCRoom = false;
-        public bool IsSpeakinging = false;
-        public bool IsLocalMuted = false;
-        public bool IsAudioOutputDisabled = false;
+    public class RTCState {
+        public bool IsInRTCRoom { get; internal set; } = false;
+        public bool IsSpeakinging { get; internal set; } = false;
+        public bool IsAudioOutputDisabled { get; internal set; } = false;
+        public bool IsLocalMuted { get; internal set; } = false;
+        //50 is its source value.
+        public float LocalOutputedVolume { get; internal set; } = 50.0f;
     }
     /// <summary>
     /// Class represents all Lobby Attribute properties

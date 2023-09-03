@@ -226,10 +226,11 @@ namespace SynicSugar.RTC {
             }
         }
         /// <summary>
-        /// Switch Input setting of Local user sending on this Session.
+        /// Switch Input setting of Local user sending on this Session.<br />
+        /// We should StartVoiceSending() and StopVoiceSending() instead of this. This is Low API. 
         /// </summary>
         /// <param name="isEnable">If true, send VC. If false, stop VC.</param>
-        void ToggleLocalUserSending(bool isEnable){
+        public void ToggleLocalUserSending(bool isEnable){
             if(!CurrentLobby.isValid() || System.String.IsNullOrEmpty(CurrentLobby.RTCRoomName)){
                 Debug.LogError("MuteSendingOfLocalUserOnSession: the room is invalid.");
                 return;
@@ -273,6 +274,14 @@ namespace SynicSugar.RTC {
                 Debug.LogErrorFormat("OnUpdateReceiving: could not toggle setting. : {0}", info.ResultCode);
                 return;
             }
+            if(info.ParticipantId == null){
+                foreach(var member in CurrentLobby.Members){
+                    member.Value.RTCState.IsLocalMuted = !info.AudioEnabled;
+                }
+            }else{
+                CurrentLobby.Members[UserId.GetUserId(info.ParticipantId).ToString()].RTCState.IsLocalMuted = !info.AudioEnabled;
+            }
+            
     #if SYNICSUGAR_LOG
             Debug.Log("OnUpdateReceiving: the toggle is successful.");
     #endif
@@ -306,6 +315,14 @@ namespace SynicSugar.RTC {
                 Debug.LogErrorFormat("OnUpdateParticipantVolume: could not toggle setting. : {0}", info.ResultCode);
                 return;
             }
+            if(info.ParticipantId == null){
+                foreach(var member in CurrentLobby.Members){
+                    member.Value.RTCState.LocalOutputedVolume = info.Volume;
+                }
+            }else{
+                CurrentLobby.Members[UserId.GetUserId(info.ParticipantId).ToString()].RTCState.LocalOutputedVolume =  info.Volume;
+            }
+
     #if SYNICSUGAR_LOG
             Debug.LogFormat("OnUpdateParticipantVolume: volume change is successful. target: {0} / Volume:{1}", info.ParticipantId, info.Volume);
     #endif
