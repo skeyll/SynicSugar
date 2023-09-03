@@ -37,7 +37,7 @@ namespace SynicSugar.RTC {
         RTCInterface rtcInterface;
         RTCAudioInterface audioInterface;
         CancellationTokenSource pttToken;
-        ulong ParticipantStatusId, ParticipantUpdatedId;
+        ulong ParticipantStatusId, ParticipantUpdatedId = 0;
         public ParticipantUpdatedNotifier ParticipantUpdatedNotifier = new();
         /// <summary>
         /// This is valid only before matching. If we want to switch OpenVC and PTT after matching, call ToggleLocalUserSending() ourself.
@@ -207,6 +207,7 @@ namespace SynicSugar.RTC {
             if(UseOpenVC){
                 ToggleLocalUserSending(true);
             }else{
+                ToggleLocalUserSending(false);
                 StartAcceptingToPushToTalk();
             }
         }
@@ -259,7 +260,6 @@ namespace SynicSugar.RTC {
                 Debug.LogError("ToggleReceiveingFromTargetUser: the room is invalid.");
                 return;
             }
-            Debug.Log(targetId == null);
             var receiveOptions = new UpdateReceivingOptions(){
                 LocalUserId = EOSManager.Instance.GetProductUserId(),
                 RoomName = CurrentLobby.RTCRoomName,
