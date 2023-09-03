@@ -22,6 +22,7 @@ namespace SynicSugar.Samples {
             GameObject chatCanvas = GameObject.Find("Chat");
             systemManager = chatCanvas.GetComponent<ChatSystemManager>();
             Name = GenerateBasicName();
+            systemManager.GenerateVCStateObject(OwnerUserID);
 
             // For example, suppose this local Player's ID is A. 
             // Player A can only control the character Instance that has OwnerUserID A.

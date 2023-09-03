@@ -25,23 +25,23 @@ namespace SynicSugar.Samples{
         public void RefreshShownValue(){
             inputDevices.options.Clear();
             outputDevices.options.Clear();
-            foreach(var device in inputs){
-                string defaultText = device.DefaultDevice ? "(Default)" : System.String.Empty;
-                string name = $"{device.DeviceName}{defaultText}";
+            for(int i = 0; i < inputs.Count; i++){
+                string defaultText = inputs[i].DefaultDevice ? "(Default)" : System.String.Empty;
+                string name = $"{defaultText} {inputs[i].DeviceName}";
                 
                 inputDevices.options.Add(new Dropdown.OptionData { text = name });
-                if(device.DefaultDevice){
-                    inputDevices.value = inputDevices.options.Count;
+                if(inputs[i].DefaultDevice){
+                    inputDevices.value = i;
                 }
             }
 
-            foreach(var device in outputs){
-                string defaultText = device.DefaultDevice ? "(Default)" : System.String.Empty;
-                string name = $"{device.DeviceName}{defaultText}";
+            for(int i = 0; i < outputs.Count; i++){
+                string defaultText = outputs[i].DefaultDevice ? "(Default)" : System.String.Empty;
+                string name = $"{defaultText} {outputs[i].DeviceName}";
                 
                 outputDevices.options.Add(new Dropdown.OptionData { text = name });
-                if(device.DefaultDevice){
-                    outputDevices.value = outputDevices.options.Count;
+                if(outputs[i].DefaultDevice){
+                    outputDevices.value = i;
                 }
             }
             inputDevices.RefreshShownValue();
