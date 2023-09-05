@@ -360,44 +360,39 @@ namespace SynicSugar.MatchMake {
                 return false;
             }
 
-            UpdateLobbyModificationOptions options = new UpdateLobbyModificationOptions();
-            options.LobbyId = CurrentLobby.LobbyId;
-            options.LocalUserId = EOSManager.Instance.GetProductUserId();
-
+            UpdateLobbyModificationOptions options = new UpdateLobbyModificationOptions(){
+                LobbyId = CurrentLobby.LobbyId,
+                LocalUserId = EOSManager.Instance.GetProductUserId()
+            };
             //Create modify handle
             LobbyInterface lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();
             ResultE result = lobbyInterface.UpdateLobbyModification(ref options, out LobbyModification lobbyHandle);
 
             if (result != ResultE.Success){
                 MatchMakeManager.Instance.LastResultCode = (Result)result;
-                Debug.LogErrorFormat("Change Lobby: Could not create lobby modification. Error code: {0}", result);
+                Debug.LogErrorFormat("AddSerachLobbyAttribute: Could not create lobby modification. Error code: {0}", result);
                 return false;
             }
             //Set Backet ID
-            AttributeData bucketAttribute = new AttributeData();
-            bucketAttribute.Key = "bucket";
-            bucketAttribute.Value = new AttributeDataValue(){
-                AsUtf8 = lobbyCondition.BucketId
+            LobbyModificationSetBucketIdOptions  bucketIdOptions = new(){
+                BucketId = lobbyCondition.BucketId
             };
-            
-            LobbyModificationAddAttributeOptions addAttributeOptions = new LobbyModificationAddAttributeOptions();
+            result = lobbyHandle.SetBucketId(ref bucketIdOptions);
 
-            addAttributeOptions.Attribute = bucketAttribute;
-            addAttributeOptions.Visibility = LobbyAttributeVisibility.Public;
-
-            result = lobbyHandle.AddAttribute(ref addAttributeOptions);
             if (result != ResultE.Success){
                 MatchMakeManager.Instance.LastResultCode = (Result)result;
-                Debug.LogErrorFormat("Change Lobby: could not add backetID. Error code: {0}", result);
+                Debug.LogErrorFormat("AddSerachLobbyAttribute: Could not set bucket id. Error code: {0}", result);
                 return false;
             }
 
             // Set attribute to handle in local
             foreach(var attribute in lobbyCondition.Attributes){
-                addAttributeOptions.Attribute = attribute.AsLobbyAttribute();
-                addAttributeOptions.Visibility = attribute.Visibility;
+                LobbyModificationAddAttributeOptions attributeOptions = new LobbyModificationAddAttributeOptions(){
+                    Attribute = attribute.AsLobbyAttribute(),
+                    Visibility = attribute.Visibility
+                };
 
-                result = lobbyHandle.AddAttribute(ref addAttributeOptions);
+                result = lobbyHandle.AddAttribute(ref attributeOptions);
                 if (result != ResultE.Success){
                     MatchMakeManager.Instance.LastResultCode = (Result)result;
                     Debug.LogErrorFormat("Change Lobby: could not add attribute. Error code: {0}", result);
@@ -494,15 +489,14 @@ namespace SynicSugar.MatchMake {
             CurrentSearch = lobbySearchHandle;
 
             //Set Backet ID
-            AttributeData bucketAttribute = new AttributeData();
-            bucketAttribute.Key = "bucket";
-            bucketAttribute.Value = new AttributeDataValue(){
-                AsUtf8 = lobbyCondition.BucketId
+            AttributeData bucketAttribute = new AttributeData(){
+                Key = "bucket",
+                Value = new AttributeDataValue(){ AsUtf8 = lobbyCondition.BucketId }
             };
-            LobbySearchSetParameterOptions paramOptions = new LobbySearchSetParameterOptions();
-
-            paramOptions.Parameter = bucketAttribute;
-            paramOptions.ComparisonOp = ComparisonOp.Equal;
+            LobbySearchSetParameterOptions paramOptions = new LobbySearchSetParameterOptions(){
+                Parameter = bucketAttribute,
+                ComparisonOp = ComparisonOp.Equal
+            };
 
             result = lobbySearchHandle.SetParameter(ref paramOptions);
             
