@@ -2,6 +2,15 @@
 //To relay Result
 namespace SynicSugar {
  	public enum Result : int {
+		Timeout = -3,
+		/// <summary>
+		/// Failed due to call SynicSugar API with lack conditions
+		/// </summary>
+		InvalidAPICall = -2,
+		/// <summary>
+		/// Initial state. SynicSugar has no data.
+		/// </summary>
+		None = -1,
 		/// <summary>
 		/// Successful result. no further error processing needed
 		/// </summary>

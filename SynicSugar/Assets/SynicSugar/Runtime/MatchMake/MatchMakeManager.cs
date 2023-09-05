@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
@@ -67,6 +68,10 @@ namespace SynicSugar.MatchMake {
         internal EOSLobby eosLobby { get; private set; }
         internal CancellationTokenSource matchingToken;
         public MatchGUIState matchState = new MatchGUIState();
+        /// <summary>
+        /// If having error, this value is changed. If Success, this remains Result.None.
+        /// </summary>
+        public Result LastResultCode { get; internal set; } = Result.None;
 
         public int GetCurrentLobbyMemberCount(){
            return eosLobby.GetCurrentLobbyMemberCount();
@@ -264,6 +269,7 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         /// <param name="token"></param>
         internal async UniTask<bool> ExitCurrentLobby(CancellationToken token){
+            LastResultCode = Result.None;
             bool canDestroy = await eosLobby.LeaveLobby(false, token);
 
             return canDestroy;
@@ -277,6 +283,13 @@ namespace SynicSugar.MatchMake {
             bool canDestroy = await eosLobby.DestroyLobby(token);
 
             return canDestroy;
+        }
+        /// <summary>
+        /// Get Last ERROR Result code. None means init state. 
+        /// </summary>
+        /// <returns>-3 - -1 is unique code of SynicSugar. Others is same with Epic's result code.</returns>
+        public Result GetLastErrorCode(){
+            return LastResultCode;
         }
     #region LobbyID
         /// <summary>
@@ -352,6 +365,15 @@ namespace SynicSugar.MatchMake {
             lobby.bEnableRTCRoom = useVoiceChat;
 
             return lobby;
+        }
+        //ここから再開　個人のLobby情報を入れるよう
+        public static List<LobbyAttribute> GenerateLobbyAttributesList(string[] bucket, uint MaxPlayers = 2, bool useVoiceChat = false){
+            Lobby lobby = new Lobby();
+            lobby.SetBucketID(bucket);
+            lobby.MaxLobbyMembers = MaxPlayers;
+            lobby.bEnableRTCRoom = useVoiceChat;
+
+            return null;
         }
         /// <summary>
         /// Change State text
