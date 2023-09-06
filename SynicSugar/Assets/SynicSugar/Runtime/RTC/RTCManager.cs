@@ -82,7 +82,9 @@ namespace SynicSugar.RTC {
 
             var audioOutputOptions = new GetAudioOutputDevicesCountOptions();
             audioInterface.GetAudioOutputDevicesCount(ref audioOutputOptions);
-            
+            //Stop sending VC
+            ToggleLocalUserSending(false);
+
             if(ParticipantStatusId == 0){
                 // Notify to get a user's joining and leaving
                 AddNotifyParticipantStatusChangedOptions StatusChangedOptions = new AddNotifyParticipantStatusChangedOptions(){
@@ -141,7 +143,7 @@ namespace SynicSugar.RTC {
                 return;
             }
             
-            //Notify to get user talking status
+            //Notify to get user Speaking status
             if(ParticipantUpdatedId == 0){
                 AddNotifyParticipantUpdatedOptions addNotifyParticipantUpdatedOptions = new AddNotifyParticipantUpdatedOptions(){
                     LocalUserId = EOSManager.Instance.GetProductUserId(),
@@ -171,9 +173,9 @@ namespace SynicSugar.RTC {
             member.RTCState.IsAudioOutputEnabled = info.AudioStatus == RTCAudioStatus.Enabled;
 
             if(info.Speaking){
-                ParticipantUpdatedNotifier.OnStartTalking(UserId.GetUserId(info.ParticipantId));
+                ParticipantUpdatedNotifier.OnStartSpeaking(UserId.GetUserId(info.ParticipantId));
             }else{
-                ParticipantUpdatedNotifier.OnStopTalking(UserId.GetUserId(info.ParticipantId));
+                ParticipantUpdatedNotifier.OnStopSpeaking(UserId.GetUserId(info.ParticipantId));
             }
         }
         /// <summary>
@@ -246,8 +248,11 @@ namespace SynicSugar.RTC {
                 Debug.LogErrorFormat("OnUpdateSending: could not toggle mute setting of local user sending. : {0}", info.ResultCode);
                 return;
             }
+            if(info.AudioStatus != RTCAudioStatus.Enabled){
+                ParticipantUpdatedNotifier.OnStopSpeaking(p2pInfo.Instance.userIds.LocalUserId);
+            }
     #if SYNICSUGAR_LOG
-            Debug.Log("OnUpdateSending: the toggle is successful.");
+            Debug.LogFormat("OnUpdateSending: the toggle is successful. Status: {0}", info.AudioStatus);
     #endif
         }
         /// <summary>
@@ -282,7 +287,7 @@ namespace SynicSugar.RTC {
             }
             
     #if SYNICSUGAR_LOG
-            Debug.Log("OnUpdateReceiving: the toggle is successful.");
+            Debug.LogFormat("OnUpdateReceiving: the toggle is successful. :{0}", info.AudioEnabled);
     #endif
         }
         /// <summary>
@@ -403,7 +408,6 @@ namespace SynicSugar.RTC {
         }
     #endregion
         public UserId LastStateUpdatedUserId { get { return ParticipantUpdatedNotifier.TargetId;} } 
-        public bool LastStateUpdatedUserStartTalking { get { return ParticipantUpdatedNotifier.IsTalkling; } }
         /// <summary>
         /// This is outputed volume on this local. We don't know target local setting.
         /// </summary>
