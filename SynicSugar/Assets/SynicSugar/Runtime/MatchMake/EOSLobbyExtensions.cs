@@ -3,7 +3,7 @@ using Epic.OnlineServices.Lobby;
 using UnityEngine;
 namespace SynicSugar.MatchMake {
     internal static class EOSLobbyExtensions {
-        internal static AttributeData AsLobbyAttribute(this LobbyAttribute attribute){
+        internal static AttributeData AsLobbyAttribute(this Attribute attribute){
             AttributeData data = new AttributeData();
             data.Key = attribute.Key;
 
@@ -24,8 +24,8 @@ namespace SynicSugar.MatchMake {
 
             return data;
         }
-        internal static bool IsEqualsLobbyAttribute(this LobbyAttribute self, object otherAttribute){
-            LobbyAttribute other = (LobbyAttribute)otherAttribute;
+        internal static bool IsEqualsLobbyAttribute(this Attribute self, object otherAttribute){
+            Attribute other = (Attribute)otherAttribute;
 
             return self.ValueType == other.ValueType &&
                 self.BOOLEAN == other.BOOLEAN &&
@@ -40,8 +40,8 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         /// <param name="serverData"></param>
         /// <returns></returns>
-        internal static LobbyAttribute GenerateLobbyAttribute(Epic.OnlineServices.Lobby.Attribute? serverData){
-            LobbyAttribute data = new LobbyAttribute();
+        internal static Attribute GenerateLobbyAttribute(Epic.OnlineServices.Lobby.Attribute? serverData){
+            Attribute data = new Attribute();
             AttributeData serverAttribute = (AttributeData)(serverData?.Data);
 
             data.Key = serverAttribute.Key;

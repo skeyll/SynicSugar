@@ -366,15 +366,6 @@ namespace SynicSugar.MatchMake {
 
             return lobby;
         }
-        //ここから再開　個人のLobby情報を入れるよう
-        public static List<LobbyAttribute> GenerateLobbyAttributesList(string[] bucket, uint MaxPlayers = 2, bool useVoiceChat = false){
-            Lobby lobby = new Lobby();
-            lobby.SetBucketID(bucket);
-            lobby.MaxLobbyMembers = MaxPlayers;
-            lobby.bEnableRTCRoom = useVoiceChat;
-
-            return null;
-        }
         /// <summary>
         /// Change State text
         /// </summary>

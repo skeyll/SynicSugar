@@ -8,6 +8,7 @@ using UnityEngine.Events;
 using SynicSugar.RTC;
 using ResultE = Epic.OnlineServices.Result;
 using SynicSugar.P2P;
+using System;
 
 namespace SynicSugar.MatchMake {
     public class Lobby {
@@ -32,7 +33,7 @@ namespace SynicSugar.MatchMake {
         internal bool bAllowInvites = false;
         internal bool bDisableHostMigration = true;
         internal bool bEnableRTCRoom = false;
-        public List<LobbyAttribute> Attributes = new List<LobbyAttribute>();
+        public List<Attribute> Attributes = new List<Attribute>();
         internal uint AvailableSlots = 0;
         internal void SetBucketID(string[] conditions){
             BucketId = System.String.Empty;
@@ -154,7 +155,7 @@ namespace SynicSugar.MatchMake {
                 attrOptions.AttrIndex = i;
                 ResultE copyAttrResult = outLobbyDetailsHandle.CopyAttributeByIndex(ref attrOptions, out Epic.OnlineServices.Lobby.Attribute? outAttribute);
                 if (copyAttrResult == ResultE.Success && outAttribute != null && outAttribute?.Data != null){
-                    LobbyAttribute attr = EOSLobbyExtensions.GenerateLobbyAttribute(outAttribute);
+                    Attribute attr = EOSLobbyExtensions.GenerateLobbyAttribute(outAttribute);
                     Attributes.Add(attr);
                 }
             }
@@ -185,7 +186,7 @@ namespace SynicSugar.MatchMake {
                         continue;
                     }
 
-                    LobbyAttribute newAttribute = EOSLobbyExtensions.GenerateLobbyAttribute(outAttribute);
+                    Attribute newAttribute = EOSLobbyExtensions.GenerateLobbyAttribute(outAttribute);
  
                     Members[memberId.ToString()].MemberAttributes.Add(newAttribute.Key, newAttribute);
                 }
@@ -196,7 +197,7 @@ namespace SynicSugar.MatchMake {
     /// Class represents all Lobby Member properties
     /// </summary>
     internal class MemberState {
-        public Dictionary<string, LobbyAttribute> MemberAttributes = new Dictionary<string, LobbyAttribute>();    
+        public Dictionary<string, Attribute> MemberAttributes = new Dictionary<string, Attribute>();    
         public RTCState RTCState = new RTCState();
     }
 
@@ -209,8 +210,46 @@ namespace SynicSugar.MatchMake {
         public float LocalOutputedVolume { get; internal set; } = 50.0f;
     }
     /// <summary>
-    /// Class represents all Lobby Attribute properties
+    /// Class represents all Lobby and Member Attribute properties
     /// </summary>
+    public class Attribute {
+        internal LobbyAttributeVisibility Visibility = LobbyAttributeVisibility.Public;
+        
+        public string Key;
+        //Only one of the following properties will have valid data (depending on 'ValueType')
+        internal bool? BOOLEAN { get; private set; }
+        internal int? INT64 { get; private set; } = 0;
+        internal double? DOUBLE { get; private set; } = 0.0;
+        internal string STRING { get; private set; }
+        internal AttributeType ValueType { get; private set; } = AttributeType.String;
+        public ComparisonOp ComparisonOperator = ComparisonOp.Equal;
+        /// <summary>
+        /// Can use bool, int, double and string.
+        /// Retrun new whole attribute instanse by GenereteSerssionAttribute<T>(Key, Value, advertiseType).
+        /// </summary>
+        /// <param name="value"></param>
+        public void SetValue(bool value){
+            BOOLEAN = value;
+            ValueType = AttributeType.Boolean;
+        }
+        public void SetValue(int value){
+            INT64 = value;
+            ValueType = AttributeType.Int64;
+        }
+        public void SetValue(double value){
+            DOUBLE = value;
+            ValueType = AttributeType.Double;
+        }
+        public void SetValue(string value){
+            STRING = value;
+            ValueType = AttributeType.String;
+        }
+
+        public override int GetHashCode(){
+            return base.GetHashCode();
+        }
+    }
+    [Obsolete("This is old. AttributeData is new one.")]
     public class LobbyAttribute {
         internal LobbyAttributeVisibility Visibility = LobbyAttributeVisibility.Public;
         
