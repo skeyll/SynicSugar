@@ -98,9 +98,10 @@ namespace SynicSugar.MatchMake {
 
             LobbyId = lobbyId;
 
-            CopyLobbyDetailsHandleOptions options = new CopyLobbyDetailsHandleOptions();
-            options.LobbyId = LobbyId;
-            options.LocalUserId = EOSManager.Instance.GetProductUserId();
+            CopyLobbyDetailsHandleOptions options = new CopyLobbyDetailsHandleOptions(){
+                LobbyId = LobbyId,
+                LocalUserId = EOSManager.Instance.GetProductUserId()
+            };
 
             ResultE result = EOSManager.Instance.GetEOSLobbyInterface().CopyLobbyDetailsHandle(ref options, out LobbyDetails outLobbyDetailsHandle);
             if (result != ResultE.Success){
@@ -117,7 +118,7 @@ namespace SynicSugar.MatchMake {
         /// <summary>
         /// Initializing the given LobbyDetails handle and caches all relevant attributes
         /// </summary>
-        /// <param name="lobbyId">Specified LobbyDetails handle</param>
+        /// <param name="outLobbyDetailsHandle">Specified LobbyDetails handle</param>
         internal void InitFromLobbyDetails(LobbyDetails outLobbyDetailsHandle){
             // Get owner
             var lobbyDetailsGetLobbyOwnerOptions = new LobbyDetailsGetLobbyOwnerOptions();
