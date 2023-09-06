@@ -30,27 +30,36 @@ namespace SynicSugar.RTC {
         }
     }
     public class ParticipantUpdatedNotifier {
-        public event Action StartTalking;
-        public event Action StopTalking;
+        public event Action StartSpeaking;
+        public event Action StopSpeaking;
+        public event Action<UserId> StartTargetSpeaking;
+        public event Action<UserId> StopTargetSpeaking;
         internal UserId TargetId { get; private set; }
-        internal bool IsTalkling { get; private set; }
-        public void Register(Action startTalking, Action stopTalking){
-            StartTalking += startTalking;
-            StopTalking += stopTalking;
+        public void Register(Action startSpeaking, Action stopSpeaking){
+            StartSpeaking += startSpeaking;
+            StopSpeaking += stopSpeaking;
+        }
+        public void Register(Action<UserId> startSpeaking, Action<UserId> stopSpeaking){
+            StartTargetSpeaking += startSpeaking;
+            StopTargetSpeaking += stopSpeaking;
         }
         internal void Clear(){
-            StartTalking = null;
-            StopTalking = null;
+            StartSpeaking = null;
+            StopSpeaking = null;
+            StartTargetSpeaking = null;
+            StopTargetSpeaking = null;
         }
-        internal void OnStartTalking(UserId targetId){
+        internal void OnStartSpeaking(UserId targetId){
+            Debug.Log("OnStartSpeaking");
             TargetId = targetId;
-            IsTalkling = true;
-            StartTalking?.Invoke();
+            StartTargetSpeaking?.Invoke(targetId);
+            StartSpeaking?.Invoke();
         }
-        internal void OnStopTalking(UserId targetId){
+        internal void OnStopSpeaking(UserId targetId){
+            Debug.Log("OnStopSpeaking");
             TargetId = targetId;
-            IsTalkling = false;
-            StopTalking?.Invoke();
+            StopTargetSpeaking?.Invoke(targetId);
+            StopSpeaking?.Invoke();
         }
     }
 }
