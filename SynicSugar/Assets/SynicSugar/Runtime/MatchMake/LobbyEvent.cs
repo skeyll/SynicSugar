@@ -3,7 +3,7 @@ using System;
 using SynicSugar.P2P;
 
 namespace SynicSugar.MatchMake {
-    public class LobbyMemberUpateNotifier {
+    public class LobbyMemberUpdateNotifier {
         /// <summary>
         /// Invoke when a user attributes is updated in current lobby.</ br>
         /// </summary>

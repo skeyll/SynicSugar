@@ -24,7 +24,7 @@ namespace SynicSugar.P2P {
             await UniTask.WhenAny(UniTask.WaitUntil(() => p2pInfo.Instance.ConnectionNotifier.completeConnectPreparetion, cancellationToken: token), UniTask.Delay(10000, cancellationToken: token));
 
             #if SYNICSUGAR_LOG
-                Debug.Log("All connections is ready.");
+                Debug.Log("SynicSugar: All connections is ready.");
             #endif
             if(!p2pConfig.Instance.UseDisconnectedEarlyNotify){
                 p2pConnectorForOtherAssembly.Instance.RemoveNotifyPeerConnectionnEstablished();

@@ -20,7 +20,7 @@ namespace SynicSugar.MatchMake {
             DontDestroyOnLoad(this);
 
             eosLobby = new EOSLobby(maxSearchResult, TimeoutSec);
-            LobbyMemberUpateNotifier = new();
+            LobbyMemberUpdateNotifier = new();
 
             if(lobbyIdSaveType == RecconectLobbyIdSaveType.CustomMethod){
                 if(customSaveLobbyID != null && customDeleteLobbyID != null){
@@ -34,7 +34,7 @@ namespace SynicSugar.MatchMake {
                 //For sub events
                 lobbyIDMethod.Clear();
                 asyncLobbyIDMethod.Clear();
-                LobbyMemberUpateNotifier.Clear();
+                LobbyMemberUpdateNotifier.Clear();
 
                 Instance = null;
             }
@@ -72,7 +72,7 @@ namespace SynicSugar.MatchMake {
         internal CancellationTokenSource matchingToken;
         public MatchGUIState matchState = new MatchGUIState();
         // Events
-        public LobbyMemberUpateNotifier LobbyMemberUpateNotifier;
+        public LobbyMemberUpdateNotifier LobbyMemberUpdateNotifier;
         /// <summary>
         /// If having error, this value is changed. If Success, this remains Result.None.
         /// </summary>
