@@ -228,11 +228,11 @@ namespace SynicSugar.MatchMake {
         
         public string Key;
         //Only one of the following properties will have valid data (depending on 'ValueType')
-        internal bool? BOOLEAN { get; private set; }
-        internal int? INT64 { get; private set; } = 0;
-        internal double? DOUBLE { get; private set; } = 0.0;
-        internal string STRING { get; private set; }
-        internal AttributeType ValueType { get; private set; } = AttributeType.String;
+        public bool? BOOLEAN { get; private set; }
+        public int? INT64 { get; private set; } = 0;
+        public double? DOUBLE { get; private set; } = 0.0;
+        public string STRING { get; private set; }
+        public AttributeType ValueType { get; private set; } = AttributeType.String;
         public ComparisonOp ComparisonOperator = ComparisonOp.Equal;
         /// <summary>
         /// Can use bool, int, double and string.
@@ -255,7 +255,19 @@ namespace SynicSugar.MatchMake {
             STRING = value;
             ValueType = AttributeType.String;
         }
-
+        public string GetValueAsString(){
+            switch(ValueType){
+                case AttributeType.Boolean:
+                return BOOLEAN.ToString();
+                case AttributeType.Int64:
+                return INT64.ToString();
+                case AttributeType.Double:
+                return DOUBLE.ToString();
+                case AttributeType.String:
+                return STRING;
+            }
+            return System.String.Empty;
+        }
         public override int GetHashCode(){
             return base.GetHashCode();
         }
@@ -293,7 +305,6 @@ namespace SynicSugar.MatchMake {
             STRING = value;
             ValueType = AttributeType.String;
         }
-
         public override int GetHashCode(){
             return base.GetHashCode();
         }
