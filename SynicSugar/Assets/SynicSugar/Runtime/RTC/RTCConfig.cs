@@ -33,7 +33,7 @@ namespace SynicSugar.RTC {
                 RTCInterface rtcInterface = EOSManager.Instance.GetEOSRTCInterface();
                 RTCAudioInterface audioInterface = rtcInterface.GetAudioInterface();
                 if(OnDeviceChangedAction != null){
-                    AudioDeviceChangedNotifier.DeviceChanged += OnDeviceChangedAction;
+                    AudioDeviceChangedNotifier.OnDeviceChanged += OnDeviceChangedAction;
                 }
 
                 var changedOptions = new AddNotifyAudioDevicesChangedOptions();
@@ -60,7 +60,7 @@ namespace SynicSugar.RTC {
                 RTCInterface rtcInterface = EOSManager.Instance.GetEOSRTCInterface();
                 RTCAudioInterface audioInterface = rtcInterface.GetAudioInterface();
                 if(OnDeviceChangedAction != null){
-                    AudioDeviceChangedNotifier.DeviceChanged += OnDeviceChangedAction;
+                    AudioDeviceChangedNotifier.OnDeviceChanged += OnDeviceChangedAction;
                 }
                 AudioDeviceChangedNotifier.MonitorGameToUnsubscribe(currentSceneName).Forget();
 
@@ -88,7 +88,7 @@ namespace SynicSugar.RTC {
                 RTCInterface rtcInterface = EOSManager.Instance.GetEOSRTCInterface();
                 RTCAudioInterface audioInterface = rtcInterface.GetAudioInterface();
                 if(OnDeviceChangedAction != null){
-                    AudioDeviceChangedNotifier.DeviceChanged += OnDeviceChangedAction;
+                    AudioDeviceChangedNotifier.OnDeviceChanged += OnDeviceChangedAction;
                 }
                 AudioDeviceChangedNotifier.MonitorGameToUnsubscribe(MoniterTargetObject).Forget();
                 
@@ -103,7 +103,7 @@ namespace SynicSugar.RTC {
         #if SYNICSUGAR_LOG
             Debug.Log("OnAudioDevicesChanged: audio device is changed.");
         #endif
-            AudioDeviceChangedNotifier.OnDeviceChanged();
+            AudioDeviceChangedNotifier.DeviceChanged();
         }
         public void RemoveNotifyAudioDevicesChanged(){
             if(AudioDevicesChangedId != 0){

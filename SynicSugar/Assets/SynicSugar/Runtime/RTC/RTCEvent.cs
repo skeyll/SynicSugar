@@ -7,16 +7,16 @@ using UnityEngine.SceneManagement;
 
 namespace SynicSugar.RTC {
     public class AudioDeviceChangedNotifier {
-        public event Action DeviceChanged;
+        public event Action OnDeviceChanged;
         
         public void Register(Action deviceChanged){
-            DeviceChanged += deviceChanged;
+            OnDeviceChanged += deviceChanged;
         }
         internal void Clear(){
-            DeviceChanged = null;
+            OnDeviceChanged = null;
         }
-        internal void OnDeviceChanged(){
-            DeviceChanged?.Invoke();
+        internal void DeviceChanged(){
+            OnDeviceChanged?.Invoke();
         }
         internal async UniTask MonitorGameToUnsubscribe(string sceneName){
             await UniTask.WaitUntil(() => SceneManager.GetActiveScene().name != sceneName);
@@ -30,34 +30,34 @@ namespace SynicSugar.RTC {
         }
     }
     public class ParticipantUpdatedNotifier {
-        public event Action StartSpeaking;
-        public event Action StopSpeaking;
-        public event Action<UserId> StartTargetSpeaking;
-        public event Action<UserId> StopTargetSpeaking;
+        public event Action OnStartSpeaking;
+        public event Action OnStopSpeaking;
+        public event Action<UserId> OnStartTargetSpeaking;
+        public event Action<UserId> OnStopTargetSpeaking;
         internal UserId TargetId { get; private set; }
         public void Register(Action startSpeaking, Action stopSpeaking){
-            StartSpeaking += startSpeaking;
-            StopSpeaking += stopSpeaking;
+            OnStartSpeaking += startSpeaking;
+            OnStopSpeaking += stopSpeaking;
         }
         public void Register(Action<UserId> startSpeaking, Action<UserId> stopSpeaking){
-            StartTargetSpeaking += startSpeaking;
-            StopTargetSpeaking += stopSpeaking;
+            OnStartTargetSpeaking += startSpeaking;
+            OnStopTargetSpeaking += stopSpeaking;
         }
         internal void Clear(){
-            StartSpeaking = null;
-            StopSpeaking = null;
-            StartTargetSpeaking = null;
-            StopTargetSpeaking = null;
+            OnStartSpeaking = null;
+            OnStopSpeaking = null;
+            OnStartTargetSpeaking = null;
+            OnStopTargetSpeaking = null;
         }
-        internal void OnStartSpeaking(UserId targetId){
+        internal void StartSpeaking(UserId targetId){
             TargetId = targetId;
-            StartTargetSpeaking?.Invoke(targetId);
-            StartSpeaking?.Invoke();
+            OnStartTargetSpeaking?.Invoke(targetId);
+            OnStartSpeaking?.Invoke();
         }
-        internal void OnStopSpeaking(UserId targetId){
+        internal void StopSpeaking(UserId targetId){
             TargetId = targetId;
-            StopTargetSpeaking?.Invoke(targetId);
-            StopSpeaking?.Invoke();
+            OnStopTargetSpeaking?.Invoke(targetId);
+            OnStopSpeaking?.Invoke();
         }
     }
 }

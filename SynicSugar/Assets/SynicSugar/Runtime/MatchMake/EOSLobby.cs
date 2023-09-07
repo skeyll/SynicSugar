@@ -696,7 +696,7 @@ namespace SynicSugar.MatchMake {
             RTCManager.Instance.AddNotifyParticipantStatusChanged();
             if(userAttributes != null && userAttributes.Count > 0){
                 foreach(var m in CurrentLobby.Members){
-                    MatchMakeManager.Instance.LobbyMemberUpdateNotifier.OnMemberAttributesUpdated(UserId.GetUserId(m.Key));
+                    MatchMakeManager.Instance.MemberUpdatedNotifier.OnMemberAttributesUpdated(UserId.GetUserId(m.Key));
                 }
             }
 
@@ -776,10 +776,10 @@ namespace SynicSugar.MatchMake {
                     Debug.Log($"MemberStatusNotyfy: {info.TargetUserId} diconnect from lobby.");
                 #endif
                 p2pInfo.Instance.userIds.MoveTargetUserIdToLefts(info.TargetUserId);
-                p2pInfo.Instance.ConnectionNotifier.OnDisconnected(UserId.GetUserId(info.TargetUserId), Reason.Disconnected);
+                p2pInfo.Instance.ConnectionNotifier.Disconnected(UserId.GetUserId(info.TargetUserId), Reason.Disconnected);
             }else if(info.CurrentStatus == LobbyMemberStatus.Joined){
                 p2pInfo.Instance.userIds.MoveTargetUserIdToRemoteUsersFromLeft(info.TargetUserId);
-                p2pInfo.Instance.ConnectionNotifier.OnConnected(UserId.GetUserId(info.TargetUserId));
+                p2pInfo.Instance.ConnectionNotifier.Connected(UserId.GetUserId(info.TargetUserId));
             }
         }
         /// <summary>
@@ -827,7 +827,7 @@ namespace SynicSugar.MatchMake {
 
             OnLobbyUpdated(info.LobbyId);
             
-            MatchMakeManager.Instance.LobbyMemberUpdateNotifier.OnMemberAttributesUpdated(UserId.GetUserId(info.TargetUserId));
+            MatchMakeManager.Instance.MemberUpdatedNotifier.OnMemberAttributesUpdated(UserId.GetUserId(info.TargetUserId));
         }
 #endregion
 #region Modify

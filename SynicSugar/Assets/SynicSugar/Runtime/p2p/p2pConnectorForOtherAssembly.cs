@@ -300,7 +300,7 @@ namespace SynicSugar.P2P {
             Debug.LogError("InterruptedCallback: unknown socket id. This peer should be no lobby member.");
             return;
         }
-        p2pInfo.Instance.ConnectionNotifier.OnEarlyDisconnected(UserId.GetUserId(data.RemoteUserId), Reason.Interrupted);
+        p2pInfo.Instance.ConnectionNotifier.EarlyDisconnected(UserId.GetUserId(data.RemoteUserId), Reason.Interrupted);
     #if SYNICSUGAR_LOG
         Debug.Log("PeerConnectionInterrupted: Connection lost now.");
     #endif
@@ -331,7 +331,7 @@ namespace SynicSugar.P2P {
             return;
         }
         if(data.ConnectionType == ConnectionEstablishedType.Reconnection){
-            p2pInfo.Instance.ConnectionNotifier.OnRestored(UserId.GetUserId(data.RemoteUserId));
+            p2pInfo.Instance.ConnectionNotifier.Restored(UserId.GetUserId(data.RemoteUserId));
     #if SYNICSUGAR_LOG
             Debug.Log("EstablishedCallback: Connection is restored.");
     #endif

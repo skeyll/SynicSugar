@@ -173,9 +173,9 @@ namespace SynicSugar.RTC {
             member.RTCState.IsAudioOutputEnabled = info.AudioStatus == RTCAudioStatus.Enabled;
 
             if(info.Speaking){
-                ParticipantUpdatedNotifier.OnStartSpeaking(UserId.GetUserId(info.ParticipantId));
+                ParticipantUpdatedNotifier.StartSpeaking(UserId.GetUserId(info.ParticipantId));
             }else{
-                ParticipantUpdatedNotifier.OnStopSpeaking(UserId.GetUserId(info.ParticipantId));
+                ParticipantUpdatedNotifier.StopSpeaking(UserId.GetUserId(info.ParticipantId));
             }
         }
         /// <summary>
@@ -249,7 +249,7 @@ namespace SynicSugar.RTC {
                 return;
             }
             if(info.AudioStatus != RTCAudioStatus.Enabled){
-                ParticipantUpdatedNotifier.OnStopSpeaking(p2pInfo.Instance.userIds.LocalUserId);
+                ParticipantUpdatedNotifier.StopSpeaking(p2pInfo.Instance.userIds.LocalUserId);
             }
     #if SYNICSUGAR_LOG
             Debug.LogFormat("OnUpdateSending: the toggle is successful. Status: {0}", info.AudioStatus);

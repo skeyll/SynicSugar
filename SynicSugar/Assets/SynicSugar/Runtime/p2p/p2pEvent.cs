@@ -9,65 +9,65 @@ namespace SynicSugar.P2P {
         internal UserId ConnectUserId { get; private set; }
 
         /// <summary>
-        /// Invoke when another user disconnects unexpectedly.</ br>
+        /// Invoke when another user disconnects unexpectedly.<br />
         /// This has a lag of about 5-10 seconds after a user downs in its local.
         /// </summary>
-        public event Action Disconnected;
+        public event Action OnDisconnected;
         /// <summary>
-        /// Invoke when a user re-connects after matchmaking.</ br>
+        /// Invoke when a user re-connects after matchmaking.<br />
         /// For returnee and newcomer
         /// </summary>
-        public event Action Connected;
+        public event Action OnConnected;
         
         /// <summary>
-        /// Invoke when a connection is interrupted with another peer. </ br>
-        /// The connection is attempted to be restored, and if that's failed, "Diconnected" is fired.</ br>
+        /// Invoke when a connection is interrupted with another peer. <br />
+        /// The connection is attempted to be restored, and if that's failed, "Diconnected" is fired.<br />
         /// This notification is early, but this doesn't means just that other user is disconnected.
         /// </summary>
-        public event Action EarlyDisconnected;
+        public event Action OnEarlyDisconnected;
         
         /// <summary>
-        /// Invoke when a connection is restored with another EarlyDisconnected peer. </ br>
+        /// Invoke when a connection is restored with another EarlyDisconnected peer. <br />
         /// About game data, the peer should have it.
         /// </summary>
-        public event Action Restored;
+        public event Action OnRestored;
 
         public void Register(Action disconnected, Action connected){
-            Disconnected += disconnected;
-            Connected += connected;
+            OnDisconnected += disconnected;
+            OnConnected += connected;
         }
         public void Register(Action disconnected, Action connected, Action earlyDisconnected, Action restored){
-            Disconnected += disconnected;
-            Connected += connected;
-            EarlyDisconnected += earlyDisconnected;
-            Restored += restored;
+            OnDisconnected += disconnected;
+            OnConnected += connected;
+            OnEarlyDisconnected += earlyDisconnected;
+            OnRestored += restored;
         }
         internal void Clear(){
-            Disconnected = null;
-            Connected = null;
-            EarlyDisconnected = null;
-            Restored = null;
+            OnDisconnected = null;
+            OnConnected = null;
+            OnEarlyDisconnected = null;
+            OnRestored = null;
             establishedMemberCounts = 0;
             completeConnectPreparetion = false;
         }
-        internal void OnDisconnected(UserId id, Reason reason){
+        internal void Disconnected(UserId id, Reason reason){
             ClosedReason = reason;
             CloseUserId = id;
-            Disconnected?.Invoke();
+            OnDisconnected?.Invoke();
         }
-        internal void OnConnected(UserId id){
+        internal void Connected(UserId id){
             ConnectUserId = id;
-            Connected?.Invoke();
+            OnConnected?.Invoke();
         }
         
-        internal void OnEarlyDisconnected(UserId id, Reason reason){
+        internal void EarlyDisconnected(UserId id, Reason reason){
             ClosedReason = reason;
             CloseUserId = id;
-            EarlyDisconnected?.Invoke();
+            OnEarlyDisconnected?.Invoke();
         }
-        internal void OnRestored(UserId id){
+        internal void Restored(UserId id){
             ConnectUserId = id;
-            Connected?.Invoke();
+            OnRestored?.Invoke();
         }
         private int establishedMemberCounts;
         internal bool completeConnectPreparetion; 
@@ -81,13 +81,13 @@ namespace SynicSugar.P2P {
         /// <summary>
         /// Invoke when Synic variables is synced.
         /// </summary>
-        public event Action SyncedSynic;
+        public event Action OnSyncedSynic;
         
         public void Register(Action syncedSynic){
-            SyncedSynic += syncedSynic;
+            OnSyncedSynic += syncedSynic;
         }
         internal void Clear(){
-            SyncedSynic = null;
+            OnSyncedSynic = null;
         }
 
         internal UserId LastSyncedUserId { get; private set; }
@@ -116,7 +116,7 @@ namespace SynicSugar.P2P {
                 _receivedAllSyncSynic = true;
             }
 
-            SyncedSynic?.Invoke();
+            OnSyncedSynic?.Invoke();
         }
     }
 }
