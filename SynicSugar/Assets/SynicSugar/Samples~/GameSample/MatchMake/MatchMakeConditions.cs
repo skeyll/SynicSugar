@@ -24,7 +24,7 @@ namespace SynicSugar.Samples{
             
             lobbyCondition.MaxLobbyMembers = 2; //2-64
 
-            LobbyAttribute attribute = new LobbyAttribute();
+            AttributeData attribute = new AttributeData();
             attribute.Key = "Level";
             attribute.SetValue(level);
             attribute.ComparisonOperator = Epic.OnlineServices.ComparisonOp.Equal;

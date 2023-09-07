@@ -1,6 +1,9 @@
 using Cysharp.Threading.Tasks;
 using SynicSugar.MatchMake;
+using SynicSugar.P2P;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,7 +20,6 @@ namespace  SynicSugar.Samples {
         //For Tank
         public InputField nameField;
         [SerializeField] Text playerName;
-        int level;
         enum SceneState{
             Standby, inMatchMake, ToGame
         }
@@ -27,6 +29,7 @@ namespace  SynicSugar.Samples {
                 matchmakeContainer = Instantiate(matchmakePrefab);
             }
             SetGUIState();
+            MatchMakeManager.Instance.LobbyMemberUpdateNotifier.Register(t => OnUpdatedMemberAttribute(t));
         }
         void SetGUIState(){
             descriptions = MatchMakeConfig.SetMatchingText(MatchMakeConfig.Langugage.EN);
@@ -91,7 +94,7 @@ namespace  SynicSugar.Samples {
             bool selfTryCatch = false;
 
             if(!selfTryCatch){ //Recommend
-                bool isSuccess = await MatchMakeManager.Instance.SearchAndCreateLobby(matchConditions.GetLobbyCondition());
+                bool isSuccess = await MatchMakeManager.Instance.SearchAndCreateLobby(matchConditions.GetLobbyCondition(), userAttributes: GenerateUserAttribute());
                 
                 if(!isSuccess){
                     EOSDebug.Instance.Log("MatchMaking Failed.");
@@ -101,7 +104,7 @@ namespace  SynicSugar.Samples {
             }else{ //Sample for another way
                 try{
                     CancellationTokenSource matchCTS = new CancellationTokenSource();
-                    bool isSuccess = await MatchMakeManager.Instance.SearchAndCreateLobby(matchConditions.GetLobbyCondition(), matchCTS);
+                    bool isSuccess = await MatchMakeManager.Instance.SearchAndCreateLobby(matchConditions.GetLobbyCondition(), matchCTS, GenerateUserAttribute());
 
                     if(!isSuccess){
                         EOSDebug.Instance.Log("Backend may have something problem.");
@@ -172,6 +175,54 @@ namespace  SynicSugar.Samples {
                 startGame.gameObject.SetActive(true);
             }else{ //For Tank
                 modeSelect.ChangeGameScene(GameModeSelect.GameScene.Tank.ToString());
+            }
+        }
+        List<AttributeData> GenerateUserAttribute(){
+            //We can set max 100 attributes.
+            List<AttributeData> attributeData = new();
+            //Name
+            AttributeData attribute = new (){
+                Key = "NAME"
+            };
+            string Name = GetRandomString();
+            attribute.SetValue(Name);
+            attributeData.Add(attribute);
+            //Rank
+            attribute = new (){
+                Key = "RANK"
+            };
+            int Rank = UnityEngine.Random.Range(0, 10);
+            attribute.SetValue(Rank);
+            attributeData.Add(attribute);
+            //Win count
+            attribute = new (){
+                Key = "WIN"
+            };
+            int Win = UnityEngine.Random.Range(0, 100);
+            attribute.SetValue(Win);
+            attributeData.Add(attribute);
+            
+            EOSDebug.Instance.Log($"UserName: {Name.ToString()} / Rank: {Rank} / Win: {Win}");
+
+            return attributeData;
+            
+            string GetRandomString(){
+                var sample = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+                string name = System.String.Empty;
+                var random = new System.Random();
+
+                for (int i = 0; i < 6; i++){
+                    name += sample[random.Next(sample.Length)];
+                }
+                return name;
+            }
+        }
+        void OnUpdatedMemberAttribute(UserId target){
+            List<AttributeData> data = MatchMakeManager.Instance.GetTargetAttributeData(target);
+            string name = AttributeData.GetValueAsString(data, "NAME");
+
+            foreach(var attr in data){
+                EOSDebug.Instance.Log($"{name}: {attr.Key} {attr.GetValueAsString()}");
             }
         }
         void SwitchGUIState(SceneState state){

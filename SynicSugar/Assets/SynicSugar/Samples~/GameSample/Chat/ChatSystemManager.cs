@@ -26,7 +26,9 @@ namespace SynicSugar.Samples {
             
             ConnectHub.Instance.StartPacketReceiver();
             RTCManager.Instance.StartVoiceSending();
-            RTCManager.Instance.ParticipantUpdatedNotifier.Register(() => OnStartTalking(), () => OnStopTalking());
+            // VC actions with No args
+            // RTCManager.Instance.ParticipantUpdatedNotifier.Register(() => OnStartSpeaking(), t => OnStopSpeaking());
+            RTCManager.Instance.ParticipantUpdatedNotifier.Register(t => OnStartSpeaking(t), t => OnStopSpeaking(t));
         }
         public void SwitchPanelContent(){
             matchmakeCanvas.SetActive(false);
@@ -60,19 +62,35 @@ namespace SynicSugar.Samples {
                 chatText.text = ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.RemoteUserIds[0]).LargePacket;
             }
         }
-        void OnStartTalking(){
-            if(!vcStates.ContainsKey(RTCManager.Instance.LastStateUpdatedUserId.ToString())){
+        //VC actions with No args
+        // void OnStartSpeaking(){
+        //     if(!vcStates.ContainsKey(RTCManager.Instance.LastStateUpdatedUserId.ToString())){
+        //         return;
+        //     }
+        //     string name = ConnectHub.Instance.GetUserInstance<ChatPlayer>(RTCManager.Instance.LastStateUpdatedUserId).Name;
+        //     vcStates[RTCManager.Instance.LastStateUpdatedUserId.ToString()].text = $"{name}: Speaking";
+        // }
+        // void OnStopSpeaking(){
+        //     if(!vcStates.ContainsKey(RTCManager.Instance.LastStateUpdatedUserId.ToString())){
+        //         return;
+        //     }
+        //     string name = ConnectHub.Instance.GetUserInstance<ChatPlayer>(RTCManager.Instance.LastStateUpdatedUserId).Name;
+        //     vcStates[RTCManager.Instance.LastStateUpdatedUserId.ToString()].text = $"{name}: Not-Speaking";
+        // }
+
+        void OnStartSpeaking(UserId target){
+            if(!vcStates.ContainsKey(target.ToString())){
                 return;
             }
-            string name = ConnectHub.Instance.GetUserInstance<ChatPlayer>(RTCManager.Instance.LastStateUpdatedUserId).Name;
-            vcStates[RTCManager.Instance.LastStateUpdatedUserId.ToString()].text = $"{name}: Speaking";
+            string name = ConnectHub.Instance.GetUserInstance<ChatPlayer>(target).Name;
+            vcStates[target.ToString()].text = $"{name}: Speaking";
         }
-        void OnStopTalking(){
-            if(!vcStates.ContainsKey(RTCManager.Instance.LastStateUpdatedUserId.ToString())){
+        void OnStopSpeaking(UserId target){
+            if(!vcStates.ContainsKey(target.ToString())){
                 return;
             }
-            string name = ConnectHub.Instance.GetUserInstance<ChatPlayer>(RTCManager.Instance.LastStateUpdatedUserId).Name;
-            vcStates[RTCManager.Instance.LastStateUpdatedUserId.ToString()].text = $"{name}: Not-Speaking";
+            string name = ConnectHub.Instance.GetUserInstance<ChatPlayer>(target).Name;
+            vcStates[target.ToString()].text = $"{name}: Not-Speaking";
         }
     }
 }
