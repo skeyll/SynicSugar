@@ -696,7 +696,7 @@ namespace SynicSugar.MatchMake {
             RTCManager.Instance.AddNotifyParticipantStatusChanged();
             if(userAttributes != null && userAttributes.Count > 0){
                 foreach(var m in CurrentLobby.Members){
-                    MatchMakeManager.Instance.MemberUpdatedNotifier.OnMemberAttributesUpdated(UserId.GetUserId(m.Key));
+                    MatchMakeManager.Instance.MemberUpdatedNotifier.MemberAttributesUpdated(UserId.GetUserId(m.Key));
                 }
             }
 
@@ -827,7 +827,7 @@ namespace SynicSugar.MatchMake {
 
             OnLobbyUpdated(info.LobbyId);
             
-            MatchMakeManager.Instance.MemberUpdatedNotifier.OnMemberAttributesUpdated(UserId.GetUserId(info.TargetUserId));
+            MatchMakeManager.Instance.MemberUpdatedNotifier.MemberAttributesUpdated(UserId.GetUserId(info.TargetUserId));
         }
 #endregion
 #region Modify

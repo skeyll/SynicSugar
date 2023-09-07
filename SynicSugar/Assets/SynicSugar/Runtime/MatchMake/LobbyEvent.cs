@@ -8,16 +8,16 @@ namespace SynicSugar.MatchMake {
         /// <summary>
         /// Invoke when a user attributes is updated in current lobby.</ br>
         /// </summary>
-        public event Action<UserId> AttributesUpdated;
+        public event Action<UserId> OnAttributesUpdated;
 
         public void Register(Action<UserId> attributesUpdated){
-            AttributesUpdated += attributesUpdated;
+            OnAttributesUpdated += attributesUpdated;
         }
         internal void Clear(){
-            AttributesUpdated = null;
+            OnAttributesUpdated = null;
         }
-        internal void OnMemberAttributesUpdated(UserId target){
-            AttributesUpdated?.Invoke(target);
+        internal void MemberAttributesUpdated(UserId target){
+            OnAttributesUpdated?.Invoke(target);
         }
     }
     public class MatchMakingGUIEvents {
