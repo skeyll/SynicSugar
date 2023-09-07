@@ -268,6 +268,15 @@ namespace SynicSugar.MatchMake {
             }
             return System.String.Empty;
         }
+        public static string GetValueAsString(List<AttributeData> list, string Key){
+            foreach(var attr in list){
+                if(attr.Key != Key){
+                    continue;
+                }
+                return attr.GetValueAsString();
+            }
+            return System.String.Empty;
+        }
         public override int GetHashCode(){
             return base.GetHashCode();
         }
