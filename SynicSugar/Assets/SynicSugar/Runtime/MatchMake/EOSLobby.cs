@@ -359,8 +359,6 @@ namespace SynicSugar.MatchMake {
             }
 
             CurrentLobby.LobbyId = info.LobbyId;
-            //Member Attribute
-            AddUserAttributes();
             //RTC
             RTCManager.Instance.AddNotifyParticipantStatusChanged();
 
@@ -420,6 +418,8 @@ namespace SynicSugar.MatchMake {
                     return false;
                 }
             }
+            // Add for User Attribute
+            AddUserAttributes(lobbyHandle);
 
             //Add attribute with handle
             UpdateLobbyOptions updateOptions = new UpdateLobbyOptions(){
@@ -428,7 +428,7 @@ namespace SynicSugar.MatchMake {
             // Init for async
             waitingMatch = true;
             isMatchSuccess = false;
-
+            
             lobbyInterface.UpdateLobby(ref updateOptions, null, OnAddSerchAttribute);
 
             await UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token);
@@ -697,7 +697,6 @@ namespace SynicSugar.MatchMake {
 
             waitingMatch = false;
         }
-
 #endregion
 //Common
 #region Notification
@@ -917,6 +916,9 @@ namespace SynicSugar.MatchMake {
             isMatchSuccess = true;
             waitingMatch = false;
         }
+        /// <summary>
+        /// For join. Host add self attributes on adding serach attribute.
+        /// </summary>
         void AddUserAttributes(){
             if(userAttributes == null || userAttributes.Count == 0){
                 return;
@@ -951,6 +953,26 @@ namespace SynicSugar.MatchMake {
 
             lobbyInterface.UpdateLobby(ref updateOptions, null, OnAddedUserAttributes);
         }
+        void AddUserAttributes(LobbyModification lobbyHandle){
+            if(userAttributes == null || userAttributes.Count == 0){
+                return;
+            }
+            ResultE result = ResultE.Success;
+
+            foreach(var attr in userAttributes){
+                var attrOptions = new LobbyModificationAddMemberAttributeOptions(){
+                    Attribute = attr.AsLobbyAttribute(),
+                    Visibility = LobbyAttributeVisibility.Public
+                };
+                result = lobbyHandle.AddMemberAttribute(ref attrOptions);
+
+                if (result != ResultE.Success){
+                    MatchMakeManager.Instance.LastResultCode = (Result)result;
+                    Debug.LogErrorFormat("AddMemberAttribute: could not add member attribute. Error code: {0}", result);
+                    return;
+                }
+            }
+        }
         void OnAddedUserAttributes(ref UpdateLobbyCallbackInfo info){
             if (info.ResultCode != ResultE.Success){
                 MatchMakeManager.Instance.LastResultCode = (Result)info.ResultCode;
@@ -961,7 +983,7 @@ namespace SynicSugar.MatchMake {
             OnLobbyUpdated(info.LobbyId);
 
         #if SYNICSUGAR_LOG
-            Debug.Log("Finish to add User attributes.");
+            Debug.Log("OnAddedUserAttributes: Guest added User attributes.");
         #endif
         }
         void OnLobbyUpdated(string lobbyId){
