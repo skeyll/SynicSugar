@@ -694,6 +694,11 @@ namespace SynicSugar.MatchMake {
             AddUserAttributes();
             //RTC
             RTCManager.Instance.AddNotifyParticipantStatusChanged();
+            if(userAttributes != null && userAttributes.Count > 0){
+                foreach(var m in CurrentLobby.Members){
+                    MatchMakeManager.Instance.LobbyMemberUpdateNotifier.OnMemberAttributesUpdated(UserId.GetUserId(m.Key));
+                }
+            }
 
             waitingMatch = false;
         }
@@ -823,7 +828,6 @@ namespace SynicSugar.MatchMake {
             OnLobbyUpdated(info.LobbyId);
             
             MatchMakeManager.Instance.LobbyMemberUpdateNotifier.OnMemberAttributesUpdated(UserId.GetUserId(info.TargetUserId));
-            Debug.Log("OnLobbyMemberUpdate");
         }
 #endregion
 #region Modify

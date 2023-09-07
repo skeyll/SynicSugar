@@ -268,7 +268,14 @@ namespace SynicSugar.MatchMake {
             }
             return System.String.Empty;
         }
+        /// <summary>
+        /// Get specific value from user attributes.
+        /// </summary>
+        /// <param name="list">User attributes </param>
+        /// <param name="Key">Target attribute key(Upper case)</param>
+        /// <returns></returns>
         public static string GetValueAsString(List<AttributeData> list, string Key){
+            Key = Key.ToUpper();
             foreach(var attr in list){
                 if(attr.Key != Key){
                     continue;
