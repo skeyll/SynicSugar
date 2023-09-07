@@ -360,7 +360,7 @@ namespace SynicSugar.MatchMake {
 
             CurrentLobby.LobbyId = info.LobbyId;
             //Member Attribute
-            AddMemberAttributes();
+            AddUserAttributes();
             //RTC
             RTCManager.Instance.AddNotifyParticipantStatusChanged();
 
@@ -691,7 +691,7 @@ namespace SynicSugar.MatchMake {
 
             CurrentLobby.InitFromLobbyHandle(info.LobbyId);
             //Member Attribute
-            AddMemberAttributes();
+            AddUserAttributes();
             //RTC
             RTCManager.Instance.AddNotifyParticipantStatusChanged();
 
@@ -823,7 +823,8 @@ namespace SynicSugar.MatchMake {
 
             OnLobbyUpdated(info.LobbyId);
             
-            MatchMakeManager.Instance.LobbyMemberUpateNotifier.OnMemberAttributesUpdated(UserId.GetUserId(info.TargetUserId));
+            MatchMakeManager.Instance.LobbyMemberUpdateNotifier.OnMemberAttributesUpdated(UserId.GetUserId(info.TargetUserId));
+            Debug.Log("OnLobbyMemberUpdate");
         }
 #endregion
 #region Modify
@@ -841,9 +842,10 @@ namespace SynicSugar.MatchMake {
                 return;
             }
 
-            UpdateLobbyModificationOptions options = new UpdateLobbyModificationOptions();
-            options.LobbyId = CurrentLobby.LobbyId;
-            options.LocalUserId = EOSManager.Instance.GetProductUserId();
+            UpdateLobbyModificationOptions options = new UpdateLobbyModificationOptions(){
+                LobbyId = CurrentLobby.LobbyId,
+                LocalUserId = EOSManager.Instance.GetProductUserId()
+            };
 
             //Create modify handle
             LobbyInterface lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();
@@ -915,18 +917,25 @@ namespace SynicSugar.MatchMake {
             isMatchSuccess = true;
             waitingMatch = false;
         }
-        void AddMemberAttributes(){
+        void AddUserAttributes(){
             if(userAttributes == null || userAttributes.Count == 0){
                 return;
             }
             LobbyInterface lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();
-            UpdateLobbyModificationOptions options = new UpdateLobbyModificationOptions();
+            UpdateLobbyModificationOptions options = new UpdateLobbyModificationOptions(){
+                LobbyId = CurrentLobby.LobbyId,
+                LocalUserId = EOSManager.Instance.GetProductUserId()
+            };
             ResultE result = lobbyInterface.UpdateLobbyModification(ref options, out LobbyModification lobbyHandle);
+            if(result != ResultE.Success){
+                Debug.Log("AddUserAttributes: can't get modify handle.");
+                return;
+            }
 
             foreach(var attr in userAttributes){
                 var attrOptions = new LobbyModificationAddMemberAttributeOptions(){
                     Attribute = attr.AsLobbyAttribute(),
-                    Visibility = LobbyAttributeVisibility.Private
+                    Visibility = LobbyAttributeVisibility.Public
                 };
                 result = lobbyHandle.AddMemberAttribute(ref attrOptions);
 
@@ -936,6 +945,24 @@ namespace SynicSugar.MatchMake {
                     return;
                 }
             }
+            UpdateLobbyOptions updateOptions = new UpdateLobbyOptions(){
+                LobbyModificationHandle = lobbyHandle
+            };
+
+            lobbyInterface.UpdateLobby(ref updateOptions, null, OnAddedUserAttributes);
+        }
+        void OnAddedUserAttributes(ref UpdateLobbyCallbackInfo info){
+            if (info.ResultCode != ResultE.Success){
+                MatchMakeManager.Instance.LastResultCode = (Result)info.ResultCode;
+                Debug.LogErrorFormat("Modify Lobby: error code: {0}", info.ResultCode);
+                return;
+            }
+
+            OnLobbyUpdated(info.LobbyId);
+
+        #if SYNICSUGAR_LOG
+            Debug.Log("Finish to add User attributes.");
+        #endif
         }
         void OnLobbyUpdated(string lobbyId){
             if (!string.IsNullOrEmpty(lobbyId) && CurrentLobby.LobbyId == lobbyId){
@@ -963,6 +990,7 @@ namespace SynicSugar.MatchMake {
             LobbyUpdateNotification.Dispose();
         }
         LobbyMemberStatusNotification.Dispose();
+        LobbyMemberUpdateNotification.Dispose();
 
         //Destroy or Leave the current lobby.
         if(CurrentLobby.isHost()){
@@ -1040,6 +1068,7 @@ namespace SynicSugar.MatchMake {
             if (CurrentLobby.isValid() && CurrentLobby.LobbyId.Equals(lobbyId, StringComparison.OrdinalIgnoreCase)){
                 CurrentLobby.Clear();
                 LobbyMemberStatusNotification.Dispose();
+                LobbyMemberUpdateNotification.Dispose();
             }
         }
 #endregion
@@ -1072,6 +1101,7 @@ namespace SynicSugar.MatchMake {
 
             await MatchMakeManager.Instance.OnDeleteLobbyID();
             LobbyMemberStatusNotification.Dispose();
+            LobbyMemberUpdateNotification.Dispose();
             CurrentLobby.Clear();
 
             return canLeave;

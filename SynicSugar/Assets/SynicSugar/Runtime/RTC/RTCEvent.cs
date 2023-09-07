@@ -50,13 +50,11 @@ namespace SynicSugar.RTC {
             StopTargetSpeaking = null;
         }
         internal void OnStartSpeaking(UserId targetId){
-            Debug.Log("OnStartSpeaking");
             TargetId = targetId;
             StartTargetSpeaking?.Invoke(targetId);
             StartSpeaking?.Invoke();
         }
         internal void OnStopSpeaking(UserId targetId){
-            Debug.Log("OnStopSpeaking");
             TargetId = targetId;
             StopTargetSpeaking?.Invoke(targetId);
             StopSpeaking?.Invoke();
