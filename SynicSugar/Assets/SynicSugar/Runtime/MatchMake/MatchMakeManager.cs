@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using SynicSugar.P2P;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -103,7 +104,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="userAttributes">The user attributes of names, job and so on that is needed before P2P. <br />
         /// These should be used just for matchmaking and the kick, the data for actual game should be exchanged via p2p for the lag and server bandwidth .</param>
         /// <returns></returns>
-        public async UniTask<bool> SearchAndCreateLobby(Lobby lobbyCondition, CancellationTokenSource token = default(CancellationTokenSource), List<Attribute> userAttributes = null){
+        public async UniTask<bool> SearchAndCreateLobby(Lobby lobbyCondition, CancellationTokenSource token = default(CancellationTokenSource), List<AttributeData> userAttributes = null){
             bool useTryCatch = token == default;
             matchingToken = useTryCatch ? new CancellationTokenSource() : token;
             
@@ -143,7 +144,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="userAttributes">The user attributes of names, job and so on that is needed before P2P. <br />
         /// These should be used just for matchmaking and the kick, the data for actual game should be exchanged via p2p for the lag and server bandwidth .</param>
         /// <returns></returns>
-        public async UniTask<bool> SearchLobby(Lobby lobbyCondition, CancellationTokenSource token = default(CancellationTokenSource), List<Attribute> userAttributes = null){
+        public async UniTask<bool> SearchLobby(Lobby lobbyCondition, CancellationTokenSource token = default(CancellationTokenSource), List<AttributeData> userAttributes = null){
             bool useTryCatch = token == default;
             matchingToken = useTryCatch ? new CancellationTokenSource() : token;
             
@@ -163,7 +164,6 @@ namespace SynicSugar.MatchMake {
             }else{
                 canMatch = await eosLobby.StartJustSearch(lobbyCondition, matchingToken.Token, userAttributes);
             }
-
 
             if(!canMatch){
                 UpdateStateDescription(MatchState.Cancel);
@@ -185,7 +185,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="userAttributes">The user attributes of names, job and so on that is needed before P2P. <br />
         /// These should be used just for matchmaking and the kick, the data for actual game should be exchanged via p2p for the lag and server bandwidth .</param>
         /// <returns></returns>
-        public async UniTask<bool> CreateLobby(Lobby lobbyCondition, CancellationTokenSource token = default(CancellationTokenSource), List<Attribute> userAttributes = null){
+        public async UniTask<bool> CreateLobby(Lobby lobbyCondition, CancellationTokenSource token = default(CancellationTokenSource), List<AttributeData> userAttributes = null){
             bool useTryCatch = token == default;
             matchingToken = useTryCatch ? new CancellationTokenSource() : token;
             
@@ -375,6 +375,23 @@ namespace SynicSugar.MatchMake {
             lobby.bEnableRTCRoom = useVoiceChat;
 
             return lobby;
+        }
+        /// <summary>
+        /// Get target attribute about Key.
+        /// </summary>
+        /// <param name="target">target user id</param>
+        /// <param name="Key">attribute key</param>
+        /// <returns>If no data, return null.</returns>
+        public AttributeData GetTargetAttributeData(UserId target, string Key){
+            return eosLobby.CurrentLobby.Members[target.ToString()]?.GetAttributeData(Key);
+        }
+        /// <summary>
+        /// Get target all attributes.
+        /// </summary>
+        /// <param name="target">target user id</param>
+        /// <returns>If no data, return null.</returns>
+        public List<AttributeData> GetTargetAttributeData(UserId target){
+            return eosLobby.CurrentLobby.Members[target.ToString()]?.Attributes;
         }
         /// <summary>
         /// Change State text

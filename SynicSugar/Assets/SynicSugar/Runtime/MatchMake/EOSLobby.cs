@@ -21,7 +21,7 @@ namespace SynicSugar.MatchMake {
         //User config
         uint MAX_SEARCH_RESULT;
         int timeoutMS;
-        List<Attribute> userAttributes = new();
+        List<AttributeData> userAttributes;
         //Notification
         /// <summary>
         /// Join, Leave, Kicked, Promote or so on...
@@ -54,7 +54,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="token"></param>
         /// <param name="saveFn">To save LobbyID. If null, save ID to local by PlayerPrefs</param>
         /// <returns>True on success. If false, EOS backend have something problem. So, when you call this process again, should wait for some time.</returns>
-        internal async UniTask<bool> StartMatching(Lobby lobbyCondition, CancellationToken token, List<Attribute> userAttributes){
+        internal async UniTask<bool> StartMatching(Lobby lobbyCondition, CancellationToken token, List<AttributeData> userAttributes){
             MatchMakeManager.Instance.LastResultCode = Result.None;
             this.userAttributes = userAttributes;
             //Start timer 
@@ -135,7 +135,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="lobbyCondition">Search condition. <c>MUST NOT</c> add the data not to open public.</param>
         /// <param name="token"></param>
         /// <returns>True on success. If false, EOS backend have something problem. So, when you call this process again, should wait for some time.</returns>
-        internal async UniTask<bool> StartJustSearch(Lobby lobbyCondition, CancellationToken token, List<Attribute> userAttributes){
+        internal async UniTask<bool> StartJustSearch(Lobby lobbyCondition, CancellationToken token, List<AttributeData> userAttributes){
             MatchMakeManager.Instance.LastResultCode = Result.None;
             this.userAttributes = userAttributes;
             var timer = TimeoutTimer(token);
@@ -180,7 +180,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="lobbyCondition">Create and search condition. <c>MUST NOT</c> add the data not to open public.</param>
         /// <param name="token"></param>
         /// <returns>True on success. If false, EOS backend have something problem. So, when you call this process again, should wait for some time.</returns>
-        internal async UniTask<bool> StartJustCreate(Lobby lobbyCondition, CancellationToken token, List<Attribute> userAttributes){
+        internal async UniTask<bool> StartJustCreate(Lobby lobbyCondition, CancellationToken token, List<AttributeData> userAttributes){
             MatchMakeManager.Instance.LastResultCode = Result.None;
             this.userAttributes = userAttributes;
             var timer = TimeoutTimer(token);
@@ -513,7 +513,7 @@ namespace SynicSugar.MatchMake {
             CurrentSearch = lobbySearchHandle;
 
             //Set Backet ID
-            AttributeData bucketAttribute = new AttributeData(){
+            Epic.OnlineServices.Lobby.AttributeData bucketAttribute = new (){
                 Key = "bucket",
                 Value = new AttributeDataValue(){ AsUtf8 = lobbyCondition.BucketId }
             };
@@ -532,7 +532,7 @@ namespace SynicSugar.MatchMake {
             
             // Set other attributes
             foreach (var attribute in lobbyCondition.Attributes){
-                AttributeData data = attribute.AsLobbyAttribute();
+                Epic.OnlineServices.Lobby.AttributeData data = attribute.AsLobbyAttribute();
                 paramOptions.Parameter = data;
                 paramOptions.ComparisonOp = attribute.ComparisonOperator; 
 
@@ -823,7 +823,7 @@ namespace SynicSugar.MatchMake {
 
             OnLobbyUpdated(info.LobbyId);
             
-            MatchMakeManager.Instance.LobbyMemberUpateNotifier.OnMemberAttributesUpdated(UserId.GetUserId(info.LobbyId));
+            MatchMakeManager.Instance.LobbyMemberUpateNotifier.OnMemberAttributesUpdated(UserId.GetUserId(info.TargetUserId));
         }
 #endregion
 #region Modify
@@ -866,7 +866,7 @@ namespace SynicSugar.MatchMake {
 
             // Set SocketName
             string socket = !string.IsNullOrEmpty(socketName) ? socketName : EOSp2pExtenstions.GenerateRandomSocketName();
-            AttributeData socketAttribute = new AttributeData(){
+            Epic.OnlineServices.Lobby.AttributeData socketAttribute = new(){
                 Key = "socket",
                 Value = new AttributeDataValue(){ AsUtf8 = socket }
             };
@@ -916,7 +916,7 @@ namespace SynicSugar.MatchMake {
             waitingMatch = false;
         }
         void AddMemberAttributes(){
-            if(userAttributes.Count == 0){
+            if(userAttributes == null || userAttributes.Count == 0){
                 return;
             }
             LobbyInterface lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();

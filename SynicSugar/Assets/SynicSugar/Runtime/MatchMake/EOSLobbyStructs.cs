@@ -33,7 +33,7 @@ namespace SynicSugar.MatchMake {
         internal bool bAllowInvites = false;
         internal bool bDisableHostMigration = true;
         internal bool bEnableRTCRoom = false;
-        public List<Attribute> Attributes = new List<Attribute>();
+        public List<AttributeData> Attributes = new List<AttributeData>();
         internal uint AvailableSlots = 0;
         internal void SetBucketID(string[] conditions){
             BucketId = System.String.Empty;
@@ -156,7 +156,7 @@ namespace SynicSugar.MatchMake {
                 attrOptions.AttrIndex = i;
                 ResultE copyAttrResult = outLobbyDetailsHandle.CopyAttributeByIndex(ref attrOptions, out Epic.OnlineServices.Lobby.Attribute? outAttribute);
                 if (copyAttrResult == ResultE.Success && outAttribute != null && outAttribute?.Data != null){
-                    Attribute attr = EOSLobbyExtensions.GenerateLobbyAttribute(outAttribute);
+                    AttributeData attr = EOSLobbyExtensions.GenerateLobbyAttribute(outAttribute);
                     Attributes.Add(attr);
                 }
             }
@@ -187,9 +187,9 @@ namespace SynicSugar.MatchMake {
                         continue;
                     }
 
-                    Attribute newAttribute = EOSLobbyExtensions.GenerateLobbyAttribute(outAttribute);
+                    AttributeData newAttribute = EOSLobbyExtensions.GenerateLobbyAttribute(outAttribute);
  
-                    Members[memberId.ToString()].MemberAttributes.Add(newAttribute.Key, newAttribute);
+                    Members[memberId.ToString()].Attributes.Add(newAttribute);
                 }
             }
         }
@@ -198,8 +198,18 @@ namespace SynicSugar.MatchMake {
     /// Class represents all Lobby Member properties
     /// </summary>
     internal class MemberState {
-        public Dictionary<string, Attribute> MemberAttributes = new Dictionary<string, Attribute>();    
-        public RTCState RTCState = new RTCState();
+        public List<AttributeData> Attributes { get; internal set; } = new List<AttributeData>();    
+        public RTCState RTCState { get; internal set; } = new RTCState();
+
+        internal AttributeData GetAttributeData(string Key){
+            foreach (var attribute in Attributes){
+                if(attribute.Key == Key){
+                    return attribute;
+                }
+            }
+            //No data
+            return null;
+        }
     }
 
     public class RTCState {
@@ -211,9 +221,9 @@ namespace SynicSugar.MatchMake {
         public float LocalOutputedVolume { get; internal set; } = 50.0f;
     }
     /// <summary>
-    /// Class represents all Lobby and Member Attribute properties
+    /// Lobby and Member Attribute data
     /// </summary>
-    public class Attribute {
+    public class AttributeData {
         internal LobbyAttributeVisibility Visibility = LobbyAttributeVisibility.Public;
         
         public string Key;
