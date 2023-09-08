@@ -58,7 +58,7 @@ namespace SynicSugar.MatchMake {
         /// <summary>
         /// Invoked when the number of participants in the lobby changes.
         /// </summary>
-        public event Action OnLobbyMemberCountChanged;
+        public event Action<UserId, bool> OnLobbyMemberCountChanged;
     #endregion
     #region Text
         /// <summary>
@@ -151,9 +151,11 @@ namespace SynicSugar.MatchMake {
         /// To display Member count. <br />
         /// After meet lobby min member counts.
         /// </summary>
+        /// <param name="target"></param>
+        /// <param name="isParticipated"></param>
         /// <param name="meetMinCondition"></param>
-        internal void LobbyMemberCountChanged(bool meetMinCondition){
-            OnLobbyMemberCountChanged?.Invoke();
+        internal void LobbyMemberCountChanged(UserId target, bool isParticipated, bool meetMinCondition){
+            OnLobbyMemberCountChanged?.Invoke(target, isParticipated);
             if(enabledManualFinish != meetMinCondition){
                 enabledManualFinish = meetMinCondition;
                 if(meetMinCondition){
@@ -166,8 +168,10 @@ namespace SynicSugar.MatchMake {
         /// <summary>
         /// To display Member count.
         /// </summary>
-        internal void LobbyMemberCountChanged(){
-            OnLobbyMemberCountChanged?.Invoke();
+        /// <param name="target"></param>
+        /// <param name="isParticipated"></param>
+        internal void LobbyMemberCountChanged(UserId target, bool isParticipated){
+            OnLobbyMemberCountChanged?.Invoke(target, isParticipated);
         }
     }
 }

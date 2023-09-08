@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using PlayEveryWare.EpicOnlineServices;
 using SynicSugar.P2P;
 using UnityEngine;
 using UnityEngine.Events;
@@ -28,6 +29,7 @@ namespace SynicSugar.MatchMake {
                     lobbyIDMethod.Delete += () => customDeleteLobbyID.Invoke();
                 }
             }
+            localUserId = UserId.GetUserId(EOSManager.Instance.GetProductUserId());
         }
         void OnDestroy() {
             if( Instance == this ) {
@@ -42,7 +44,7 @@ namespace SynicSugar.MatchMake {
 #endregion
         //Option
         public uint maxSearchResult = 5;
-        
+
         [HideInInspector] public int hostsTimeoutSec = 180;
         [Range(20f, 600f)]
         public int TimeoutSec = 180;
@@ -77,8 +79,27 @@ namespace SynicSugar.MatchMake {
         /// If having error, this value is changed. If Success, this remains Result.None.
         /// </summary>
         public Result LastResultCode { get; internal set; } = Result.None;
+        /// <summary>
+        /// Is this user Host?
+        /// </summary>
         public bool isHost { get { return eosLobby.CurrentLobby.isHost(); }}
-
+        UserId localUserId;
+        /// <summary>
+        /// Is this id is LocalUser's id?
+        /// </summary>
+        /// <param name="target"></param>
+        /// <returns></returns>
+        public bool isLocalUserId(UserId id){
+            return id == localUserId;
+        }
+        /// <summary>
+        /// Is this id is LocalUser's id?
+        /// </summary>
+        /// <param name="target"></param>
+        /// <returns></returns>
+        public bool isLocalUserId(string id){
+            return UserId.GetUserId(id) == localUserId;
+        }
         public int GetCurrentLobbyMemberCount(){
            return eosLobby.GetCurrentLobbyMemberCount();
         }
