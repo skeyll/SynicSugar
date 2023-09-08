@@ -277,9 +277,8 @@ namespace SynicSugar.MatchMake {
         public static string GetValueAsString(List<AttributeData> list, string Key){
             foreach(var attr in list){
                 if(string.Compare(attr.Key, Key, true) <= 0){
-                    continue;
+                    return attr.GetValueAsString();
                 }
-                return attr.GetValueAsString();
             }
             return System.String.Empty;
         }
