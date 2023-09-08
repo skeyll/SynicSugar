@@ -110,7 +110,7 @@ namespace SynicSugar.MatchMake {
 
         /// <summary>
         /// MatchMake player with conditions and get the data for p2p connect. <br />
-        /// Search a lobby, then if can't join, create a lobby as host.
+        /// Search a lobby, then if can't join, create a lobby as host. When lobby filled with max members, the lobby is closed automatically.
         /// </summary>
         /// <param name="lobbyCondition">Crate by EOSLobbyExtenstions.GenerateLobby().</param>
         /// <param name="token">For cancel matchmaking. This is used by CancelCurrentMatchMake.
@@ -119,10 +119,28 @@ namespace SynicSugar.MatchMake {
         /// <param name="userAttributes">The user attributes of names, job and so on that is needed before P2P. <br />
         /// These should be used just for matchmaking and the kick, the data for actual game should be exchanged via p2p for the lag and server bandwidth .</param>
         /// <returns></returns>
-        public async UniTask<bool> SearchAndCreateLobby(Lobby lobbyCondition, CancellationTokenSource token = default(CancellationTokenSource), List<AttributeData> userAttributes = null){
+        public async UniTask<bool> SearchAndCreateLobby(Lobby lobbyCondition, List<AttributeData> userAttributes = null, CancellationTokenSource token = default(CancellationTokenSource)){
+            //This task can be canceled from outside even if pass no token.
+            //So need try-catch
+            bool useTryCatch = token == default;
             matchingToken = token == default ? new CancellationTokenSource() : token;
             
-            bool canMatch = await eosLobby.StartMatching(lobbyCondition, matchingToken.Token, userAttributes);
+            bool canMatch = false;
+
+            //Match at Lobby
+            if(useTryCatch){
+                try{
+                    canMatch = await eosLobby.StartMatching(lobbyCondition, matchingToken.Token, userAttributes, 0);
+                }catch(OperationCanceledException){
+                #if SYNICSUGAR_LOG
+                    Debug.Log("MatchMaking is canceled");
+                #endif
+                    MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
+                    return false;
+                }
+            }else{
+                canMatch = await eosLobby.StartMatching(lobbyCondition, matchingToken.Token, userAttributes, 0);
+            }
 
             if(!canMatch){
                 MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
@@ -132,10 +150,45 @@ namespace SynicSugar.MatchMake {
             MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Ready);
             return true;
         }
-        public async UniTask<bool> SearchAndCreateLobby(Lobby lobbyCondition, int requiredMemberCount, CancellationTokenSource token = default(CancellationTokenSource), List<AttributeData> userAttributes = null){
+        /// <summary>
+        /// MatchMake player with conditions and get the data for p2p connect. <br />
+        /// Search a lobby, then if can't join, create a lobby as host. After lobby filled with min members, Host closes lobby with FinishMatchmaking().
+        /// </summary>
+        /// <param name="lobbyCondition">Crate by EOSLobbyExtenstions.GenerateLobby().</param>
+        /// <param name="token">For cancel matchmaking. This is used by CancelCurrentMatchMake.
+        /// If pass, we implement OperationCanceledException by ourself.
+        /// If not pass, such processe are done internally and return false when we cancel matchmake.</param>
+        /// <param name="minLobbyMember">Minimum number of lobby members required. <br />
+        /// To close automatically, 0 or pass nothing. The case completes matchmaking on filled in lobby by max members. <br />
+        /// If 2 or more, after lobby reach this min value,  (If we use EnableManualFinish event.) ManualFinish Button is displayed for Host. Host calls FinishMatchmake(), then the matchmaking is completed and start p2p. (If not call FinishMatchmake(), the matchmaking is going on until timeout and get failed.)</param>
+        /// <param name="userAttributes">The user attributes of names, job and so on that is needed before P2P. <br />
+        /// These should be used just for matchmaking and the kick, the data for actual game should be exchanged via p2p for the lag and server bandwidth .</param>
+        /// <returns></returns>
+        public async UniTask<bool> SearchAndCreateLobby(Lobby lobbyCondition, uint minLobbyMember, List<AttributeData> userAttributes = null, CancellationTokenSource token = default(CancellationTokenSource)){  
+            //This task can be canceled from outside even if pass no token.
+            //So need try-catch
+            bool useTryCatch = token == default;
             matchingToken = token == default ? new CancellationTokenSource() : token;
+
+            if(minLobbyMember < 2 || minLobbyMember < lobbyCondition.MaxLobbyMembers){
+                minLobbyMember = 0;
+            }
             
-            bool canMatch = await eosLobby.StartMatching(lobbyCondition, matchingToken.Token, userAttributes);
+            bool canMatch = false;
+            //Match at Lobby
+            if(useTryCatch){
+                try{
+                    canMatch = await eosLobby.StartMatching(lobbyCondition, matchingToken.Token, userAttributes, minLobbyMember);
+                }catch(OperationCanceledException){
+                #if SYNICSUGAR_LOG
+                    Debug.Log("MatchMaking is canceled");
+                #endif
+                    MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
+                    return false;
+                }
+            }else{
+                canMatch = await eosLobby.StartMatching(lobbyCondition, matchingToken.Token, userAttributes, minLobbyMember);
+            }
 
             if(!canMatch){
                 MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
@@ -156,10 +209,26 @@ namespace SynicSugar.MatchMake {
         /// <param name="userAttributes">The user attributes of names, job and so on that is needed before P2P. <br />
         /// These should be used just for matchmaking and the kick, the data for actual game should be exchanged via p2p for the lag and server bandwidth .</param>
         /// <returns></returns>
-        public async UniTask<bool> SearchLobby(Lobby lobbyCondition, CancellationTokenSource token = default(CancellationTokenSource), List<AttributeData> userAttributes = null){
-            matchingToken = token == default ? new CancellationTokenSource() : token;
+        public async UniTask<bool> SearchLobby(Lobby lobbyCondition, List<AttributeData> userAttributes = null, CancellationTokenSource token = default(CancellationTokenSource)){
+            bool useTryCatch = token == default;
+            matchingToken = useTryCatch ? new CancellationTokenSource() : token;
             
-            bool canMatch = await eosLobby.StartJustSearch(lobbyCondition, matchingToken.Token, userAttributes);
+            bool canMatch = false;
+            //Match at Lobby
+            if(useTryCatch){
+                try{
+                    canMatch = await eosLobby.StartJustSearch(lobbyCondition, matchingToken.Token, userAttributes);
+                }catch(OperationCanceledException){
+                #if SYNICSUGAR_LOG
+                    Debug.Log("MatchMaking is canceled");
+                #endif
+                    MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
+                    return false;
+                }
+            }else{
+                canMatch = await eosLobby.StartJustSearch(lobbyCondition, matchingToken.Token, userAttributes);
+            }
+            
 
             if(!canMatch){
                 MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
@@ -181,10 +250,72 @@ namespace SynicSugar.MatchMake {
         /// <param name="userAttributes">The user attributes of names, job and so on that is needed before P2P. <br />
         /// These should be used just for matchmaking and the kick, the data for actual game should be exchanged via p2p for the lag and server bandwidth .</param>
         /// <returns></returns>
-        public async UniTask<bool> CreateLobby(Lobby lobbyCondition, CancellationTokenSource token = default(CancellationTokenSource), List<AttributeData> userAttributes = null){
-            matchingToken = token == default ? new CancellationTokenSource() : token;
+        public async UniTask<bool> CreateLobby(Lobby lobbyCondition, List<AttributeData> userAttributes = null, CancellationTokenSource token = default(CancellationTokenSource)){
+            bool useTryCatch = token == default;
+            matchingToken = useTryCatch ? new CancellationTokenSource() : token;
             
-            bool canMatch = await eosLobby.StartJustCreate(lobbyCondition, matchingToken.Token, userAttributes);
+            bool canMatch = false;
+            //Match at Lobby
+            if(useTryCatch){
+                try{
+                    canMatch = await eosLobby.StartJustCreate(lobbyCondition, matchingToken.Token, userAttributes, 0);;
+                }catch(OperationCanceledException){
+                #if SYNICSUGAR_LOG
+                    Debug.Log("MatchMaking is canceled");
+                #endif
+                    MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
+                    return false;
+                }
+            }else{
+                canMatch = await eosLobby.StartJustCreate(lobbyCondition, matchingToken.Token, userAttributes, 0);
+            }
+            
+            if(!canMatch){
+                MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
+                return false;
+            }
+            
+            MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Ready);
+            return true;
+        }
+        /// <summary>
+        /// Create lobby and wait for other users, then get the data for p2p connect. <br />
+        /// Recommend: SearchAndCreateLobby()
+        /// </summary>
+        /// <param name="lobbyCondition">Crate by EOSLobbyExtenstions.GenerateLobby().</param>
+        /// <param name="token">For cancel matchmaking. This is used by CancelCurrentMatchMake.
+        /// If pass, we implement OperationCanceledException by ourself.
+        /// If not pass, such processe are done internally and return false when we cancel matchmake.</param>
+        /// <param name="minLobbyMember">Minimum number of lobby members required. <br />
+        /// To close automatically, 0 or pass nothing. The case completes matchmaking on filled in lobby by max members. <br />
+        /// If 2 or more, after lobby reach this min value,  (If we use EnableManualFinish event.) ManualFinish Button is displayed for Host. Host calls FinishMatchmake(), then the matchmaking is completed and start p2p. (If not call FinishMatchmake(), the matchmaking is going on until timeout and get failed.)</param>
+        /// <param name="userAttributes">The user attributes of names, job and so on that is needed before P2P. <br />
+        /// These should be used just for matchmaking and the kick, the data for actual game should be exchanged via p2p for the lag and server bandwidth .</param>
+        /// <returns></returns>
+        public async UniTask<bool> CreateLobby(Lobby lobbyCondition, uint minLobbyMember, List<AttributeData> userAttributes = null, CancellationTokenSource token = default(CancellationTokenSource)){
+            bool useTryCatch = token == default;
+            matchingToken = useTryCatch ? new CancellationTokenSource() : token;
+            
+            if(minLobbyMember < 2 || minLobbyMember < lobbyCondition.MaxLobbyMembers){
+                minLobbyMember = 0;
+            }
+            
+            bool canMatch = false;
+            //Match at Lobby
+            if(useTryCatch){
+                try{
+                    canMatch = await eosLobby.StartJustCreate(lobbyCondition, matchingToken.Token, userAttributes, 0);;
+                }catch(OperationCanceledException){
+                #if SYNICSUGAR_LOG
+                    Debug.Log("MatchMaking is canceled");
+                #endif
+                    MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
+                    return false;
+                }
+            }else{
+                canMatch = await eosLobby.StartJustCreate(lobbyCondition, matchingToken.Token, userAttributes, 0);
+            }
+            
             if(!canMatch){
                 MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
                 return false;
