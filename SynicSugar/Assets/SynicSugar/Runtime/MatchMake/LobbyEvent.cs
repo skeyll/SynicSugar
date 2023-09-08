@@ -99,7 +99,9 @@ namespace SynicSugar.MatchMake {
             DisableStart = null;
             EnableCancelKick = null;
             EnableManualFinish = null;
+            DisableManualFinish = null;
             DisableCancelKickFinish = null;
+            OnLobbyMemberCountChanged = null;
         }
         
         internal void ChangeState(State state){
@@ -160,6 +162,12 @@ namespace SynicSugar.MatchMake {
                     DisableManualFinish?.Invoke();
                 }
             }
+        }
+        /// <summary>
+        /// To display Member count.
+        /// </summary>
+        internal void LobbyMemberCountChanged(){
+            OnLobbyMemberCountChanged?.Invoke();
         }
     }
 }

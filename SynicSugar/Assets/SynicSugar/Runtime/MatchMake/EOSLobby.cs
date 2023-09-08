@@ -14,14 +14,14 @@ namespace SynicSugar.MatchMake {
     internal class EOSLobby {
         internal Lobby CurrentLobby { get; private set; } = new Lobby();
 
-        bool waitingMatch;
-        bool waitLeave, canLeave;
+        bool waitingMatch, waitLeave, canLeave;
         LobbySearch CurrentSearch;
         Dictionary<Lobby, LobbyDetails> SearchResults = new Dictionary<Lobby, LobbyDetails>();
         //User config
         uint MAX_SEARCH_RESULT;
         int timeoutMS;
         List<AttributeData> userAttributes;
+        bool useManualFinishMatchMake;
         //Notification
         /// <summary>
         /// Join, Leave, Kicked, Promote or so on...
@@ -732,8 +732,13 @@ namespace SynicSugar.MatchMake {
             }
             OnLobbyUpdated(info.LobbyId);
             
-            //For MatchMake on the first
+            //For MatchMaking
             if(waitingMatch){ //This flag is shared by both host and guest, and is false after getting SocketName.
+                if(useManualFinishMatchMake){
+                    MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(GetCurrentLobbyMemberCount() == GetMaxLobbyMemberCount());
+                }else{
+                    MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged();
+                }
                 if(info.TargetUserId == productUserId && info.CurrentStatus == LobbyMemberStatus.Promoted){
                     //??? Need timeout process to wait for other user as host?
 
