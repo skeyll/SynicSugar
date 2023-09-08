@@ -55,6 +55,10 @@ namespace SynicSugar.MatchMake {
         /// After complete or cancel matchmaking, prevent to change lobby state.
         /// </summary>
         public event Action DisableCancelKickFinish;
+        /// <summary>
+        /// Invoked when the number of participants in the lobby changes.
+        /// </summary>
+        public event Action OnLobbyMemberCountChanged;
     #endregion
     #region Text
         /// <summary>
@@ -140,17 +144,22 @@ namespace SynicSugar.MatchMake {
                 break;
             }
         }
+        bool enabledManualFinish;
         /// <summary>
-        /// After filled min members.
+        /// To display Member count. <br />
+        /// After meet lobby min member counts.
         /// </summary>
-        internal void OnEnableManualFinish(){
-            EnableManualFinish?.Invoke();
-        }
-        /// <summary>
-        /// After member is fewer.
-        /// </summary>
-        internal void OnDisableManualFinish(){
-            DisableManualFinish?.Invoke();
+        /// <param name="meetMinCondition"></param>
+        internal void LobbyMemberCountChanged(bool meetMinCondition){
+            OnLobbyMemberCountChanged?.Invoke();
+            if(enabledManualFinish != meetMinCondition){
+                enabledManualFinish = meetMinCondition;
+                if(meetMinCondition){
+                    EnableManualFinish?.Invoke();
+                }else{
+                    DisableManualFinish?.Invoke();
+                }
+            }
         }
     }
 }
