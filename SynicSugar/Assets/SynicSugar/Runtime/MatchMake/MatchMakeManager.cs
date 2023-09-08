@@ -77,6 +77,7 @@ namespace SynicSugar.MatchMake {
         /// If having error, this value is changed. If Success, this remains Result.None.
         /// </summary>
         public Result LastResultCode { get; internal set; } = Result.None;
+        public bool isHost { get { return eosLobby.CurrentLobby.isHost(); }}
 
         public int GetCurrentLobbyMemberCount(){
            return eosLobby.GetCurrentLobbyMemberCount();
@@ -214,6 +215,18 @@ namespace SynicSugar.MatchMake {
                 Destroy(this.gameObject);
             }
             return canCancel;
+        }
+        /// <summary>
+        /// Host kicks a specific target from Lobby. Only one tareget can be kicked at a time.
+        /// </summary>
+        /// <param name="token">token for this task</param>
+        /// <returns></returns>
+        public async UniTask<bool> KickTargetFromLobby(UserId targetId, CancellationToken token = default(CancellationToken)){
+            LastResultCode = Result.None;
+            token = token == default ? this.GetCancellationTokenOnDestroy() : token;
+            bool canKick = await eosLobby.KickTargetMember(targetId, token);
+
+            return canKick;
         }
         /// <summary>
         /// Leave the current lobby in Game.

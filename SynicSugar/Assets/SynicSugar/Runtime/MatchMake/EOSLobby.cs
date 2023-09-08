@@ -700,6 +700,44 @@ namespace SynicSugar.MatchMake {
             waitingMatch = false;
         }
 #endregion
+#region Kick
+        bool isKicking, canKick;
+        /// <summary>
+        /// Currently preventing duplicate calls.
+        /// </summary>
+        /// <param name="target"></param>
+        /// <returns></returns>
+        internal async UniTask<bool> KickTargetMember(UserId target, CancellationToken token){
+            if(!CurrentLobby.isHost()){
+                Debug.LogError("KickTargetMember: This user is not Host.");
+                return false;
+            }
+            if(isKicking){
+                Debug.LogError("KickTargetMember: This user is kicking member now.");
+                return false;
+            }
+            var lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();
+            var options = new KickMemberOptions(){
+                LobbyId = CurrentLobby.LobbyId,
+                LocalUserId = CurrentLobby.LobbyOwner,
+                TargetUserId = target.AsEpic
+            };
+            isKicking = true;
+            canKick = false;
+            lobbyInterface.KickMember(ref options, null, OnKickMember);
+            await UniTask.WaitUntil(() => !isKicking, cancellationToken: token);
+            return canKick;
+        }
+        void OnKickMember(ref KickMemberCallbackInfo info){
+            if(info.LobbyId == CurrentLobby.LobbyId){
+                canKick = info.ResultCode == ResultE.Success;
+            }else{
+                MatchMakeManager.Instance.LastResultCode = (Result)info.ResultCode;
+                Debug.LogError("This is other lobby result.");
+            }
+            isKicking = false;
+        }
+#endregion
 //Common
 #region Notification
         /// <summary>
@@ -735,9 +773,9 @@ namespace SynicSugar.MatchMake {
             //For MatchMaking
             if(waitingMatch){ //This flag is shared by both host and guest, and is false after getting SocketName.
                 if(useManualFinishMatchMake){
-                    MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(GetCurrentLobbyMemberCount() == GetMaxLobbyMemberCount());
+                    MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(UserId.GetUserId(info.TargetUserId), info.CurrentStatus == LobbyMemberStatus.Joined, GetCurrentLobbyMemberCount() == GetMaxLobbyMemberCount());
                 }else{
-                    MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged();
+                    MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(UserId.GetUserId(info.TargetUserId), info.CurrentStatus == LobbyMemberStatus.Joined);
                 }
                 if(info.TargetUserId == productUserId && info.CurrentStatus == LobbyMemberStatus.Promoted){
                     //??? Need timeout process to wait for other user as host?
