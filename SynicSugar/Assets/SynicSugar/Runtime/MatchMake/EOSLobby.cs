@@ -60,8 +60,7 @@ namespace SynicSugar.MatchMake {
             //Start timer 
             var timer = TimeoutTimer(token);
             //Serach
-            MatchMakeManager.Instance.matchState.stopAdditionalInput?.Invoke();
-            MatchMakeManager.Instance.UpdateStateDescription(MatchState.Search);
+            MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Start);
             bool canJoin = await JoinExistingLobby(lobbyCondition, token);
 
             if(canJoin){
@@ -69,7 +68,7 @@ namespace SynicSugar.MatchMake {
                 // Chagne these value via MamberStatusUpdate notification.
                 isMatchSuccess = false;
                 waitingMatch = true;
-                MatchMakeManager.Instance.matchState.acceptCancel?.Invoke();
+                MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Wait);
 
                 await UniTask.WhenAny(UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token), timer);
 
@@ -79,7 +78,7 @@ namespace SynicSugar.MatchMake {
                 }
 
                 if(isMatchSuccess){
-                    MatchMakeManager.Instance.matchState.stopAdditionalInput?.Invoke();
+                    MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Finish);
                     bool canInit = InitConnectConfig(ref p2pInfo.Instance.userIds);
                     if(!canInit){
                         Debug.LogError("Fail InitConnectConfig");
@@ -94,14 +93,13 @@ namespace SynicSugar.MatchMake {
             }
             //If player cannot join lobby as a guest, creates a lobby as a host and waits for other player.
             //Create
-            MatchMakeManager.Instance.UpdateStateDescription(MatchState.Wait);
             bool canCreate = await CreateLobby(lobbyCondition, token);
             if(canCreate){
                 // Wait for other player to join
                 // Chagne these value via MamberStatusUpdate notification.
                 isMatchSuccess = false;
                 waitingMatch = true;
-                MatchMakeManager.Instance.matchState.acceptCancel?.Invoke();
+                MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Wait);
 
                 await UniTask.WhenAny(UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token), timer);
                 
@@ -111,7 +109,7 @@ namespace SynicSugar.MatchMake {
                 }
                 
                 if(isMatchSuccess){
-                    MatchMakeManager.Instance.matchState.stopAdditionalInput?.Invoke();
+                    MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Finish);
                     bool canInit = InitConnectConfig(ref p2pInfo.Instance.userIds);
                     if(!canInit){
                         Debug.LogError("Fail InitConnectConfig");
@@ -140,15 +138,14 @@ namespace SynicSugar.MatchMake {
             this.userAttributes = userAttributes;
             var timer = TimeoutTimer(token);
             //Serach
-            MatchMakeManager.Instance.matchState.stopAdditionalInput?.Invoke();
-            MatchMakeManager.Instance.UpdateStateDescription(MatchState.Search);
+            MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Start);
             bool canJoin = await JoinExistingLobby(lobbyCondition, token);
             if(canJoin){
                 // Wait for SocketName to use p2p connection
                 // Chagne these value via MamberStatusUpdate notification.
                 isMatchSuccess = false;
                 waitingMatch = true;
-                MatchMakeManager.Instance.matchState.acceptCancel?.Invoke();
+                MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Wait);
                 await UniTask.WhenAny(UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token), timer);
 
                 //Matching cancel
@@ -157,7 +154,7 @@ namespace SynicSugar.MatchMake {
                 }
 
                 if(isMatchSuccess){
-                    MatchMakeManager.Instance.matchState.stopAdditionalInput?.Invoke();
+                    MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Finish);
                     bool canInit = InitConnectConfig(ref p2pInfo.Instance.userIds);
                     if(!canInit){
                         Debug.LogError("Fail InitConnectConfig");
@@ -185,15 +182,14 @@ namespace SynicSugar.MatchMake {
             this.userAttributes = userAttributes;
             var timer = TimeoutTimer(token);
 
-            MatchMakeManager.Instance.matchState.stopAdditionalInput?.Invoke();
-            MatchMakeManager.Instance.UpdateStateDescription(MatchState.Wait);
+            MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Start);
             bool canCreate = await CreateLobby(lobbyCondition, token);
             if(canCreate){
                 // Wait for other player to join
                 // Chagne these value via MamberStatusUpdate notification.
                 isMatchSuccess = false;
                 waitingMatch = true;
-                MatchMakeManager.Instance.matchState.acceptCancel?.Invoke();
+                MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Wait);
                 await UniTask.WhenAny(UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token), timer);
 
                 //Matching cancel
@@ -202,7 +198,7 @@ namespace SynicSugar.MatchMake {
                 }
 
                 if(isMatchSuccess){
-                    MatchMakeManager.Instance.matchState.stopAdditionalInput?.Invoke();
+                    MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Finish);
                     bool canInit = InitConnectConfig(ref p2pInfo.Instance.userIds);
                     if(!canInit){
                         Debug.LogError("Fail InitConnectConfig");
@@ -226,6 +222,7 @@ namespace SynicSugar.MatchMake {
         internal async UniTask<bool> JoinLobbyBySavedLobbyId(string LobbyID, CancellationToken token){
             MatchMakeManager.Instance.LastResultCode = Result.None;
             //Search
+            MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Recconect);
             bool canSerch = await RetriveLobbyByLobbyId(LobbyID, token);
 
         #if SYNICSUGAR_LOG

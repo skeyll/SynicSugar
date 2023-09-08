@@ -70,7 +70,7 @@ namespace SynicSugar.MatchMake {
     #endregion
         internal EOSLobby eosLobby { get; private set; }
         internal CancellationTokenSource matchingToken;
-        public MatchGUIState matchState = new MatchGUIState();
+        public MatchMakingGUIEvents MatchMakingGUIEvents = new MatchMakingGUIEvents();
         // Events
         public MemberUpdatedNotifier MemberUpdatedNotifier;
         /// <summary>
@@ -84,13 +84,6 @@ namespace SynicSugar.MatchMake {
 
         public int GetMaxLobbyMemberCount(){
            return eosLobby.GetMaxLobbyMemberCount();
-        }
-        /// <summary>
-        /// Set State from script
-        /// </summary>
-        /// <param name="state"></param>
-        public void SetGUIState(MatchGUIState state){
-            matchState = state;
         }
 
         /// <summary>
@@ -110,11 +103,11 @@ namespace SynicSugar.MatchMake {
             bool canMatch = await eosLobby.StartMatching(lobbyCondition, matchingToken.Token, userAttributes);
 
             if(!canMatch){
-                UpdateStateDescription(MatchState.Cancel);
+                MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
                 return false;
             }
             
-            UpdateStateDescription(MatchState.Success);
+            MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Ready);
             return true;
         }
         public async UniTask<bool> SearchAndCreateLobby(Lobby lobbyCondition, int requiredMemberCount, CancellationTokenSource token = default(CancellationTokenSource), List<AttributeData> userAttributes = null){
@@ -123,11 +116,11 @@ namespace SynicSugar.MatchMake {
             bool canMatch = await eosLobby.StartMatching(lobbyCondition, matchingToken.Token, userAttributes);
 
             if(!canMatch){
-                UpdateStateDescription(MatchState.Cancel);
+                MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
                 return false;
             }
             
-            UpdateStateDescription(MatchState.Success);
+            MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Ready);
             return true;
         }
         /// <summary>
@@ -147,11 +140,11 @@ namespace SynicSugar.MatchMake {
             bool canMatch = await eosLobby.StartJustSearch(lobbyCondition, matchingToken.Token, userAttributes);
 
             if(!canMatch){
-                UpdateStateDescription(MatchState.Cancel);
+                MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
                 return false;
             }
             
-            UpdateStateDescription(MatchState.Success);
+            MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Ready);
             return true;
         }
         
@@ -171,11 +164,11 @@ namespace SynicSugar.MatchMake {
             
             bool canMatch = await eosLobby.StartJustCreate(lobbyCondition, matchingToken.Token, userAttributes);
             if(!canMatch){
-                UpdateStateDescription(MatchState.Cancel);
+                MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
                 return false;
             }
             
-            UpdateStateDescription(MatchState.Success);
+            MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Ready);
             return true;
         }
         /// <summary>
@@ -195,10 +188,11 @@ namespace SynicSugar.MatchMake {
             bool canJoin =  await eosLobby.JoinLobbyBySavedLobbyId(LobbyID, matchingToken.Token);
 
             if(!canJoin){
-                UpdateStateDescription(MatchState.Cancel);
+                MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
                 return false;
             }
 
+            MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Ready);
             return true;
         }
         /// <summary>
@@ -265,15 +259,15 @@ namespace SynicSugar.MatchMake {
             Debug.Log($"Save LobbyID by {lobbyIdSaveType}");
     #endif
             switch(lobbyIdSaveType){
-                case MatchMakeManager.RecconectLobbyIdSaveType.NoReconnection:
+                case RecconectLobbyIdSaveType.NoReconnection:
                 return;
-                case MatchMakeManager.RecconectLobbyIdSaveType.Playerprefs:
-                    PlayerPrefs.SetString(MatchMakeManager.Instance.playerprefsSaveKey, GetCurrentLobbyID());
+                case RecconectLobbyIdSaveType.Playerprefs:
+                    PlayerPrefs.SetString(playerprefsSaveKey, GetCurrentLobbyID());
                 return;
-                case MatchMakeManager.RecconectLobbyIdSaveType.CustomMethod:
+                case RecconectLobbyIdSaveType.CustomMethod:
                     lobbyIDMethod.OnSave();
                 return;
-                case MatchMakeManager.RecconectLobbyIdSaveType.AsyncCustomMethod:
+                case RecconectLobbyIdSaveType.AsyncCustomMethod:
                     await asyncLobbyIDMethod.OnSave();
                 return;
             }
@@ -286,15 +280,15 @@ namespace SynicSugar.MatchMake {
             Debug.Log($"Delete LobbyID by {lobbyIdSaveType}");
     #endif
             switch(lobbyIdSaveType){
-                case MatchMakeManager.RecconectLobbyIdSaveType.NoReconnection:
+                case RecconectLobbyIdSaveType.NoReconnection:
                 return;
-                case MatchMakeManager.RecconectLobbyIdSaveType.Playerprefs:
-                    PlayerPrefs.DeleteKey(MatchMakeManager.Instance.playerprefsSaveKey);
+                case RecconectLobbyIdSaveType.Playerprefs:
+                    PlayerPrefs.DeleteKey(playerprefsSaveKey);
                 return;
-                case MatchMakeManager.RecconectLobbyIdSaveType.CustomMethod:
+                case RecconectLobbyIdSaveType.CustomMethod:
                     lobbyIDMethod.OnSave();
                 return;
-                case MatchMakeManager.RecconectLobbyIdSaveType.AsyncCustomMethod:
+                case RecconectLobbyIdSaveType.AsyncCustomMethod:
                     await asyncLobbyIDMethod.OnDelete();
                 return;
             }
@@ -339,16 +333,6 @@ namespace SynicSugar.MatchMake {
         /// <returns>If no data, return null.</returns>
         public List<AttributeData> GetTargetAttributeData(UserId target){
             return eosLobby.CurrentLobby.Members[target.ToString()]?.Attributes;
-        }
-        /// <summary>
-        /// Change State text
-        /// </summary>
-        /// <param name="state"></param>
-        internal void UpdateStateDescription(MatchState state){
-            if(matchState.state == null){
-                return;
-            }
-            matchState.state.text = matchState.GetDiscription(state);
         }
     }
 }

@@ -20,6 +20,8 @@ namespace SynicSugar.MatchMake {
             OnAttributesUpdated?.Invoke(target);
         }
     }
+    
+    [System.Serializable]
     public class MatchMakingGUIEvents {
         public MatchMakingGUIEvents(){}
         public MatchMakingGUIEvents(Text displayedStateText){
@@ -28,7 +30,7 @@ namespace SynicSugar.MatchMake {
         /// <summary>
         /// To display text state.
         /// </summary>
-        public Text stateText;
+        public Text stateText = null;
         public bool canKick { get; internal set; }
     #region Event
         /// <summary>
@@ -44,6 +46,11 @@ namespace SynicSugar.MatchMake {
         /// After filled in the minimum number of members, can manually close Lobby to start p2p.
         /// </summary>
         public event Action EnableManualFinish;
+        /// <summary>
+        /// This is enabled when the required members are passed to the Matchmaking API.<br />
+        /// Invoked when members leave and condition is no longer met.
+        /// </summary>
+        public event Action DisableManualFinish;
         /// <summary>
         /// After complete or cancel matchmaking, prevent to change lobby state.
         /// </summary>
@@ -75,34 +82,75 @@ namespace SynicSugar.MatchMake {
         /// Invoke DisableCancelKickFinish().
         /// </summary>
         public string TryToCancel;
+        /// <summary>
+        /// Until join lobby. Same StartMatchmaking<br />
+        /// Invoke DisableStart().
+        /// </summary>
+        public string StartReconnection;
     #endregion
         internal enum State {
-            Standby, Start, Wait, Finish, Ready, Cancel
+            Standby, Start, Wait, Finish, Ready, Cancel, Recconect
         }
+        internal void Clear(){
+            DisableStart = null;
+            EnableCancelKick = null;
+            EnableManualFinish = null;
+            DisableCancelKickFinish = null;
+        }
+        
         internal void ChangeState(State state){
-            if(stateText == null){
-                return;
-            }
             switch(state){
                 case State.Standby:
-                    stateText.text = System.String.Empty;
+                    if(stateText != null){
+                        stateText.text = System.String.Empty;
+                    }
                 break;
                 case State.Start:
-                    stateText.text = StartMatchmaking;
+                    DisableStart?.Invoke();
+                    canKick = false;
+                    if(stateText != null){
+                        stateText.text = StartMatchmaking;
+                    }
                 break;
                 case State.Wait:
-                    stateText.text = WaitForOpponents;
+                    EnableCancelKick?.Invoke();
+                    canKick = true;
+                    if(stateText != null){
+                        stateText.text = WaitForOpponents;
+                    }
                 break;
                 case State.Finish:
-                    stateText.text = FinishMatchmaking;
+                    DisableCancelKickFinish?.Invoke();
+                    canKick = false;
+                    if(stateText != null){
+                        stateText.text = FinishMatchmaking;
+                    }
                 break;
                 case State.Ready:
-                    stateText.text = ReadyForConnection;
+                    if(stateText != null){
+                        stateText.text = ReadyForConnection;
+                    }
                 break;
                 case State.Cancel:
-                    stateText.text = TryToCancel;
+                    DisableCancelKickFinish?.Invoke();
+                    canKick = false;
+                    if(stateText != null){
+                        stateText.text = TryToCancel;
+                    }
                 break;
             }
+        }
+        /// <summary>
+        /// After filled min members.
+        /// </summary>
+        internal void OnEnableManualFinish(){
+            EnableManualFinish?.Invoke();
+        }
+        /// <summary>
+        /// After member is fewer.
+        /// </summary>
+        internal void OnDisableManualFinish(){
+            DisableManualFinish?.Invoke();
         }
     }
 }
