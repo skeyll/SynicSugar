@@ -136,51 +136,6 @@ namespace SynicSugar.MatchMake {
         /// <param name="lobbyCondition">Search condition. <c>MUST NOT</c> add the data not to open public.</param>
         /// <param name="token"></param>
         /// <param name="userAttributes"></param>
-        /// <returns>True on success. If false, EOS backend have something problem. So, when you call this process again, should wait for some time.</returns>
-        internal async UniTask<bool> StartJustSearch(Lobby lobbyCondition, CancellationToken token, List<AttributeData> userAttributes){
-            MatchMakeManager.Instance.LastResultCode = Result.None;
-            this.userAttributes = userAttributes;
-            var timer = TimeoutTimer(token);
-            //Serach
-            MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Start);
-            bool canJoin = await JoinExistingLobby(lobbyCondition, token);
-            if(canJoin){
-                // Wait for SocketName to use p2p connection
-                // Chagne these value via MamberStatusUpdate notification.
-                isMatchSuccess = false;
-                waitingMatch = true;
-                MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Wait);
-                await UniTask.WhenAny(UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token), timer);
-
-                //Matching cancel
-                if(token.IsCancellationRequested){
-                    throw new OperationCanceledException();
-                }
-
-                if(isMatchSuccess){
-                    MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Finish);
-                    bool canInit = InitConnectConfig(ref p2pInfo.Instance.userIds);
-                    if(!canInit){
-                        Debug.LogError("Fail InitConnectConfig");
-                        return false;
-                    }
-    
-                    await OpenConnection(token);
-                    
-                    await MatchMakeManager.Instance.OnSaveLobbyID();
-                }
-                return isMatchSuccess;
-            }
-            //Failed due to no-playing-user or server problems.
-            return false;
-        }
-        /// <summary>
-        /// Just search Lobby<br />
-        /// Recommend: StartMatching()
-        /// </summary>
-        /// <param name="lobbyCondition">Search condition. <c>MUST NOT</c> add the data not to open public.</param>
-        /// <param name="token"></param>
-        /// <param name="userAttributes"></param>
         /// <param name="minLobbyMember"></param>
         /// <returns>True on success. If false, EOS backend have something problem. So, when you call this process again, should wait for some time.</returns>
         internal async UniTask<bool> StartJustSearch(Lobby lobbyCondition, CancellationToken token, List<AttributeData> userAttributes, uint minLobbyMember){
@@ -508,6 +463,9 @@ namespace SynicSugar.MatchMake {
             isMatchSuccess = true;
             waitingMatch = false;
         }
+#endregion
+#region Manual Close
+
 #endregion
 //Guest
 #region Search
@@ -840,8 +798,6 @@ namespace SynicSugar.MatchMake {
             //For MatchMaking
             if(waitingMatch){ //This flag is shared by both host and guest, and is false after getting SocketName.
                 if(info.TargetUserId == productUserId && info.CurrentStatus == LobbyMemberStatus.Promoted){
-                    //??? Need timeout process to wait for other user as host?
-
                     //This local player manage lobby, So dosen't need update notify.
                     LobbyUpdateNotification.Dispose();
                 }
@@ -965,8 +921,9 @@ namespace SynicSugar.MatchMake {
                 return;
             }
             //Change permission level
-            LobbyModificationSetPermissionLevelOptions permissionOptions = new LobbyModificationSetPermissionLevelOptions();
-            permissionOptions.PermissionLevel = LobbyPermissionLevel.Joinviapresence;
+            LobbyModificationSetPermissionLevelOptions permissionOptions = new LobbyModificationSetPermissionLevelOptions(){
+                PermissionLevel = LobbyPermissionLevel.Joinviapresence
+            };
             result = lobbyHandle.SetPermissionLevel(ref permissionOptions);
             if (result != ResultE.Success){
                 MatchMakeManager.Instance.LastResultCode = (Result)result;
