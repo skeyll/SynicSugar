@@ -12,62 +12,73 @@ namespace SynicSugar.P2P {
         /// Invoke when another user disconnects unexpectedly.<br />
         /// This has a lag of about 5-10 seconds after a user downs in its local.
         /// </summary>
-        public event Action OnDisconnected;
+        public event Action<UserId> OnTargetLeaved;
+        /// <summary>
+        /// Invoke when another user disconnects unexpectedly.<br />
+        /// This has a lag of about 5-10 seconds after a user downs in its local.
+        /// </summary>
+        public event Action<UserId> OnTargetDisconnected;
         /// <summary>
         /// Invoke when a user re-connects after matchmaking.<br />
         /// For returnee and newcomer
         /// </summary>
-        public event Action OnConnected;
+        public event Action<UserId> OnTargetConnected;
         
         /// <summary>
         /// Invoke when a connection is interrupted with another peer. <br />
         /// The connection is attempted to be restored, and if that's failed, "Diconnected" is fired.<br />
         /// This notification is early, but this doesn't means just that other user is disconnected.
         /// </summary>
-        public event Action OnEarlyDisconnected;
+        public event Action<UserId> OnTargetEarlyDisconnected;
         
         /// <summary>
         /// Invoke when a connection is restored with another EarlyDisconnected peer. <br />
         /// About game data, the peer should have it.
         /// </summary>
-        public event Action OnRestored;
+        public event Action<UserId> OnTargetRestored;
 
-        public void Register(Action disconnected, Action connected){
-            OnDisconnected += disconnected;
-            OnConnected += connected;
+        public void Register(Action<UserId> leaved, Action<UserId> disconnected, Action<UserId> connected){
+            OnTargetDisconnected += disconnected;
+            OnTargetConnected += connected;
         }
-        public void Register(Action disconnected, Action connected, Action earlyDisconnected, Action restored){
-            OnDisconnected += disconnected;
-            OnConnected += connected;
-            OnEarlyDisconnected += earlyDisconnected;
-            OnRestored += restored;
+        public void Register(Action<UserId> disconnected, Action<UserId> connected, Action<UserId> earlyDisconnected, Action<UserId> restored){
+            OnTargetDisconnected += disconnected;
+            OnTargetConnected += connected;
+            OnTargetEarlyDisconnected += earlyDisconnected;
+            OnTargetRestored += restored;
         }
         internal void Clear(){
-            OnDisconnected = null;
-            OnConnected = null;
-            OnEarlyDisconnected = null;
-            OnRestored = null;
+            OnTargetLeaved = null;
+            OnTargetDisconnected = null;
+            OnTargetConnected = null;
+            OnTargetEarlyDisconnected = null;
+            OnTargetRestored = null;
             establishedMemberCounts = 0;
             completeConnectPreparetion = false;
         }
         internal void Disconnected(UserId id, Reason reason){
             ClosedReason = reason;
             CloseUserId = id;
-            OnDisconnected?.Invoke();
+            OnTargetDisconnected?.Invoke(id);
         }
         internal void Connected(UserId id){
             ConnectUserId = id;
-            OnConnected?.Invoke();
+            OnTargetConnected?.Invoke(id);
         }
         
         internal void EarlyDisconnected(UserId id, Reason reason){
             ClosedReason = reason;
             CloseUserId = id;
-            OnEarlyDisconnected?.Invoke();
+            OnTargetEarlyDisconnected?.Invoke(id);
         }
         internal void Restored(UserId id){
             ConnectUserId = id;
-            OnRestored?.Invoke();
+            OnTargetRestored?.Invoke(id);
+        }
+        internal void Leaved(UserId id, Reason reason){
+            ClosedReason = reason;
+            CloseUserId = id;
+            OnTargetRestored?.Invoke(id);
         }
         private int establishedMemberCounts;
         internal bool completeConnectPreparetion; 
