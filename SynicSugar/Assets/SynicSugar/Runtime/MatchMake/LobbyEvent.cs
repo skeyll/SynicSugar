@@ -45,16 +45,16 @@ namespace SynicSugar.MatchMake {
         /// This is enabled when the required members are passed to the Matchmaking API.<br />
         /// After filled in the minimum number of members, can manually close Lobby to start p2p.
         /// </summary>
-        public event Action EnableManualFinish;
+        public event Action EnableHostConclude;
         /// <summary>
         /// This is enabled when the required members are passed to the Matchmaking API.<br />
         /// Invoked when members leave and condition is no longer met.
         /// </summary>
-        public event Action DisableManualFinish;
+        public event Action DisableHostConclude;
         /// <summary>
         /// After complete or cancel matchmaking, prevent to change lobby state.
         /// </summary>
-        public event Action DisableCancelKickFinish;
+        public event Action DisableCancelKickConclude;
         /// <summary>
         /// Invoked when the number of participants in the lobby changes.
         /// </summary>
@@ -93,14 +93,14 @@ namespace SynicSugar.MatchMake {
         public string StartReconnection;
     #endregion
         internal enum State {
-            Standby, Start, Wait, Finish, Ready, Cancel, Recconect
+            Standby, Start, Wait, Conclude, Ready, Cancel, Recconect
         }
         internal void Clear(){
             DisableStart = null;
             EnableCancelKick = null;
-            EnableManualFinish = null;
-            DisableManualFinish = null;
-            DisableCancelKickFinish = null;
+            EnableHostConclude = null;
+            DisableHostConclude = null;
+            DisableCancelKickConclude = null;
             OnLobbyMemberCountChanged = null;
         }
         
@@ -125,8 +125,8 @@ namespace SynicSugar.MatchMake {
                         stateText.text = WaitForOpponents;
                     }
                 break;
-                case State.Finish:
-                    DisableCancelKickFinish?.Invoke();
+                case State.Conclude:
+                    DisableCancelKickConclude?.Invoke();
                     canKick = false;
                     if(stateText != null){
                         stateText.text = FinishMatchmaking;
@@ -138,7 +138,7 @@ namespace SynicSugar.MatchMake {
                     }
                 break;
                 case State.Cancel:
-                    DisableCancelKickFinish?.Invoke();
+                    DisableCancelKickConclude?.Invoke();
                     canKick = false;
                     if(stateText != null){
                         stateText.text = TryToCancel;
@@ -146,7 +146,7 @@ namespace SynicSugar.MatchMake {
                 break;
             }
         }
-        bool enabledManualFinish;
+        bool enabledManualConclude = false;
         /// <summary>
         /// To display Member count. <br />
         /// After meet lobby min member counts.
@@ -156,12 +156,14 @@ namespace SynicSugar.MatchMake {
         /// <param name="meetMinCondition"></param>
         internal void LobbyMemberCountChanged(UserId target, bool isParticipated, bool meetMinCondition){
             OnLobbyMemberCountChanged?.Invoke(target, isParticipated);
-            if(enabledManualFinish != meetMinCondition){
-                enabledManualFinish = meetMinCondition;
+                UnityEngine.Debug.Log("LobbyMemberCountChanged1");
+            if(enabledManualConclude != meetMinCondition){
+                enabledManualConclude = meetMinCondition;
+                UnityEngine.Debug.Log("LobbyMemberCountChanged2");
                 if(meetMinCondition){
-                    EnableManualFinish?.Invoke();
+                    EnableHostConclude?.Invoke();
                 }else{
-                    DisableManualFinish?.Invoke();
+                    DisableHostConclude?.Invoke();
                 }
             }
         }

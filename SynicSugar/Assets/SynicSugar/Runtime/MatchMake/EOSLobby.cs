@@ -81,7 +81,7 @@ namespace SynicSugar.MatchMake {
                 }
 
                 if(isMatchSuccess){
-                    MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Finish);
+                    MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Conclude);
                     bool canInit = InitConnectConfig(ref p2pInfo.Instance.userIds);
                     if(!canInit){
                         Debug.LogError("Fail InitConnectConfig");
@@ -112,7 +112,7 @@ namespace SynicSugar.MatchMake {
                 }
                 
                 if(isMatchSuccess){
-                    MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Finish);
+                    MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Conclude);
                     bool canInit = InitConnectConfig(ref p2pInfo.Instance.userIds);
                     if(!canInit){
                         Debug.LogError("Fail InitConnectConfig");
@@ -163,7 +163,7 @@ namespace SynicSugar.MatchMake {
                 }
 
                 if(isMatchSuccess){
-                    MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Finish);
+                    MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Conclude);
                     bool canInit = InitConnectConfig(ref p2pInfo.Instance.userIds);
                     if(!canInit){
                         Debug.LogError("Fail InitConnectConfig");
@@ -212,7 +212,7 @@ namespace SynicSugar.MatchMake {
                 }
 
                 if(isMatchSuccess){
-                    MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Finish);
+                    MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Conclude);
                     bool canInit = InitConnectConfig(ref p2pInfo.Instance.userIds);
                     if(!canInit){
                         Debug.LogError("Fail InitConnectConfig");
@@ -713,13 +713,16 @@ namespace SynicSugar.MatchMake {
             AddUserAttributes();
             //RTC
             RTCManager.Instance.AddNotifyParticipantStatusChanged();
-            if(userAttributes != null && userAttributes.Count > 0){
-                foreach(var m in CurrentLobby.Members){
-                    MatchMakeManager.Instance.MemberUpdatedNotifier.MemberAttributesUpdated(UserId.GetUserId(m.Key));
-                }
-            }
+            string LocalId = EOSManager.Instance.GetProductUserId().ToString();
             foreach(var member in CurrentLobby.Members){
                 MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(UserId.GetUserId(member.Key), true);
+            }
+            if(userAttributes != null && userAttributes.Count > 0){
+                foreach(var m in CurrentLobby.Members){
+                    if(m.Key != LocalId){
+                        MatchMakeManager.Instance.MemberUpdatedNotifier.MemberAttributesUpdated(UserId.GetUserId(m.Key));
+                    }
+                }
             }
 
             waitingMatch = false;
@@ -801,6 +804,7 @@ namespace SynicSugar.MatchMake {
                     //This local player manage lobby, So dosen't need update notify.
                     LobbyUpdateNotification.Dispose();
                 }
+                Debug.Log(CurrentLobby.Members.Count);
                 if(useManualFinishMatchMake){
                     MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(UserId.GetUserId(info.TargetUserId), info.CurrentStatus == LobbyMemberStatus.Joined, CurrentLobby.Members.Count == requiredMembers);
                 }else{
@@ -832,6 +836,7 @@ namespace SynicSugar.MatchMake {
                     Debug.Log($"MemberStatusNotyfy: {info.TargetUserId} left from lobby.");
                 #endif
                 p2pInfo.Instance.userIds.RemoveUserId(info.TargetUserId);
+                p2pInfo.Instance.ConnectionNotifier.Leaved(UserId.GetUserId(info.TargetUserId), Reason.Left);
             }else if(info.CurrentStatus == LobbyMemberStatus.Disconnected){
                 #if SYNICSUGAR_LOG
                     Debug.Log($"MemberStatusNotyfy: {info.TargetUserId} diconnect from lobby.");
@@ -898,10 +903,16 @@ namespace SynicSugar.MatchMake {
         /// Use lobbyID to connect on the problem, so save lobbyID in local somewhere.
         /// </summary>
         /// <returns></returns>
-        void SwitchLobbyAttribute(){
+        internal void SwitchLobbyAttribute(){
             if (!CurrentLobby.isHost()){
 #if SYNICSUGAR_LOG
-                Debug.LogError("Change Lobby: This user isn't lobby owner.");
+                Debug.LogError("SwitchLobbyAttribute: This user isn't lobby owner.");
+#endif
+                return;
+            }
+            if(CurrentLobby.Members.Count < requiredMembers){
+#if SYNICSUGAR_LOG
+                Debug.LogError("SwitchLobbyAttribute: This lobby doesn't meet member condition.");
 #endif
                 return;
             }

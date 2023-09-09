@@ -68,7 +68,7 @@ namespace SynicSugar.P2P {
             }
         }
 
-    #region Pause Session(Experimental, Not recommend for game?)
+    #region Pause Session
         /// <summary>
         /// For ConnectManager. Stop packet receeiveing to buffer. While stopping, packets are dropped.
         /// </summary>
