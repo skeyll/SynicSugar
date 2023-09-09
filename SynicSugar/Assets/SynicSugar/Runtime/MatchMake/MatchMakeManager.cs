@@ -37,6 +37,7 @@ namespace SynicSugar.MatchMake {
                 lobbyIDMethod.Clear();
                 asyncLobbyIDMethod.Clear();
                 MemberUpdatedNotifier.Clear();
+                MatchMakingGUIEvents.Clear();
 
                 Instance = null;
             }
@@ -320,7 +321,7 @@ namespace SynicSugar.MatchMake {
                 MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
                 return false;
             }
-            
+
             MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Ready);
             return true;
         }
