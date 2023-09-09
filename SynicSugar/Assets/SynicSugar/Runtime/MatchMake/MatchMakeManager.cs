@@ -171,7 +171,8 @@ namespace SynicSugar.MatchMake {
             bool useTryCatch = token == default;
             matchingToken = token == default ? new CancellationTokenSource() : token;
 
-            if(minLobbyMember < 2 || minLobbyMember < lobbyCondition.MaxLobbyMembers){
+            if(minLobbyMember < 2 || minLobbyMember > lobbyCondition.MaxLobbyMembers){
+                Debug.Log("To 0");
                 minLobbyMember = 0;
             }
             
@@ -257,7 +258,7 @@ namespace SynicSugar.MatchMake {
             bool useTryCatch = token == default;
             matchingToken = useTryCatch ? new CancellationTokenSource() : token;
 
-            if(minLobbyMember < 2 || minLobbyMember < lobbyCondition.MaxLobbyMembers){
+            if(minLobbyMember < 2 || minLobbyMember > lobbyCondition.MaxLobbyMembers){
                 minLobbyMember = 0;
             }
             
@@ -344,7 +345,7 @@ namespace SynicSugar.MatchMake {
             bool useTryCatch = token == default;
             matchingToken = useTryCatch ? new CancellationTokenSource() : token;
             
-            if(minLobbyMember < 2 || minLobbyMember < lobbyCondition.MaxLobbyMembers){
+            if(minLobbyMember < 2 || minLobbyMember > lobbyCondition.MaxLobbyMembers){
                 minLobbyMember = 0;
             }
             
@@ -371,6 +372,18 @@ namespace SynicSugar.MatchMake {
 
             MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Ready);
             return true;
+        }
+        bool isConcluding;
+        /// <summary>
+        /// After the requirement is met, Host manually finish matchmaking and start p2p.
+        /// </summary>
+        public void ConcludeMatchMake(){
+            if(isConcluding || !isHost){
+                return;
+            }
+            isConcluding = true;
+            eosLobby.SwitchLobbyAttribute();
+            isConcluding = false;
         }
         /// <summary>
         /// Join the Lobby with saved LobbyID. <br />
