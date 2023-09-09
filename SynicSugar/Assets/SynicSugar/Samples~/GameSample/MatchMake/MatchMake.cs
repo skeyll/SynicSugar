@@ -3,45 +3,57 @@ using SynicSugar.MatchMake;
 using SynicSugar.P2P;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 namespace  SynicSugar.Samples {
     public class MatchMake : MonoBehaviour{
         [SerializeField] GameObject matchmakePrefab;
-        GameObject matchmakeContainer;
-        [SerializeField] Button startMatchMake, closeLobby, startGame, backtoMenu;
-        [SerializeField] MatchGUIState descriptions;
+        [SerializeField] Button startMatchMake, closeLobby, startGame, backtoMenu, hostConclude;
         [SerializeField] MatchMakeConditions matchConditions;
         [SerializeField] Text buttonText, matchmakeState;
         [SerializeField] GameModeSelect modeSelect; //For tankmatchmaking scene, and to cancel matchmake then return to menu.
         //For Tank
         public InputField nameField;
-        [SerializeField] Text playerName;
+        [SerializeField] Text playerName, lobbyMemberCount;
+        [SerializeField] Transform memberContentParent;
+        [SerializeField] GameObject memberStatePrefab;
+        //Key is UserId
+        Dictionary<string, LobbyMemberState> LobbyMemberStatus = new();
         enum SceneState{
             Standby, inMatchMake, ToGame
         }
     #region Init
         void Awake(){
             if(MatchMakeManager.Instance == null){
-                matchmakeContainer = Instantiate(matchmakePrefab);
+                Instantiate(matchmakePrefab);
             }
-            SetGUIState();
-            MatchMakeManager.Instance.LobbyMemberUpdateNotifier.Register(t => OnUpdatedMemberAttribute(t));
+            SetGUIEvents();
         }
-        void SetGUIState(){
-            descriptions = MatchMakeConfig.SetMatchingText(MatchMakeConfig.Langugage.EN);
-            descriptions.state = matchmakeState;
-            descriptions.stopAdditionalInput.AddListener(StopAdditionalInput);
-            descriptions.acceptCancel.AddListener(() => ActivateCancelButton(false));
+        /// <summary>
+        /// Change button and text state in matchmaking.
+        /// </summary>
+        void SetGUIEvents(){
+            MatchMakeManager.Instance.MatchMakingGUIEvents = MatchMakeConfig.SetMatchingText(MatchMakeConfig.Langugage.EN);
+            MatchMakeManager.Instance.MatchMakingGUIEvents.stateText = matchmakeState;
 
-            MatchMakeManager.Instance.SetGUIState(descriptions);
+            MatchMakeManager.Instance.MatchMakingGUIEvents.DisableStart += OnDisableStart;
+            MatchMakeManager.Instance.MatchMakingGUIEvents.EnableCancelKick += OnEnableCancel;
+
+            if(SceneManager.GetActiveScene().name == "TankMatchMake"){
+                MatchMakeManager.Instance.MatchMakingGUIEvents.EnableHostConclude += OnEnableHostConclude;
+                MatchMakeManager.Instance.MatchMakingGUIEvents.DisableHostConclude += OnDisableHostConclude;
+                MatchMakeManager.Instance.MatchMakingGUIEvents.DisableCancelKickConclude += OnDisableCancelKickFinish;
+                MatchMakeManager.Instance.MatchMakingGUIEvents.OnLobbyMemberCountChanged += OnLobbyMemberCountChanged;
+                //For user attribute to use just in Lobby.
+                MatchMakeManager.Instance.MemberUpdatedNotifier.Register(t => OnUpdatedMemberAttribute(t));
+            }
         }
     #endregion
     #region For Recconect
-        async void Start(){
+        async UniTaskVoid Start(){
             //Dose this game allow user to re-join thedisconnected match? 
             if(MatchMakeManager.Instance.lobbyIdSaveType == MatchMakeManager.RecconectLobbyIdSaveType.NoReconnection){
                 return;
@@ -71,7 +83,11 @@ namespace  SynicSugar.Samples {
             SwitchGUIState(SceneState.Standby);
         }
     #endregion
+        //Register MatchMaking button
         public void StartMatchMake(){
+            //For Tank
+            ClearLobbyMemberState();
+
             EOSDebug.Instance.Log("Start MatchMake.");
             StartMatchMakeEntity().Forget();
 
@@ -94,17 +110,23 @@ namespace  SynicSugar.Samples {
             bool selfTryCatch = false;
 
             if(!selfTryCatch){ //Recommend
-                bool isSuccess = await MatchMakeManager.Instance.SearchAndCreateLobby(matchConditions.GetLobbyCondition(), userAttributes: GenerateUserAttribute());
-                
+                bool isSuccess = false;
+
+                if(SceneManager.GetActiveScene().name == "TankMatchMake"){ //To set max members and min members
+                    isSuccess = await MatchMakeManager.Instance.SearchAndCreateLobby(matchConditions.GetLobbyCondition(16), minLobbyMember: 2, userAttributes: MatchMakeConfig.GenerateUserAttribute());
+                }else{ //MaxLobbyMember is just 2.
+                    isSuccess = await MatchMakeManager.Instance.SearchAndCreateLobby(matchConditions.GetLobbyCondition(2));
+                }
+                    
                 if(!isSuccess){
                     EOSDebug.Instance.Log("MatchMaking Failed.");
                     SwitchGUIState(SceneState.Standby);
                     return;
                 }
-            }else{ //Sample for another way
+            }else{ //Sample for another way. To cancel via token in manual.
                 try{
                     CancellationTokenSource matchCTS = new CancellationTokenSource();
-                    bool isSuccess = await MatchMakeManager.Instance.SearchAndCreateLobby(matchConditions.GetLobbyCondition(), matchCTS, GenerateUserAttribute());
+                    bool isSuccess = await MatchMakeManager.Instance.SearchAndCreateLobby(matchConditions.GetLobbyCondition(), token: matchCTS);
 
                     if(!isSuccess){
                         EOSDebug.Instance.Log("Backend may have something problem.");
@@ -122,109 +144,42 @@ namespace  SynicSugar.Samples {
 
             SwitchCancelButtonActive(true);
 
-            GoGameScene();
-        }
-        /// <summary>
-        /// Cancel matchmaking (Host delete and Guest leave the current lobby)
-        /// </summary>
-        public void CancelMatchMaking(){
-            CancelMatchMakingEntity().Forget();
-
-            if(nameField != null){
-                nameField.gameObject.SetActive(true);
-            }
-        }
-        async UniTask CancelMatchMakingEntity(){
-            SwitchCancelButtonActive(false);
-
-            bool isSuccess = await MatchMakeManager.Instance.CancelCurrentMatchMake();
-            
-            SwitchGUIState(SceneState.Standby);
-        }
-        /// <summary>
-        /// Cancel matchmaking (Host delete and Guest leave the current lobby)
-        /// Then destroy MatchMakeManager and back to MainMenu.
-        /// </summary>
-        /// <returns></returns>
-        public async void CanelMatchMakingAndReturnToLobby(){
-            SwitchCancelButtonActive(false);
-
-            bool isSuccess = await MatchMakeManager.Instance.CancelCurrentMatchMake(true);
-            
-            modeSelect.ChangeGameScene(GameModeSelect.GameScene.MainMenu.ToString());
-        }
-        //State event
-        public void ActivateCancelButton(bool afterMatching){
-            SwitchCancelButtonActive(true);
-            buttonText.text = afterMatching ? "Close Lobby" : "Stop MatchMake";
-        }
-        public void StopAdditionalInput(){
-            startMatchMake.gameObject.SetActive(false);
-        }
-        
-        void SwitchCancelButtonActive(bool isActivate){
-            //To return main menu
-            if(backtoMenu != null){
-                backtoMenu.gameObject.SetActive(isActivate);
-            }
-            closeLobby.gameObject.SetActive(isActivate);
-        }
-        
-        void GoGameScene(){
             if(startGame != null){ //For ReadHeart and Chat
                 startGame.gameObject.SetActive(true);
             }else{ //For Tank
                 modeSelect.ChangeGameScene(GameModeSelect.GameScene.Tank.ToString());
             }
         }
-        List<AttributeData> GenerateUserAttribute(){
-            //We can set max 100 attributes.
-            List<AttributeData> attributeData = new();
-            //Name
-            AttributeData attribute = new (){
-                Key = "NAME"
-            };
-            string Name = GetRandomString();
-            attribute.SetValue(Name);
-            attributeData.Add(attribute);
-            //Rank
-            attribute = new (){
-                Key = "RANK"
-            };
-            int Rank = UnityEngine.Random.Range(0, 10);
-            attribute.SetValue(Rank);
-            attributeData.Add(attribute);
-            //Win count
-            attribute = new (){
-                Key = "WIN"
-            };
-            int Win = UnityEngine.Random.Range(0, 100);
-            attribute.SetValue(Win);
-            attributeData.Add(attribute);
-            
-            EOSDebug.Instance.Log($"UserName: {Name.ToString()} / Rank: {Rank} / Win: {Win}");
+        /// <summary>
+        /// Register to Cancel button. <br />
+        /// Host delete and Guest leave the current lobby.
+        /// </summary>
+        public void CancelMatchMaking(){
+            MatchMakeManager.Instance.CancelCurrentMatchMake().Forget();
 
-            return attributeData;
-            
-            string GetRandomString(){
-                var sample = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-                string name = System.String.Empty;
-                var random = new System.Random();
-
-                for (int i = 0; i < 6; i++){
-                    name += sample[random.Next(sample.Length)];
-                }
-                return name;
+            if(nameField != null){
+                nameField.gameObject.SetActive(true);
             }
         }
-        void OnUpdatedMemberAttribute(UserId target){
-            List<AttributeData> data = MatchMakeManager.Instance.GetTargetAttributeData(target);
-            string name = AttributeData.GetValueAsString(data, "NAME");
-
-            foreach(var attr in data){
-                EOSDebug.Instance.Log($"{name}: {attr.Key} {attr.GetValueAsString()}");
-            }
+        /// <summary>
+        /// Register to ReturnMenu button.<br />
+        /// Host delete and Guest leave the current lobby. Then, destroy MatchMakeManager and back to MainMenu.
+        /// </summary>
+        /// <returns></returns>
+        public async void CanelMatchMakingAndReturnToLobby(){
+            await MatchMakeManager.Instance.CancelCurrentMatchMake(true);
+            
+            modeSelect.ChangeGameScene(GameModeSelect.GameScene.MainMenu.ToString());
         }
+        //For Tank
+        public void FinishMatchMakingAfterMeetRequiredCondition(){
+            MatchMakeManager.Instance.ConcludeMatchMake();
+            OnDisableHostConclude();
+        }
+        /// <summary>
+        /// Manage UIs on after and before matchmaking.
+        /// </summary>
+        /// <param name="state"></param>
         void SwitchGUIState(SceneState state){
             if(startMatchMake != null){
                 startMatchMake.gameObject.SetActive(state == SceneState.Standby);
@@ -238,6 +193,61 @@ namespace  SynicSugar.Samples {
             if(backtoMenu != null){
                 backtoMenu.gameObject.SetActive(false);
             }
+        }
+        #region For GUI events
+        void OnDisableStart(){
+            startMatchMake.gameObject.SetActive(false);
+        }
+        void OnEnableCancel(){
+            SwitchCancelButtonActive(true);
+            buttonText.text = "Cancel Matchmaking";
+        }
+        void OnDisableCancelKickFinish(){
+            SwitchCancelButtonActive(false);
+        }
+        //For Tank
+        void OnEnableHostConclude(){
+            hostConclude.gameObject.SetActive(true);
+        }
+        //For Tank
+        void OnDisableHostConclude(){
+            hostConclude.gameObject.SetActive(false);
+        }
+        //For Tank
+        void OnLobbyMemberCountChanged(UserId target, bool isParticipated){
+            if(isParticipated){
+                GameObject stateObj = Instantiate(memberStatePrefab, memberContentParent);
+                LobbyMemberState state = stateObj.GetComponent<LobbyMemberState>();
+                LobbyMemberStatus.Add(target.ToString(), state);
+            }else{
+                Destroy(LobbyMemberStatus[target.ToString()].gameObject);
+                LobbyMemberStatus.Remove(target.ToString());
+            }
+            lobbyMemberCount.text = $"Current: {MatchMakeManager.Instance.GetCurrentLobbyMemberCount()} / Max: {MatchMakeManager.Instance.GetMaxLobbyMemberCount()}";
+        }
+        void SwitchCancelButtonActive(bool isActivate){
+            //To return main menu
+            if(backtoMenu != null){
+                backtoMenu.gameObject.SetActive(isActivate);
+            }
+            closeLobby.gameObject.SetActive(isActivate);
+        }
+        #endregion
+        
+        void OnUpdatedMemberAttribute(UserId target){
+            List<AttributeData> data = MatchMakeManager.Instance.GetTargetAttributeData(target);
+            LobbyMemberState state = LobbyMemberStatus[target.ToString()];
+            
+            state.SetData(target, AttributeData.GetValueAsString(data, "NAME"), AttributeData.GetValueAsString(data, "LEVEL"));
+        }
+        void ClearLobbyMemberState(){
+            if(SceneManager.GetActiveScene().name != "TankMatchMake"){ 
+                return;
+            }
+            foreach(var s in LobbyMemberStatus){
+                Destroy(s.Value.gameObject);
+            }
+            LobbyMemberStatus.Clear();
         }
     }
 }

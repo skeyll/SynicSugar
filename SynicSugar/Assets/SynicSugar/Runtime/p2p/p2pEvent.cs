@@ -78,7 +78,7 @@ namespace SynicSugar.P2P {
         internal void Leaved(UserId id, Reason reason){
             ClosedReason = reason;
             CloseUserId = id;
-            OnTargetRestored?.Invoke(id);
+            OnTargetLeaved?.Invoke(id);
         }
         private int establishedMemberCounts;
         internal bool completeConnectPreparetion; 

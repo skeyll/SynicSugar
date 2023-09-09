@@ -609,11 +609,18 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: 'Player 1-64
+  m_Text: 'Player 2-64
 
     2 Scenes(MatchScene->GameScene)
 
-    3D'
+    3D
+
+    User Attributes
+    and Kick target user from lobby
+
+    Manual close matchmaking.
+
+'
 --- !u!222 &203041213
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1451,11 +1458,14 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: '1-64
+  m_Text: '2
 
     SingleScene
 
     2D-simple chat and stress test
+
+    VoiceChat(OpenVC
+    or PushToTalk)
 
 
     *Recommend

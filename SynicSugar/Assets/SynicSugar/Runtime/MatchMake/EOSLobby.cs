@@ -835,14 +835,14 @@ namespace SynicSugar.MatchMake {
                 #if SYNICSUGAR_LOG
                     Debug.Log($"MemberStatusNotyfy: {info.TargetUserId} left from lobby.");
                 #endif
-                p2pInfo.Instance.userIds.RemoveUserId(info.TargetUserId);
                 p2pInfo.Instance.ConnectionNotifier.Leaved(UserId.GetUserId(info.TargetUserId), Reason.Left);
+                p2pInfo.Instance.userIds.RemoveUserId(info.TargetUserId);
             }else if(info.CurrentStatus == LobbyMemberStatus.Disconnected){
                 #if SYNICSUGAR_LOG
                     Debug.Log($"MemberStatusNotyfy: {info.TargetUserId} diconnect from lobby.");
                 #endif
-                p2pInfo.Instance.userIds.MoveTargetUserIdToLefts(info.TargetUserId);
                 p2pInfo.Instance.ConnectionNotifier.Disconnected(UserId.GetUserId(info.TargetUserId), Reason.Disconnected);
+                p2pInfo.Instance.userIds.MoveTargetUserIdToLefts(info.TargetUserId);
             }else if(info.CurrentStatus == LobbyMemberStatus.Joined){
                 p2pInfo.Instance.userIds.MoveTargetUserIdToRemoteUsersFromLeft(info.TargetUserId);
                 p2pInfo.Instance.ConnectionNotifier.Connected(UserId.GetUserId(info.TargetUserId));

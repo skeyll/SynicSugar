@@ -17,9 +17,9 @@ namespace SynicSugar.Samples {
 
         void Start() {
             vcStates = new();
-            p2pInfo.Instance.ConnectionNotifier.Disconnected += OnDisconect;
-            p2pInfo.Instance.ConnectionNotifier.Connected += OnConnected;
-            p2pInfo.Instance.SyncSnyicNotifier.SyncedSynic += OnSyncedSynic;
+            p2pInfo.Instance.ConnectionNotifier.OnTargetDisconnected += OnDisconect;
+            p2pInfo.Instance.ConnectionNotifier.OnTargetConnected += OnConnected;
+            p2pInfo.Instance.SyncSnyicNotifier.OnSyncedSynic += OnSyncedSynic;
             //At first, instantiate network objects.
             //It are registered to ConnectHub automatically.
             SynicObject.AllSpawn(chatPlayerPrefab);
@@ -40,11 +40,11 @@ namespace SynicSugar.Samples {
             string tmpName = p2pInfo.Instance.IsLoaclUser(userId) ? "LocalPlayer" : "RemotePlayer";
             stateText.text = $"{tmpName}: Not-Speaking";
         }
-        void OnDisconect(){
-            chatText.text += $"{p2pInfo.Instance.LastDisconnectedUsersId} is Disconnected / {p2pInfo.Instance.LastDisconnectedUsersReason}{System.Environment.NewLine}";
+        void OnDisconect(UserId id){
+            chatText.text += $"{id} is Disconnected / {p2pInfo.Instance.LastDisconnectedUsersReason}{System.Environment.NewLine}";
         }
-        void OnConnected(){
-            chatText.text += $"{p2pInfo.Instance.LastConnectedUsersId} Join {System.Environment.NewLine}";
+        void OnConnected(UserId id){
+            chatText.text += $"{id} Join {System.Environment.NewLine}";
             //Send local data
             ConnectHub.Instance.SyncSynic(p2pInfo.Instance.LastConnectedUsersId, 0, false, true);
         }

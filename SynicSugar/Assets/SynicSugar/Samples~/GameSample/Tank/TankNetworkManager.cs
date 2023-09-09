@@ -20,9 +20,10 @@ namespace  SynicSugar.Samples {
             //Generate player models
             SynicObject.AllSpawn(playerPrefab);
 
-            p2pInfo.Instance.ConnectionNotifier.Disconnected += OnDisconnected;
-            p2pInfo.Instance.ConnectionNotifier.EarlyDisconnected += OnEarlyDisconnected;
-            p2pInfo.Instance.ConnectionNotifier.Restored += OnRestored;
+            p2pInfo.Instance.ConnectionNotifier.OnTargetDisconnected += OnDisconnected;
+            p2pInfo.Instance.ConnectionNotifier.OnTargetEarlyDisconnected += OnEarlyDisconnected;
+            p2pInfo.Instance.ConnectionNotifier.OnTargetRestored += OnRestored;
+            p2pInfo.Instance.ConnectionNotifier.OnTargetLeaved += OnLeaved;
             //After creating the instances for receive in local, start Packet Receiver.
             ConnectHub.Instance.StartPacketReceiver();
             //Set Player Name and Activate PlayerObject
@@ -45,18 +46,21 @@ namespace  SynicSugar.Samples {
             }
         } 
 
-        void OnEarlyDisconnected(){
-            ConnectHub.Instance.GetUserInstance<TankPlayer>(p2pInfo.Instance.LastDisconnectedUsersId).gameObject.SetActive(false);
-        }
-        void OnRestored(){
-            ConnectHub.Instance.GetUserInstance<TankPlayer>(p2pInfo.Instance.LastDisconnectedUsersId).gameObject.SetActive(true);
-        }
-        void OnDisconnected(){
+        void OnDisconnected(UserId id){
             //This sample doesn't allow reconnection, so this distinction doesn't matters not to need hold the disconnected user data.
             //However, if your project allows to recconect, Host should hold the objects in order to send data with SyncSynic.
             if(!p2pInfo.Instance.IsHost()){
-                Destroy(ConnectHub.Instance.GetUserInstance<TankPlayer>(p2pInfo.Instance.LastDisconnectedUsersId).gameObject);
+                Destroy(ConnectHub.Instance.GetUserInstance<TankPlayer>(id).gameObject);
             }
+        }
+        void OnLeaved(UserId id){
+            Destroy(ConnectHub.Instance.GetUserInstance<TankPlayer>(id).gameObject);
+        }
+        void OnEarlyDisconnected(UserId id){
+            ConnectHub.Instance.GetUserInstance<TankPlayer>(id).gameObject.SetActive(false);
+        }
+        void OnRestored(UserId id){
+            ConnectHub.Instance.GetUserInstance<TankPlayer>(id).gameObject.SetActive(true);
         }
         public void ReturnToTitle(){
             AsyncReturnToTitle().Forget();
