@@ -105,11 +105,15 @@ namespace SynicSugar.RTC {
         #endif
             AudioDeviceChangedNotifier.DeviceChanged();
         }
+        /// <summary>
+        /// Remove AudioDevicesChanged in manual.
+        /// </summary>
         public void RemoveNotifyAudioDevicesChanged(){
             if(AudioDevicesChangedId != 0){
                 RTCInterface rtcInterface = EOSManager.Instance.GetEOSRTCInterface();
                 RTCAudioInterface audioInterface = rtcInterface.GetAudioInterface();
                 audioInterface.RemoveNotifyAudioDevicesChanged(AudioDevicesChangedId);
+                AudioDeviceChangedNotifier.Clear();
                 AudioDevicesChangedId = 0;
             }
         }
