@@ -117,10 +117,8 @@ namespace SynicSugar.MatchMake {
         /// <param name="token">For cancel matchmaking. This is used by CancelCurrentMatchMake.
         /// If pass, we implement OperationCanceledException by ourself.
         /// If not pass, such processe are done internally and return false when we cancel matchmake.</param>
-        /// <param name="userAttributes">The user attributes of names, job and so on that is needed before P2P. <br />
-        /// These should be used just for matchmaking and the kick, the data for actual game should be exchanged via p2p for the lag and server bandwidth .</param>
         /// <returns></returns>
-        public async UniTask<bool> SearchAndCreateLobby(Lobby lobbyCondition, List<AttributeData> userAttributes = null, CancellationTokenSource token = default(CancellationTokenSource)){
+        public async UniTask<bool> SearchAndCreateLobby(Lobby lobbyCondition, CancellationTokenSource token = default(CancellationTokenSource)){
             //This task can be canceled from outside even if pass no token.
             //So need try-catch
             bool useTryCatch = token == default;
@@ -131,7 +129,7 @@ namespace SynicSugar.MatchMake {
             //Match at Lobby
             if(useTryCatch){
                 try{
-                    canMatch = await eosLobby.StartMatching(lobbyCondition, matchingToken.Token, userAttributes, 0);
+                    canMatch = await eosLobby.StartMatching(lobbyCondition, matchingToken.Token, null, 0);
                 }catch(OperationCanceledException){
                 #if SYNICSUGAR_LOG
                     Debug.Log("MatchMaking is canceled");
@@ -140,7 +138,7 @@ namespace SynicSugar.MatchMake {
                     return false;
                 }
             }else{
-                canMatch = await eosLobby.StartMatching(lobbyCondition, matchingToken.Token, userAttributes, 0);
+                canMatch = await eosLobby.StartMatching(lobbyCondition, matchingToken.Token, null, 0);
             }
 
             if(!canMatch){
@@ -208,10 +206,8 @@ namespace SynicSugar.MatchMake {
         /// <param name="token">For cancel matchmaking. This is used by CancelCurrentMatchMake.
         /// If pass, we implement OperationCanceledException by ourself.
         /// If not pass, such processe are done internally and return false when we cancel matchmake.</param>
-        /// <param name="userAttributes">The user attributes of names, job and so on that is needed before P2P. <br />
-        /// These should be used just for matchmaking and the kick, the data for actual game should be exchanged via p2p for the lag and server bandwidth .</param>
         /// <returns></returns>
-        public async UniTask<bool> SearchLobby(Lobby lobbyCondition, List<AttributeData> userAttributes = null, CancellationTokenSource token = default(CancellationTokenSource)){
+        public async UniTask<bool> SearchLobby(Lobby lobbyCondition, CancellationTokenSource token = default(CancellationTokenSource)){
             bool useTryCatch = token == default;
             matchingToken = useTryCatch ? new CancellationTokenSource() : token;
             
@@ -219,7 +215,7 @@ namespace SynicSugar.MatchMake {
             //Match at Lobby
             if(useTryCatch){
                 try{
-                    canMatch = await eosLobby.StartJustSearch(lobbyCondition, matchingToken.Token, userAttributes, 0);
+                    canMatch = await eosLobby.StartJustSearch(lobbyCondition, matchingToken.Token, null, 0);
                 }catch(OperationCanceledException){
                 #if SYNICSUGAR_LOG
                     Debug.Log("MatchMaking is canceled");
@@ -228,7 +224,7 @@ namespace SynicSugar.MatchMake {
                     return false;
                 }
             }else{
-                canMatch = await eosLobby.StartJustSearch(lobbyCondition, matchingToken.Token, userAttributes, 0);
+                canMatch = await eosLobby.StartJustSearch(lobbyCondition, matchingToken.Token, null, 0);
             }
             
 
@@ -296,10 +292,8 @@ namespace SynicSugar.MatchMake {
         /// <param name="token">For cancel matchmaking. This is used by CancelCurrentMatchMake.
         /// If pass, we implement OperationCanceledException by ourself.
         /// If not pass, such processe are done internally and return false when we cancel matchmake.</param>
-        /// <param name="userAttributes">The user attributes of names, job and so on that is needed before P2P. <br />
-        /// These should be used just for matchmaking and the kick, the data for actual game should be exchanged via p2p for the lag and server bandwidth .</param>
         /// <returns></returns>
-        public async UniTask<bool> CreateLobby(Lobby lobbyCondition, List<AttributeData> userAttributes = null, CancellationTokenSource token = default(CancellationTokenSource)){
+        public async UniTask<bool> CreateLobby(Lobby lobbyCondition, CancellationTokenSource token = default(CancellationTokenSource)){
             bool useTryCatch = token == default;
             matchingToken = useTryCatch ? new CancellationTokenSource() : token;
             
@@ -307,7 +301,7 @@ namespace SynicSugar.MatchMake {
             //Match at Lobby
             if(useTryCatch){
                 try{
-                    canMatch = await eosLobby.StartJustCreate(lobbyCondition, matchingToken.Token, userAttributes, 0);;
+                    canMatch = await eosLobby.StartJustCreate(lobbyCondition, matchingToken.Token, null, 0);;
                 }catch(OperationCanceledException){
                 #if SYNICSUGAR_LOG
                     Debug.Log("MatchMaking is canceled");
@@ -316,7 +310,7 @@ namespace SynicSugar.MatchMake {
                     return false;
                 }
             }else{
-                canMatch = await eosLobby.StartJustCreate(lobbyCondition, matchingToken.Token, userAttributes, 0);
+                canMatch = await eosLobby.StartJustCreate(lobbyCondition, matchingToken.Token, null, 0);
             }
             
             if(!canMatch){

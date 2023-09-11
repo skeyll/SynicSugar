@@ -332,7 +332,7 @@ namespace SynicSugar.RTC {
     #endif
         }
         /// <summary>
-        /// Host user mutes target user('s input). The target can't speak but can hear other members of the lobby .
+        /// Host user mutes target user('s input). The target can't speak but can hear other members of the lobby.
         /// </summary>
         /// <param name="target">Muted Target</param>
         public void HardMuteTargetUser(UserId target, bool isMuted){

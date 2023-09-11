@@ -16,6 +16,9 @@ namespace SynicSugar.RTC {
         private RTCConfig(){}
         public static RTCConfig Instance { get { return instance; } }
         ulong AudioDevicesChangedId;
+        /// <summary>
+        /// Events for OnDeviceChanged.
+        /// </summary>
         public AudioDeviceChangedNotifier AudioDeviceChangedNotifier = new();
         /// <summary>
         /// Register to receive notifications when an audio device is added or removed to the system.<br />
@@ -210,7 +213,6 @@ namespace SynicSugar.RTC {
         /// Change OutputDevice.
         /// </summary>
         /// <param name="deviceInfo">AudioOutputDeviceInfo from the List to be got by GetOutputtDeviceInformation().</param>
-        /// <param name="isMute"></param>
         // NOTE: This will be DEPRECATED in future SDK.
         public static void SetAudioOutputDevice(AudioOutputDeviceInfo deviceInfo){
             RTCInterface rtcInterface = EOSManager.Instance.GetEOSRTCInterface();
