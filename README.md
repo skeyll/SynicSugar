@@ -14,7 +14,7 @@ For more detail is [https://skeyll.github.io/SynicSugar/](https://skeyll.github.
  - Almost all RPC processes are zero-allocation
  - Free VoiceChat
  - Cross-platform connction <br>
-    (Current: Android, iOS, and PC / InTest: Console / Future?: WebGL)
+    (Current: Android, iOS, and PC / Preview: Console / Future: WebGL)
 
 
 ```csharp
