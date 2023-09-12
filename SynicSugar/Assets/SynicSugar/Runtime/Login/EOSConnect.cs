@@ -63,9 +63,6 @@ namespace SynicSugar.Login {
             resultS = Result.Canceled;
             //Pass UserID on each Game.
             EOSManager.Instance.StartConnectLoginWithDeviceToken("UnityEditorLocalUser", info => {
-#if SYNICSUGAR_LOG
-                    Debug.Log(info.ResultCode);
-#endif
                     isSuccess = (info.ResultCode == ResultE.Success);
                     resultS = (Result)info.ResultCode;
                     waitingAuth = false;

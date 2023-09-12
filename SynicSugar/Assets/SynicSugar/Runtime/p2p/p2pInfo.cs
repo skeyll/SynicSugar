@@ -49,15 +49,15 @@ namespace SynicSugar.P2P {
         /// <summary>
         /// Reason of the user disconnected from p2p.
         /// </summary>
-        public Reason LastDisconnectedUsersReason => ConnectionNotifier.ClosedReason;
+        public Reason LastDisconnectedUsersReason { get { return ConnectionNotifier.ClosedReason;} }
         /// <summary>
         /// UserId of the user disconnected from p2p.
         /// </summary>
-        public UserId LastDisconnectedUsersId => ConnectionNotifier.CloseUserId;
+        public UserId LastDisconnectedUsersId { get { return ConnectionNotifier.CloseUserId;} } 
         /// <summary>
         /// UserId of the reconnecter disconnected from p2p.
         /// </summary>
-        public UserId LastConnectedUsersId => ConnectionNotifier.ConnectUserId;
+        public UserId LastConnectedUsersId { get { return ConnectionNotifier.ConnectUserId;} } 
         /// <summary>
         /// The notify events for SyncSynic for recconecter and large packet.
         /// </summary>
@@ -71,11 +71,11 @@ namespace SynicSugar.P2P {
         /// <summary>
         /// Phase of the last SyncSynic to receive to this local.
         /// </summary>
-        public byte SyncedSynicPhase => SyncSnyicNotifier.LastSyncedPhase;
+        public byte SyncedSynicPhase { get { return SyncSnyicNotifier.LastSyncedPhase; } } 
         /// <summary>
         /// UserId of the last SyncSynic to receive to this local.
         /// </summary>
-        public UserId LastSyncedUserId => SyncSnyicNotifier.LastSyncedUserId;
+        public UserId LastSyncedUserId { get { return SyncSnyicNotifier.LastSyncedUserId;} } 
         /// <summary>
         /// Always return false. Just on reconnect, returns true until getting SyncSynic for self data from Host.
         /// </summary>

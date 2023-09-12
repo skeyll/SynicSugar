@@ -4,7 +4,7 @@ weight = 0
 +++
 ## Key
 <small>*Namespace: SynicSugar.MatchMake* <br>
-*Class: LobbyAttribute* </small>
+*Class: AttributeData* </small>
 
 public string Key 
 
@@ -17,7 +17,7 @@ using SynicSugar.MatchMake;
 
 public class LobbyCondition : MonoBehaviour {
     void SetLobbyConditions(){
-        LobbyAttribute attribute = new LobbyAttribute();
+        AttributeData attribute = new AttributeData();
         attribute.Key = "Level";
     }
 }

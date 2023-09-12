@@ -52,6 +52,7 @@ public partial class Player {
  - Mesh topology with max 64 peers
  - No Use Cost and No CCU Limit
  - High-level APIs for mobile and small-group games (MatchMaking, Host-Migration and Re-connection...)
+ - Almost all RPC process is zero-allocation
  - Cross-platform connction <br>
     (Current: Android, iOS, and PC / Future: Console / Not support: WebGL)
 
@@ -66,7 +67,7 @@ public partial class Player {
 - [Mono.Cecil](https://github.com/jbevain/cecil)
 
  SynicSugar uses Roslyn SourceGenerator supported after 2021.3. SourceGenerator generates almost all codes for p2p connect on compile automatically.  
-Large dependencies is for performance. SynicSugar is a full-mesh p2p. All peers connect with each other instead of 1-to-many like dedicated server and client-server model. If we want to sync data with 63 peer in a full-mesh, we need to send data 63 times. Individual connection is fast but the whole is costly. So the core needs faster. 
+Large dependencies is for performance. SynicSugar is a full-mesh p2p. All peers connect with each other instead of 1-to-many like dedicated server and client-server model. If we want to sync data with many peers in a full-mesh, we need to send data 63 times. Individual connection is fast but the whole is costly. So the core needs faster. 
 
 ## For Debug
 SynicSugar has Debug.Log in some parts for the game development. To use the logs, add SYNICSUGAR_LOG to Scripting Define Symbols in project setting. Logs for errors are displayed by default.

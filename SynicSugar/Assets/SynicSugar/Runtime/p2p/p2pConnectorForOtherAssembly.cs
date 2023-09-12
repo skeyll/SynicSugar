@@ -8,6 +8,7 @@ using Cysharp.Threading.Tasks;
 using SynicSugar.MatchMake;
 using MemoryPack;
 using ResultE = Epic.OnlineServices.Result;
+using SynicSugar.RTC;
 //We can't call the main-Assembly from own-assemblies.
 //So, use such processes through this assembly.
 namespace SynicSugar.P2P {
@@ -67,7 +68,7 @@ namespace SynicSugar.P2P {
             }
         }
 
-    #region Pause Session(Experimental, Not recommend for game?)
+    #region Pause Session
         /// <summary>
         /// For ConnectManager. Stop packet receeiveing to buffer. While stopping, packets are dropped.
         /// </summary>
@@ -166,35 +167,6 @@ namespace SynicSugar.P2P {
 
             return true;
         }
-//         public SugarPacket GetPacketFromBuffer(byte channel){
-//             //Set options
-//             ReceivePacketOptions options = new ReceivePacketOptions(){
-//                 LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
-//                 MaxDataSizeBytes = 1170,
-//                 RequestedChannel = channel
-//             };
-//             //Next packet size
-//             var getNextReceivedPacketSizeOptions = new GetNextReceivedPacketSizeOptions {
-//                 LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
-//                 RequestedChannel = channel
-//             };
-
-//             P2PHandle.GetNextReceivedPacketSize(ref getNextReceivedPacketSizeOptions, out uint nextPacketSizeBytes);
-
-//             byte[] data = new byte[nextPacketSizeBytes];
-//             var dataSegment = new ArraySegment<byte>(data);
-//             ResultE result = P2PHandle.ReceivePacket(ref options, out ProductUserId peerId, out SocketId socketId, out byte outChannel, dataSegment, out uint bytesWritten);
-            
-//             if (result != ResultE.Success){
-// #if SYNICSUGAR_LOG //This range is for performance since this is called every frame.
-//                 if(result == ResultE.InvalidParameters){
-//                     Debug.LogErrorFormat("Get Packets: input was invalid: {0}", result);
-//                 }
-// #endif
-//                 return null; //No packet
-//             }
-//             return new SugarPacket(){ ch = outChannel, UserID = peerId.ToString(), payload = dataSegment}; 
-//         }
         /// <summary>
         /// Clear the packet queues.
         /// Just for PausePacketXXX.
@@ -328,7 +300,7 @@ namespace SynicSugar.P2P {
             Debug.LogError("InterruptedCallback: unknown socket id. This peer should be no lobby member.");
             return;
         }
-        p2pInfo.Instance.ConnectionNotifier.OnEarlyDisconnected(UserId.GetUserId(data.RemoteUserId), Reason.Interrupted);
+        p2pInfo.Instance.ConnectionNotifier.EarlyDisconnected(UserId.GetUserId(data.RemoteUserId), Reason.Interrupted);
     #if SYNICSUGAR_LOG
         Debug.Log("PeerConnectionInterrupted: Connection lost now.");
     #endif
@@ -359,7 +331,7 @@ namespace SynicSugar.P2P {
             return;
         }
         if(data.ConnectionType == ConnectionEstablishedType.Reconnection){
-            p2pInfo.Instance.ConnectionNotifier.OnRestored(UserId.GetUserId(data.RemoteUserId));
+            p2pInfo.Instance.ConnectionNotifier.Restored(UserId.GetUserId(data.RemoteUserId));
     #if SYNICSUGAR_LOG
             Debug.Log("EstablishedCallback: Connection is restored.");
     #endif
@@ -421,5 +393,6 @@ namespace SynicSugar.P2P {
         public void GetPong(string id, ArraySegment<byte> utc){
             p2pInfo.Instance.pings.GetPong(id, utc);
         }
+        public bool IsEnableRTC => MatchMakeManager.Instance.eosLobby.CurrentLobby.bEnableRTCRoom;
     }
 }

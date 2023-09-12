@@ -26,7 +26,7 @@ Attributes to Synchronize.
 using SynicSugar.P2P;
 
 [NetworkPlayer]
-public class NetworkSample {
+public partial class NetworkSample {
     [SyncVar]
     int syncIntVar;
 

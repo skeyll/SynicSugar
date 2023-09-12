@@ -5,7 +5,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
+using SynicSugar.RTC;
 using ResultE = Epic.OnlineServices.Result;
+using SynicSugar.P2P;
+using System;
 
 namespace SynicSugar.MatchMake {
     public class Lobby {
@@ -27,10 +30,10 @@ namespace SynicSugar.MatchMake {
         }
         internal LobbyPermissionLevel PermissionLevel = LobbyPermissionLevel.Publicadvertised;
         public string BucketId = System.String.Empty;
-        // bool bPresenceEnabled = false;
         internal bool bAllowInvites = false;
         internal bool bDisableHostMigration = true;
-        public List<LobbyAttribute> Attributes = new List<LobbyAttribute>();
+        internal bool bEnableRTCRoom = false;
+        public List<AttributeData> Attributes = new List<AttributeData>();
         internal uint AvailableSlots = 0;
         internal void SetBucketID(string[] conditions){
             BucketId = System.String.Empty;
@@ -42,12 +45,20 @@ namespace SynicSugar.MatchMake {
                 BucketId += i == 0 ? conditions[i] : (":" + conditions[i]);
             }
         }
-
-        internal List<LobbyMember> Members = new List<LobbyMember>();
+ 
+        internal Dictionary<string, MemberState> Members = new();
 
         // Utility data
-        internal bool _SearchResult = false;
         internal bool _BeingCreated = false;
+
+        #region RTC
+        internal string RTCRoomName = System.String.Empty;
+        internal bool hasConnectedRTCRoom = false;
+        //for joing or leaving
+        internal NotifyEventHandle RTCParticipantStatusChanged; 
+        //for speaking or non-speaking
+        internal NotifyEventHandle RTCParticipantUpdated;
+        #endregion
 
         /// <summary>
         /// Checks if Lobby Id is valid
@@ -73,6 +84,7 @@ namespace SynicSugar.MatchMake {
             LobbyOwner = new ProductUserId();
             Attributes.Clear();
             Members.Clear();
+            RTCManager.Instance.RemoveRTCEvents();
         }
 
         /// <summary>
@@ -86,9 +98,10 @@ namespace SynicSugar.MatchMake {
 
             LobbyId = lobbyId;
 
-            CopyLobbyDetailsHandleOptions options = new CopyLobbyDetailsHandleOptions();
-            options.LobbyId = LobbyId;
-            options.LocalUserId = EOSManager.Instance.GetProductUserId();
+            CopyLobbyDetailsHandleOptions options = new CopyLobbyDetailsHandleOptions(){
+                LobbyId = LobbyId,
+                LocalUserId = EOSManager.Instance.GetProductUserId()
+            };
 
             ResultE result = EOSManager.Instance.GetEOSLobbyInterface().CopyLobbyDetailsHandle(ref options, out LobbyDetails outLobbyDetailsHandle);
             if (result != ResultE.Success){
@@ -102,21 +115,19 @@ namespace SynicSugar.MatchMake {
 
             InitFromLobbyDetails(outLobbyDetailsHandle);
         }
-
-        //-------------------------------------------------------------------------
         /// <summary>
-        /// Initializing the given <c>LobbyDetails</c> handle and caches all relevant attributes
+        /// Initializing the given LobbyDetails handle and caches all relevant attributes
         /// </summary>
-        /// <param name="lobbyId">Specified <c>LobbyDetails</c> handle</param>
+        /// <param name="outLobbyDetailsHandle">Specified LobbyDetails handle</param>
         internal void InitFromLobbyDetails(LobbyDetails outLobbyDetailsHandle){
-            // get owner
+            // Get owner
             var lobbyDetailsGetLobbyOwnerOptions = new LobbyDetailsGetLobbyOwnerOptions();
             ProductUserId newLobbyOwner = outLobbyDetailsHandle.GetLobbyOwner(ref lobbyDetailsGetLobbyOwnerOptions);
             if (newLobbyOwner != LobbyOwner){
                 LobbyOwner = newLobbyOwner;
             }
 
-            // copy lobby info
+            // Copy lobby info
             var lobbyDetailsCopyInfoOptions = new LobbyDetailsCopyInfoOptions();
             ResultE infoResult = outLobbyDetailsHandle.CopyInfo(ref lobbyDetailsCopyInfoOptions, out LobbyDetailsInfo? outLobbyDetailsInfo);
             if (infoResult != ResultE.Success){
@@ -132,10 +143,11 @@ namespace SynicSugar.MatchMake {
             MaxLobbyMembers = (uint)(outLobbyDetailsInfo?.MaxMembers);
             PermissionLevel = (LobbyPermissionLevel)(outLobbyDetailsInfo?.PermissionLevel);
             bAllowInvites = (bool)(outLobbyDetailsInfo?.AllowInvites);
+            bEnableRTCRoom = (bool)(outLobbyDetailsInfo?.RTCRoomEnabled);
             AvailableSlots = (uint)(outLobbyDetailsInfo?.AvailableSlots);
             BucketId = outLobbyDetailsInfo?.BucketId;
 
-            // get attributes
+            // Get attributes
             Attributes.Clear();
             var lobbyDetailsGetAttributeCountOptions = new LobbyDetailsGetAttributeCountOptions();
             uint attrCount = outLobbyDetailsHandle.GetAttributeCount(ref lobbyDetailsGetAttributeCountOptions);
@@ -144,13 +156,14 @@ namespace SynicSugar.MatchMake {
                 attrOptions.AttrIndex = i;
                 ResultE copyAttrResult = outLobbyDetailsHandle.CopyAttributeByIndex(ref attrOptions, out Epic.OnlineServices.Lobby.Attribute? outAttribute);
                 if (copyAttrResult == ResultE.Success && outAttribute != null && outAttribute?.Data != null){
-                    LobbyAttribute attr = EOSLobbyExtenstions.GenerateLobbyAttribute(outAttribute);
+                    AttributeData attr = EOSLobbyExtensions.GenerateLobbyAttribute(outAttribute);
                     Attributes.Add(attr);
                 }
             }
 
-            // get members
-            List<LobbyMember> OldMembers = new List<LobbyMember>(Members);
+            // Get members
+            // List<LobbyMember> OldMembers = new List<LobbyMember>(Members);
+            Dictionary<string, MemberState> tmp = new (Members);
             Members.Clear();
 
             var lobbyDetailsGetMemberCountOptions = new LobbyDetailsGetMemberCountOptions();
@@ -159,9 +172,9 @@ namespace SynicSugar.MatchMake {
             for (int memberIndex = 0; memberIndex < memberCount; memberIndex++){
                 var lobbyDetailsGetMemberByIndexOptions = new LobbyDetailsGetMemberByIndexOptions() { MemberIndex = (uint)memberIndex };
                 ProductUserId memberId = outLobbyDetailsHandle.GetMemberByIndex(ref lobbyDetailsGetMemberByIndexOptions);
-                Members.Insert((int)memberIndex, new LobbyMember() { ProductId = memberId });
+                Members.Add(UserId.GetUserId(memberId).ToString(), new MemberState(){});
 
-                // member attributes
+                // Add member attributes
                 var lobbyDetailsGetMemberAttributeCountOptions = new LobbyDetailsGetMemberAttributeCountOptions() { TargetUserId = memberId };
                 int memberAttributeCount = (int)outLobbyDetailsHandle.GetMemberAttributeCount(ref lobbyDetailsGetMemberAttributeCountOptions);
 
@@ -174,9 +187,9 @@ namespace SynicSugar.MatchMake {
                         continue;
                     }
 
-                    LobbyAttribute newAttribute = EOSLobbyExtenstions.GenerateLobbyAttribute(outAttribute);
+                    AttributeData newAttribute = EOSLobbyExtensions.GenerateLobbyAttribute(outAttribute);
  
-                    Members[memberIndex].MemberAttributes.Add(newAttribute.Key, newAttribute);
+                    Members[memberId.ToString()].Attributes.Add(newAttribute);
                 }
             }
         }
@@ -184,13 +197,96 @@ namespace SynicSugar.MatchMake {
     /// <summary>
     /// Class represents all Lobby Member properties
     /// </summary>
-    internal class LobbyMember {
-        public ProductUserId ProductId;
-        public Dictionary<string, LobbyAttribute> MemberAttributes = new Dictionary<string, LobbyAttribute>();
+    internal class MemberState {
+        public List<AttributeData> Attributes { get; internal set; } = new List<AttributeData>();    
+        public RTCState RTCState { get; internal set; } = new RTCState();
+
+        internal AttributeData GetAttributeData(string Key){
+            foreach (var attribute in Attributes){
+                if(attribute.Key == Key){
+                    return attribute;
+                }
+            }
+            //No data
+            return null;
+        }
+    }
+
+    public class RTCState {
+        public bool IsInRTCRoom { get; internal set; } = false;
+        public bool IsSpeakinging { get; internal set; } = false;
+        public bool IsAudioOutputEnabled { get; internal set; } = false;
+        public bool IsHardMuted { get; internal set; } = false;
+        public bool IsLocalMute { get; internal set; } = false;
+        public float LocalOutputedVolume { get; internal set; } = 50.0f;
     }
     /// <summary>
-    /// Class represents all Lobby Attribute properties
+    /// Lobby and Member Attribute data
     /// </summary>
+    public class AttributeData {
+        internal LobbyAttributeVisibility Visibility = LobbyAttributeVisibility.Public;
+        
+        public string Key;
+        //Only one of the following properties will have valid data (depending on 'ValueType')
+        public bool? BOOLEAN { get; private set; }
+        public int? INT64 { get; private set; } = 0;
+        public double? DOUBLE { get; private set; } = 0.0;
+        public string STRING { get; private set; }
+        public AttributeType ValueType { get; private set; } = AttributeType.String;
+        public ComparisonOp ComparisonOperator = ComparisonOp.Equal;
+        /// <summary>
+        /// Can use bool, int, double and string.
+        /// Retrun new whole attribute instanse by GenereteSerssionAttribute<T>(Key, Value, advertiseType).
+        /// </summary>
+        /// <param name="value"></param>
+        public void SetValue(bool value){
+            BOOLEAN = value;
+            ValueType = AttributeType.Boolean;
+        }
+        public void SetValue(int value){
+            INT64 = value;
+            ValueType = AttributeType.Int64;
+        }
+        public void SetValue(double value){
+            DOUBLE = value;
+            ValueType = AttributeType.Double;
+        }
+        public void SetValue(string value){
+            STRING = value;
+            ValueType = AttributeType.String;
+        }
+        public string GetValueAsString(){
+            switch(ValueType){
+                case AttributeType.Boolean:
+                return BOOLEAN.ToString();
+                case AttributeType.Int64:
+                return INT64.ToString();
+                case AttributeType.Double:
+                return DOUBLE.ToString();
+                case AttributeType.String:
+                return STRING;
+            }
+            return System.String.Empty;
+        }
+        /// <summary>
+        /// Get specific value from user attributes.
+        /// </summary>
+        /// <param name="list">User attributes </param>
+        /// <param name="Key">Target attribute key(The key from server becomes Upper case)</param>
+        /// <returns></returns>
+        public static string GetValueAsString(List<AttributeData> list, string Key){
+            foreach(var attr in list){
+                if(string.Compare(attr.Key, Key, true) <= 0){
+                    return attr.GetValueAsString();
+                }
+            }
+            return System.String.Empty;
+        }
+        public override int GetHashCode(){
+            return base.GetHashCode();
+        }
+    }
+    [Obsolete("This is old. AttributeData is new one.")]
     public class LobbyAttribute {
         internal LobbyAttributeVisibility Visibility = LobbyAttributeVisibility.Public;
         
@@ -223,48 +319,8 @@ namespace SynicSugar.MatchMake {
             STRING = value;
             ValueType = AttributeType.String;
         }
-
         public override int GetHashCode(){
             return base.GetHashCode();
-        }
-    }
-    
-    public enum MatchState {
-        Search, Wait, Connect, Success, Fail, Cancel
-    }
-    [System.Serializable]
-    public class MatchGUIState {
-        public MatchGUIState(){
-
-        }
-        public MatchGUIState(Text uiText){
-            state = uiText;
-        }
-        public Text state;
-        //ex.
-        // 1. Press [start match make] button.
-        // 2. Make [start match make] disable not to press multiple times. -> stopAdditionalInput
-        // 3. Change [start match make] text to [stop match make]. -> acceptCancel
-        // 4. (On Success) Completely inactive [start match make]. -> stopAdditionalInput
-        public UnityEvent stopAdditionalInput = new UnityEvent();
-        public UnityEvent acceptCancel = new UnityEvent();
-        //Diplay these on UI text.
-        public string searchLobby, waitothers, tryconnect, success, fail, trycancel;
-        internal string GetDiscription(MatchState state){
-            switch(state){
-                case MatchState.Search:
-                return searchLobby;
-                case MatchState.Wait:
-                return waitothers;
-                case MatchState.Connect:
-                return tryconnect;
-                case MatchState.Success:
-                return success;
-                case MatchState.Cancel:
-                return trycancel;
-            }
-            
-            return System.String.Empty;
         }
     }
 }

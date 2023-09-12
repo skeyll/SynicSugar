@@ -13,7 +13,7 @@ This is used like **p2pinfo.Instance.XXX()**.
 This manages data after p2p connections have established.<br>
 
 This script is Mono's Singleton attached to NetworkManager. To generate NetworkManager, right-click on the Hierarchy and click SynicSugar/NetworkManager<br>
-NetworkManager has **DontDestroy**, so ConnectManager will not be destroyed by scene transitions. <br>
+NetworkManager has **DontDestroy**, so NetworkManager will not be destroyed by scene transitions. <br>
 
 If this is no longer needed, we call *[CancelCurrentMatchMake](../../SynicSugar.MatchMake/MatchMakeManager/cancelcurrentmatchmake)*, *[ConnectHub.Instance.CloseSession(CancellationTokenSource)](../../SynicSugar.P2P/ConnectHub/exitsession)* or *[ConnectHub.Instance.ExitSession(CancellationTokenSource)](../../SynicSugar.P2P/ConnectHub/exitsession)*.
 

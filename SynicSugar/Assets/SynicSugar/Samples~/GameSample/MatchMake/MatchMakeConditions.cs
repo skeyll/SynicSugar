@@ -17,14 +17,15 @@ namespace SynicSugar.Samples{
             UpdateConditionsText();
         }
 
-        public Lobby GetLobbyCondition(){
+        public Lobby GetLobbyCondition(uint MaxLobbyMembers = 2){
+            bool useVC = SceneManager.GetActiveScene().name == "Chat";
             //Create conditions
-            Lobby lobbyCondition = MatchMakeManager.GenerateLobbyObject(new string[3]{SceneManager.GetActiveScene().name, mode.ToString(), region.ToString()});
+            Lobby lobbyCondition = MatchMakeManager.GenerateLobbyObject(new string[3]{SceneManager.GetActiveScene().name, mode.ToString(), region.ToString()}, useVoiceChat: useVC);
             
-            lobbyCondition.MaxLobbyMembers = 2; //2-64
+            lobbyCondition.MaxLobbyMembers = MaxLobbyMembers; //2-64
 
-            LobbyAttribute attribute = new LobbyAttribute();
-            attribute.Key = "Level";
+            AttributeData attribute = new AttributeData();
+            attribute.Key = "LEVEL";
             attribute.SetValue(level);
             attribute.ComparisonOperator = Epic.OnlineServices.ComparisonOp.Equal;
             lobbyCondition.Attributes.Add(attribute);

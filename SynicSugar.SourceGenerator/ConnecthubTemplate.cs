@@ -34,96 +34,98 @@ namespace SynicSugarGenerator
                     "l has not been referenced\r\n#pragma warning disable CS0436 // Type conflicts with" +
                     " the imported type\r\n\r\nusing UnityEngine;\r\nusing MemoryPack;\r\nusing MemoryPack.Co" +
                     "mpression;\r\nusing System;\r\nusing System.Collections.Generic;\r\nusing System.Threa" +
-                    "ding;\r\nusing Cysharp.Threading.Tasks;\r\nnamespace SynicSugar.P2P {\r\n    internal " +
-                    "sealed class ConnectHub {\r\n        //Singleton\r\n        private static Lazy<Conn" +
-                    "ectHub> instance = new Lazy<ConnectHub>();\r\n        public static ConnectHub Ins" +
-                    "tance => instance.Value;\r\n\r\n        public ConnectHub(){\r\n        }\r\n        byt" +
-                    "e ch_r;\r\n        string id_r;\r\n        ArraySegment<byte> payload_r;\r\n        //" +
-                    "Start\r\n        /// <summary>\r\n        /// Start the packet receiver. Call after " +
-                    "creating the Network Instance required for reception.\r\n        /// </summary>\r\n " +
-                    "       // Default Relay Setting is AllowRelay. To change this, get NatType.\r\n   " +
-                    "     public void StartPacketReceiver(){\r\n            if(p2pConnectorForOtherAsse" +
-                    "mbly.Instance.p2pToken != null && !p2pConnectorForOtherAssembly.Instance.p2pToke" +
-                    "n.IsCancellationRequested){\r\n                p2pConnectorForOtherAssembly.Instan" +
-                    "ce.p2pToken.Cancel();\r\n            }\r\n\r\n            p2pConnectorForOtherAssembly" +
-                    ".Instance.p2pToken = new CancellationTokenSource();\r\n\r\n            if(p2pConfig." +
-                    "Instance.AutoRefreshPing){\r\n                p2pConnectorForOtherAssembly.Instanc" +
-                    "e.AutoRefreshPings(p2pConnectorForOtherAssembly.Instance.p2pToken.Token).Forget(" +
-                    ");\r\n            }\r\n\r\n            if(p2pConfig.Instance.getPacketFrequency == p2p" +
-                    "Config.GetPacketFrequency.PerSecond3xFPS){\r\n                ReciveThreePackets()" +
-                    ".Forget();\r\n                return;\r\n            }\r\n            RecivePacket().F" +
-                    "orget();\r\n        }\r\n        //Pause receiver\r\n        /// <summary>\r\n        //" +
-                    "/ Pause getting a packet from the buffer. To re-start, call StartPacketReceiver(" +
-                    ").<br />\r\n        /// *Packet receiving to the buffer is continue. If the packet" +
-                    " is over the buffer, subsequent packets are discarded.\r\n        /// </summary>\r\n" +
-                    "        public void PausetPacketReceiver(){\r\n            if(p2pConnectorForOther" +
-                    "Assembly.Instance.p2pToken != null && !p2pConnectorForOtherAssembly.Instance.p2p" +
-                    "Token.IsCancellationRequested){\r\n                p2pConnectorForOtherAssembly.In" +
-                    "stance.p2pToken.Cancel();\r\n            }\r\n        }\r\n\r\n        //Pause Reciving " +
-                    "buffer\r\n        /// <summary>\r\n        /// Pause receiving a packet to the recei" +
-                    "ve buffer. To re-start, call RestartConnections(). <br />\r\n        /// After cal" +
-                    "l this, packets will have been discarded until connection will re-open.<br />\r\n " +
-                    "       /// WARNING: This doesn\'t work as intended now. Can\'t stop receiving pack" +
-                    "ets to buffer, so SynicSugar discard those packets before re-start.\r\n        ///" +
-                    " </summary>\r\n        /// <param name=\"isForced\">If True, force to stop and clear" +
-                    " current packet queue. <br />\r\n        /// If false, process current queue, then" +
-                    " stop it.</param>\r\n        public async UniTask PauseConnections(bool isForced =" +
-                    " false, CancellationTokenSource cancelToken = default(CancellationTokenSource)){" +
-                    "\r\n            if(cancelToken == default(CancellationTokenSource)){\r\n            " +
-                    "    cancelToken = new CancellationTokenSource();\r\n            }\r\n            awa" +
-                    "it p2pConnectorForOtherAssembly.Instance.PauseConnections(isForced, cancelToken." +
-                    "Token);\r\n        }\r\n        /// <summary>\r\n        /// Prepare to receive packet" +
-                    "s in advance. If user sent a packet, it can also open connection to get packets " +
-                    "without this.\r\n        /// </summary>\r\n        public void RestartConnections(){" +
-                    "\r\n            p2pConnectorForOtherAssembly.Instance.RestartConnections();\r\n     " +
-                    "       StartPacketReceiver();\r\n        }\r\n        \r\n        /// <summary>\r\n     " +
-                    "   /// Stop receiver, close all connections and remove the notify events.\r\n     " +
-                    "   /// Then, the user leave the lobby.<br />\r\n        /// To exit from lobby alo" +
-                    "ne during a game(= not whole, only one battle). Usually use CloseSession().\r\n   " +
-                    "     /// </summary>\r\n        public async UniTask<bool> ExitSession(Cancellation" +
-                    "TokenSource cancelToken = default(CancellationTokenSource)){\r\n            if(can" +
-                    "celToken == default(CancellationTokenSource)){\r\n                cancelToken = ne" +
-                    "w CancellationTokenSource();\r\n            }\r\n            bool isSuccess = await " +
-                    "p2pConnectorForOtherAssembly.Instance.ExitSession(cancelToken.Token);\r\n         " +
-                    "   ClearReferenceDictionaries();\r\n            return isSuccess;\r\n        }\r\n    " +
-                    "    /// <summary>\r\n        /// Stop receiver, close all connections and remove t" +
-                    "he notify events.<br />\r\n        /// Then, Host closees and Guest leaves the lob" +
-                    "by.\r\n        /// </summary>\r\n        public async UniTask<bool> CloseSession(Can" +
-                    "cellationTokenSource cancelToken = default(CancellationTokenSource)){\r\n         " +
-                    "   if(cancelToken == default(CancellationTokenSource)){\r\n                cancelT" +
-                    "oken = new CancellationTokenSource();\r\n            }\r\n            bool isSuccess" +
-                    " = await p2pConnectorForOtherAssembly.Instance.CloseSession(cancelToken.Token);\r" +
-                    "\n            ClearReferenceDictionaries();\r\n            return isSuccess;\r\n     " +
-                    "   }\r\n        async UniTask RecivePacket(){\r\n            while(!p2pConnectorForO" +
-                    "therAssembly.Instance.p2pToken.IsCancellationRequested){\r\n                bool r" +
-                    "ecivePacket = p2pConnectorForOtherAssembly.Instance.GetPacketFromBuffer(ref ch_r" +
-                    ", ref id_r, ref payload_r);\r\n\r\n                if(recivePacket){\r\n              " +
-                    "      ConnectHub.Instance.ConvertFromPacket(ref ch_r, ref id_r, ref payload_r);\r" +
-                    "\n                }\r\n                await UniTask.Delay(p2pConnectorForOtherAsse" +
-                    "mbly.Instance.receiverInterval);\r\n\r\n                if(p2pConnectorForOtherAssem" +
-                    "bly.Instance == null || p2pConnectorForOtherAssembly.Instance.p2pToken.IsCancell" +
-                    "ationRequested){\r\n                    break;\r\n                }\r\n            }\r\n" +
-                    "        }\r\n        \r\n        async UniTask ReciveThreePackets(){\r\n            wh" +
-                    "ile(!p2pConnectorForOtherAssembly.Instance.p2pToken.IsCancellationRequested){\r\n " +
-                    "               //1st\r\n                bool recivePacket = p2pConnectorForOtherAs" +
-                    "sembly.Instance.GetPacketFromBuffer(ref ch_r, ref id_r, ref payload_r);\r\n       " +
-                    "         if(recivePacket){\r\n                    ConnectHub.Instance.ConvertFromP" +
-                    "acket(ref ch_r, ref id_r, ref payload_r);\r\n                    //2nd\r\n          " +
-                    "          recivePacket = p2pConnectorForOtherAssembly.Instance.GetPacketFromBuff" +
-                    "er(ref ch_r, ref id_r, ref payload_r);\r\n                    if(recivePacket){\r\n " +
-                    "                       ConnectHub.Instance.ConvertFromPacket(ref ch_r, ref id_r," +
-                    " ref payload_r);\r\n                        //3rd\r\n                        reciveP" +
-                    "acket = p2pConnectorForOtherAssembly.Instance.GetPacketFromBuffer(ref ch_r, ref " +
-                    "id_r, ref payload_r);\r\n                        if(recivePacket){\r\n              " +
-                    "              ConnectHub.Instance.ConvertFromPacket(ref ch_r, ref id_r, ref payl" +
-                    "oad_r);\r\n                        }\r\n                    }\r\n                }\r\n\r\n" +
-                    "                await UniTask.Yield(PlayerLoopTiming.Update);\r\n\r\n               " +
-                    " if(p2pConnectorForOtherAssembly.Instance == null || p2pConnectorForOtherAssembl" +
-                    "y.Instance.p2pToken.IsCancellationRequested){\r\n                    break;\r\n     " +
-                    "           }\r\n            }\r\n        }\r\n\r\n        //(for elements)\r\n        publ" +
-                    "ic enum CHANNELLIST{\r\n            ");
+                    "ding;\r\nusing Cysharp.Threading.Tasks;\r\nusing SynicSugar.RTC;\r\nnamespace SynicSug" +
+                    "ar.P2P {\r\n    internal sealed class ConnectHub {\r\n        //Singleton\r\n        p" +
+                    "rivate static Lazy<ConnectHub> instance = new Lazy<ConnectHub>();\r\n        publi" +
+                    "c static ConnectHub Instance => instance.Value;\r\n\r\n        public ConnectHub(){\r" +
+                    "\n        }\r\n        byte ch_r;\r\n        string id_r;\r\n        ArraySegment<byte>" +
+                    " payload_r;\r\n        //Start\r\n        /// <summary>\r\n        /// Start the packe" +
+                    "t receiver. Call after creating the Network Instance required for reception.\r\n  " +
+                    "      /// </summary>\r\n        // Default Relay Setting is AllowRelay. To change " +
+                    "this, get NatType.\r\n        public void StartPacketReceiver(){\r\n            if(p" +
+                    "2pConnectorForOtherAssembly.Instance.p2pToken != null && !p2pConnectorForOtherAs" +
+                    "sembly.Instance.p2pToken.IsCancellationRequested){\r\n                p2pConnector" +
+                    "ForOtherAssembly.Instance.p2pToken.Cancel();\r\n            }\r\n\r\n            p2pCo" +
+                    "nnectorForOtherAssembly.Instance.p2pToken = new CancellationTokenSource();\r\n\r\n  " +
+                    "          if(p2pConfig.Instance.AutoRefreshPing){\r\n                p2pConnectorF" +
+                    "orOtherAssembly.Instance.AutoRefreshPings(p2pConnectorForOtherAssembly.Instance." +
+                    "p2pToken.Token).Forget();\r\n            }\r\n\r\n            if(p2pConfig.Instance.ge" +
+                    "tPacketFrequency == p2pConfig.GetPacketFrequency.PerSecond3xFPS){\r\n             " +
+                    "   ReciveThreePackets().Forget();\r\n            }else{\r\n                RecivePac" +
+                    "ket().Forget();\r\n            }\r\n            if(p2pConnectorForOtherAssembly.Inst" +
+                    "ance.IsEnableRTC){\r\n                RTCManager.Instance.ToggleReceiveingFromTarg" +
+                    "et(null, true);\r\n            }\r\n        }\r\n        //Pause receiver\r\n        ///" +
+                    " <summary>\r\n        /// Pause getting a packet from the buffer. To re-start, cal" +
+                    "l StartPacketReceiver().<br />\r\n        /// *Packet receiving to the buffer is c" +
+                    "ontinue. If the packet is over the buffer, subsequent packets are discarded.\r\n  " +
+                    "      /// </summary>\r\n        public void PausetPacketReceiver(){\r\n            i" +
+                    "f(p2pConnectorForOtherAssembly.Instance.p2pToken != null && !p2pConnectorForOthe" +
+                    "rAssembly.Instance.p2pToken.IsCancellationRequested){\r\n                p2pConnec" +
+                    "torForOtherAssembly.Instance.p2pToken.Cancel();\r\n            }\r\n        }\r\n\r\n   " +
+                    "     //Pause Reciving buffer\r\n        /// <summary>\r\n        /// Pause receiving" +
+                    " a packet to the receive buffer. To re-start, call RestartConnections(). <br />\r" +
+                    "\n        /// After call this, packets will have been discarded until connection " +
+                    "will re-open.<br />\r\n        /// WARNING: This doesn\'t work as intended now. Can" +
+                    "\'t stop receiving packets to buffer, so SynicSugar discard those packets before " +
+                    "re-start.\r\n        /// </summary>\r\n        /// <param name=\"isForced\">If True, f" +
+                    "orce to stop and clear current packet queue. <br />\r\n        /// If false, proce" +
+                    "ss current queue, then stop it.</param>\r\n        public async UniTask PauseConne" +
+                    "ctions(bool isForced = false, CancellationTokenSource cancelToken = default(Canc" +
+                    "ellationTokenSource)){\r\n            if(cancelToken == default(CancellationTokenS" +
+                    "ource)){\r\n                cancelToken = new CancellationTokenSource();\r\n        " +
+                    "    }\r\n            await p2pConnectorForOtherAssembly.Instance.PauseConnections(" +
+                    "isForced, cancelToken.Token);\r\n        }\r\n        /// <summary>\r\n        /// Pre" +
+                    "pare to receive packets in advance. If user sent a packet, it can also open conn" +
+                    "ection to get packets without this.\r\n        /// </summary>\r\n        public void" +
+                    " RestartConnections(){\r\n            p2pConnectorForOtherAssembly.Instance.Restar" +
+                    "tConnections();\r\n            StartPacketReceiver();\r\n        }\r\n        \r\n      " +
+                    "  /// <summary>\r\n        /// Stop receiver, close all connections and remove the" +
+                    " notify events.\r\n        /// Then, the user leave the lobby.<br />\r\n        /// " +
+                    "To exit from lobby alone during a game(= not whole, only one battle). Usually us" +
+                    "e CloseSession().\r\n        /// </summary>\r\n        public async UniTask<bool> Ex" +
+                    "itSession(CancellationTokenSource cancelToken = default(CancellationTokenSource)" +
+                    "){\r\n            if(cancelToken == default(CancellationTokenSource)){\r\n          " +
+                    "      cancelToken = new CancellationTokenSource();\r\n            }\r\n            b" +
+                    "ool isSuccess = await p2pConnectorForOtherAssembly.Instance.ExitSession(cancelTo" +
+                    "ken.Token);\r\n            ClearReferenceDictionaries();\r\n            return isSuc" +
+                    "cess;\r\n        }\r\n        /// <summary>\r\n        /// Stop receiver, close all co" +
+                    "nnections and remove the notify events.<br />\r\n        /// Then, Host closees an" +
+                    "d Guest leaves the lobby.\r\n        /// </summary>\r\n        public async UniTask<" +
+                    "bool> CloseSession(CancellationTokenSource cancelToken = default(CancellationTok" +
+                    "enSource)){\r\n            if(cancelToken == default(CancellationTokenSource)){\r\n " +
+                    "               cancelToken = new CancellationTokenSource();\r\n            }\r\n    " +
+                    "        bool isSuccess = await p2pConnectorForOtherAssembly.Instance.CloseSessio" +
+                    "n(cancelToken.Token);\r\n            ClearReferenceDictionaries();\r\n            re" +
+                    "turn isSuccess;\r\n        }\r\n        async UniTask RecivePacket(){\r\n            w" +
+                    "hile(!p2pConnectorForOtherAssembly.Instance.p2pToken.IsCancellationRequested){\r\n" +
+                    "                bool recivePacket = p2pConnectorForOtherAssembly.Instance.GetPac" +
+                    "ketFromBuffer(ref ch_r, ref id_r, ref payload_r);\r\n\r\n                if(recivePa" +
+                    "cket){\r\n                    ConnectHub.Instance.ConvertFromPacket(ref ch_r, ref " +
+                    "id_r, ref payload_r);\r\n                }\r\n                await UniTask.Delay(p2" +
+                    "pConnectorForOtherAssembly.Instance.receiverInterval);\r\n\r\n                if(p2p" +
+                    "ConnectorForOtherAssembly.Instance == null || p2pConnectorForOtherAssembly.Insta" +
+                    "nce.p2pToken.IsCancellationRequested){\r\n                    break;\r\n            " +
+                    "    }\r\n            }\r\n        }\r\n        \r\n        async UniTask ReciveThreePack" +
+                    "ets(){\r\n            while(!p2pConnectorForOtherAssembly.Instance.p2pToken.IsCanc" +
+                    "ellationRequested){\r\n                //1st\r\n                bool recivePacket = " +
+                    "p2pConnectorForOtherAssembly.Instance.GetPacketFromBuffer(ref ch_r, ref id_r, re" +
+                    "f payload_r);\r\n                if(recivePacket){\r\n                    ConnectHub" +
+                    ".Instance.ConvertFromPacket(ref ch_r, ref id_r, ref payload_r);\r\n               " +
+                    "     //2nd\r\n                    recivePacket = p2pConnectorForOtherAssembly.Inst" +
+                    "ance.GetPacketFromBuffer(ref ch_r, ref id_r, ref payload_r);\r\n                  " +
+                    "  if(recivePacket){\r\n                        ConnectHub.Instance.ConvertFromPack" +
+                    "et(ref ch_r, ref id_r, ref payload_r);\r\n                        //3rd\r\n         " +
+                    "               recivePacket = p2pConnectorForOtherAssembly.Instance.GetPacketFro" +
+                    "mBuffer(ref ch_r, ref id_r, ref payload_r);\r\n                        if(recivePa" +
+                    "cket){\r\n                            ConnectHub.Instance.ConvertFromPacket(ref ch" +
+                    "_r, ref id_r, ref payload_r);\r\n                        }\r\n                    }\r" +
+                    "\n                }\r\n\r\n                await UniTask.Yield(PlayerLoopTiming.Updat" +
+                    "e);\r\n\r\n                if(p2pConnectorForOtherAssembly.Instance == null || p2pCo" +
+                    "nnectorForOtherAssembly.Instance.p2pToken.IsCancellationRequested){\r\n           " +
+                    "         break;\r\n                }\r\n            }\r\n        }\r\n\r\n        //(for e" +
+                    "lements)\r\n        public enum CHANNELLIST{\r\n            ");
             
-            #line 156 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 160 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(SyncList));
             
             #line default
@@ -133,21 +135,21 @@ namespace SynicSugarGenerator
                     "> packetInfo = new Dictionary<string, LargePacketInfomation>();\r\n\r\n        //Ref" +
                     "(for class)");
             
-            #line 162 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 166 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Reference));
             
             #line default
             #line hidden
             this.Write("\r\n\r\n        //Clear ref\r\n        private void ClearReferenceDictionaries(){ ");
             
-            #line 165 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 169 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ClearReference));
             
             #line default
             #line hidden
             this.Write("\r\n        }\r\n\r\n        //Register(for class)");
             
-            #line 168 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 172 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Register));
             
             #line default
@@ -161,7 +163,7 @@ namespace SynicSugarGenerator
         /// <returns>T's instance</returns>
         public T GetUserInstance<T>(UserId id) where T : IGetPlayer {");
             
-            #line 175 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 179 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(PlayeInstance));
             
             #line default
@@ -176,7 +178,7 @@ namespace SynicSugarGenerator
         /// <returns>T's instance</returns>
         public T GetInstance<T>() where T : IGetCommons {");
             
-            #line 183 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 187 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(CommonsInstance));
             
             #line default
@@ -185,7 +187,7 @@ namespace SynicSugarGenerator
                     "\r\n        public void ConvertFromPacket(ref byte ch, ref string id, ref ArraySeg" +
                     "ment<byte> payload){\r\n            switch((CHANNELLIST)ch){");
             
-            #line 189 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 193 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(PacketConvert));
             
             #line default
@@ -226,7 +228,7 @@ namespace SynicSugarGenerator
                     "ance.LastTargetRPCPayload, p2pInfo.Instance.LastTargetRPCUserId);\r\n        }\r\n\r\n" +
                     "        ");
             
-            #line 247 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 251 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
  if (needSyncSynic) { 
             
             #line default
@@ -256,14 +258,14 @@ namespace SynicSugarGenerator
                     "oArray(), targetId, syncedPhase, syncSinglePhase, false);\r\n        }\r\n\r\n        " +
                     "");
             
-            #line 278 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 282 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GenerateSynicContainer));
             
             #line default
             #line hidden
             this.Write("\r\n        ");
             
-            #line 279 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 283 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
  } 
             
             #line default
@@ -301,7 +303,7 @@ namespace SynicSugarGenerator
                     "Id].phase;\r\n            bool syncSinglePhase = packetInfo[overwriterUserId].sync" +
                     "SinglePhase;\r\n\r\n            switch(phase){");
             
-            #line 331 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 335 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(SyncedInvoker));
             
             #line default
@@ -309,7 +311,7 @@ namespace SynicSugarGenerator
             this.Write("\r\n                default:\r\n                goto case 9;\r\n            }\r\n        " +
                     "}\r\n        ");
             
-            #line 336 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 340 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(SyncedItems));
             
             #line default

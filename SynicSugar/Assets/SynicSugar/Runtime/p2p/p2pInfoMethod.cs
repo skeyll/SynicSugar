@@ -1,5 +1,6 @@
 using PlayEveryWare.EpicOnlineServices;
 using Epic.OnlineServices.P2P;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using ResultE = Epic.OnlineServices.Result;
@@ -19,11 +20,11 @@ namespace SynicSugar.P2P {
         /// For initial connection. But, after 10 sec, always end.
         /// </summary>
         /// <returns></returns>
-        static async internal UniTask WaitConnectPreparation(){
-            await UniTask.WhenAny(UniTask.WaitUntil(() => p2pInfo.Instance.ConnectionNotifier.completeConnectPreparetion), UniTask.Delay(10000));
+        static async internal UniTask WaitConnectPreparation(CancellationToken token){
+            await UniTask.WhenAny(UniTask.WaitUntil(() => p2pInfo.Instance.ConnectionNotifier.completeConnectPreparetion, cancellationToken: token), UniTask.Delay(10000, cancellationToken: token));
 
             #if SYNICSUGAR_LOG
-                Debug.Log("All connections is ready.");
+                Debug.Log("SynicSugar: All connections is ready.");
             #endif
             if(!p2pConfig.Instance.UseDisconnectedEarlyNotify){
                 p2pConnectorForOtherAssembly.Instance.RemoveNotifyPeerConnectionnEstablished();

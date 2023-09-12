@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using SynicSugar.P2P;
 using System;
+using Epic.OnlineServices;
 namespace  SynicSugar.Samples {
     [NetworkPlayer(true)]
     public partial class TankPlayer : MonoBehaviour {
