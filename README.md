@@ -118,6 +118,6 @@ SynicSugar has Debug.Log in some portions for the game development. To use the l
 
 ## Contribute Guideline
 
-SynicSugar's concept is an easy online game development for everyone. Therefore, the development is also based on this policy. The target is online game for up to 64 people supported by EOS, but the main is small-party action game. If you want to create MMO, you should use [Mirror](https://github.com/MirrorNetworking/Mirror). 
+SynicSugar's concept is an easy online game development for everyone. Therefore, the development is also based on this policy. We can create online game for up to 64 people supported by EOS, but the main is small-party(2-32) game. If you want to create MMO, Survival Game and Party Game, you should use [Mirror](https://github.com/MirrorNetworking/Mirror). 
 
-The roadmap is [here](https://github.com/users/skeyll/projects/5/views/2). For the time being, add basic function for online-game and improve performance. If you need any necessary functions, please post it to Github Issue or give a pull request. Great thanks for all contributions!
+The roadmap is [here](https://github.com/users/skeyll/projects/5/views/2). For the time being, add a basic function for online-game and improve the performance. If you need any necessary functions, please post it to Github Issue or give a pull request. Great thanks for all contributions!
