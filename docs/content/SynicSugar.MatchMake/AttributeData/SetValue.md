@@ -4,7 +4,7 @@ weight = 1
 +++
 ## SetValue
 <small>*Namespace: SynicSugar.MatchMake* <br>
-*Class: LobbyAttribute* </small>
+*Class: AttributeData* </small>
 
 public void SetValue(bool value)<br>
 public void SetValue(int value)<br>
@@ -21,7 +21,7 @@ using SynicSugar.MatchMake;
 
 public class LobbyCondition : MonoBehaviour {
     void SetLobbyConditions(){
-        LobbyAttribute attribute = new LobbyAttribute();
+        AttributeData attribute = new AttributeData();
         attribute.SetValue(100);
     }
 }

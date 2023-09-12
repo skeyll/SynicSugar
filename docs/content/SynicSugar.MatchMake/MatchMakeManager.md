@@ -28,23 +28,31 @@ If this is no longer needed, we call *[CancelCurrentMatchMake](../MatchMakeManag
 | [customDeleteLobbyID](../MatchMakeManager/customdeletelobbyid) | UnityEvent to delete LobbyID |
 | [lobbyIDMethod](../MatchMakeManager/lobbyidmethod) | Actions to recconect Lobby |
 | [asyncLobbyIDMethod](../MatchMakeManager/asynclobbyidmethod) | Func&lt;UniTask&gt; to recconect Lobby |
-| [matchState](../MatchMakeManager/matchstate) | Text and Button state on GUI in matchmaking |
+| [MatchMakingGUIEvents](../MatchMakeManager/matchmakingguievents) | To manage GUI in matchmaking |
+| [MemberUpdatedNotifier](../MatchMakeManager/memberupdatednotifier) | Notify when a user attributes is updated |
+| [LastResultCode](../MatchMakeManager/lastresultcode) | ResultCode if get error |
+| [isHost](../MatchMakeManager/ishost) | Whether this local user is the owner of current Lobby |
 
 
 ### Function 
 | API | description |
 |---|---|
-| [SetGUIState](../MatchMakeManager/setguistate) | Change *MatchState* from script |
 | [SearchAndCreateLobby](../MatchMakeManager/searchandcreatelobby) | Search lobby and, if can't join, create lobby |
 | [SearchLobby](../MatchMakeManager/searchlobby) | Search lobby and join it as Guest |
 | [CreateLobby](../MatchMakeManager/createlobby) | Create lobby as Host and wait for Guest |
+| [ConcludeMatchMake](../MatchMakeManager/concludematchmake) | Host finishes a matchmaking by hand |
 | [ReconnectLobby](../MatchMakeManager/reconnectlobby) | Join the Lobby with saved LobbyID |
 | [CancelCurrentMatchMake](../MatchMakeManager/cancelcurrentmatchmake) | Stop the current matchmaking |
+| [KickTargetFromLobby](../MatchMakeManager/kicktargetfromlobby) | (Host) kicks target from Lobby |
+| [GetLastErrorCode](../MatchMakeManager/getlasterrorcode) | Get Last ERROR Result code |
 | [GetCurrentLobbyID](../MatchMakeManager/getcurrentlobbyid) | Get LobbyID that a user participating |
 | [GetReconnectLobbyID](../MatchMakeManager/getreconnectlobbyid) | Get LobbyID by Playerprefs |
 | [GetCurrentLobbyMemberCount](../MatchMakeManager/getcurrentlobbymembercount) | Get the current member count in Lobby |
 | [GetMaxLobbyMemberCount](../MatchMakeManager/getmaxlobbymembercount) | Get the current lobby's member limit |
 | [GenerateLobbyObject](../MatchMakeManager/generatelobbyobject) | Generate a lobby object for conditions |
+| [GetTargetAttributeData](../MatchMakeManager/gettargetattributedata) | Get attribute(s) of a member |
+| [GetLastErrorCode](../MatchMakeManager/getlasterrorcode) | Get Last ERROR Result code of Matchmaking |
+| [isLocalUserId](../MatchMakeManager/islocaluserid) | Whether the argument is the id of local user or not |
 
 
 ```cs

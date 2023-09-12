@@ -4,7 +4,7 @@ weight = 1
 +++
 ## ComparisonOperator
 <small>*Namespace: SynicSugar.MatchMake* <br>
-*Class: LobbyAttribute* </small>
+*Class: AttributeData* </small>
 
 public Epic.OnlineServices.ComparisonOp ComparisonOperator
 
@@ -18,7 +18,7 @@ using SynicSugar.MatchMake;
 
 public class LobbyCondition : MonoBehaviour {
     void SetLobbyConditions(){
-        LobbyAttribute attribute = new LobbyAttribute();
+        AttributeData attribute = new AttributeData();
         attribute.comparisonOption = Epic.OnlineServices.ComparisonOp.Equal;
     }
 }

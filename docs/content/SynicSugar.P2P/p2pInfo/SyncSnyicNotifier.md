@@ -10,12 +10,12 @@ public SyncSnyicNotifier SyncSnyicNotifier
 
 
 ### Description
-Invoke the registereds event when synced some Synic variables by *[SyncSynic](../../SynicSugar.P2P/ConnectHub/syncsynic)*.<br>
+Invoke the registered event when synced some Synic variables by *[SyncSynic](../../SynicSugar.P2P/ConnectHub/syncsynic)*.<br>
 
-### Properity
+### Event
 | API | description |
 |---|---|
-| SyncedSynic | Invoke when some Synic variables is synced. |
+| OnSyncedSynic | Invoke when some Synic variables is synced |
 
 
 ### Function
@@ -30,7 +30,7 @@ using UnityEngine;
 
 public class p2pSample : MonoBehaviour {
     void Start(){
-        p2pInfo.Instance.SyncSnyicNotifier.SyncedSynic += OnSyncedSynic;
+        p2pInfo.Instance.SyncSnyicNotifier.OnSyncedSynic += OnSyncedSynic;
     }
 
     void OnSyncedSynic(){
