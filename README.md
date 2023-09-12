@@ -2,7 +2,7 @@
 # SynicSugar
 ![https://github.com/skeyll/SynicSugar/blob/main/LICENSE](https://img.shields.io/github/license/skeyll/SynicSugar) ![Unity](https://img.shields.io/badge/Unity-2021.3%2B-blue) [![openupm](https://img.shields.io/npm/v/net.skeyll.synicsugar?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/net.skeyll.synicsugar/) 
 
-SynicSugar is Unity High-Level Network Library with EpicOnlineServices. The concept is the syntax sugar of netcode. The runtime process is sonic by pre-generating and IL weaving codes for your project. SynicSugar will be optimized for small-party (action) game
+SynicSugar is Unity High-Level Network Library with EpicOnlineServices. The concept is the syntax sugar of netcode. Matchmaking, Relay and VC are for free thanks to Epic Game, and have high-level APIs for actual game development. Almost SynicSugar APIs are zero-allocation, so the runtime process is sonic. SynicSugar will be optimized for small-party game not covered by [Mirror](https://github.com/MirrorNetworking/Mirror).
 
 For more detail is [https://skeyll.github.io/SynicSugar/](https://skeyll.github.io/SynicSugar/).
 
@@ -10,8 +10,11 @@ For more detail is [https://skeyll.github.io/SynicSugar/](https://skeyll.github.
 ## Feature
  - Mesh topology with max 64 peers
  - No Use Cost and No CCU Limit
- - High-level APIs for mobile and small-group games (MatchMaking, Host-Migration and Re-connection...)
- - Cross-platform connction (Current: Android, iOS, and PC / Future: Console )
+ - High-level APIs for mobile and small-group games (MatchMaking, Host-Migration, To sent Large-packet, PushToTalk, and Re-connection...)
+ - Almost all RPC processes are zero-allocation
+ - Free VoiceChat
+ - Cross-platform connction <br>
+    (Current: Android, iOS, and PC / InTest: Console / Future?: WebGL)
 
 
 ```csharp
@@ -107,11 +110,14 @@ About app credential, you can use Peer2Peer as ClientPolicy. The minimum is as f
 
 
 ## For Debug
-SynicSugar has Debug.Log in some parts for the game development. To use the logs, add SYNICSUGAR_LOG to Scripting Define Symbols in project setting. Logs for errors are displayed by default.
+SynicSugar has Debug.Log in some portions for the game development. To use the logs, add SYNICSUGAR_LOG to Scripting Define Symbols in project setting. Logs for errors are displayed by default.
 
 
 ## License
- License is under the MIT. I will never change it.
+ License is under the MIT.
 
 ## Contribute Guideline
-SynicSugar's concept is an easy online game development for everyone. Therefore, the development is also based on this policy. The target is online game for up to 64 people supported by EOS, but the main is small-party action game. If you want to create MMO, you can use Mirror. The roadmap is to expand the necessary functions for these games and improve performance. If you need any necessary features, please post it to Github Issue, or pull. Great thanks for all contributions!
+
+SynicSugar's concept is an easy online game development for everyone. Therefore, the development is also based on this policy. The target is online game for up to 64 people supported by EOS, but the main is small-party action game. If you want to create MMO, you should use [Mirror](https://github.com/MirrorNetworking/Mirror). 
+
+The roadmap is [here](https://github.com/users/skeyll/projects/5/views/2). For the time being, add basic function for online-game and improve performance. If you need any necessary functions, please post it to Github Issue or give a pull request. Great thanks for all contributions!
