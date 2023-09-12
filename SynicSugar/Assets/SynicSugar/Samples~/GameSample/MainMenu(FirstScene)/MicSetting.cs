@@ -12,10 +12,9 @@ namespace SynicSugar.Samples{
         void Start(){
             inputs = RTCConfig.GetInputDeviceInformation();
             outputs = RTCConfig.GetOutputDeviceInformation();
-            
+
             inputDevices.onValueChanged.AddListener(i => OnInputSelected(i));
             outputDevices.onValueChanged.AddListener(i => OnOutputSelected(i));
-
             RefreshShownValue();
             //To remove for manual
             // RTCConfig.Instance.AddNotifyAudioDevicesChanged(() => RefreshShownValue());

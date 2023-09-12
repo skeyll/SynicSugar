@@ -20,8 +20,6 @@ namespace SynicSugar.P2P {
             }
         }
 #endregion
-        [Obsolete("p2pInfo.Instance.ConnectionNotifier is new one.")]
-        public ConnectionNotifier ConnectionNotifier => p2pInfo.Instance.ConnectionNotifier;
         ///Options 
         [Header("Interval of sending each users[ms]. Recommend: 3ms-")]
         /// <summary>

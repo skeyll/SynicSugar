@@ -9,8 +9,7 @@ namespace SynicSugar.P2P {
         internal UserId ConnectUserId { get; private set; }
 
         /// <summary>
-        /// Invoke when another user disconnects unexpectedly.<br />
-        /// This has a lag of about 5-10 seconds after a user downs in its local.
+        /// Invoke when another user leaves.<br />
         /// </summary>
         public event Action<UserId> OnTargetLeaved;
         /// <summary>
@@ -38,6 +37,7 @@ namespace SynicSugar.P2P {
         public event Action<UserId> OnTargetRestored;
 
         public void Register(Action<UserId> leaved, Action<UserId> disconnected, Action<UserId> connected){
+            OnTargetLeaved += leaved;
             OnTargetDisconnected += disconnected;
             OnTargetConnected += connected;
         }

@@ -111,7 +111,7 @@ namespace  SynicSugar.Samples {
 
             if(!selfTryCatch){ //Recommend
                 bool isSuccess = false;
-
+                
                 if(SceneManager.GetActiveScene().name == "TankMatchMake"){ //To set max members and min members
                     isSuccess = await MatchMakeManager.Instance.SearchAndCreateLobby(matchConditions.GetLobbyCondition(16), minLobbyMember: 2, userAttributes: MatchMakeConfig.GenerateUserAttribute());
                 }else{ //MaxLobbyMember is just 2.
