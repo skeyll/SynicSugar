@@ -2,7 +2,7 @@
 # SynicSugar
 ![https://github.com/skeyll/SynicSugar/blob/main/LICENSE](https://img.shields.io/github/license/skeyll/SynicSugar) ![Unity](https://img.shields.io/badge/Unity-2021.3%2B-blue) [![openupm](https://img.shields.io/npm/v/net.skeyll.synicsugar?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/net.skeyll.synicsugar/) 
 
-SynicSugar is Unity High-Level Network Library with EpicOnlineServices. The concept is the syntax sugar of netcode. Matchmaking, Relay and VC are for free thanks to Epic Game, and have high-level APIs for actual game development. Almost SynicSugar APIs are zero-allocation, so the runtime process is sonic. SynicSugar will be optimized for small-party game not covered by [Mirror](https://github.com/MirrorNetworking/Mirror).
+SynicSugar is Unity High-Level Network Library with EpicOnlineServices. The concept is the syntax sugar of netcode. Matchmaking, Relay and VC are for free thanks to EpicGames, and have high-level APIs for actual game development. Almost SynicSugar APIs are zero-allocation, so the runtime process is sonic. SynicSugar will be optimized for small-party game not covered by [Mirror](https://github.com/MirrorNetworking/Mirror).
 
 For more detail is [https://skeyll.github.io/SynicSugar/](https://skeyll.github.io/SynicSugar/).
 
