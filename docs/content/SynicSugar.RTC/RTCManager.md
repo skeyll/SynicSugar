@@ -8,9 +8,7 @@ weight = 1
 
 
 ### Description
-Manager singleton on session. This script attached to NetworkManger.<br>
-We can manage RTC setting on a session.
-
+Manage around RTC on session. <br>
 This script is Mono's Singleton attached to NetworkManager. To generate NetworkManager, right-click on the Hierarchy and click SynicSugar/NetworkManager
 NetworkManager has DontDestroy, so NetworkManager will not be destroyed by scene transitions. 
 

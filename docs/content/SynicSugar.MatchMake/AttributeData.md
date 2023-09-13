@@ -13,27 +13,27 @@ Max 100 attributes can be set.
 ### Properity
 | API | description |
 |---|---|
-| [Key](../LobbyAttribute/key) | The Key for this attribute |
+| [Key](../AttributeData/key) | The Key for this attribute |
 | BOOLEAN | The value when it was set as bool |
 | INT64 | The value when it was set as INT64 |
 | DOUBLE | The value when it was set as DOUBLE |
 | STRING | The value when it was set as STRING |
 | ValueType | The value type of holding |
-| [ComparisonOperator](../LobbyAttribute/comparisonoperator) | Comparison Operator for this attribute |
+| [ComparisonOperator](../AttributeData/comparisonoperator) | Comparison Operator for this attribute |
 
 
 
 ### Function 
 | API | description |
 |---|---|
-| [SetValue](../LobbyAttribute/setvalue) | Set a value to the attribute |
+| [SetValue](../AttributeData/setvalue) | Set a value to the attribute |
 | GetValueAsString | Get value as string from attribute |
 
 
 ### Static Function 
 | API | description |
 |---|---|
-| [GetValueAsString](../LobbyAttribute/getvalueasstring) | Get specific key value as string from attribute list |
+| [GetValueAsString](../AttributeData/getvalueasstring) | Get specific key value as string from attribute list |
 
 
 ```cs
