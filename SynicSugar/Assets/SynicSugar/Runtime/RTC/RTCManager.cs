@@ -9,8 +9,7 @@ using SynicSugar.MatchMake;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using ResultE = Epic.OnlineServices.Result;
-
-#if !ENABLE_LEGACY_INPUT_MANAGER
+#if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
 #endif
 
@@ -44,10 +43,10 @@ namespace SynicSugar.RTC {
         /// </summary>
         [Header("If true, all audio is transmitted. If false, push to take.")]
         public bool UseOpenVC;
-#if ENABLE_LEGACY_INPUT_MANAGER
-        public KeyCode KeyToPushToTalk = KeyCode.Space;
+#if ENABLE_INPUT_SYSTEM
+        public Key KeyToPushToTalk = Key.Space;
 #else
-        public UnityEngine.InputSystem.Key KeyToPushToTalk = UnityEngine.InputSystem.Key.Space;
+        public KeyCode KeyToPushToTalk = KeyCode.Space;
 #endif
         /// <summary>
         /// When using RTC, call OnComplete of Create and Join.
@@ -389,18 +388,18 @@ namespace SynicSugar.RTC {
         /// <returns></returns>
         async UniTask PushToTalkLoop(CancellationToken token){
             while(!token.IsCancellationRequested && !UseOpenVC){
-#if ENABLE_LEGACY_INPUT_MANAGER
-                await UniTask.WaitUntil(() => Input.GetKeyDown(KeyToPushToTalk), cancellationToken: token);
-                if(UseOpenVC){ break; }
-                ToggleLocalUserSending(true);
-                await UniTask.WaitUntil(() => Input.GetKeyUp(KeyToPushToTalk), cancellationToken: token);
-                if(UseOpenVC){ break; }
-                ToggleLocalUserSending(false);
-#else
+#if ENABLE_INPUT_SYSTEM
                 await UniTask.WaitUntil(() => Keyboard.current[KeyToPushToTalk].wasPressedThisFrame, cancellationToken: token);
                 if(UseOpenVC){ break; }
                 ToggleLocalUserSending(true);
                 await UniTask.WaitUntil(() => Keyboard.current[KeyToPushToTalk].wasReleasedThisFrame, cancellationToken: token);
+                if(UseOpenVC){ break; }
+                ToggleLocalUserSending(false);
+#else
+                await UniTask.WaitUntil(() => Input.GetKeyDown(KeyToPushToTalk), cancellationToken: token);
+                if(UseOpenVC){ break; }
+                ToggleLocalUserSending(true);
+                await UniTask.WaitUntil(() => Input.GetKeyUp(KeyToPushToTalk), cancellationToken: token);
                 if(UseOpenVC){ break; }
                 ToggleLocalUserSending(false);
 #endif
