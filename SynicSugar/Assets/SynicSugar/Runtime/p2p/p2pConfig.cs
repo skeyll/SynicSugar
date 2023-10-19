@@ -21,13 +21,12 @@ namespace SynicSugar.P2P {
         }
 #endregion
         ///Options 
-        [Header("Interval of sending each users[ms]. Recommend: 3ms-")]
+        [Range(1, 10), Header("The number of users that this local user sends packet in a frame. Recommend: 1-5")]
         /// <summary>
-        /// Interval ms on sending to each user in Rpc. <br />>
-        /// If interval is too short and the sending buffer becomes full, the next packets will be discarded.<br />
-        /// Recommend: 3ms-
+        /// No use anymore
         /// </summary>
-        public int interval_sendToAll = 3;
+        public int SendToAllBatchSize = 3;
+
         [Header("Interval until sending next new value[ms]. Recommend: 1000-3000ms.")]
         /// <summary>
         /// Interval ms that a SyncVar dosen't been send even if the value changes after send that SyncVar.<br />
