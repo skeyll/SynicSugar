@@ -21,11 +21,18 @@ namespace SynicSugar.P2P {
         }
 #endregion
         ///Options 
-        [Range(1, 10), Header("The number of users that this local user sends packet in a frame. Recommend: 1-5")]
+        [Range(1, 10), Header("The number of target users to be sent packet of RPC in a frame. Recommend: 1-5")]
         /// <summary>
-        /// No use anymore
+        /// The number of target users to be sent packet of RPC in a frame. Wait for a frame after a set. <br />
+        /// The sending buffer is probably around 64 KB, so it should not exceed this. If we set 0 from the script, it will cause crash.
         /// </summary>
         public int SendToAllBatchSize = 3;
+        [Range(1, 10), Header("The number of packets to be sent of a large packet in a frame. Recommend: 1-5")]
+        /// <summary>
+        /// The number of packets to be sent of a large packet in a frame. Wait for a frame after a set. <br />
+        /// The sending buffer is probably around 64 KB, so it should not exceed this. If we set 0 from the script, it will cause crash.
+        /// </summary>
+        public int SendLargePacketBatchSize = 3;
 
         [Header("Interval until sending next new value[ms]. Recommend: 1000-3000ms.")]
         /// <summary>
@@ -40,8 +47,11 @@ namespace SynicSugar.P2P {
         public PacketReliability packetReliability = PacketReliability.ReliableOrdered;
         
         public enum GetPacketFrequency {
-            PerSecond3xFPS, PerSecondFPS, PerSecond100, PerSecond50, PerSecond25
+            PerSecondBurstFPS, PerSecondFPS, PerSecond100, PerSecond50, PerSecond25
         }
+        [Range(2, 10), Header("The number of times to be get packet in a frame. Recommend: 2-5")]
+        public int BurstReceiveBatchSize = 5;
+
         [Header("PacketReceiver's Frequency/per seconds *Never more than game FPS.")]
         /// <summary>
         /// Frequency of calling PacketReceiver.<br />

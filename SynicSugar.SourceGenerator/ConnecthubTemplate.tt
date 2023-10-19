@@ -47,8 +47,8 @@ namespace SynicSugar.P2P {
                 p2pConnectorForOtherAssembly.Instance.AutoRefreshPings(p2pConnectorForOtherAssembly.Instance.p2pToken.Token).Forget();
             }
 
-            if(p2pConfig.Instance.getPacketFrequency == p2pConfig.GetPacketFrequency.PerSecond3xFPS){
-                ReciveThreePackets().Forget();
+            if(p2pConfig.Instance.getPacketFrequency == p2pConfig.GetPacketFrequency.PerSecondBurstFPS){
+                ReciveMultiplePackets().Forget();
             }else{
                 RecivePacket().Forget();
             }
@@ -129,28 +129,24 @@ namespace SynicSugar.P2P {
             }
         }
         
-        async UniTask ReciveThreePackets(){
+        async UniTask ReciveMultiplePackets(){
+            int count = p2pConfig.Instance.BurstReceiveBatchSize;
+
             while(!p2pConnectorForOtherAssembly.Instance.p2pToken.IsCancellationRequested){
-                //1st
                 bool recivePacket = p2pConnectorForOtherAssembly.Instance.GetPacketFromBuffer(ref ch_r, ref id_r, ref payload_r);
+                count--;
+
                 if(recivePacket){
                     ConnectHub.Instance.ConvertFromPacket(ref ch_r, ref id_r, ref payload_r);
-                    //2nd
-                    recivePacket = p2pConnectorForOtherAssembly.Instance.GetPacketFromBuffer(ref ch_r, ref id_r, ref payload_r);
-                    if(recivePacket){
-                        ConnectHub.Instance.ConvertFromPacket(ref ch_r, ref id_r, ref payload_r);
-                        //3rd
-                        recivePacket = p2pConnectorForOtherAssembly.Instance.GetPacketFromBuffer(ref ch_r, ref id_r, ref payload_r);
-                        if(recivePacket){
-                            ConnectHub.Instance.ConvertFromPacket(ref ch_r, ref id_r, ref payload_r);
-                        }
-                    }
                 }
 
-                await UniTask.Yield(PlayerLoopTiming.Update);
-
-                if(p2pConnectorForOtherAssembly.Instance == null || p2pConnectorForOtherAssembly.Instance.p2pToken.IsCancellationRequested){
-                    break;
+                if(count == 0 || !recivePacket){
+                    await UniTask.Yield(PlayerLoopTiming.Update);
+                    
+                    if(p2pConnectorForOtherAssembly.Instance == null){
+                        break;
+                    }
+                    count = p2pConfig.Instance.BurstReceiveBatchSize;
                 }
             }
         }
