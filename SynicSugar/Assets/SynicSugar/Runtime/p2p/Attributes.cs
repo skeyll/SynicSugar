@@ -75,14 +75,15 @@ namespace SynicSugar.P2P {
     public sealed class RpcAttribute : Attribute {
         public bool recordLastPacket;
         /// <summary>
-        /// For NetworkPlayer and NetoworkCommons.
+        /// For NetworkPlayer and NetoworkCommons. Just Send packet. 
         /// </summary>
         public RpcAttribute(){}
         /// <summary>
-        /// If true, hold the last RPC data for the manual resend.
+        /// Set options for sending packets to resend and the way to send.
         /// </summary>
-        /// <param name="shouldRecordLastPacketInfo"></param>
-        public RpcAttribute(bool shouldRecordLastPacketInfo){
+        /// <param name="shouldRecordLastPacketInfo">If true, the packet info is hold for manual resend.</param>
+        /// <param name="isLargePacket">If true, this process is sent as LargePacket.</param>
+        public RpcAttribute(bool shouldRecordLastPacketInfo, bool isLargePacket){
             recordLastPacket = shouldRecordLastPacketInfo;
         }
     }
@@ -94,11 +95,13 @@ namespace SynicSugar.P2P {
         /// For NetworkPlayer.
         /// </summary>
         public TargetRpcAttribute(){}
+        
         /// <summary>
-        /// If true, hold the last RPC data for the manual resend.
+        /// Set options for sending packets to resend and the way to send.
         /// </summary>
-        /// <param name="shouldRecordLastPacketInfo"></param>
-        public TargetRpcAttribute(bool shouldRecordLastPacketInfo){
+        /// <param name="shouldRecordLastPacketInfo">If true, the packet info is hold for manual resend.</param>
+        /// <param name="isLargePacket">If true, this process is sent as LargePacket.</param>
+        public TargetRpcAttribute(bool shouldRecordLastPacketInfo, bool isLargePacket){
             recordLastPacket = shouldRecordLastPacketInfo;
         }
     }
