@@ -17,7 +17,7 @@ namespace SynicSugar.P2P {
         public static async UniTaskVoid SendPacketToAll(byte ch, byte[] value){
             ArraySegment<byte> data = value is not null ? value : Array.Empty<byte>();
             ResultE result;
-            int count = 0;
+            int count = p2pConfig.Instance.RPCBatchSize;
             foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
                 SendPacketOptions options = new SendPacketOptions(){
                     LocalUserId = EOSManager.Instance.GetProductUserId(),
@@ -35,7 +35,8 @@ namespace SynicSugar.P2P {
                     continue;
                 }
 
-                if(count % p2pConfig.Instance.SendToAllBatchSize == 0){
+                count--;
+                if(count <= 0){
                     await UniTask.Yield();
                     if(p2pConnectorForOtherAssembly.Instance.p2pToken != null && p2pConnectorForOtherAssembly.Instance.p2pToken.IsCancellationRequested){
                 #if SYNICSUGAR_LOG
@@ -43,8 +44,8 @@ namespace SynicSugar.P2P {
                 #endif
                         break;
                     }
+                    count = p2pConfig.Instance.RPCBatchSize;
                 }
-                count++;
             }
         }
         /// <summary>
@@ -69,7 +70,7 @@ namespace SynicSugar.P2P {
                 // Array.Copy(value, p2pInfo.Instance.lastRpcInfo.payload, value.Length);
             }
             ResultE result;
-            int count = 0;
+            int count = p2pConfig.Instance.RPCBatchSize;
             foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
                 SendPacketOptions options = new SendPacketOptions(){
                     LocalUserId = EOSManager.Instance.GetProductUserId(),
@@ -86,7 +87,8 @@ namespace SynicSugar.P2P {
                     Debug.LogErrorFormat("Send Packet: can't send packet, code: {0}", result);
                     continue;
                 }
-                if(count % p2pConfig.Instance.SendToAllBatchSize == 0){
+                count--;
+                if(count <= 0){
                     await UniTask.Yield();
                     if(p2pConnectorForOtherAssembly.Instance.p2pToken != null && p2pConnectorForOtherAssembly.Instance.p2pToken.IsCancellationRequested){
                 #if SYNICSUGAR_LOG
@@ -94,8 +96,8 @@ namespace SynicSugar.P2P {
                 #endif
                         break;
                     }
+                    count = p2pConfig.Instance.RPCBatchSize;
                 }
-                count++;
             }
         }
         /// <summary>
@@ -108,7 +110,7 @@ namespace SynicSugar.P2P {
         /// <returns></returns>
         public static async UniTaskVoid SendPacketToAll(byte ch, ArraySegment<byte> value){
             ResultE result;
-            int count = 0;
+            int count = p2pConfig.Instance.RPCBatchSize;
             foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
                 SendPacketOptions options = new SendPacketOptions(){
                     LocalUserId = EOSManager.Instance.GetProductUserId(),
@@ -125,7 +127,8 @@ namespace SynicSugar.P2P {
                     Debug.LogErrorFormat("Send Packet: can't send packet, code: {0}", result);
                     continue;
                 }
-                if(count % p2pConfig.Instance.SendToAllBatchSize == 0){
+                count--;
+                if(count <= 0){
                     await UniTask.Yield();
                     if(p2pConnectorForOtherAssembly.Instance.p2pToken != null && p2pConnectorForOtherAssembly.Instance.p2pToken.IsCancellationRequested){
                 #if SYNICSUGAR_LOG
@@ -133,8 +136,8 @@ namespace SynicSugar.P2P {
                 #endif
                         break;
                     }
+                    count = p2pConfig.Instance.RPCBatchSize;
                 }
-                count++;
             }
         }
         /// <summary>
@@ -361,7 +364,7 @@ namespace SynicSugar.P2P {
                 length = startIndex + 1160 < value.Length ? 1160 : value.Length - startIndex;
                 SendPacket();
                 //For sending buffer and main thread fps.
-                if(header[0] % 5 == 0){
+                if(header[0] % p2pConfig.Instance.LargePacketBatchSize == 0){
                     await UniTask.Yield();
                 }
 
