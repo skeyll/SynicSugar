@@ -129,12 +129,55 @@ namespace SynicSugar.P2P {
         }
         #nullable disable
     }
-    public class LargePacketInfomation {
+    /// <summary>
+    /// To reconstruction large packet. 
+    /// </summary>
+    public class LargePacketsInfomation {
+        /// <summary>
+        /// How many packets are sent in a packet?
+        /// </summary>
         public byte chunk;
-        public byte phase;
-        public bool syncSinglePhase;
+        /// <summary>
+        /// Current packet size received
+        /// </summary>
         public int currentSize;
     }
+    /// <summary>
+    /// Just for Synic.
+    /// </summary>
+    public class SynicPacketInfomation {
+        public LargePacketsInfomation basis = new();
+        /// <summary>
+        /// Phase specified in SyncSynic
+        /// </summary>
+        public byte phase;
+        /// <summary>
+        /// For just a one phase?
+        /// </summary>
+        public bool syncSinglePhase;
+    }
+
+#region OBSOLETE
+    public class LargePacketInfomation {
+        /// <summary>
+        /// How many packets are sent in a packet?
+        /// </summary>
+        public byte chunk;
+        /// <summary>
+        /// Phase specified in SyncSynic
+        /// </summary>
+        public byte phase;
+        /// <summary>
+        /// For just a one phase?
+        /// </summary>
+        public bool syncSinglePhase;
+        /// <summary>
+        /// Current packet size received
+        /// </summary>
+        public int currentSize;
+    }
+#endregion
+#region For p2pInfo
     public class PingInformation {
         internal int Ping;
         internal DateTime LastUpdatedLocalUTC;
@@ -149,6 +192,7 @@ namespace SynicSugar.P2P {
         internal byte ch;
         internal UserId target;
     }
+#endregion
     [MemoryPackable]
     // This way is bad performance. Please let me know if you have a good idea to serialize and send data.
     public partial class SynicContainer {

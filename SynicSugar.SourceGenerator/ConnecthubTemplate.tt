@@ -160,8 +160,8 @@ namespace SynicSugar.P2P {
             <#= SyncList #>
         }
         //For Synic
-        Dictionary<string, byte[]> buffer = new Dictionary<string, byte[]>();
-        Dictionary<string, LargePacketInfomation> packetInfo = new Dictionary<string, LargePacketInfomation>();
+        Dictionary<string, byte[]> synicBuffer = new Dictionary<string, byte[]>();
+        Dictionary<string, SynicPacketInfomation> synicPacketInfo = new Dictionary<string, SynicPacketInfomation>();
 
         //Ref(for class)<#= Reference #>
 
@@ -207,11 +207,11 @@ namespace SynicSugar.P2P {
                     }
                     SyncedSynic(id);
 
-                    p2pConnectorForOtherAssembly.Instance.UpdateSyncedState(id, packetInfo[id].phase);
+                    p2pConnectorForOtherAssembly.Instance.UpdateSyncedState(id, synicPacketInfo[id].phase);
 
                     //Init
-                    buffer.Remove(id);
-                    packetInfo.Remove(id);
+                    synicBuffer.Remove(id);
+                    synicPacketInfo.Remove(id);
 
                     //Change AcceptHostsSynic flag.
                     if(p2pInfo.Instance.IsLoaclUser(id)){
@@ -292,12 +292,12 @@ namespace SynicSugar.P2P {
                 }
             }
 
-            if(!buffer.ContainsKey(id)){
-                packetInfo.Add(id, new LargePacketInfomation(){  chunk = payload[1], 
+            if(!synicBuffer.ContainsKey(id)){
+                synicPacketInfo.Add(id, new SynicPacketInfomation(){  basis = new (){ chunk = payload[1]}, 
                                                                             phase = payload[2], 
                                                                             syncSinglePhase = payload[3] == 1 ? true : false });
                 //Prep enough byte[]
-                buffer.Add(id, new byte[payload[1] * 1100]);
+                synicBuffer.Add(id, new byte[payload[1] * 1100]);
             }
             int packetIndex = payload[0];
             int offset = packetIndex * 1100;
@@ -307,11 +307,11 @@ namespace SynicSugar.P2P {
     #endif
             //Remove header
             Span<byte> packetPayload = payload.Slice(5);
-            packetInfo[id].currentSize += packetPayload.Length;
+            synicPacketInfo[id].basis.currentSize += packetPayload.Length;
             //Copy Byte from what come in
-            Buffer.BlockCopy(packetPayload.ToArray(), 0, buffer[id], offset, packetPayload.Length);
+            Buffer.BlockCopy(packetPayload.ToArray(), 0, synicBuffer[id], offset, packetPayload.Length);
             //Comming all?
-            return packetInfo[id].currentSize + 1100 > buffer[id].Length ? true : false;
+            return synicPacketInfo[id].basis.currentSize + 1100 > synicBuffer[id].Length ? true : false;
         }
 
         /// <summary>
@@ -320,17 +320,17 @@ namespace SynicSugar.P2P {
         void SyncedSynic(string overwriterUserId){
             //Deserialize packet
             using var decompressor = new BrotliDecompressor();
-            Span<byte> transmittedPaylaod = new Span<byte>(buffer[overwriterUserId]);
+            Span<byte> transmittedPaylaod = new Span<byte>(synicBuffer[overwriterUserId]);
 
-            var decompressedBuffer = decompressor.Decompress(transmittedPaylaod.Slice(0, packetInfo[overwriterUserId].currentSize));
+            var decompressedBuffer = decompressor.Decompress(transmittedPaylaod.Slice(0, synicPacketInfo[overwriterUserId].basis.currentSize));
             SynicContainer container = MemoryPackSerializer.Deserialize<SynicContainer>(decompressedBuffer);
 #if SYNICSUGAR_LOG
             Debug.Log($"SyncedSynic: Deserialize is Success for {overwriterUserId}");
     #endif
 
             //Packet data
-            int phase = packetInfo[overwriterUserId].phase;
-            bool syncSinglePhase = packetInfo[overwriterUserId].syncSinglePhase;
+            int phase = synicPacketInfo[overwriterUserId].phase;
+            bool syncSinglePhase = synicPacketInfo[overwriterUserId].syncSinglePhase;
 
             switch(phase){<#= SyncedInvoker #>
                 default:

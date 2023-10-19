@@ -206,6 +206,7 @@ namespace SynicSugar.P2P {
                 return;
             }
         }
+        //のちにSendSynicPacketsに名前を変える
         /// <summary>
         /// Send a large packet to a specific peer. To send returner. <br />
         /// Add header to sent divided packets.
@@ -215,7 +216,8 @@ namespace SynicSugar.P2P {
         /// <param name="value">The payload serialized with MemoryPack and BrotliCompressor</param>
         /// <param name="targetId"></param>
         /// <param name="syncedPhase">Sync from 0 to hierarchy</param>
-        /// <param name="syncAllHierarchy">If false, synchronize an only specific hierarchy</param>
+        /// <param name="syncSpecificPhase">If false, synchronize an only specific hierarchy</param>
+        /// <param name="isSelfData">Is it own data?</param>
         public static void SendLargePacket(byte ch, byte[] value, UserId targetId, byte syncedPhase = 9, bool syncSpecificPhase = false, bool isSelfData = true){
             int length = 1100;
             byte[] header = GenerateHeader(value.Length, syncedPhase, syncSpecificPhase, isSelfData);
@@ -271,5 +273,60 @@ namespace SynicSugar.P2P {
                 return result;
             }
         }
+        // public static void SendLargePacket(byte ch, byte[] value, UserId targetId, byte syncedPhase = 9, bool syncSpecificPhase = false, bool isSelfData = true){
+        //     int length = 1100;
+        //     byte[] header = GenerateHeader(value.Length, syncedPhase, syncSpecificPhase, isSelfData);
+
+        // #if SYNICSUGAR_LOG
+        //     Debug.Log($"SendLargePacket: PacketInfo:: size {value.Length} / chunk {header[1]} / hierarchy {header[2]} / syncSpecificPhase {header[3]}");
+        // #endif
+
+        //     //Max payload is 1170 but we need some header.
+        //     for(int startIndex = 0; startIndex < value.Length; startIndex += 1100){
+        //         length = startIndex + 1100 < value.Length ? 1100 : value.Length - startIndex;
+
+        //         Span<byte> _payload = new Span<byte>(value, startIndex, length); 
+        //         //Add header
+        //         Span<byte> payload = new byte[header.Length + length];
+        //         header.CopyTo(payload);
+        //         _payload.CopyTo(payload.Slice(5));
+
+        //         SendPacketOptions options = new SendPacketOptions(){
+        //             LocalUserId = EOSManager.Instance.GetProductUserId(),
+        //             RemoteUserId = targetId.AsEpic,
+        //             SocketId = p2pConnectorForOtherAssembly.Instance.SocketId,
+        //             Channel = ch,
+        //             AllowDelayedDelivery = true,
+        //             Reliability = p2pConfig.Instance.packetReliability,
+        //             Data = new ArraySegment<byte>(payload.ToArray())
+        //         };
+
+        //         ResultE result = p2pConnectorForOtherAssembly.Instance.P2PHandle.SendPacket(ref options);
+
+        //         if(result != ResultE.Success){
+        //             Debug.LogErrorFormat("Send Large Packet: can't send packet, code: {0}", result);
+        //             return;
+        //         }
+        //         //add index
+        //         header[0]++;
+        //     }
+        // #if SYNICSUGAR_LOG
+        //     Debug.Log($"Send Large Packet: Success to {targetId.ToString()}!");
+        // #endif
+        //     /// <summary>
+        //     /// index, chunk, sycned phase, is Specific sync, self or not
+        //     /// </summary>
+        //     byte[] GenerateHeader(int valueLength, byte phase, bool isOnly, bool isSelfData){
+        //         byte[] result = new byte[5];
+
+        //         result[0] = 0; 
+        //         result[1] = (byte)Math.Ceiling(valueLength / 1100f);;
+        //         result[2] = phase;
+        //         result[3] = isOnly ? (byte)1 : (byte)0;
+        //         result[4] = isSelfData ? (byte)1 : (byte)0;
+
+        //         return result;
+        //     }
+        // }
     }
 }
