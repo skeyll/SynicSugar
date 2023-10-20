@@ -182,5 +182,7 @@ namespace SynicSugar.P2P {
         /// the last UserId sent with TargetRPC that record data.
         /// </summary>
         public UserId LastTargetRPCUserId => lastTargetRPCInfo.target;
+        public bool LastRPCIsLargePacket => lastRpcInfo.isLargePacket;
+        public bool LastTargetRPCIsLargePacket => lastTargetRPCInfo.isLargePacket;
     }
 }

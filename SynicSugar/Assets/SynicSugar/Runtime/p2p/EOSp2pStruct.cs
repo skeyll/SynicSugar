@@ -186,11 +186,13 @@ namespace SynicSugar.P2P {
     public class RPCInformation {
         internal byte[] payload;
         internal byte ch;
+        internal bool isLargePacket;
     }
     public class TargetRPCInformation {
         internal byte[] payload;
         internal byte ch;
         internal UserId target;
+        internal bool isLargePacket;
     }
 #endregion
     [MemoryPackable]

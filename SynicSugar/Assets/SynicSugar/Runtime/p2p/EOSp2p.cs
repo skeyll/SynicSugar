@@ -7,6 +7,7 @@ using ResultE = Epic.OnlineServices.Result;
 
 namespace SynicSugar.P2P {
     public static class EOSp2p {
+    #region Basic
         /// <summary>
         /// Send a packet to all remote peers. <br />
         /// Normally, <c>generated functions (have [RPC]) call this</c>, but we can also use this.
@@ -62,6 +63,7 @@ namespace SynicSugar.P2P {
             if(recordPacketInfo){
                 p2pInfo.Instance.lastRpcInfo.ch = ch;
                 p2pInfo.Instance.lastRpcInfo.payload = value;
+                p2pInfo.Instance.lastRpcInfo.isLargePacket = true;
                 // Current byte[] value is serialize just before call RPC, so we don't need to create new byte[] for this process.
                 // No one can't use this "value" from elsewhere.
                 // For readability and extensibility, we should create new array.
@@ -176,6 +178,7 @@ namespace SynicSugar.P2P {
                 p2pInfo.Instance.lastTargetRPCInfo.ch = ch;
                 p2pInfo.Instance.lastTargetRPCInfo.payload = value;
                 p2pInfo.Instance.lastTargetRPCInfo.target = targetId;
+                p2pInfo.Instance.lastTargetRPCInfo.isLargePacket = false;
             }
             SendPacketOptions options = new SendPacketOptions(){
                 LocalUserId = EOSManager.Instance.GetProductUserId(),
@@ -219,6 +222,195 @@ namespace SynicSugar.P2P {
                 return;
             }
         }
+    #endregion
+    #region LargePacket
+        /// <summary>
+        /// Send TargetRPC as LargePacket. <br />
+        /// Max packet size is 296960byte.(1160byte * 256)
+        /// </summary>
+        /// <param name="ch"></param>
+        /// <param name="value"></param>
+        /// <param name="targetId"></param>
+        public async static UniTask SendLargePackets(byte ch, byte[] value, UserId targetId){
+            int length = 1160;
+            byte[] header = GenerateHeader(value.Length);
+
+        #if SYNICSUGAR_LOG
+            Debug.Log($"SendLargePackets: PacketInfo:: size {value.Length} / chunk {header[1]}");
+        #endif
+
+            //Max payload is 1170 but we need some header.
+            for(int startIndex = 0; startIndex < value.Length; startIndex += 1160){
+                length = startIndex + 1160 < value.Length ? 1160 : value.Length - startIndex;
+                SendPacket();
+                //For sending buffer and main thread fps.
+                if(header[0] % p2pConfig.Instance.LargePacketBatchSize == 0){
+                    await UniTask.Yield();
+                }
+
+                //To use Span. However, this process generates Garbage by each loop.
+                void SendPacket(){
+                    Span<byte> _payload = new Span<byte>(value, startIndex, length); 
+                    //Add header
+                    Span<byte> payload = new byte[header.Length + length];
+                    header.CopyTo(payload);
+                    _payload.CopyTo(payload.Slice(2));
+
+                    SendPacketOptions options = new SendPacketOptions(){
+                        LocalUserId = EOSManager.Instance.GetProductUserId(),
+                        RemoteUserId = targetId.AsEpic,
+                        SocketId = p2pConnectorForOtherAssembly.Instance.SocketId,
+                        Channel = ch,
+                        AllowDelayedDelivery = true,
+                        Reliability = p2pConfig.Instance.packetReliability,
+                        Data = new ArraySegment<byte>(payload.ToArray())
+                    };
+
+                    ResultE result = p2pConnectorForOtherAssembly.Instance.P2PHandle.SendPacket(ref options);
+
+                    if(result != ResultE.Success){
+                        Debug.LogErrorFormat("Send Large Packet: can't send packet, code: {0}", result);
+                        return;
+                    }
+                    //add index
+                    header[0]++;
+                }
+            }
+        #if SYNICSUGAR_LOG
+            Debug.Log($"SendLargePackets: Finish to Send to {targetId}!");
+        #endif
+            /// <summary>
+            /// index, chunk, sycned phase, is Specific sync, self or not
+            /// </summary>
+            byte[] GenerateHeader(int valueLength){
+                byte[] result = new byte[2];
+
+                result[0] = 0; 
+                result[1] = (byte)Math.Ceiling(valueLength / 1100f);
+
+                return result;
+            }
+        }
+        
+        /// <summary>
+        /// Send TargetRPC as LargePacket. <br />
+        /// Max packet size is 296960byte.(1160byte * 256)
+        /// </summary>
+        /// <param name="ch"></param>
+        /// <param name="value"></param>
+        /// <param name="targetId"></param>
+        public async static UniTask SendLargePackets(byte ch, byte[] value, UserId targetId, bool recordPacketInfo){
+            if(recordPacketInfo){
+                p2pInfo.Instance.lastTargetRPCInfo.ch = ch;
+                p2pInfo.Instance.lastTargetRPCInfo.payload = value;
+                p2pInfo.Instance.lastTargetRPCInfo.target = targetId;
+                p2pInfo.Instance.lastTargetRPCInfo.isLargePacket = true;
+            }
+
+            int length = 1160;
+            byte[] header = GenerateHeader(value.Length);
+
+        #if SYNICSUGAR_LOG
+            Debug.Log($"SendLargePackets: PacketInfo:: size {value.Length} / chunk {header[1]}");
+        #endif
+
+            //Max payload is 1170 but we need some header.
+            for(int startIndex = 0; startIndex < value.Length; startIndex += 1160){
+                length = startIndex + 1160 < value.Length ? 1160 : value.Length - startIndex;
+                SendPacket();
+                //For sending buffer and main thread fps.
+                if(header[0] % p2pConfig.Instance.LargePacketBatchSize == 0){
+                    await UniTask.Yield();
+                }
+
+                //To use Span. However, this process generates Garbage by each loop.
+                void SendPacket(){
+                    Span<byte> _payload = new Span<byte>(value, startIndex, length); 
+                    //Add header
+                    Span<byte> payload = new byte[header.Length + length];
+                    header.CopyTo(payload);
+                    _payload.CopyTo(payload.Slice(2));
+
+                    SendPacketOptions options = new SendPacketOptions(){
+                        LocalUserId = EOSManager.Instance.GetProductUserId(),
+                        RemoteUserId = targetId.AsEpic,
+                        SocketId = p2pConnectorForOtherAssembly.Instance.SocketId,
+                        Channel = ch,
+                        AllowDelayedDelivery = true,
+                        Reliability = p2pConfig.Instance.packetReliability,
+                        Data = new ArraySegment<byte>(payload.ToArray())
+                    };
+
+                    ResultE result = p2pConnectorForOtherAssembly.Instance.P2PHandle.SendPacket(ref options);
+
+                    if(result != ResultE.Success){
+                        Debug.LogErrorFormat("Send Large Packet: can't send packet, code: {0}", result);
+                        return;
+                    }
+                    //add index
+                    header[0]++;
+                }
+            }
+        #if SYNICSUGAR_LOG
+            Debug.Log($"SendLargePackets: Finish to Send to {targetId}!");
+        #endif
+            /// <summary>
+            /// index, chunk, sycned phase, is Specific sync, self or not
+            /// </summary>
+            byte[] GenerateHeader(int valueLength){
+                byte[] result = new byte[2];
+
+                result[0] = 0; 
+                result[1] = (byte)Math.Ceiling(valueLength / 1100f);
+
+                return result;
+            }
+        }
+        /// <summary>
+        /// Send RPC as LargePacket. <br />
+        /// Max packet size is 296960byte.(1160byte * 256)
+        /// </summary>
+        /// <param name="ch"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public async static UniTask SendLargePacketsToAll(byte ch, byte[] value){
+            foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
+                await SendLargePackets(ch, value, id);
+            }
+        #if SYNICSUGAR_LOG
+            Debug.Log($"Finish SendLargePacketsToAll for {ch}");
+        #endif
+        }
+        
+        /// <summary>
+        /// Send RPC as LargePacket. <br />
+        /// Max packet size is 296960byte.(1160byte * 256)
+        /// </summary>
+        /// <param name="ch"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public async static UniTask SendLargePacketsToAll(byte ch, byte[] value, bool recordPacketInfo){
+            if(recordPacketInfo){
+                p2pInfo.Instance.lastRpcInfo.ch = ch;
+                p2pInfo.Instance.lastRpcInfo.payload = value;
+                p2pInfo.Instance.lastRpcInfo.isLargePacket = true;
+                // Current byte[] value is serialize just before call RPC, so we don't need to create new byte[] for this process.
+                // No one can't use this "value" from elsewhere.
+                // For readability and extensibility, we should create new array.
+                // Now, we hold reference for performance.
+                // ... = new byte[value.Length];
+                // Array.Copy(value, p2pInfo.Instance.lastRpcInfo.payload, value.Length);
+            }
+            foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
+                await SendLargePackets(ch, value, id);
+            }
+        #if SYNICSUGAR_LOG
+            Debug.Log($"Finish SendLargePacketsToAll for {ch}");
+        #endif
+        }
+    #endregion
+
+    #region For Synic
         /// <summary>
         /// Send a synic packet to a specific peer. Main uses is to send hame data to returner. <br />
         /// Add header to sent divided packets.
@@ -268,7 +460,7 @@ namespace SynicSugar.P2P {
                 header[0]++;
             }
         #if SYNICSUGAR_LOG
-            Debug.Log($"Send Large Packet: Success to {targetId.ToString()}!");
+            Debug.Log($"Send Large Packet: Success to {targetId}!");
         #endif
             /// <summary>
             /// index, chunk, sycned phase, is Specific sync, self or not
@@ -285,6 +477,8 @@ namespace SynicSugar.P2P {
                 return result;
             }
         }
+    #endregion
+
     #region OBSOLETE
         public static void SendLargePacket(byte ch, byte[] value, UserId targetId, byte syncedPhase = 9, bool syncSpecificPhase = false, bool isSelfData = true){
             int length = 1100;
@@ -342,87 +536,5 @@ namespace SynicSugar.P2P {
             }
         }
     #endregion
-
-
-        /// <summary>
-        /// Send TargetRPC as LargePacket. <br />
-        /// Max packet size is 296960byte.(1160byte * 256)
-        /// </summary>
-        /// <param name="ch"></param>
-        /// <param name="value"></param>
-        /// <param name="targetId"></param>
-        public async static UniTask SendLargePackets(byte ch, byte[] value, UserId targetId){
-            int length = 1160;
-            byte[] header = GenerateHeader(value.Length);
-
-        #if SYNICSUGAR_LOG
-            Debug.Log($"SendLargePackets: PacketInfo:: size {value.Length} / chunk {header[1]}");
-        #endif
-
-            //Max payload is 1170 but we need some header.
-            for(int startIndex = 0; startIndex < value.Length; startIndex += 1160){
-                length = startIndex + 1160 < value.Length ? 1160 : value.Length - startIndex;
-                SendPacket();
-                //For sending buffer and main thread fps.
-                if(header[0] % p2pConfig.Instance.LargePacketBatchSize == 0){
-                    await UniTask.Yield();
-                }
-
-                //To use Span. However, this process generates Garbage by each loop.
-                void SendPacket(){
-                    Span<byte> _payload = new Span<byte>(value, startIndex, length); 
-                    //Add header
-                    Span<byte> payload = new byte[header.Length + length];
-                    header.CopyTo(payload);
-                    _payload.CopyTo(payload.Slice(2));
-
-                    SendPacketOptions options = new SendPacketOptions(){
-                        LocalUserId = EOSManager.Instance.GetProductUserId(),
-                        RemoteUserId = targetId.AsEpic,
-                        SocketId = p2pConnectorForOtherAssembly.Instance.SocketId,
-                        Channel = ch,
-                        AllowDelayedDelivery = true,
-                        Reliability = p2pConfig.Instance.packetReliability,
-                        Data = new ArraySegment<byte>(payload.ToArray())
-                    };
-
-                    ResultE result = p2pConnectorForOtherAssembly.Instance.P2PHandle.SendPacket(ref options);
-
-                    if(result != ResultE.Success){
-                        Debug.LogErrorFormat("Send Large Packet: can't send packet, code: {0}", result);
-                        return;
-                    }
-                    //add index
-                    header[0]++;
-                }
-            }
-        #if SYNICSUGAR_LOG
-            Debug.Log($"SendLargePackets: Finish to Send to {targetId.ToString()}!");
-        #endif
-            /// <summary>
-            /// index, chunk, sycned phase, is Specific sync, self or not
-            /// </summary>
-            byte[] GenerateHeader(int valueLength){
-                byte[] result = new byte[2];
-
-                result[0] = 0; 
-                result[1] = (byte)Math.Ceiling(valueLength / 1100f);
-
-                return result;
-            }
-        }
-        /// <summary>
-        /// Send RPC as LargePacket. <br />
-        /// Max packet size is 296960byte.(1160byte * 256)
-        /// </summary>
-        /// <param name="ch"></param>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        public async static UniTask SendLargePacketsToAll(byte ch, byte[] value){
-            foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
-                await SendLargePackets(ch, value, id);
-            }
-            Debug.Log("Finish SendLargePacketsToAll");
-        }
     }
 }

@@ -77,8 +77,8 @@ namespace SynicSugar.Generator {
                         //Get attribute arg
                         var attributeArg = methodAttribute.FirstOrDefault(a => a.Name.ToString() is RPC or TARGETRPC);
                         if (attributeArg is not null && (attributeArg.ArgumentList?.Arguments.Count ?? 0) > 0){
-                            //User
-                            contentsInfo[ci].boolAttributeArg = (bool)(attributeArg.ArgumentList.Arguments[0].Expression as LiteralExpressionSyntax).Token.Value;
+                            contentsInfo[ci].isLargePacket = (bool)(attributeArg.ArgumentList.Arguments[0].Expression as LiteralExpressionSyntax).Token.Value;
+                            contentsInfo[ci].isRecord = (bool)(attributeArg.ArgumentList.Arguments[1].Expression as LiteralExpressionSyntax).Token.Value;
                         }
                         //Get method info
                         if (hasRpc){
@@ -116,17 +116,17 @@ namespace SynicSugar.Generator {
                             //Set attribute data
                             var argsCount = syncvarSyntax.ArgumentList?.Arguments.Count ?? 0;
                             if (argsCount == 0){
-                            }
-                            else if(argsCount == 1){
+                                //All elements are false
+                            }else if(argsCount == 1){
                                 var args = (syncvarSyntax.ArgumentList.Arguments[0].Expression as LiteralExpressionSyntax).Token.Value;
                                 if (args is bool){
-                                    contentsInfo[ci].boolAttributeArg = (bool)(syncvarSyntax.ArgumentList.Arguments[0].Expression as LiteralExpressionSyntax).Token.Value;
+                                    contentsInfo[ci].isOnlyHost = (bool)(syncvarSyntax.ArgumentList.Arguments[0].Expression as LiteralExpressionSyntax).Token.Value;
                                 }else if(args is int){
                                     contentsInfo[ci].intAttributeArg = (int)(syncvarSyntax.ArgumentList.Arguments[0].Expression as LiteralExpressionSyntax).Token.Value;
                                 }
                             }
                             else{
-                                contentsInfo[ci].boolAttributeArg = (bool)(syncvarSyntax.ArgumentList.Arguments[0].Expression as LiteralExpressionSyntax).Token.Value;
+                                contentsInfo[ci].isOnlyHost = (bool)(syncvarSyntax.ArgumentList.Arguments[0].Expression as LiteralExpressionSyntax).Token.Value;
                                 contentsInfo[ci].intAttributeArg = (int)(syncvarSyntax.ArgumentList.Arguments[1].Expression as LiteralExpressionSyntax).Token.Value;
                             }
                         }
@@ -190,12 +190,12 @@ namespace SynicSugar.Generator {
                     if (info.isNetworkPlayer) {
                         switch (info.type) {
                             case ContentInfo.Type.Rpc:
-                                rpcs[cb.GetFullName(info.rootNameSpace, info.rootName)].Append(cb.CreatePlayerRpcMethod(info.contentName, info.paramNamespace, info.param, info.boolAttributeArg));
-                                PacketConvert.Append(cb.CreatePlayerRpcPacketConvert(info.rootName, info.contentName, info.param, info.paramNamespace));
+                                rpcs[cb.GetFullName(info.rootNameSpace, info.rootName)].Append(cb.CreatePlayerRpcMethod(info.contentName, info.paramNamespace, info.param, info.isRecord, info.isLargePacket));
+                                PacketConvert.Append(cb.CreatePlayerRpcPacketConvert(info.rootName, info.contentName, info.param, info.paramNamespace, info.isLargePacket));
                            continue;
                             case ContentInfo.Type.TargetRpc:
-                                rpcs[cb.GetFullName(info.rootNameSpace, info.rootName)].Append(cb.CreatePlayerTargetRpcMethod(info.contentName, info.paramNamespace, info.param, info.boolAttributeArg));
-                                PacketConvert.Append(cb.CreatePlayerTargetRpcPacketConvert(info.rootName, info.contentName, info.param, info.paramNamespace));
+                                rpcs[cb.GetFullName(info.rootNameSpace, info.rootName)].Append(cb.CreatePlayerTargetRpcMethod(info.contentName, info.paramNamespace, info.param, info.isRecord, info.isLargePacket));
+                                PacketConvert.Append(cb.CreatePlayerTargetRpcPacketConvert(info.rootName, info.contentName, info.param, info.paramNamespace, info.isLargePacket));
                             continue;
                             case ContentInfo.Type.SyncVar:
                                 syncvars[cb.GetFullName(info.rootNameSpace, info.rootName)].Append(cb.CreateSyncVarMethod(info.contentName, info.paramNamespace, info.param, info.intAttributeArg, info.isPublicVar, false, false));
@@ -210,11 +210,11 @@ namespace SynicSugar.Generator {
                     //for Commons
                     switch (info.type){
                         case ContentInfo.Type.Rpc:
-                            rpcs[cb.GetFullName(info.rootNameSpace, info.rootName)].Append(cb.CreateCommonsRpcMethod(info.contentName, info.paramNamespace, info.param, info.boolAttributeArg));
-                            PacketConvert.Append(cb.CreateCommonsRpcPacketConvert(info.rootName, info.contentName, info.param, info.paramNamespace));
+                            rpcs[cb.GetFullName(info.rootNameSpace, info.rootName)].Append(cb.CreateCommonsRpcMethod(info.contentName, info.paramNamespace, info.param, info.isRecord, info.isLargePacket));
+                            PacketConvert.Append(cb.CreateCommonsRpcPacketConvert(info.rootName, info.contentName, info.param, info.paramNamespace, info.isLargePacket));
                         continue;
                         case ContentInfo.Type.SyncVar:
-                            syncvars[cb.GetFullName(info.rootNameSpace, info.rootName)].Append(cb.CreateSyncVarMethod(info.contentName, info.paramNamespace, info.param, info.intAttributeArg, info.isPublicVar, info.boolAttributeArg, true));
+                            syncvars[cb.GetFullName(info.rootNameSpace, info.rootName)].Append(cb.CreateSyncVarMethod(info.contentName, info.paramNamespace, info.param, info.intAttributeArg, info.isPublicVar, info.isOnlyHost, true));
                             PacketConvert.Append(cb.CreateCommonsSyncVarPacketConvert(info.rootName, info.contentName, info.param, info.paramNamespace, info.isPublicVar));
                         continue;
                         case ContentInfo.Type.Synic:
@@ -322,14 +322,16 @@ namespace SynicSugar.Generator {
             public string nameSpace, name;
         }
         public class ContentInfo{
-            public bool isNetworkPlayer, boolAttributeArg;
-            public string rootNameSpace, rootName, contentName, param, paramNamespace;
-            public int intAttributeArg;
-            public bool isPublicVar;
-            public Type type;
             public enum Type{
                 Rpc, TargetRpc, SyncVar, Synic
             }
+            public Type type;
+            public string rootNameSpace, rootName, contentName, param, paramNamespace;
+            public int intAttributeArg;
+            //For RPC
+            public bool isNetworkPlayer, isRecord, isLargePacket;
+            //For SyncVar
+            public bool isPublicVar, isOnlyHost;
         }
 
         string GetNamespace(TypeSyntax param, SemanticModel semanticModel){
@@ -358,6 +360,7 @@ using SynicSugar.P2P;
 using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using MemoryPack.Compression;
 ";
 
         string SynicItemsHeader = $@"// <auto-generated>
