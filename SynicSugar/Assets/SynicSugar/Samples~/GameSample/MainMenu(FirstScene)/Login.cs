@@ -7,7 +7,14 @@ namespace  SynicSugar.Samples {
         [SerializeField] GameObject modeSelectCanvas;
         [SerializeField] bool needResultDetail;
         void Start(){
+            
             bool hasLogin = EOSConnect.HasLoggedinEOS();
+        #if SYNICSUGAR_FPSTEST
+            if(!hasLogin){
+                //Set game FPS
+                Application.targetFrameRate = 60;
+            }
+        #endif
             
             this.gameObject.SetActive(!hasLogin);
             modeSelectCanvas.SetActive(hasLogin);

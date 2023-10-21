@@ -26,7 +26,7 @@ namespace SynicSugar.P2P {
         private static Lazy<ConnectHub> instance = new Lazy<ConnectHub>();
         public static ConnectHub Instance => instance.Value;
 
-        private ConnectHub(){}
+        public ConnectHub(){}
         byte ch_r;
         string id_r;
         ArraySegment<byte> payload_r;
@@ -303,11 +303,11 @@ namespace SynicSugar.P2P {
             if(!largeBuffer[id].ContainsKey(ch)){
                 largePacketInfo[id].Add(ch, new LargePacketsInfomation(){ chunk = payload[1] });
                 //Prep enough byte[]
-                largeBuffer[id].Add(ch, new byte[payload[1] * 1100]);
+                largeBuffer[id].Add(ch, new byte[payload[1] * 1160]);
             }
 
             int packetIndex = payload[0];
-            int offset = packetIndex * 1100;
+            int offset = packetIndex * 1160;
 
     #if SYNICSUGAR_LOG
             Debug.Log($"RestoreLargePackets: PacketInfo:: ch {ch} / index {payload[0]} / chunk {payload[1]}");
@@ -319,7 +319,7 @@ namespace SynicSugar.P2P {
             Buffer.BlockCopy(packetPayload.ToArray(), 0, largeBuffer[id][ch], offset, packetPayload.Length);
 
             //Comming all?
-            return largePacketInfo[id][ch].currentSize + 1100 > largeBuffer[id][ch].Length ? true : false;
+            return largePacketInfo[id][ch].currentSize + 1160 > largeBuffer[id][ch].Length ? true : false;
         }
 
         //Synced 0 = index, 1 = chunk, 2 = phase, 3 = syncSinglePhase, 4 = isSelf

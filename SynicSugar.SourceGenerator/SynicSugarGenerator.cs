@@ -360,6 +360,7 @@ using SynicSugar.P2P;
 using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using MemoryPack;
 using MemoryPack.Compression;
 ";
 
