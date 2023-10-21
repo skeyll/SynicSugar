@@ -123,9 +123,8 @@ namespace SynicSugar.Samples {
         public void SetTextureWithNewColor(){
             Sprite logo = Resources.Load<Sprite>("SynicSugarLogo");
             Color[] pixels = logo.texture.GetPixels();
-
-            string colorName = Random.Range(0, 2) == 0 ? "Red" : "Gray";
-            Color newColor = colorName == "Red" ? Color.red : Color.gray;
+            string colorName = p2pInfo.Instance.IsHost() ? "Red" : "Gray";
+            Color newColor = p2pInfo.Instance.IsHost() ? Color.red : Color.gray;
 
             for(int i = 0; i < pixels.Length; i++){
                 //Change black pixel to new color.
@@ -150,6 +149,7 @@ namespace SynicSugar.Samples {
         public void SendLargePacketViaRpc(byte[] png){
             Texture2D texture = new Texture2D(256, 256, TextureFormat.RGBA4444, false);
             texture.LoadImage(png);
+            EOSDebug.Instance.Log($"Change texture color");
 
             systemManager.ForLargePacket.texture = texture;
         }
