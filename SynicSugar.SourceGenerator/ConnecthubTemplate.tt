@@ -166,6 +166,10 @@ namespace SynicSugar.P2P {
 
         //Clear ref
         private void ClearReferenceDictionaries(){ <#= ClearReference #>
+            synicBuffer.Clear();
+            synicPacketInfo.Clear();
+            largeBuffer.Clear();
+            largePacketInfo.Clear();
         }
 
         //Register(for class)<#= Register #>

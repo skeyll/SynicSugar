@@ -148,9 +148,11 @@ namespace SynicSugarGenerator
             
             #line default
             #line hidden
-            this.Write("\r\n        }\r\n\r\n        //Register(for class)");
+            this.Write("\r\n            synicBuffer.Clear();\r\n            synicPacketInfo.Clear();\r\n       " +
+                    "     largeBuffer.Clear();\r\n            largePacketInfo.Clear();\r\n        }\r\n\r\n  " +
+                    "      //Register(for class)");
             
-            #line 171 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 175 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Register));
             
             #line default
@@ -164,7 +166,7 @@ namespace SynicSugarGenerator
         /// <returns>T's instance</returns>
         public T GetUserInstance<T>(UserId id) where T : IGetPlayer {");
             
-            #line 178 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 182 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(PlayeInstance));
             
             #line default
@@ -179,7 +181,7 @@ namespace SynicSugarGenerator
         /// <returns>T's instance</returns>
         public T GetInstance<T>() where T : IGetCommons {");
             
-            #line 186 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 190 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(CommonsInstance));
             
             #line default
@@ -188,7 +190,7 @@ namespace SynicSugarGenerator
                     "\r\n        public void ConvertFromPacket(ref byte ch, ref string id, ref ArraySeg" +
                     "ment<byte> payload){\r\n            switch((CHANNELLIST)ch){");
             
-            #line 192 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 196 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(PacketConvert));
             
             #line default
@@ -238,7 +240,7 @@ namespace SynicSugarGenerator
                     "stTargetRPCPayload, p2pInfo.Instance.LastTargetRPCUserId);\r\n        }\r\n\r\n       " +
                     " ");
             
-            #line 262 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 266 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
  if (needSyncSynic) { 
             
             #line default
@@ -268,14 +270,14 @@ namespace SynicSugarGenerator
                     ".ToArray(), targetId, syncedPhase, syncSinglePhase, false);\r\n        }\r\n\r\n      " +
                     "  ");
             
-            #line 293 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 297 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GenerateSynicContainer));
             
             #line default
             #line hidden
             this.Write("\r\n        ");
             
-            #line 294 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 298 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
  } 
             
             #line default
@@ -331,7 +333,7 @@ namespace SynicSugarGenerator
                     "nfo[overwriterUserId].phase;\r\n            bool syncSinglePhase = synicPacketInfo" +
                     "[overwriterUserId].syncSinglePhase;\r\n\r\n            switch(phase){");
             
-            #line 375 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 379 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(SyncedInvoker));
             
             #line default
@@ -339,7 +341,7 @@ namespace SynicSugarGenerator
             this.Write("\r\n                default:\r\n                goto case 9;\r\n            }\r\n        " +
                     "}\r\n        ");
             
-            #line 380 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 384 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(SyncedItems));
             
             #line default
