@@ -8,22 +8,26 @@ using System;
 using System.Threading;
 using System.Collections.Generic;
 using System.Linq;
+using MemoryPack;
 
 namespace SynicSugar.TitleStorage {
-    public class EOSTitleStorage : MonoBehaviour {
+    public static class EOSTitleStorage {
+        //Options
         const uint MAXCHUNKLENGTH = 4 * 4 * 4096;
-        public TransferProgressEvent progressInfo = new();
-        #region Query
-        
-        //FileName, FileSizeBytes
-        Dictionary<string, uint> FileMetaDatas = new ();
+        public static TransferProgressEvent ProgressInfo = new();
+        //Query
+        static Dictionary<string, uint> FileMetaDatas = new ();
+        //Read
+        static TransferInProgress CurrentTransfer = new();
 
+        #region Query
+        //FileName, FileSizeBytes
         /// <summary>
         /// Query the file List from backend. Hold FileSizeBytes to read file.
         /// When we know the filename to want to get, can also call ReadFile not to call this.
         /// </summary>
         /// <param name="tags"></param>
-        public async UniTask<List<string>> QueryFileList(string[] tags, CancellationToken token = default(CancellationToken)){
+        public static async UniTask<List<string>> QueryFileList(string[] tags, CancellationToken token = default(CancellationToken)){
             Utf8String[] utf8StringTags = new Utf8String[tags.Length];
 
             for (int i = 0; i < tags.Length; ++i){
@@ -38,7 +42,7 @@ namespace SynicSugar.TitleStorage {
         /// When we know the filename to want to get, can also call ReadFile not to call this.
         /// </summary>
         /// <param name="tags"></param>
-        public async UniTask<List<string>> QueryFileList(List<string> tags, CancellationToken token = default(CancellationToken)){
+        public static async UniTask<List<string>> QueryFileList(List<string> tags, CancellationToken token = default(CancellationToken)){
             Utf8String[] utf8StringTags = new Utf8String[tags.Count];
 
             for (int i = 0; i < tags.Count; ++i){
@@ -52,7 +56,7 @@ namespace SynicSugar.TitleStorage {
         /// MEMO: Is FileMetadata's Release unnecessary in C#?
         /// </summary>
         /// <param name="tags"></param>
-        async UniTask<bool> QueryFileList(Utf8String[] tags){
+        static async UniTask<bool> QueryFileList(Utf8String[] tags){
             QueryFileListOptions queryOptions = new QueryFileListOptions(){
                 LocalUserId = EOSManager.Instance.GetProductUserId(),
                 ListOfTags = tags
@@ -95,22 +99,19 @@ namespace SynicSugar.TitleStorage {
             }
         }
         #endregion
-        #region ReadFile
-        
-        private TitleStorageFileTransferRequest CurrentTransferRequest = null;
-        Dictionary<string, TransferInProgress> TransfersInProgress = new Dictionary<string, TransferInProgress>();
-        
-        private Dictionary<string, string> StorageData = new Dictionary<string, string>();
+        #region Download
         /// <summary>
-        /// Get File with file name (in QueryFileList).
+        /// Exsist target? If not, Download it from EOS server. <br />
+        /// After call this, we load target as Resources or AssetBundle.
         /// </summary>
         /// <param name="fileName"></param>
         /// <returns></returns>
-        public async UniTask ReadFile(string fileName){
+        public static async UniTask<bool> ReadFile(string fileName) {
             TitleStorageInterface titleStorageInterface = EOSManager.Instance.GetEOSPlatformInterface().GetTitleStorageInterface();
-            //Prep
+            //Prep.
+            //If can use local data, use the query data.
             if(!FileMetaDatas.ContainsKey(fileName)){
-                //Get size
+                //Get query
                 var queryOptions = new QueryFileOptions {
                     LocalUserId = EOSManager.Instance.GetProductUserId(),
                     Filename = fileName
@@ -121,14 +122,14 @@ namespace SynicSugar.TitleStorage {
                 titleStorageInterface.QueryFile(ref queryOptions, null, OnQueryFileCompleteCallback);
                 await UniTask.WaitUntil(() => finishQuery);
                 if(!findFile){
-                    //Failure
-                    return;
+                    Debug.LogError("ReadFile: can't query meta data.");
+                    return false;
                 }
-
                 void OnQueryFileCompleteCallback(ref QueryFileCallbackInfo data){
                     findFile = data.ResultCode == ResultE.Success;
                     finishQuery = true;
                 }
+                //Get target data
                 var copyFileMetadataOptions = new CopyFileMetadataByFilenameOptions {
                     LocalUserId = EOSManager.Instance.GetProductUserId(),
                     Filename = fileName
@@ -136,162 +137,355 @@ namespace SynicSugar.TitleStorage {
                 titleStorageInterface.CopyFileMetadataByFilename(ref copyFileMetadataOptions, out FileMetadata? fileMetadata);
 
                 if (fileMetadata == null || string.IsNullOrEmpty(fileMetadata?.Filename)){
-                    //Failure
-                    return;
+                    Debug.LogError("ReadFile: can't find the meta data in query.");
+                    return false;
                 }
                 FileMetaDatas.Add(fileMetadata?.Filename, (uint)fileMetadata?.FileSizeBytes);
+                Debug.Log("FileSize: " + FileMetaDatas[fileName]);
             }
+            if(string.Compare(fileName, CurrentTransfer.FileName,true) == 0){
+                Debug.LogError("ReadFile: This call is Duplicateds. Already start dornloading it.");
+                return false;
+            }
+
+            //Init for new transfer
+            CancelCurrentTransfer();
+            ProgressInfo.CurrentFileName = fileName; 
+            CurrentTransfer.Init(fileName);
+
             //Read file
             ReadFileOptions readOptions = new ReadFileOptions(){
                 LocalUserId = EOSManager.Instance.GetProductUserId(),
                 Filename = fileName,
                 ReadChunkLengthBytes = MAXCHUNKLENGTH,
-                ReadFileDataCallback = OnFileDataReceived,
+                ReadFileDataCallback = OnReadFileData,
                 FileTransferProgressCallback = OnFileTransferProgress
             };
 
             bool finishRead = false;
             bool getFile = false;
             TitleStorageFileTransferRequest transferRequest = titleStorageInterface.ReadFile(ref readOptions, null, OnReadFileComplete);
-            
-            CancelCurrentTransfer();
-            // CurrentTransferHandle = transferReq;
-
-            TransferInProgress newTransfer = new () {
-                isDownloading = true,
-                Data = new byte[FileMetaDatas[fileName]]
-            };
-
-            TransfersInProgress.Add(fileName, newTransfer);
-
-            progressInfo.CurrentFileName = fileName;
+            ProgressInfo.CurrentHandle = transferRequest;
 
             await UniTask.WaitUntil(() => finishRead);
-
+            
             void OnReadFileComplete(ref ReadFileCallbackInfo data){
                 getFile = data.ResultCode == ResultE.Success;
                 if (!getFile){
                     Debug.LogErrorFormat("ReadFile: OnFileReceived is Failure. {0}", data.ResultCode);
                 }
-                FinishFileDownload(data.Filename, getFile, data.ResultCode);
+                Debug.Log("Called");
+                FinishFileDownload(data.Filename, getFile);
                 finishRead = true;
             }
+
+            transferRequest.Release();
+            return getFile;
         }
-        public void FinishFileDownload(string fileName, bool success, ResultE result){
-            if (!TransfersInProgress.TryGetValue(fileName, out TransferInProgress transfer)){
-                Debug.LogErrorFormat("ReadFile: '{0}' was not found in TransfersInProgress.", fileName);
+        //TODO: Improve Performance
+        /// <summary>
+        /// Exsist targets? If not, Download them from EOS server. <br />
+        /// After call this, we load target as Resources or AssetBundle.
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <returns></returns>
+        public static async UniTask<bool> ReadFiles(string[] fileNames) {
+            bool getFile = false;
+            foreach(var f in fileNames){
+                getFile = await ReadFile(f);
+            }
+            return getFile;
+        }
+        static void FinishFileDownload(string fileName, bool success){
+            if (string.Compare(fileName, CurrentTransfer.FileName, true) != 0){
+                Debug.LogError("ReadFile: Failure.  This is a wrong download.");
                 return;
             }
 
-            if (!transfer.isDownloading){
-                Debug.LogError("ReadFile: Failure. Download/upload mismatch.");
+            if (!CurrentTransfer.isDownload){
+                Debug.LogError("ReadFile: Failure. Read incorrect data.");
                 return;
             }
 
-            if (!transfer.Done() || success){
-                if (!transfer.Done()){
-                    Debug.LogError("ReadFile: Failure. Not enough data for file");
+            if (success){
+                if (!CurrentTransfer.Done()){
+                    Debug.LogError("ReadFile: Failure. Not enough data to read.");
                 }
 
-                TransfersInProgress.Remove(fileName);
-
-                if (fileName == progressInfo.CurrentFileName){
+                if (fileName == ProgressInfo.CurrentFileName){
                     ClearCurrentTransfer();
                 }
             }
 
-            string fileData = string.Empty;
-            if (transfer.TotalSize > 0){
-                fileData = System.Text.Encoding.UTF8.GetString(transfer.Data);
+        #if SYNICSUGAR_LOG
+            Debug.Log("ReadFile: Finish to read " + fileName );
+        #endif
+
+            CurrentTransfer.Init();
+
+            if (fileName.Equals(ProgressInfo.CurrentFileName, StringComparison.OrdinalIgnoreCase)){
+                ClearCurrentTransfer();
+            }
+        }
+        static void ClearCurrentTransfer(){
+            ProgressInfo.CurrentFileName = string.Empty;
+
+            if (ProgressInfo.CurrentHandle != null){
+                ProgressInfo.CurrentHandle = null;
+            }
+        }
+
+        static ReadResult OnReadFileData(ref ReadFileDataCallbackInfo data){
+            if (data.DataChunk == null){
+                Debug.LogError("ReadFile: Failure. Data pointer is null.");
+                return ReadResult.RrFailrequest;
             }
 
-            StorageData.Add(fileName, fileData);
+            //Failure and Cancel
+            if (string.Compare(data.Filename, CurrentTransfer.FileName, true) != 0){
+                Debug.LogError("ReadFile: Failure. Read incorrect data.");
+                return ReadResult.RrCancelrequest;
+            }
 
-            Debug.LogFormat("[EOS SDK] Title storage: file read finished: '{0}' Size: {1}.", fileName, fileData.Length);
+            if (!CurrentTransfer.isDownload){
+                Debug.LogError("ReadFile: Failure. Unintended Download.");
+                return ReadResult.RrFailrequest;
+            }
+            //Prep data array
+            if (CurrentTransfer.TotalFileSize == 0){
+                CurrentTransfer.InitData(data.TotalFileSizeBytes);
+                CurrentTransfer.TotalFileSize = data.TotalFileSizeBytes;
+            }
 
-            TransfersInProgress.Remove(fileName);
+            data.DataChunk.Array.CopyTo(CurrentTransfer.Data, CurrentTransfer.CurrentIndex);
+            CurrentTransfer.CurrentIndex += (uint)data.DataChunk.Count;
+            Debug.Log(data.IsLastChunk);
 
-            if (fileName.Equals(progressInfo.CurrentFileName, StringComparison.OrdinalIgnoreCase)){
+            //The last or not
+            return ReadResult.RrContinuereading;//data.IsLastChunk ? ReadResult.RrFailrequest : ReadResult.RrContinuereading;
+        }
+        /// <summary>
+        /// Optional callback function to be informed of download progress, if the file is not already locally cached.
+        /// </summary>
+        /// <param name="data"></param>
+        static void OnFileTransferProgress (ref FileTransferProgressCallbackInfo data){
+            if (data.TotalFileSizeBytes > 0){
+                ProgressInfo.InProgressing(data.BytesTransferred / data.TotalFileSizeBytes);
+            }
+        }
+        #endregion
+        #region LoadFile
+        static public async UniTask<T> LoadFromAssetBundle<T>(string filePath) where T : class {
+            TitleStorageInterface titleStorageInterface = EOSManager.Instance.GetEOSPlatformInterface().GetTitleStorageInterface();
+            //Prep.
+            //If can use local data, use the query data.
+            if(!FileMetaDatas.ContainsKey(filePath)){
+                //Get query
+                var queryOptions = new QueryFileOptions {
+                    LocalUserId = EOSManager.Instance.GetProductUserId(),
+                    Filename = filePath
+                };
+
+                bool finishQuery = false;
+                bool findFile = false;
+                titleStorageInterface.QueryFile(ref queryOptions, null, OnQueryFileCompleteCallback);
+                await UniTask.WaitUntil(() => finishQuery);
+                if(!findFile){
+                    Debug.LogError("LoadFile: can't query meta data.");
+                    return null;
+                }
+                void OnQueryFileCompleteCallback(ref QueryFileCallbackInfo data){
+                    findFile = data.ResultCode == ResultE.Success;
+                    finishQuery = true;
+                }
+                //Get target data
+                var copyFileMetadataOptions = new CopyFileMetadataByFilenameOptions {
+                    LocalUserId = EOSManager.Instance.GetProductUserId(),
+                    Filename = filePath
+                };
+                titleStorageInterface.CopyFileMetadataByFilename(ref copyFileMetadataOptions, out FileMetadata? fileMetadata);
+
+                if (fileMetadata == null || string.IsNullOrEmpty(fileMetadata?.Filename)){
+                    Debug.LogError("LoadFile: can't find the meta data in query.");
+                    return null;
+                }
+                FileMetaDatas.Add(fileMetadata?.Filename, (uint)fileMetadata?.FileSizeBytes);
+            }
+            if(string.Compare(filePath, CurrentTransfer.FileName,true) == 0){
+                Debug.LogError("LoadFile: This call is Duplicateds. Already is loading it.");
+                return null;
+            }
+
+            //Init for new transfer
+            CancelCurrentTransfer();
+            ProgressInfo.CurrentFileName = filePath; 
+            CurrentTransfer.Init(filePath);
+
+            //Read file
+            ReadFileOptions readOptions = new ReadFileOptions(){
+                LocalUserId = EOSManager.Instance.GetProductUserId(),
+                Filename = filePath,
+                ReadChunkLengthBytes = MAXCHUNKLENGTH,
+                ReadFileDataCallback = OnReadFileData,
+                FileTransferProgressCallback = OnFileTransferProgress
+            };
+
+            bool finishRead = false;
+            bool getFile = false;
+            TitleStorageFileTransferRequest transferRequest = titleStorageInterface.ReadFile(ref readOptions, null, OnReadFileComplete);
+            ProgressInfo.CurrentHandle = transferRequest;
+
+            await UniTask.WaitUntil(() => finishRead);
+            byte[] result = new byte[0];
+            
+            void OnReadFileComplete(ref ReadFileCallbackInfo data){
+                getFile = data.ResultCode == ResultE.Success;
+                if (!getFile){
+                    Debug.LogErrorFormat("LoadFile: OnFileReceived is Failure. {0}", data.ResultCode);
+                }
+                FinishFileDownload(data.Filename, getFile, out result);
+                finishRead = true;
+            }
+
+            transferRequest.Release();
+            return null;
+            // AddressableHelper.LoadAddressableAsync();
+        }
+        /// <summary>
+        /// Get File with file name (in QueryFileList).
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <returns></returns>
+        static public async UniTask<T> LoadFromResources<T>(string fileName) where T : class {
+            TitleStorageInterface titleStorageInterface = EOSManager.Instance.GetEOSPlatformInterface().GetTitleStorageInterface();
+            //Prep.
+            //If can use local data, use the query data.
+            if(!FileMetaDatas.ContainsKey(fileName)){
+                //Get query
+                var queryOptions = new QueryFileOptions {
+                    LocalUserId = EOSManager.Instance.GetProductUserId(),
+                    Filename = fileName
+                };
+
+                bool finishQuery = false;
+                bool findFile = false;
+                titleStorageInterface.QueryFile(ref queryOptions, null, OnQueryFileCompleteCallback);
+                await UniTask.WaitUntil(() => finishQuery);
+                if(!findFile){
+                    Debug.LogError("LoadFile: can't query meta data.");
+                    return null;
+                }
+                void OnQueryFileCompleteCallback(ref QueryFileCallbackInfo data){
+                    findFile = data.ResultCode == ResultE.Success;
+                    finishQuery = true;
+                }
+                //Get target data
+                var copyFileMetadataOptions = new CopyFileMetadataByFilenameOptions {
+                    LocalUserId = EOSManager.Instance.GetProductUserId(),
+                    Filename = fileName
+                };
+                titleStorageInterface.CopyFileMetadataByFilename(ref copyFileMetadataOptions, out FileMetadata? fileMetadata);
+
+                if (fileMetadata == null || string.IsNullOrEmpty(fileMetadata?.Filename)){
+                    Debug.LogError("LoadFile: can't find the meta data in query.");
+                    return null;
+                }
+                FileMetaDatas.Add(fileMetadata?.Filename, (uint)fileMetadata?.FileSizeBytes);
+            }
+            if(string.Compare(fileName, CurrentTransfer.FileName,true) == 0){
+                Debug.LogError("LoadFile: This call is Duplicateds. Already is loading it.");
+                return null;
+            }
+
+            //Init for new transfer
+            CancelCurrentTransfer();
+            ProgressInfo.CurrentFileName = fileName; 
+            CurrentTransfer.Init(fileName);
+
+            //Read file
+            ReadFileOptions readOptions = new ReadFileOptions(){
+                LocalUserId = EOSManager.Instance.GetProductUserId(),
+                Filename = fileName,
+                ReadChunkLengthBytes = MAXCHUNKLENGTH,
+                ReadFileDataCallback = OnReadFileData,
+                FileTransferProgressCallback = OnFileTransferProgress
+            };
+
+            bool finishRead = false;
+            bool getFile = false;
+            TitleStorageFileTransferRequest transferRequest = titleStorageInterface.ReadFile(ref readOptions, null, OnReadFileComplete);
+            ProgressInfo.CurrentHandle = transferRequest;
+
+            await UniTask.WaitUntil(() => finishRead);
+            byte[] result = new byte[0];
+            
+            void OnReadFileComplete(ref ReadFileCallbackInfo data){
+                getFile = data.ResultCode == ResultE.Success;
+                if (!getFile){
+                    Debug.LogErrorFormat("LoadFile: OnFileReceived is Failure. {0}", data.ResultCode);
+                }
+                FinishFileDownload(data.Filename, getFile, out result);
+                finishRead = true;
+            }
+
+            transferRequest.Release();
+            return MemoryPackSerializer.Deserialize<T>(result);
+        }
+        static void FinishFileDownload(string fileName, bool success, out byte[] result){
+            if (string.Compare(fileName, CurrentTransfer.FileName, true) != 0){
+                Debug.LogError("LoadFile: Failure.  This is a wrong download.");
+                result = null;
+                return;
+            }
+
+            if (!CurrentTransfer.isDownload){
+                Debug.LogError("LoadFile: Failure. Read incorrect data.");
+                result = null;
+                return;
+            }
+
+            if (success){
+                if (!CurrentTransfer.Done()){
+                    Debug.LogError("LoadFile: Failure. Not enough data to read.");
+                }
+
+                if (fileName == ProgressInfo.CurrentFileName){
+                    ClearCurrentTransfer();
+                }
+            }
+            result = new byte[CurrentTransfer.Data.Length];
+            Buffer.BlockCopy(CurrentTransfer.Data, 0, result, 0, result.Length);
+            string test = string.Empty;
+            for(int i = 1; i < 10; i++){
+                test += result[CurrentTransfer.Data.Length - i];
+            }
+            Debug.Log(test);
+            
+
+        #if SYNICSUGAR_LOG
+            Debug.Log("LoadFile: Finish to read " + fileName + result.Length);
+        #endif
+
+            CurrentTransfer.Init();
+
+            if (fileName.Equals(ProgressInfo.CurrentFileName, StringComparison.OrdinalIgnoreCase)){
                 ClearCurrentTransfer();
             }
         }
         
-        private void CancelCurrentTransfer() {
-            if (CurrentTransferRequest != null){
-                ResultE cancelResult = CurrentTransferRequest.CancelRequest();
+        static void CancelCurrentTransfer() {
+            if (ProgressInfo.CurrentHandle != null){
+                ResultE cancelResult = ProgressInfo.CurrentHandle.CancelRequest();
 
                 if (cancelResult == ResultE.Success){
-                    TransfersInProgress.TryGetValue(progressInfo.CurrentFileName, out TransferInProgress transfer);
-
-                    if (transfer != null){
-                        if (transfer.isDownloading) {
-                            Debug.Log("ReadFile: Download is canceled");
-                        }else{
-                            Debug.Log("ReadFile: Upload is canceled");
-                        }
-
-                        TransfersInProgress.Remove(progressInfo.CurrentFileName);
+                    if(string.Compare(ProgressInfo.CurrentFileName, CurrentTransfer.FileName, true) == 0){
+                        CurrentTransfer.Data = null;
                     }
                 }
             }
 
             ClearCurrentTransfer();
         }
-        private void ClearCurrentTransfer(){
-            progressInfo.CurrentFileName = string.Empty;
-
-            if (CurrentTransferRequest != null){
-                CurrentTransferRequest = null;
-            }
-        }
-
-        ReadResult OnFileDataReceived(ref ReadFileDataCallbackInfo data){
-            return ReceiveData(data.Filename, data.DataChunk, data.TotalFileSizeBytes);
-        }
-        ReadResult ReceiveData(string fileName, ArraySegment<byte> data, uint totalSize){
-            if (data == null){
-                Debug.LogError("ReadFile: Failure. Data pointer is null.");
-                return ReadResult.RrFailrequest;
-            }
-
-            TransfersInProgress.TryGetValue(fileName, out TransferInProgress transfer);
-            //Failure and Cancel
-            if (transfer == null){
-                return ReadResult.RrCancelrequest;
-            }
-
-            if (!transfer.isDownloading){
-                Debug.LogError("ReadFile: Failure. Download/upload mismatch.");
-                return ReadResult.RrFailrequest;
-            }
-
-            //First update
-            if (transfer.CurrentIndex == 0 && transfer.TotalSize == 0){
-                transfer.TotalSize = totalSize;
-
-                if (transfer.TotalSize == 0){
-                    return ReadResult.RrContinuereading;
-                }
-            }
-
-            // Make enough room
-            if (transfer.TotalSize - transfer.CurrentIndex >= data.Count){
-                data.Array.CopyTo(transfer.Data, transfer.CurrentIndex);
-                transfer.CurrentIndex += (uint)data.Count;
-
-                return ReadResult.RrContinuereading;
-            } else {
-                Debug.LogError("ReadFile: Failure. Too much of it.");
-                return ReadResult.RrFailrequest;
-            }
-        }
-        
-        private void OnFileTransferProgress (ref FileTransferProgressCallbackInfo data){
-            if (data.TotalFileSizeBytes > 0){
-                progressInfo.InProgressing(data.BytesTransferred / data.TotalFileSizeBytes);
-            }
-        }
-
         #endregion
     }
 }
