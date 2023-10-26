@@ -102,11 +102,11 @@ namespace SynicSugar.TitleStorage {
         #region Download
         /// <summary>
         /// Exsist target? If not, Download it from EOS server. <br />
-        /// After call this, we load target as Resources or AssetBundle.
+        /// After call this, we can load the target as Resources or AssetBundle.
         /// </summary>
-        /// <param name="fileName"></param>
-        /// <returns></returns>
-        public static async UniTask<bool> ReadFile(string fileName) {
+        /// <param name="fileName">target</param>
+        /// <returns>If true, Exsist in locaal or fetch file from backend.</returns>
+        public static async UniTask<bool> FetchFile(string fileName) {
             TitleStorageInterface titleStorageInterface = EOSManager.Instance.GetEOSPlatformInterface().GetTitleStorageInterface();
             //Prep.
             //If can use local data, use the query data.
@@ -144,10 +144,10 @@ namespace SynicSugar.TitleStorage {
                 Debug.Log("FileSize: " + FileMetaDatas[fileName]);
             }
             if(string.Compare(fileName, CurrentTransfer.FileName,true) == 0){
-                Debug.LogError("ReadFile: This call is Duplicateds. Already start dornloading it.");
+                Debug.LogError("ReadFile: This call is Duplicateds. Downloading it now.");
                 return false;
             }
-
+            //Need download
             //Init for new transfer
             CancelCurrentTransfer();
             ProgressInfo.CurrentFileName = fileName; 
@@ -174,7 +174,6 @@ namespace SynicSugar.TitleStorage {
                 if (!getFile){
                     Debug.LogErrorFormat("ReadFile: OnFileReceived is Failure. {0}", data.ResultCode);
                 }
-                Debug.Log("Called");
                 FinishFileDownload(data.Filename, getFile);
                 finishRead = true;
             }
@@ -187,12 +186,16 @@ namespace SynicSugar.TitleStorage {
         /// Exsist targets? If not, Download them from EOS server. <br />
         /// After call this, we load target as Resources or AssetBundle.
         /// </summary>
-        /// <param name="fileName"></param>
-        /// <returns></returns>
-        public static async UniTask<bool> ReadFiles(string[] fileNames) {
+        /// <param name="fileNames">targets</param>
+        /// <returns>If true, Exsist in locaal or fetch file from backend</returns>
+        public static async UniTask<bool> CanReadFiles(string[] fileNames) {
             bool getFile = false;
             foreach(var f in fileNames){
-                getFile = await ReadFile(f);
+                getFile = await FetchFile(f);
+                if(!getFile){
+                    Debug.LogErrorFormat("CanReadFiles: Can't read {0}", f);
+                    return false;
+                }
             }
             return getFile;
         }
@@ -275,7 +278,15 @@ namespace SynicSugar.TitleStorage {
         }
         #endregion
         #region LoadFile
-        static public async UniTask<T> LoadFromAssetBundle<T>(string filePath) where T : class {
+    #if SYNICSUGAR_ADDRESSABLE
+        /// <summary>
+        /// Load file with Addressable. When data exists in local, it is just loaded; if not, it is downloaded from Server and then loaded.
+        /// These Resource is managed in batches, and need to call Release() on changing scene.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
+        public static async UniTask<T> LoadFromAssetBundle<T>(string filePath) where T : class {
             TitleStorageInterface titleStorageInterface = EOSManager.Instance.GetEOSPlatformInterface().GetTitleStorageInterface();
             //Prep.
             //If can use local data, use the query data.
@@ -315,7 +326,12 @@ namespace SynicSugar.TitleStorage {
                 Debug.LogError("LoadFile: This call is Duplicateds. Already is loading it.");
                 return null;
             }
+            //Try to get
+            if(AddressableHelper.Exist<T>(filePath)){
+                return await AddressableHelper.LoadAddressableAsync<T>(filePath);
+            }
 
+            //Not exsit file, fetch it from EOS.
             //Init for new transfer
             CancelCurrentTransfer();
             ProgressInfo.CurrentFileName = filePath; 
@@ -341,22 +357,28 @@ namespace SynicSugar.TitleStorage {
             void OnReadFileComplete(ref ReadFileCallbackInfo data){
                 getFile = data.ResultCode == ResultE.Success;
                 if (!getFile){
-                    Debug.LogErrorFormat("LoadFile: OnFileReceived is Failure. {0}", data.ResultCode);
+                    Debug.LogErrorFormat("ReadFile: OnFileReceived is Failure. {0}", data.ResultCode);
                 }
-                FinishFileDownload(data.Filename, getFile, out result);
+                FinishFileDownload(data.Filename, getFile);
                 finishRead = true;
             }
 
             transferRequest.Release();
-            return null;
-            // AddressableHelper.LoadAddressableAsync();
+            return await AddressableHelper.LoadAddressableAsync<T>(filePath);
         }
+        /// <summary>
+        /// Destroy all used resources. Call before transition to next scene.
+        /// </summary>
+        public static void ReleaseAddressables() {
+            AddressableHelper.ReleaseAddressables();
+        }
+    #endif
         /// <summary>
         /// Get File with file name (in QueryFileList).
         /// </summary>
         /// <param name="fileName"></param>
         /// <returns></returns>
-        static public async UniTask<T> LoadFromResources<T>(string fileName) where T : class {
+        static async UniTask<T> LoadFromResources<T>(string fileName) where T : class {
             TitleStorageInterface titleStorageInterface = EOSManager.Instance.GetEOSPlatformInterface().GetTitleStorageInterface();
             //Prep.
             //If can use local data, use the query data.
@@ -459,8 +481,6 @@ namespace SynicSugar.TitleStorage {
             for(int i = 1; i < 10; i++){
                 test += result[CurrentTransfer.Data.Length - i];
             }
-            Debug.Log(test);
-            
 
         #if SYNICSUGAR_LOG
             Debug.Log("LoadFile: Finish to read " + fileName + result.Length);
