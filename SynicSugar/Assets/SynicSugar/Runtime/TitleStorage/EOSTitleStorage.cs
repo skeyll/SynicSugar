@@ -141,7 +141,6 @@ namespace SynicSugar.TitleStorage {
                     return false;
                 }
                 FileMetaDatas.Add(fileMetadata?.Filename, (uint)fileMetadata?.FileSizeBytes);
-                Debug.Log("FileSize: " + FileMetaDatas[fileName]);
             }
             if(string.Compare(fileName, CurrentTransfer.FileName,true) == 0){
                 Debug.LogError("ReadFile: This call is Duplicateds. Downloading it now.");
@@ -188,7 +187,7 @@ namespace SynicSugar.TitleStorage {
         /// </summary>
         /// <param name="fileNames">targets</param>
         /// <returns>If true, Exsist in locaal or fetch file from backend</returns>
-        public static async UniTask<bool> CanReadFiles(string[] fileNames) {
+        public static async UniTask<bool> FetchFiles(string[] fileNames) {
             bool getFile = false;
             foreach(var f in fileNames){
                 getFile = await FetchFile(f);
@@ -221,7 +220,7 @@ namespace SynicSugar.TitleStorage {
             }
 
         #if SYNICSUGAR_LOG
-            Debug.Log("ReadFile: Finish to read " + fileName );
+            Debug.Log("ReadFile: Finish to read " + fileName);
         #endif
 
             CurrentTransfer.Init();
@@ -262,7 +261,6 @@ namespace SynicSugar.TitleStorage {
 
             data.DataChunk.Array.CopyTo(CurrentTransfer.Data, CurrentTransfer.CurrentIndex);
             CurrentTransfer.CurrentIndex += (uint)data.DataChunk.Count;
-            Debug.Log(data.IsLastChunk);
 
             //The last or not
             return ReadResult.RrContinuereading;//data.IsLastChunk ? ReadResult.RrFailrequest : ReadResult.RrContinuereading;
@@ -275,6 +273,30 @@ namespace SynicSugar.TitleStorage {
             if (data.TotalFileSizeBytes > 0){
                 ProgressInfo.InProgressing(data.BytesTransferred / data.TotalFileSizeBytes);
             }
+        }
+        /// <summary>
+        /// Clear previously cached file data. 
+        /// </summary>
+        public static async UniTask<bool> DeleteCache(){
+            TitleStorageInterface storageInterface = EOSManager.Instance.GetEOSPlatformInterface().GetTitleStorageInterface();
+            //Get query
+            var option = new DeleteCacheOptions {
+                LocalUserId = EOSManager.Instance.GetProductUserId()
+            };
+            bool finishDeleted = false;
+            bool canDelete = false;
+            storageInterface.DeleteCache(ref option, null, OnDeleteCacheComplete);
+
+            await UniTask.WaitUntil(() => finishDeleted);
+
+            void OnDeleteCacheComplete(ref DeleteCacheCallbackInfo data){
+                canDelete = data.ResultCode == ResultE.Success;
+                if(!canDelete){
+                    Debug.LogError("DeleteCache: Failure");
+                }
+                finishDeleted = true;
+            }
+            return canDelete;
         }
         #endregion
         #region LoadFile
