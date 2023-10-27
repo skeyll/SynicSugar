@@ -109,10 +109,6 @@ About app credential, you can use Peer2Peer as ClientPolicy. The minimum is as f
 ![image](https://user-images.githubusercontent.com/50002207/230758754-4333b431-48fe-4539-aa97-20c6f86d68ae.png)
 
 
-## For Debug
-SynicSugar has Debug.Log in some portions for the game development. To use the logs, add SYNICSUGAR_LOG to Scripting Define Symbols in project setting. Logs for errors are displayed by default.
-
-
 ## License
  License is under the MIT.
 
