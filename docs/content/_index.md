@@ -70,9 +70,6 @@ public partial class Player {
  SynicSugar uses Roslyn SourceGenerator supported after 2021.3. SourceGenerator generates almost all codes for p2p connect on compile automatically.  
 Large dependencies is for performance. SynicSugar is a full-mesh p2p. All peers connect with each other instead of 1-to-many like dedicated server and client-server model. If we want to sync data with many peers in a full-mesh, we need to send data 63 times. Individual connection is fast but the whole is costly. So the core needs faster. 
 
-## For Debug
-SynicSugar has Debug.Log in some portions for the game development. To use the logs, add SYNICSUGAR_LOG to Scripting Define Symbols in project setting. Logs for errors are displayed by default.
-
 ## Contribution Guideline
 SynicSugar's concept is an easy online game development for everyone. Therefore, the development is also based on this policy. The target is online game for up to 64 people supported by EOS, but the main is small-party action game. If you want to create MMO, you should use [Mirror](https://github.com/MirrorNetworking/Mirror). 
 The roadmap is [here](https://github.com/users/skeyll/projects/5/views/2). For the time being, add basic function for online-game and improve performance. If you need any necessary functions, please post it to Github Issue or give a pull request. Great thanks for all contributions!

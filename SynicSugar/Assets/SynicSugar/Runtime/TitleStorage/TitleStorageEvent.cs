@@ -14,7 +14,7 @@ namespace SynicSugar.TitleStorage {
         public void Register(Action<string, float> inProgress){
             InProgress += inProgress;
         }
-        internal void Clear(){
+        public void Clear(){
             InProgress = null;
         }
         internal void InProgressing(float progress){

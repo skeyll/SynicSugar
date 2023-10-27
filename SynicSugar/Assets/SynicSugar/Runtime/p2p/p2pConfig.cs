@@ -70,7 +70,7 @@ namespace SynicSugar.P2P {
         /// </summary>
         public GetPacketFrequency getPacketFrequency = GetPacketFrequency.PerSecond50;
         /// <summary>
-        /// Frequency of BurstFPS's GetPacket  in a frame. Recommend: 2-5
+        /// Frequency of BurstFPS's GetPacket in a frame. Recommend: 2-5
         /// </summary>
         [Range(2, 10)]
         public int BurstReceiveBatchSize = 5;

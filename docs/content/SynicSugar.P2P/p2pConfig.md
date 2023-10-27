@@ -21,14 +21,16 @@ If this is no longer needed, we call *[CancelCurrentMatchMake](../../SynicSugar.
 ### Properity
 | API | description |
 |---|---|
-| [interval_sendToAll](../p2pConfig/intervalsendtoall) | Sending to each users interval of Rpc |
-| [autoSyncInterval](../p2pConfig/autosyncinterval) | Sending new value interval of SyncVar |
-| [GetPacketFrequency](../p2pConfig/getpacketfrequency) | Frequency of calling PacketReceiver |
 | [packetReliability](../p2pConfig/packetreliability) | The delivery reliability of a packet |
-| [UseDisconnectedEarlyNotify](../p2pConfig/usedisconnectedearlynotify) | Notify at the step of a connection interrupted |
 | [FirstConnection](../p2pConfig/firstconnection) | Delay to return true after matchmaking is completed |
-| [SamplesPerPing](../p2pConfig/samplesperping) | Number of samples used for a ping |
+| [UseDisconnectedEarlyNotify](../p2pConfig/usedisconnectedearlynotify) | Notify at the step of a connection interrupted |
+| [GetPacketFrequency](../p2pConfig/getpacketfrequency) | Frequency of getting packet |
+| [BurstReceiveBatchSize](../p2pConfig/burstreceivebatchsize) | Frequency of BurstFPS's GetPacket in a frame |
+| [RPCBatchSize](../p2pConfig/rpcbatchsize) | Frequency of sending RPC in a frame |
+| [LargePacketBatchSize](../p2pConfig/largepacketbatchsize) | Frequency of sending LargePacket(Target)RPC in a frame |
+| [autoSyncInterval](../p2pConfig/autosyncinterval) | Sending new value interval of SyncVar |
 | [AutoRefreshPing](../p2pConfig/autorefreshping) | If true, update ping automatically |
+| [SamplesPerPing](../p2pConfig/samplesperping) | Number of samples used for a ping |
 | [PingAutoRefreshRateSec](../p2pConfig/pingautorefreshratesec) | Interval sec to update ping automatically |
 
 

@@ -1,8 +1,8 @@
 +++
-title = "asyncLobbyIDMethod"
-weight = 7
+title = "AsyncLobbyIDMethod"
+weight = 6
 +++
-## asyncLobbyIDMethod
+## AsyncLobbyIDMethod
 <small>*Namespace: SynicSugar.MatchMake* <br>
 *Class: MatchMakeManager* </small>
 
