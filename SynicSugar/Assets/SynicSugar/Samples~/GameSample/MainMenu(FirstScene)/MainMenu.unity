@@ -1462,13 +1462,13 @@ MonoBehaviour:
 
     SingleScene
 
-    2D-simple chat and stress test
+    2D-simple chat
 
-    VoiceChat(OpenVC
-    or PushToTalk)
+    VoiceChat(OpenVC or PushToTalk)
 
 
     *Recommend
+    (Include Almost all APIs)
 
     ReConnect
 

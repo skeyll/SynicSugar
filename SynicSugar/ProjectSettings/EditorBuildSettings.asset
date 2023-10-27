@@ -20,4 +20,5 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/SynicSugar/Samples/GameSample/Chat/Chat.unity
     guid: 52f18ba6adc5c53409a96d5576f60f10
-  m_configObjects: {}
+  m_configObjects:
+    com.unity.addressableassets: {fileID: 11400000, guid: e270bf60342d4064daea9f1b06fd2269, type: 2}

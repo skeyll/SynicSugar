@@ -26,8 +26,7 @@ namespace SynicSugar.P2P {
         private static Lazy<ConnectHub> instance = new Lazy<ConnectHub>();
         public static ConnectHub Instance => instance.Value;
 
-        public ConnectHub(){
-        }
+        public ConnectHub(){}
         byte ch_r;
         string id_r;
         ArraySegment<byte> payload_r;
@@ -47,8 +46,8 @@ namespace SynicSugar.P2P {
                 p2pConnectorForOtherAssembly.Instance.AutoRefreshPings(p2pConnectorForOtherAssembly.Instance.p2pToken.Token).Forget();
             }
 
-            if(p2pConfig.Instance.getPacketFrequency == p2pConfig.GetPacketFrequency.PerSecond3xFPS){
-                ReciveThreePackets().Forget();
+            if(p2pConfig.Instance.getPacketFrequency == p2pConfig.GetPacketFrequency.PerSecondBurstFPS){
+                ReciveMultiplePackets().Forget();
             }else{
                 RecivePacket().Forget();
             }
@@ -129,28 +128,24 @@ namespace SynicSugar.P2P {
             }
         }
         
-        async UniTask ReciveThreePackets(){
+        async UniTask ReciveMultiplePackets(){
+            int count = p2pConfig.Instance.BurstReceiveBatchSize;
+
             while(!p2pConnectorForOtherAssembly.Instance.p2pToken.IsCancellationRequested){
-                //1st
                 bool recivePacket = p2pConnectorForOtherAssembly.Instance.GetPacketFromBuffer(ref ch_r, ref id_r, ref payload_r);
+                count--;
+
                 if(recivePacket){
                     ConnectHub.Instance.ConvertFromPacket(ref ch_r, ref id_r, ref payload_r);
-                    //2nd
-                    recivePacket = p2pConnectorForOtherAssembly.Instance.GetPacketFromBuffer(ref ch_r, ref id_r, ref payload_r);
-                    if(recivePacket){
-                        ConnectHub.Instance.ConvertFromPacket(ref ch_r, ref id_r, ref payload_r);
-                        //3rd
-                        recivePacket = p2pConnectorForOtherAssembly.Instance.GetPacketFromBuffer(ref ch_r, ref id_r, ref payload_r);
-                        if(recivePacket){
-                            ConnectHub.Instance.ConvertFromPacket(ref ch_r, ref id_r, ref payload_r);
-                        }
-                    }
                 }
 
-                await UniTask.Yield(PlayerLoopTiming.Update);
-
-                if(p2pConnectorForOtherAssembly.Instance == null || p2pConnectorForOtherAssembly.Instance.p2pToken.IsCancellationRequested){
-                    break;
+                if(count == 0 || !recivePacket){
+                    await UniTask.Yield(PlayerLoopTiming.Update);
+                    
+                    if(p2pConnectorForOtherAssembly.Instance == null){
+                        break;
+                    }
+                    count = p2pConfig.Instance.BurstReceiveBatchSize;
                 }
             }
         }
@@ -159,14 +154,22 @@ namespace SynicSugar.P2P {
         public enum CHANNELLIST{
             <#= SyncList #>
         }
-        //For Synic
-        Dictionary<string, byte[]> buffer = new Dictionary<string, byte[]>();
-        Dictionary<string, LargePacketInfomation> packetInfo = new Dictionary<string, LargePacketInfomation>();
+        //For Synic(UserId, value)
+        Dictionary<string, byte[]> synicBuffer = new Dictionary<string, byte[]>();
+        Dictionary<string, SynicPacketInfomation> synicPacketInfo = new Dictionary<string, SynicPacketInfomation>();
+
+        //For LargePacket(UserId, (ch, value))
+        Dictionary<string, Dictionary<byte, byte[]>> largeBuffer = new Dictionary<string,Dictionary<byte, byte[]>>();
+        Dictionary<string, Dictionary<byte, LargePacketsInfomation>> largePacketInfo = new Dictionary<string, Dictionary<byte, LargePacketsInfomation>>();
 
         //Ref(for class)<#= Reference #>
 
         //Clear ref
         private void ClearReferenceDictionaries(){ <#= ClearReference #>
+            synicBuffer.Clear();
+            synicPacketInfo.Clear();
+            largeBuffer.Clear();
+            largePacketInfo.Clear();
         }
 
         //Register(for class)<#= Register #>
@@ -198,7 +201,7 @@ namespace SynicSugar.P2P {
                     p2pConnectorForOtherAssembly.Instance.GetPong(id, payload);
                 return;
                 case CHANNELLIST.Synic:
-                    bool restoredPacket = RestorePackets(ref ch, ref id, ref payload);
+                    bool restoredPacket = RestoreSynicPackets(ref ch, ref id, ref payload);
                     if(!restoredPacket){
     #if SYNICSUGAR_LOG 
                         Debug.LogFormat("ConvertFormPacket: Restore packet is in progress. for {0}", id);
@@ -207,11 +210,11 @@ namespace SynicSugar.P2P {
                     }
                     SyncedSynic(id);
 
-                    p2pConnectorForOtherAssembly.Instance.UpdateSyncedState(id, packetInfo[id].phase);
+                    p2pConnectorForOtherAssembly.Instance.UpdateSyncedState(id, synicPacketInfo[id].phase);
 
                     //Init
-                    buffer.Remove(id);
-                    packetInfo.Remove(id);
+                    synicBuffer.Remove(id);
+                    synicPacketInfo.Remove(id);
 
                     //Change AcceptHostsSynic flag.
                     if(p2pInfo.Instance.IsLoaclUser(id)){
@@ -228,6 +231,10 @@ namespace SynicSugar.P2P {
         /// To record, pass true to attribute.
         /// </summary>
         public void ResendLastRPC(){
+            if(p2pInfo.Instance.LastRPCIsLargePacket){
+                EOSp2p.SendLargePacketsToAll(p2pInfo.Instance.LastRPCch, p2pInfo.Instance.LastRPCPayload).Forget();
+                return;
+            }
             EOSp2p.SendPacketToAll(p2pInfo.Instance.LastRPCch, p2pInfo.Instance.LastRPCPayload).Forget();
         }
         /// <summary>
@@ -237,6 +244,10 @@ namespace SynicSugar.P2P {
         /// </summary>
         /// <param name="target"></param>
         public void ResendLastRPCToTarget(UserId target){
+            if(p2pInfo.Instance.LastRPCIsLargePacket){
+                EOSp2p.SendLargePackets(p2pInfo.Instance.LastRPCch, p2pInfo.Instance.LastRPCPayload, target).Forget();
+                return;
+            }
             EOSp2p.SendPacket(p2pInfo.Instance.LastRPCch, p2pInfo.Instance.LastRPCPayload, target);
         }
         /// <summary>
@@ -245,6 +256,10 @@ namespace SynicSugar.P2P {
         /// To record, pass true to attribute.
         /// </summary>
         public void ResendLastTargetRPC(){
+            if(p2pInfo.Instance.LastTargetRPCIsLargePacket){
+                EOSp2p.SendLargePackets(p2pInfo.Instance.LastTargetRPCch, p2pInfo.Instance.LastTargetRPCPayload, p2pInfo.Instance.LastTargetRPCUserId).Forget();
+                return;
+            }
             EOSp2p.SendPacket(p2pInfo.Instance.LastTargetRPCch, p2pInfo.Instance.LastTargetRPCPayload, p2pInfo.Instance.LastTargetRPCUserId);
         }
 
@@ -264,7 +279,7 @@ namespace SynicSugar.P2P {
             using var selfCompressor  = new BrotliCompressor();
             MemoryPackSerializer.Serialize(selfCompressor, synicContainer);
 
-            EOSp2p.SendLargePacket((byte)CHANNELLIST.Synic, selfCompressor.ToArray(), targetId, syncedPhase, syncSinglePhase);
+            EOSp2p.SendSynicPackets((byte)CHANNELLIST.Synic, selfCompressor.ToArray(), targetId, syncedPhase, syncSinglePhase);
 
             if(!syncTargetsData || !p2pInfo.Instance.IsHost()){
                 return;
@@ -276,14 +291,43 @@ namespace SynicSugar.P2P {
             using var targetCompressor  = new BrotliCompressor();
             MemoryPackSerializer.Serialize(targetCompressor, synicContainer);
 
-            EOSp2p.SendLargePacket((byte)CHANNELLIST.Synic, targetCompressor.ToArray(), targetId, syncedPhase, syncSinglePhase, false);
+            EOSp2p.SendSynicPackets((byte)CHANNELLIST.Synic, targetCompressor.ToArray(), targetId, syncedPhase, syncSinglePhase, false);
         }
 
         <#= GenerateSynicContainer #>
         <# } #>
+        
+        //Synced 0 = index, 1 = chunk
+        bool RestoreLargePackets(ref byte ch, ref string id, ref ArraySegment<byte> payload){
+            //Prep
+            if(!largeBuffer.ContainsKey(id)){
+                largePacketInfo.Add(id, new Dictionary<byte, LargePacketsInfomation>());
+                largeBuffer.Add(id, new Dictionary<byte, byte[]>());
+            }
+            if(!largeBuffer[id].ContainsKey(ch)){
+                largePacketInfo[id].Add(ch, new LargePacketsInfomation(){ chunk = payload[1] });
+                //Prep enough byte[]
+                largeBuffer[id].Add(ch, new byte[payload[1] * 1160]);
+            }
+
+            int packetIndex = payload[0];
+            int offset = packetIndex * 1160;
+
+    #if SYNICSUGAR_LOG
+            Debug.Log($"RestoreLargePackets: PacketInfo:: ch {ch} / index {payload[0]} / chunk {payload[1]}");
+    #endif
+            //Remove header
+            Span<byte> packetPayload = payload.Slice(2);
+            largePacketInfo[id][ch].currentSize += packetPayload.Length;
+            //Copy Byte from what come in
+            Buffer.BlockCopy(packetPayload.ToArray(), 0, largeBuffer[id][ch], offset, packetPayload.Length);
+
+            //Comming all?
+            return largePacketInfo[id][ch].currentSize + 1160 > largeBuffer[id][ch].Length ? true : false;
+        }
 
         //Synced 0 = index, 1 = chunk, 2 = phase, 3 = syncSinglePhase, 4 = isSelf
-        bool RestorePackets(ref byte ch, ref string id, ref ArraySegment<byte> payload){
+        bool RestoreSynicPackets(ref byte ch, ref string id, ref ArraySegment<byte> payload){
             if(payload[4] == 0){
                 if(p2pInfo.Instance.IsHost(id) && p2pInfo.Instance.AcceptHostSynic){
                     id = p2pInfo.Instance.LocalUserId.ToString();
@@ -292,26 +336,26 @@ namespace SynicSugar.P2P {
                 }
             }
 
-            if(!buffer.ContainsKey(id)){
-                packetInfo.Add(id, new LargePacketInfomation(){  chunk = payload[1], 
+            if(!synicBuffer.ContainsKey(id)){
+                synicPacketInfo.Add(id, new SynicPacketInfomation(){  basis = new (){ chunk = payload[1]}, 
                                                                             phase = payload[2], 
                                                                             syncSinglePhase = payload[3] == 1 ? true : false });
                 //Prep enough byte[]
-                buffer.Add(id, new byte[payload[1] * 1100]);
+                synicBuffer.Add(id, new byte[payload[1] * 1100]);
             }
             int packetIndex = payload[0];
             int offset = packetIndex * 1100;
 
     #if SYNICSUGAR_LOG
-            Debug.Log($"RestorePackets: PacketInfo:: index {payload[0]} / chunk {payload[1]} / phase {payload[2]} / syncSinglePhase {payload[3]}");
+            Debug.Log($"RestoreSynicPackets: PacketInfo:: index {payload[0]} / chunk {payload[1]} / phase {payload[2]} / syncSinglePhase {payload[3]}");
     #endif
             //Remove header
             Span<byte> packetPayload = payload.Slice(5);
-            packetInfo[id].currentSize += packetPayload.Length;
+            synicPacketInfo[id].basis.currentSize += packetPayload.Length;
             //Copy Byte from what come in
-            Buffer.BlockCopy(packetPayload.ToArray(), 0, buffer[id], offset, packetPayload.Length);
+            Buffer.BlockCopy(packetPayload.ToArray(), 0, synicBuffer[id], offset, packetPayload.Length);
             //Comming all?
-            return packetInfo[id].currentSize + 1100 > buffer[id].Length ? true : false;
+            return synicPacketInfo[id].basis.currentSize + 1100 > synicBuffer[id].Length ? true : false;
         }
 
         /// <summary>
@@ -320,17 +364,17 @@ namespace SynicSugar.P2P {
         void SyncedSynic(string overwriterUserId){
             //Deserialize packet
             using var decompressor = new BrotliDecompressor();
-            Span<byte> transmittedPaylaod = new Span<byte>(buffer[overwriterUserId]);
+            Span<byte> transmittedPaylaod = new Span<byte>(synicBuffer[overwriterUserId]);
 
-            var decompressedBuffer = decompressor.Decompress(transmittedPaylaod.Slice(0, packetInfo[overwriterUserId].currentSize));
+            var decompressedBuffer = decompressor.Decompress(transmittedPaylaod.Slice(0, synicPacketInfo[overwriterUserId].basis.currentSize));
             SynicContainer container = MemoryPackSerializer.Deserialize<SynicContainer>(decompressedBuffer);
 #if SYNICSUGAR_LOG
             Debug.Log($"SyncedSynic: Deserialize is Success for {overwriterUserId}");
     #endif
 
             //Packet data
-            int phase = packetInfo[overwriterUserId].phase;
-            bool syncSinglePhase = packetInfo[overwriterUserId].syncSinglePhase;
+            int phase = synicPacketInfo[overwriterUserId].phase;
+            bool syncSinglePhase = synicPacketInfo[overwriterUserId].syncSinglePhase;
 
             switch(phase){<#= SyncedInvoker #>
                 default:

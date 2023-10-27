@@ -1,6 +1,6 @@
 +++
 title = "MatchMakingGUIEvents"
-weight = 8
+weight = 3
 +++
 ## MatchMakingGUIEvents
 <small>*Namespace: SynicSugar.MatchMake* <br>
@@ -9,16 +9,17 @@ weight = 8
 public MatchMakingGUIEvents MatchMakingGUIEvents
 
 ### Description
-To manage GUI in matchmaking. Invoke these on each phase.<br>
+To manage GUI state in matchmaking. Invoke these on each phase.<br>
 
-Can set some value on UnityEditor.
+Can set some value on UnityEditor.<br>
+To use TextMeshPro, set SYNICSUGAR_TMP to Scripting Define Symbols.
 
 
 ### Properity
 | API | description |
 |---|---|
 | canKick | True after meet required member counts |
-| stateText | GUIText to display matchmaking state |
+| stateText | UI Text or TMP_Text to display matchmaking state |
 
 ### Event
 | API | description |

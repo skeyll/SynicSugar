@@ -11,18 +11,23 @@ public sealed class RpcAttribute : Attribute
 
 
 ### Description
-On Fire, invoked in other peers.<br>
-1st args can be synchronized.<br>
-Anything that can be serialized by [MemoryPack](https://github.com/Cysharp/MemoryPack).
+Invoke method in local and other peers' instance.<br>
 
-Check *[p2pConfig.interval_sendToAll](../p2pConfig/intervalsendtoall)*.<br>
-*This API is most likely a change.*
+Can send 1st argument (that can serialize with [MemoryPack](https://github.com/Cysharp/MemoryPack).<br>
+When argument is over 1170 bytes, make true the first argument of RPC. SynicSugar can send it up to 296960 Bytes (about 300KB) as LargePacket. <br>
+Normally, RPC is sent to one peer per frame, but by *[p2pConfig.RPCBatchSize](../p2pConfig/rpcbatchsize)*, it can be sent to multiple peers within the same frame.<br>
+
+EOS has Packet reliability, but the packet can not be reached to disconnected peers. When shouldRecordLastPacketInfo is true, can get payload info from p2pInfo that packets that must be sent.<br>
+*[ConnectHub.Instance.ResendLastRPC](../../SynicSugar.P2P/ConnectHub/resendlastrpc)*,
+*[ConnectHub.Instance.ResendLastRPCToTarget](../../SynicSugar.P2P/ConnectHub/resendlastrpctotarget)*
+
 
 ### Constructor
 
 | API | description |
 |---|---|
-| Rpc() |  |
+| Rpc() | Standard RPC |
+| Rpc(bool isLargePacket, bool shouldRecordLastPacketInfo) | Exceed 1170 bytes? Record latest payload? |
 
 
 
@@ -30,9 +35,15 @@ Check *[p2pConfig.interval_sendToAll](../p2pConfig/intervalsendtoall)*.<br>
 using SynicSugar.P2P;
 
 [NetworkPlayer]
-public class NetworkSample {
+public partial class NetworkSample {
     [Rpc]
-    void RPCFuction(string message){
+    public void StandardRpc(string message){
+    }
+    [Rpc(true, false)]
+    public void LargePacketRpc(string message){
+    }
+    [Rpc(false, true)]
+    public void ImportantRpc(string message){
     }
 }
 ```

@@ -10,6 +10,7 @@ public sealed class SyncVarAttribute : Attribute
 
 
 ### Description
+**Under testing and not optimized.**<br>
 When values are changed, synchronize with other peers automatically.<br>
 If not set syncIntervalMs, use *[p2pConfig.autoSyncInterval](../p2pConfig/autosyncinterval)*.<br>
 

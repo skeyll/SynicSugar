@@ -31,29 +31,107 @@
                 return;";
         }
         //TargetRPC
-        internal string CreatePlayerTargetRpcPacketConvert(string rootName, string method, string param, string paramNs){
-            string paramName = string.IsNullOrEmpty(param) ? System.String.Empty : $", MemoryPackSerializer.Deserialize<{GetFullName(paramNs, param)}>(payload)";
+        internal string CreatePlayerTargetRpcPacketConvert(string rootName, string method, string param, string paramNs, bool isLargePacket){
+            string paramName = System.String.Empty;
+            if (string.IsNullOrEmpty(param)){
+                //Pass
+            }else if (isLargePacket){
+                paramName = $", MemoryPackSerializer.Deserialize<{GetFullName(paramNs, param)}>(decompressed{method})";
+            }else{ //For normal packet
+                paramName = $", MemoryPackSerializer.Deserialize<{GetFullName(paramNs, param)}>(payload)";
+            }
+
+            string largepacketHeader = isLargePacket ? $@"{{
+                    if(!RestoreLargePackets(ref ch, ref id, ref payload)){{
+                #if SYNICSUGAR_LOG 
+                        Debug.LogFormat(""ConvertFormPacket: Restore Large packet is in progress. for {{0}} "", ch);
+                #endif
+                        return;
+                    }}
+                    using var decompressor{method} = new BrotliDecompressor();
+                    Span<byte> {method}Paylaod = new Span<byte>(largeBuffer[id][ch]);
+
+                    var decompressed{method} = decompressor{method}.Decompress({method}Paylaod.Slice(0, largePacketInfo[id][ch].currentSize));
+                ": "";
+            string footer = isLargePacket ? $@"
+                    largeBuffer[id].Remove(ch);
+                    largePacketInfo[id].Remove(ch);
+                return; }}" : "return; ";
+
             return $@"
-                case CHANNELLIST.{method}:
+                case CHANNELLIST.{method}:{largepacketHeader}
                     {rootName}[id].{method}(UserId.GetUserId(id){paramName});
-                return;";
+                {footer}";
         }
         //RPC
-        internal string CreatePlayerRpcPacketConvert(string rootName, string method, string param, string paramNs){
-            string paramName = string.IsNullOrEmpty(param) ? System.String.Empty : $"MemoryPackSerializer.Deserialize<{GetFullName(paramNs, param)}>(payload)";
+        internal string CreatePlayerRpcPacketConvert(string rootName, string method, string param, string paramNs, bool isLargePacket){
+            string paramName = System.String.Empty;
+            
+            if (string.IsNullOrEmpty(param)){
+                //Pass
+            }else if (isLargePacket){
+                paramName = $"MemoryPackSerializer.Deserialize<{GetFullName(paramNs, param)}>(decompressed{method})";
+            }else{ //For normal packet
+                paramName = $"MemoryPackSerializer.Deserialize<{GetFullName(paramNs, param)}>(payload)";
+
+            }
+
+            string largepacketHeader = isLargePacket ? $@"{{
+                    if(!RestoreLargePackets(ref ch, ref id, ref payload)){{
+                #if SYNICSUGAR_LOG 
+                        Debug.LogFormat(""ConvertFormPacket: Restore Large packet is in progress. for {{0}}"", ch);
+                #endif
+                        return;
+                    }}
+                    using var decompressor{method} = new BrotliDecompressor();
+                    Span<byte> {method}Paylaod = new Span<byte>(largeBuffer[id][ch]);
+
+                    var decompressed{method} = decompressor{method}.Decompress({method}Paylaod.Slice(0, largePacketInfo[id][ch].currentSize));
+                " : "";
+            string footer = isLargePacket ? $@"
+                    largeBuffer[id].Remove(ch);
+                    largePacketInfo[id].Remove(ch);
+                return; }}" : "return;";
+
             return $@"
-                case CHANNELLIST.{method}:
+                case CHANNELLIST.{method}:{largepacketHeader}
                     {rootName}[id].{method}({paramName});
-                return;";
+                {footer}";
         }
-        internal string CreateCommonsRpcPacketConvert(string rootName, string method, string param, string paramNs){
-            //string fixedParam = string.IsNullOrEmpty(param) ? System.String.Empty : $"MemoryPackSerializer.Deserialize<{GetFullName(paramNameSpace, param)}>(payload))";
-            string paramName = string.IsNullOrEmpty(param) ? System.String.Empty : $"MemoryPackSerializer.Deserialize<{GetFullName(paramNs, param)}>(payload)";
+        internal string CreateCommonsRpcPacketConvert(string rootName, string method, string param, string paramNs, bool isLargePacket){
+            string paramName = System.String.Empty;
+            
+            if (string.IsNullOrEmpty(param)){
+                //Pass
+            }else if (isLargePacket){
+                paramName = $"MemoryPackSerializer.Deserialize<{GetFullName(paramNs, param)}>(decompressed{method})";
+            }else{ //For normal packet
+                paramName = $"MemoryPackSerializer.Deserialize<{GetFullName(paramNs, param)}>(payload)";
+            }
+
+            string largepacketHeader = isLargePacket ? $@"{{
+                    if(!RestoreLargePackets(ref ch, ref id, ref payload)){{
+                #if SYNICSUGAR_LOG 
+                        Debug.LogFormat(""ConvertFormPacket: Restore Large packet is in progress. for {{0}}"", ch);
+                #endif
+                        return;
+                    }}
+                    using var decompressor{method} = new BrotliDecompressor();
+                    Span<byte> {method}Paylaod = new Span<byte>(largeBuffer[id][ch]);
+
+                    var decompressed{method} = decompressor{method}.Decompress({method}Paylaod.Slice(0, largePacketInfo[id][ch].currentSize));
+                " : "";
+
+            string footer = isLargePacket ? $@"
+                    largeBuffer[id].Remove(ch);
+                    largePacketInfo[id].Remove(ch);
+                return; }}" : "return;";
+
             return $@"
-                case CHANNELLIST.{method}:
+                case CHANNELLIST.{method}:{largepacketHeader}
                     {rootName}.isLocalCall = false;
                     {rootName}.{method}({paramName});
-                return;";
+                {footer}";
         }
 
         //ClearReference
@@ -152,36 +230,61 @@
 ";
         }
         //Rpc Method
-        internal string CreatePlayerRpcMethod(string fnName, string paramNs, string paramType, bool recordLastInfo){
+        internal string CreatePlayerRpcMethod(string fnName, string paramNs, string paramType, bool recordLastInfo, bool isLargePacket){
             string arg = string.IsNullOrEmpty(paramType) ? "" : $"{GetFullName(paramNs, paramType)} value";
             string serializer = string.IsNullOrEmpty(arg) ? "null" : "MemoryPack.MemoryPackSerializer.Serialize(value)";
+            string largepacketCompresser = isLargePacket ? @"
+                using var compressor  = new BrotliCompressor();
+                MemoryPackSerializer.Serialize(compressor, value);" : "";
+            if (isLargePacket && !string.IsNullOrEmpty(arg)){
+                serializer = "compressor.ToArray()";
+            }
+
             string recordOption = recordLastInfo ? ", true" : "";
+            string methodType = isLargePacket ? "SendLargePacketsToAll" : "SendPacketToAll";
             return $@"
         void SynicSugarRpc_{fnName}({arg}) {{
-            if(isLocal){{
-                EOSp2p.SendPacketToAll((byte)ConnectHub.CHANNELLIST.{fnName}, {serializer}{recordOption}).Forget();
+            if(isLocal){{{largepacketCompresser}
+                EOSp2p.{methodType}((byte)ConnectHub.CHANNELLIST.{fnName}, {serializer}{recordOption}).Forget();
             }}
         }}";
         }
-        internal string CreatePlayerTargetRpcMethod(string fnName, string paramNs, string paramType, bool recordLastInfo){
+        internal string CreatePlayerTargetRpcMethod(string fnName, string paramNs, string paramType, bool recordLastInfo, bool isLargePacket){
             string arg = string.IsNullOrEmpty(paramType) ? "" : $", {GetFullName(paramNs, paramType)} value";
             string serializer = string.IsNullOrEmpty(arg) ? "null" : "MemoryPack.MemoryPackSerializer.Serialize(value)";
+            string largepacketCompresser = isLargePacket ? @"
+                using var compressor  = new BrotliCompressor();
+                MemoryPackSerializer.Serialize(compressor, value);" : "";
+            if (isLargePacket && !string.IsNullOrEmpty(arg)){
+                serializer = "compressor.ToArray()";
+            }
             string recordOption = recordLastInfo ? ", true" : "";
+            string methodType = isLargePacket ? "SendLargePackets" : "SendPacket";
+            string forget = isLargePacket ? ".Forget()" : "";
+
             return $@"
         void SynicSugarRpc_{fnName}(UserId id{arg}) {{
-            if(isLocal){{
-                EOSp2p.SendPacket((byte)ConnectHub.CHANNELLIST.{fnName}, {serializer}, id{recordOption});
+            if(isLocal){{{largepacketCompresser}
+                EOSp2p.{methodType}((byte)ConnectHub.CHANNELLIST.{fnName}, {serializer}, id{recordOption}){forget};
             }}
         }}";
         }
-        internal string CreateCommonsRpcMethod(string fnName, string paramNs, string paramType, bool recordLastInfo){
+        internal string CreateCommonsRpcMethod(string fnName, string paramNs, string paramType, bool recordLastInfo, bool isLargePacket){
             string arg = string.IsNullOrEmpty(paramType) ? "" : $"{GetFullName(paramNs, paramType)} value";
             string serializer = string.IsNullOrEmpty(arg) ? "null" : "MemoryPack.MemoryPackSerializer.Serialize(value)";
+            string largepacketCompresser = isLargePacket ? @"
+                using var compressor  = new BrotliCompressor();
+                MemoryPackSerializer.Serialize(compressor, value);" : "";
+
+            if (isLargePacket && !string.IsNullOrEmpty(arg)){
+                serializer = "compressor.ToArray()";
+            }
             string recordOption = recordLastInfo ? ", true" : "";
+            string methodType = isLargePacket ? "SendLargePacketsToAll" : "SendPacketToAll";
             return $@"
         void SynicSugarRpc_{fnName}({arg}) {{
-            if(isLocalCall){{
-                EOSp2p.SendPacketToAll((byte)ConnectHub.CHANNELLIST.{fnName}, {serializer}{recordOption}).Forget();
+            if(isLocalCall){{{largepacketCompresser}
+                EOSp2p.{methodType}((byte)ConnectHub.CHANNELLIST.{fnName}, {serializer}{recordOption}).Forget();
             }}
             isLocalCall = true;
         }}";

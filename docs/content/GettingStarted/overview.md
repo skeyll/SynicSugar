@@ -1,5 +1,5 @@
 +++
-title =   "Overview"
+title = "Overview"
 weight = 0
 +++
 ### Overview
@@ -29,3 +29,5 @@ I start this project as "EOS Sample" only to test EOS SDK for my game. So, some 
 
 ### Support on Unity
 SynicSugar support Unity 21.3 and later, which adopts Roslyn Source Generator. SynicSugar use SourceGenerator and IL PostProcesser to generate codes for network process. SynicSugar will not support older Unity. In addition to it, we have to build  with IL2CPP a game that uses SynicSugar for some depend libraries. Currently, SynicSugar officially supports games developed with the traditional MonoBehaviour/Component. For ECS, it isn't yet.<br>
+
+‥‥

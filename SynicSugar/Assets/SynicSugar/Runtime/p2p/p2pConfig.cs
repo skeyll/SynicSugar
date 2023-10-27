@@ -21,35 +21,11 @@ namespace SynicSugar.P2P {
         }
 #endregion
         ///Options 
-        [Header("Interval of sending each users[ms]. Recommend: 3ms-")]
-        /// <summary>
-        /// Interval ms on sending to each user in Rpc. <br />>
-        /// If interval is too short and the sending buffer becomes full, the next packets will be discarded.<br />
-        /// Recommend: 3ms-
-        /// </summary>
-        public int interval_sendToAll = 3;
-        [Header("Interval until sending next new value[ms]. Recommend: 1000-3000ms.")]
-        /// <summary>
-        /// Interval ms that a SyncVar dosen't been send even if the value changes after send that SyncVar.<br />
-        /// If set short value, may get congesting the band.<br />
-        /// Recommend: 1000-3000ms.
-        /// </summary>
-        public int autoSyncInterval = 1000;
         /// <summary>
         /// Quality of connection
         /// </summary>
         public PacketReliability packetReliability = PacketReliability.ReliableOrdered;
-        
-        public enum GetPacketFrequency {
-            PerSecond3xFPS, PerSecondFPS, PerSecond100, PerSecond50, PerSecond25
-        }
-        [Header("PacketReceiver's Frequency/per seconds *Never more than game FPS.")]
-        /// <summary>
-        /// Frequency of calling PacketReceiver.<br />
-        /// Cannot exceed the recive's fps of the app's. <br />
-        /// </summary>
-        public GetPacketFrequency getPacketFrequency = GetPacketFrequency.PerSecond50;
-        public bool UseDisconnectedEarlyNotify;
+
         /// <summary>
         /// Delay time to return true after matchmaking.<br />
         /// After the matchmaking is established, EOS need to request and accept connections with each other. This is the setting of how to handle it.
@@ -82,11 +58,49 @@ namespace SynicSugar.P2P {
         /// MEMO: Can't change this in game for performance now.
         /// </summary>
         internal bool AllowDelayedDelivery;
-        
+        public bool UseDisconnectedEarlyNotify;
+
+        public enum GetPacketFrequency {
+            PerSecondBurstFPS, PerSecondFPS, PerSecond100, PerSecond50, PerSecond25
+        }
+        [Space(10)] 
+        /// <summary>
+        /// PacketReceiver's Frequency/per seconds.<br />
+        /// Cannot exceed the recive's fps of the app's. <br />
+        /// </summary>
+        public GetPacketFrequency getPacketFrequency = GetPacketFrequency.PerSecond50;
+        /// <summary>
+        /// Frequency of BurstFPS's GetPacket in a frame. Recommend: 2-5
+        /// </summary>
+        [Range(2, 10)]
+        public int BurstReceiveBatchSize = 5;
+        [Range(1, 10)]
+        /// <summary>
+        /// The number of target users to be sent packet of RPC in a frame. Wait for a frame after a set. <br />
+        /// The sending buffer is probably around 64 KB, so it should not exceed this. If we set 0 from the script, it will cause crash.
+        /// </summary>
+        public int RPCBatchSize = 3;
+        [Range(1, 10)]
+        /// <summary>
+        /// The number of packets to be sent of a large packet in a frame. Wait for a frame after a set. <br />
+        /// The sending buffer is probably around 64 KB, so it should not exceed this. If we set 0 from the script, it will cause crash.
+        /// </summary>
+        public int LargePacketBatchSize = 3;
+        [Range(0, 5000)]
+        /// <summary>
+        /// Interval ms that a SyncVar dosen't been send even if the value changes after send that SyncVar.<br />
+        /// If set short value, may get congesting the band.<br />
+        /// Recommend: 1000-3000ms.
+        /// </summary>
+        public int autoSyncInterval = 1000;
+
+        /// <summary>
+        /// False if ping is not needed. We can also refresh to call RefreshPing manually.
+        /// </summary>
+        [Space(10)] 
+        public bool AutoRefreshPing;
         [Range(1, 4)]
         public byte SamplesPerPing;
-        [Header("If false, need call RefreshPing to GetPing.")]
-        public bool AutoRefreshPing;
         [Range(1, 60)]
         public int PingAutoRefreshRateSec = 10;
     }

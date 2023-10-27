@@ -26,9 +26,9 @@ If this is no longer needed, we call *[CancelCurrentMatchMake](../MatchMakeManag
 | [playerprefsSaveKey](../MatchMakeManager/playerprefssavekey) | The key to save LobbyID |
 | [customSaveLobbyID](../MatchMakeManager/customsavelobbyid) | UnityEvent to save LobbyID |
 | [customDeleteLobbyID](../MatchMakeManager/customdeletelobbyid) | UnityEvent to delete LobbyID |
-| [lobbyIDMethod](../MatchMakeManager/lobbyidmethod) | Actions to recconect Lobby |
-| [asyncLobbyIDMethod](../MatchMakeManager/asynclobbyidmethod) | Func&lt;UniTask&gt; to recconect Lobby |
-| [MatchMakingGUIEvents](../MatchMakeManager/matchmakingguievents) | To manage GUI in matchmaking |
+| [lobbyIDMethod](../../SynicSugar.MatchMake/lobbyidmethod) | Actions to recconect Lobby |
+| [asyncLobbyIDMethod](../../SynicSugar.MatchMake/asynclobbyidmethod) | Func&lt;UniTask&gt; to recconect Lobby |
+| [MatchMakingGUIEvents](../../SynicSugar.MatchMake/matchmakingguievents) | To manage GUI in matchmaking |
 | [MemberUpdatedNotifier](../MatchMakeManager/memberupdatednotifier) | Notify when a user attributes is updated |
 | [LastResultCode](../MatchMakeManager/lastresultcode) | ResultCode if get error |
 | [isHost](../MatchMakeManager/ishost) | Whether this local user is the owner of current Lobby |

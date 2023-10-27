@@ -7,13 +7,23 @@ using System.Threading;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+#if SYNICSUGAR_TMP
+using TMPro;
+#endif
 
 namespace  SynicSugar.Samples {
     public class MatchMake : MonoBehaviour{
         [SerializeField] GameObject matchmakePrefab;
         [SerializeField] Button startMatchMake, closeLobby, startGame, backtoMenu, hostConclude;
         [SerializeField] MatchMakeConditions matchConditions;
-        [SerializeField] Text buttonText, matchmakeState;
+        [SerializeField] Text buttonText;
+    #if SYNICSUGAR_TMP
+        [SerializeField] TMP_Text matchmakeState;
+
+    #else
+        [SerializeField] Text matchmakeState;
+
+    #endif
         [SerializeField] GameModeSelect modeSelect; //For tankmatchmaking scene, and to cancel matchmake then return to menu.
         //For Tank
         public InputField nameField;
@@ -37,7 +47,11 @@ namespace  SynicSugar.Samples {
         /// </summary>
         void SetGUIEvents(){
             MatchMakeManager.Instance.MatchMakingGUIEvents = MatchMakeConfig.SetMatchingText(MatchMakeConfig.Langugage.EN);
+        #if SYNICSUGAR_TMP
             MatchMakeManager.Instance.MatchMakingGUIEvents.stateText = matchmakeState;
+        #else
+            MatchMakeManager.Instance.MatchMakingGUIEvents.stateText = matchmakeState;
+        #endif
 
             MatchMakeManager.Instance.MatchMakingGUIEvents.DisableStart += OnDisableStart;
             MatchMakeManager.Instance.MatchMakingGUIEvents.EnableCancelKick += OnEnableCancel;

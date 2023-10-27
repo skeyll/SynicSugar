@@ -1,7 +1,11 @@
 #pragma warning disable CS0414 //The field is assigned but its value is never used
 using System;
 using SynicSugar.P2P;
+#if SYNICSUGAR_TMP
+using TMPro;
+#else
 using UnityEngine.UI;
+#endif
 
 namespace SynicSugar.MatchMake {
     public class MemberUpdatedNotifier {
@@ -21,16 +25,29 @@ namespace SynicSugar.MatchMake {
         }
     }
     
-    [System.Serializable]
+    [Serializable]
     public class MatchMakingGUIEvents {
         public MatchMakingGUIEvents(){}
+    #if SYNICSUGAR_TMP
+        public MatchMakingGUIEvents(TMP_Text displayedStateText){
+            stateText = displayedStateText;
+        }
+    #else
         public MatchMakingGUIEvents(Text displayedStateText){
             stateText = displayedStateText;
         }
+    #endif
+
         /// <summary>
         /// To display text state.
         /// </summary>
+    #if SYNICSUGAR_TMP
+        public TMP_Text stateText = null;
+    #else
         public Text stateText = null;
+    #endif
+
+        // public TextP
         public bool canKick { get; internal set; }
     #region Event
         /// <summary>
@@ -104,6 +121,50 @@ namespace SynicSugar.MatchMake {
             OnLobbyMemberCountChanged = null;
         }
         
+    #if SYNICSUGAR_TMP
+        internal void ChangeState(State state){
+            switch(state){
+                case State.Standby:
+                    if(stateText != null){
+                        stateText.SetText(System.String.Empty);
+                    }
+                break;
+                case State.Start:
+                    DisableStart?.Invoke();
+                    canKick = false;
+                    if(stateText != null){
+                        stateText.SetText(StartMatchmaking);
+                    }
+                break;
+                case State.Wait:
+                    EnableCancelKick?.Invoke();
+                    canKick = true;
+                    if(stateText != null){
+                        stateText.SetText(WaitForOpponents);
+                    }
+                break;
+                case State.Conclude:
+                    DisableCancelKickConclude?.Invoke();
+                    canKick = false;
+                    if(stateText != null){
+                        stateText.SetText(FinishMatchmaking);
+                    }
+                break;
+                case State.Ready:
+                    if(stateText != null){
+                        stateText.SetText(ReadyForConnection);
+                    }
+                break;
+                case State.Cancel:
+                    DisableCancelKickConclude?.Invoke();
+                    canKick = false;
+                    if(stateText != null){
+                        stateText.SetText(TryToCancel);
+                    }
+                break;
+            }
+        }
+    #else
         internal void ChangeState(State state){
             switch(state){
                 case State.Standby:
@@ -146,6 +207,7 @@ namespace SynicSugar.MatchMake {
                 break;
             }
         }
+    #endif
         bool enabledManualConclude = false;
         /// <summary>
         /// To display Member count. <br />

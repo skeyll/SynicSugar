@@ -14,6 +14,7 @@ namespace SynicSugar.Samples {
         Dictionary<string, Text> vcStates; //Key is UserId.ToString().
         [SerializeField] Transform vcStatesContentParent;
         [SerializeField] Text vcStatePrefab;
+        public RawImage ForLargePacket;
 
         void Start() {
             vcStates = new();
@@ -30,6 +31,12 @@ namespace SynicSugar.Samples {
             // RTCManager.Instance.ParticipantUpdatedNotifier.Register(() => OnStartSpeaking(), t => OnStopSpeaking());
             RTCManager.Instance.ParticipantUpdatedNotifier.Register(t => OnStartSpeaking(t), t => OnStopSpeaking(t));
         }
+    #if SYNICSUGAR_FPSTEST
+        void Update(){
+            float fps = 1f / Time.deltaTime;
+            Debug.Log("--UPDATE-- fps:" + fps);
+        }
+    #endif
         public void SwitchPanelContent(){
             matchmakeCanvas.SetActive(false);
             chatCanvas.SetActive(true);
