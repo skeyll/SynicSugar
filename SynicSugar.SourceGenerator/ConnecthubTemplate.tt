@@ -341,10 +341,10 @@ namespace SynicSugar.P2P {
                                                                             phase = payload[2], 
                                                                             syncSinglePhase = payload[3] == 1 ? true : false });
                 //Prep enough byte[]
-                synicBuffer.Add(id, new byte[payload[1] * 1100]);
+                synicBuffer.Add(id, new byte[payload[1] * 1160]);
             }
             int packetIndex = payload[0];
-            int offset = packetIndex * 1100;
+            int offset = packetIndex * 1160;
 
     #if SYNICSUGAR_LOG
             Debug.Log($"RestoreSynicPackets: PacketInfo:: index {payload[0]} / chunk {payload[1]} / phase {payload[2]} / syncSinglePhase {payload[3]}");
@@ -355,7 +355,7 @@ namespace SynicSugar.P2P {
             //Copy Byte from what come in
             Buffer.BlockCopy(packetPayload.ToArray(), 0, synicBuffer[id], offset, packetPayload.Length);
             //Comming all?
-            return synicPacketInfo[id].basis.currentSize + 1100 > synicBuffer[id].Length ? true : false;
+            return synicPacketInfo[id].basis.currentSize + 1160 > synicBuffer[id].Length ? true : false;
         }
 
         /// <summary>

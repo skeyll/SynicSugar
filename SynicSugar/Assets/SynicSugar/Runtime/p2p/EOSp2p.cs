@@ -362,7 +362,7 @@ namespace SynicSugar.P2P {
                 byte[] result = new byte[2];
 
                 result[0] = 0; 
-                result[1] = (byte)Math.Ceiling(valueLength / 1100f);
+                result[1] = (byte)Math.Ceiling(valueLength / 1160f);
 
                 return result;
             }
@@ -431,7 +431,7 @@ namespace SynicSugar.P2P {
         /// <param name="syncSpecificPhase">If false, synchronize an only specific hierarchy</param>
         /// <param name="isSelfData">Is it own data?</param>
         public static void SendSynicPackets(byte ch, byte[] value, UserId targetId, byte syncedPhase = 9, bool syncSpecificPhase = false, bool isSelfData = true){
-            int length = 1100;
+            int length = 1160;
             byte[] header = GenerateHeader(value.Length, syncedPhase, syncSpecificPhase, isSelfData);
 
         #if SYNICSUGAR_LOG
@@ -439,8 +439,8 @@ namespace SynicSugar.P2P {
         #endif
 
             //Max payload is 1170 but we need some header.
-            for(int startIndex = 0; startIndex < value.Length; startIndex += 1100){
-                length = startIndex + 1100 < value.Length ? 1100 : value.Length - startIndex;
+            for(int startIndex = 0; startIndex < value.Length; startIndex += 1160){
+                length = startIndex + 1160 < value.Length ? 1160 : value.Length - startIndex;
 
                 Span<byte> _payload = new Span<byte>(value, startIndex, length); 
                 //Add header
@@ -477,7 +477,7 @@ namespace SynicSugar.P2P {
                 byte[] result = new byte[5];
 
                 result[0] = 0; 
-                result[1] = (byte)Math.Ceiling(valueLength / 1100f);
+                result[1] = (byte)Math.Ceiling(valueLength / 1160f);
                 result[2] = phase;
                 result[3] = isOnly ? (byte)1 : (byte)0;
                 result[4] = isSelfData ? (byte)1 : (byte)0;

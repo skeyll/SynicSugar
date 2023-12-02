@@ -310,16 +310,16 @@ namespace SynicSugarGenerator
                     "                                                        phase = payload[2], \r\n  " +
                     "                                                                          syncSi" +
                     "nglePhase = payload[3] == 1 ? true : false });\r\n                //Prep enough by" +
-                    "te[]\r\n                synicBuffer.Add(id, new byte[payload[1] * 1100]);\r\n       " +
+                    "te[]\r\n                synicBuffer.Add(id, new byte[payload[1] * 1160]);\r\n       " +
                     "     }\r\n            int packetIndex = payload[0];\r\n            int offset = pack" +
-                    "etIndex * 1100;\r\n\r\n    #if SYNICSUGAR_LOG\r\n            Debug.Log($\"RestoreSynicP" +
+                    "etIndex * 1160;\r\n\r\n    #if SYNICSUGAR_LOG\r\n            Debug.Log($\"RestoreSynicP" +
                     "ackets: PacketInfo:: index {payload[0]} / chunk {payload[1]} / phase {payload[2]" +
                     "} / syncSinglePhase {payload[3]}\");\r\n    #endif\r\n            //Remove header\r\n  " +
                     "          Span<byte> packetPayload = payload.Slice(5);\r\n            synicPacketI" +
                     "nfo[id].basis.currentSize += packetPayload.Length;\r\n            //Copy Byte from" +
                     " what come in\r\n            Buffer.BlockCopy(packetPayload.ToArray(), 0, synicBuf" +
                     "fer[id], offset, packetPayload.Length);\r\n            //Comming all?\r\n           " +
-                    " return synicPacketInfo[id].basis.currentSize + 1100 > synicBuffer[id].Length ? " +
+                    " return synicPacketInfo[id].basis.currentSize + 1160 > synicBuffer[id].Length ? " +
                     "true : false;\r\n        }\r\n\r\n        /// <summary>\r\n        /// Call from Convert" +
                     "FormPacket.\r\n        /// </summary>\r\n        void SyncedSynic(string overwriterU" +
                     "serId){\r\n            //Deserialize packet\r\n            using var decompressor = " +
