@@ -804,7 +804,6 @@ namespace SynicSugar.MatchMake {
                     //This local player manage lobby, So dosen't need update notify.
                     LobbyUpdateNotification.Dispose();
                 }
-                Debug.Log(CurrentLobby.Members.Count);
                 if(useManualFinishMatchMake){
                     MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(UserId.GetUserId(info.TargetUserId), info.CurrentStatus == LobbyMemberStatus.Joined, CurrentLobby.Members.Count == requiredMembers);
                 }else{
@@ -1047,7 +1046,48 @@ namespace SynicSugar.MatchMake {
             }
         }
 #endregion
-#region Cancel
+#region Cancel MatchMake
+    /// <summary>
+    /// Host close matchmaking. Guest Cancel matchmaking.
+    /// </summary>
+    /// <param name="matchingToken"></param>
+    /// <param name="token"></param>
+    /// <returns></returns>
+    internal async UniTask<bool> CloseMatchMaking(CancellationTokenSource matchingToken, CancellationToken token){
+        if(!CurrentLobby.isValid()){
+            MatchMakeManager.Instance.LastResultCode = Result.InvalidAPICall;
+            Debug.LogError($"Cancel MatchMaking: this user has not participated a lobby.");
+            return false;
+        }
+        //Remove notify
+        if(!CurrentLobby.isHost()){
+            LobbyUpdateNotification.Dispose();
+        }
+        LobbyMemberStatusNotification.Dispose();
+        LobbyMemberUpdateNotification.Dispose();
+
+        //Destroy or Leave the current lobby.
+        if(CurrentLobby.isHost()){
+            bool canDestroy = await DestroyLobby(token);
+            
+            if(canDestroy){
+                matchingToken?.Cancel();
+            }else{
+                Debug.LogError($"Cancel MatchMaking: has something problem when destroying the lobby");
+            }
+
+            return canDestroy;
+        }
+
+        bool canLeave = await LeaveLobby(true, token);
+        
+        if(canLeave){
+            matchingToken?.Cancel();
+        }else{
+            Debug.LogError($"Cancel MatchMaking: has something problem when leave from the lobby");
+        }
+        return canLeave;
+    }
     /// <summary>
     /// Cancel MatcgMaking and leave the lobby.
     /// </summary>
