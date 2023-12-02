@@ -538,7 +538,7 @@ namespace SynicSugar.MatchMake {
             };
             LobbySearchSetParameterOptions paramOptions = new LobbySearchSetParameterOptions(){
                 Parameter = bucketAttribute,
-                ComparisonOp = ComparisonOp.Equal
+                ComparisonOp = ComparisonOp.Equal.AsEpic()
             };
 
             result = lobbySearchHandle.SetParameter(ref paramOptions);
@@ -553,7 +553,7 @@ namespace SynicSugar.MatchMake {
             foreach (var attribute in lobbyCondition.Attributes){
                 Epic.OnlineServices.Lobby.AttributeData data = attribute.AsLobbyAttribute();
                 paramOptions.Parameter = data;
-                paramOptions.ComparisonOp = attribute.ComparisonOperator; 
+                paramOptions.ComparisonOp = attribute.ComparisonOperator.AsEpic(); 
 
                 result = lobbySearchHandle.SetParameter(ref paramOptions);
 
@@ -826,11 +826,6 @@ namespace SynicSugar.MatchMake {
                 #if SYNICSUGAR_LOG
                     Debug.Log($"MemberStatusNotyfy: {info.TargetUserId} is promoted to host.");
                 #endif
-                if(!CurrentLobby.isHost()){
-                    //MEMO: Now, if user disconnect from Lobby and then change hosts, the user become newbie.
-                    //Guest Don't need to hold user id 
-                    // p2pInfo.Instance.userIds.LeftUsers = new List<UserId>();
-                }
             }else if(info.CurrentStatus == LobbyMemberStatus.Left) {
                 #if SYNICSUGAR_LOG
                     Debug.Log($"MemberStatusNotyfy: {info.TargetUserId} left from lobby.");
@@ -1252,7 +1247,7 @@ namespace SynicSugar.MatchMake {
 
                 userIds.AllUserIds.Add(targetId);
                 userIds.AllCurrentUserIds.Add(targetId);
-                
+
                 if(userIds.LocalUserId != targetId){
                     userIds.RemoteUserIds.Add(targetId);
                 }
