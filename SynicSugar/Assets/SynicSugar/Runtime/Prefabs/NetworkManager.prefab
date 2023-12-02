@@ -19,7 +19,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &1535193180786485604
 Transform:
@@ -51,7 +51,6 @@ MonoBehaviour:
   maxSearchResult: 5
   hostsTimeoutSec: 180
   TimeoutSec: 180
-  UseVoiceChat: 0
   lobbyIdSaveType: 1
   playerprefsSaveKey: eos_lobbyid
   customSaveLobbyID:
@@ -60,20 +59,14 @@ MonoBehaviour:
   customDeleteLobbyID:
     m_PersistentCalls:
       m_Calls: []
-  matchState:
-    state: {fileID: 0}
-    stopAdditionalInput:
-      m_PersistentCalls:
-        m_Calls: []
-    acceptCancel:
-      m_PersistentCalls:
-        m_Calls: []
-    searchLobby: 
-    waitothers: 
-    tryconnect: 
-    success: 
-    fail: 
-    trycancel: 
+  MatchMakingGUIEvents:
+    stateText: {fileID: 0}
+    StartMatchmaking: 
+    WaitForOpponents: 
+    FinishMatchmaking: 
+    ReadyForConnection: 
+    TryToCancel: 
+    StartReconnection: 
 --- !u!114 &2114254298220440419
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -86,14 +79,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cfcb8bb8afbcedd4e97d9ccce350c691, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  interval_sendToAll: 3
-  autoSyncInterval: 1000
   packetReliability: 2
-  getPacketFrequency: 2
-  UseDisconnectedEarlyNotify: 0
   FirstConnection: 0
-  SamplesPerPing: 0
+  UseDisconnectedEarlyNotify: 0
+  getPacketFrequency: 2
+  BurstReceiveBatchSize: 5
+  RPCBatchSize: 3
+  LargePacketBatchSize: 3
+  autoSyncInterval: 1000
   AutoRefreshPing: 0
+  SamplesPerPing: 0
   PingAutoRefreshRateSec: 10
 --- !u!114 &4569237702368255570
 MonoBehaviour:
@@ -107,6 +102,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 646e066acc92b1a41bb149b9056bb3b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  UseOpenVC: 0
+  KeyToPushToTalk: 1
 --- !u!114 &6016646276410024044
 MonoBehaviour:
   m_ObjectHideFlags: 0
