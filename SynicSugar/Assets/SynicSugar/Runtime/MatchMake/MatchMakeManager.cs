@@ -403,6 +403,28 @@ namespace SynicSugar.MatchMake {
             MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Ready);
             return true;
         }
+        
+        /// <summary>
+        /// When Host, closes lobby and cancels MatchMake.<br />
+        /// When Guest, leave lobby and cancels MatchMake.
+        /// </summary>
+        /// <param name="token">token for this task</param>
+        /// <param name="removeManager">If true, destroy ConnectManager. When we move to the other scene (where we don't need ConnectManager) after this, we should pass true.</param>
+        /// <returns></returns>
+        public async UniTask<bool> CloseCurrentMatchMake(bool removeManager = false, CancellationToken token = default(CancellationToken)){
+            if(matchingToken == null || !matchingToken.Token.CanBeCanceled){
+            #if SYNICSUGAR_LOG
+                Debug.Log("CloseCurrentMatchMake: Is this user currently in matchmaking?");
+            #endif
+                return false;
+            }
+            bool canCancel = await eosLobby.CloseMatchMaking(matchingToken, token);
+            
+            if(removeManager && canCancel){
+                Destroy(this.gameObject);
+            }
+            return canCancel;
+        }
         /// <summary>
         /// Exit lobby and cancel MatchMake.
         /// </summary>
