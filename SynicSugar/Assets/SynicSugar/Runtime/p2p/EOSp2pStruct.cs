@@ -10,7 +10,18 @@ namespace SynicSugar.P2P {
     /// </summary>
     internal class UserIds {
         internal UserId LocalUserId;
+        /// <summary>
+        /// Just current
+        /// </summary>
         internal List<UserId> RemoteUserIds;
+        /// <summary>
+        /// Whole session include Local user
+        /// </summary>
+        internal List<UserId> AllUserIds;
+        /// <summary>
+        /// Current Session include Local user, but exclude Disconencted user
+        /// </summary>
+        internal List<UserId> AllCurrentUserIds;
 
         //Options
         internal UserId HostUserId;
@@ -24,12 +35,14 @@ namespace SynicSugar.P2P {
             LocalUserId = UserId.GetUserId(EOSManager.Instance.GetProductUserId());
         }
         /// <summary>
-        /// Remove user ID of leaving lobby.<br />
+        /// Remove user ID when the user leaves lobby.<br />
         /// </summary>
         /// <param name="targetId"></param>
         internal void RemoveUserId(ProductUserId targetId){
             UserId userId = UserId.GetUserId(targetId);
             RemoteUserIds.Remove(userId);
+            AllUserIds.Remove(userId);
+            AllCurrentUserIds.Remove(userId);
             p2pInfo.Instance.pings.pingInfo.Remove(userId.ToString());
         }
         /// <summary>
@@ -39,6 +52,7 @@ namespace SynicSugar.P2P {
         internal void MoveTargetUserIdToLefts(ProductUserId targetId){
             UserId userId = UserId.GetUserId(targetId);
             RemoteUserIds.Remove(userId);
+            AllCurrentUserIds.Remove(userId);
             LeftUsers.Add(userId);
             p2pInfo.Instance.pings.pingInfo[userId.ToString()].Ping = -1;
         }
@@ -50,6 +64,7 @@ namespace SynicSugar.P2P {
         internal void MoveTargetUserIdToRemoteUsersFromLeft(ProductUserId targetId){
             UserId userId = UserId.GetUserId(targetId);
             LeftUsers.Remove(userId);
+            AllCurrentUserIds.Add(userId);
             RemoteUserIds.Add(userId);
         }
     }

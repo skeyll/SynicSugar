@@ -1030,26 +1030,6 @@ namespace SynicSugar.MatchMake {
 
             lobbyInterface.UpdateLobby(ref updateOptions, null, OnAddedUserAttributes);
         }
-        void AddUserAttributes(LobbyModification lobbyHandle){
-            if(userAttributes == null || userAttributes.Count == 0){
-                return;
-            }
-            ResultE result = ResultE.Success;
-
-            foreach(var attr in userAttributes){
-                var attrOptions = new LobbyModificationAddMemberAttributeOptions(){
-                    Attribute = attr.AsLobbyAttribute(),
-                    Visibility = LobbyAttributeVisibility.Public
-                };
-                result = lobbyHandle.AddMemberAttribute(ref attrOptions);
-
-                if (result != ResultE.Success){
-                    MatchMakeManager.Instance.LastResultCode = (Result)result;
-                    Debug.LogErrorFormat("AddUserAttributes: could not add member attribute. Error code: {0}", result);
-                    return;
-                }
-            }
-        }
         void OnAddedUserAttributes(ref UpdateLobbyCallbackInfo info){
             if (info.ResultCode != ResultE.Success){
                 MatchMakeManager.Instance.LastResultCode = (Result)info.ResultCode;
@@ -1263,11 +1243,18 @@ namespace SynicSugar.MatchMake {
             uint memberCount = lobbyHandle.GetMemberCount(ref countOptions);
             //Get other use's id
             LobbyDetailsGetMemberByIndexOptions memberOptions = new LobbyDetailsGetMemberByIndexOptions();
+            userIds.AllUserIds = new List<UserId>();
+            userIds.AllCurrentUserIds = new List<UserId>();
             userIds.RemoteUserIds = new List<UserId>();
             for(uint i = 0; i < memberCount; i++){
                 memberOptions.MemberIndex = i;
-                if(userIds.LocalUserId.AsEpic != lobbyHandle.GetMemberByIndex(ref memberOptions)){
-                    userIds.RemoteUserIds.Add(UserId.GetUserId(lobbyHandle.GetMemberByIndex(ref memberOptions)));
+                UserId targetId = UserId.GetUserId(lobbyHandle.GetMemberByIndex(ref memberOptions));
+
+                userIds.AllUserIds.Add(targetId);
+                userIds.AllCurrentUserIds.Add(targetId);
+                
+                if(userIds.LocalUserId != targetId){
+                    userIds.RemoteUserIds.Add(targetId);
                 }
             }
             //Get lobby's attribute count
