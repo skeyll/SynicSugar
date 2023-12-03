@@ -61,12 +61,12 @@ namespace SynicSugar.Samples {
             if(p2pInfo.Instance.IsLoaclUser(p2pInfo.Instance.LastSyncedUserId) && p2pInfo.Instance.AcceptHostSynic){
                 await UniTask.WaitUntil(() => p2pInfo.Instance.HasReceivedAllSyncSynic);
                 //Update counter
-                inputCount.text = $"ChatCount: {ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.LocalUserId).submitCount} / {ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.RemoteUserIds[0]).submitCount}";
+                inputCount.text = $"ChatCount: {ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.LocalUserId).submitCount} / {ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.CurrentRemoteUserIds[0]).submitCount}";
                 return;
             }
             if(p2pInfo.Instance.SyncedSynicPhase == 1){  
                 EOSDebug.Instance.Log("GetLargePacket");
-                chatText.text = ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.RemoteUserIds[0]).LargePacket;
+                chatText.text = ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.CurrentRemoteUserIds[0]).LargePacket;
             }
         }
         //VC actions with No args
