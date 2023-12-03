@@ -19,7 +19,7 @@ If success and finish preparation p2p connect, return true. If not (by timeout o
 
 This CancellationTokenSource is used only to cancel matchmaking. <br>
 Usually we don't need pass token source. If not pass, when we call CancelMatchMaking(), we get just bool result from this method. If pass source, we need TryCatch for CancelMatching.<br>
-When matchmaking fails, this always returns false, not an exception. To get result code, use *[LastResultCode](../../SynicSugar.MatchMake/MatchMakeManager/lastresultcode)*.<br>
+When matchmaking fails, this always returns false, not an exception. To get result code, use *[LastResultCode](../../../SynicSugar.MatchMake/MatchMakeManager/lastresultcode)*.<br>
 
 
 For Host to conclude matchmaking, pass minLobbyMember. This allows Host to kick other member, and end matchmaking after meeting members condition. In the case, the matchmaking won't have ended until Host conclude it in manual.<br>
