@@ -1,12 +1,11 @@
 +++
-title = "ComparisonOperator"
+title = "ComparisonOp"
 weight = 1
 +++
-## ComparisonOperator
+## ComparisonOp
 <small>*Namespace: SynicSugar.MatchMake* <br>
-*Class: AttributeData* </small>
 
-public Epic.OnlineServices.ComparisonOp ComparisonOperator
+public enum ComparisonOp
 
 ### Description
 Comparison Operator for this attribute.<br>
@@ -19,7 +18,7 @@ using SynicSugar.MatchMake;
 public class LobbyCondition : MonoBehaviour {
     void SetLobbyConditions(){
         AttributeData attribute = new AttributeData();
-        attribute.comparisonOption = Epic.OnlineServices.ComparisonOp.Equal;
+        attribute.ComparisonOperator = ComparisonOp.Equal;
     }
 }
 ```

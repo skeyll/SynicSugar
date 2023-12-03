@@ -21,8 +21,12 @@ If this is no longer needed, we call *[CancelCurrentMatchMake](../../SynicSugar.
 ### Properity
 | API | description |
 |---|---|
+| HostUserId | Host's UserId in this lobby |
 | [LocalUserId](../p2pInfo/localuserid) | UserID of this local |
-| [RemoteUserIds](../p2pInfo/remoteuserids) | UserIDs list of this connection |
+| [CurrentRemoteUserIds](../p2pInfo/remoteuserids) | UserIDs of current conenction |
+| DisconnectedUserIds | Disconnected user ids. (May come back, not exit) |
+| AllCurrentUserIds | UserIDs of current conenction include LocalUser |
+| [AllUserIds](../p2pInfo/remoteuserids) | AllCurrentUserIds + DisconnectedUserIds |
 | [AcceptHostSynic](../p2pInfo/accepthostsynic) | If true, host overwrite this local user instnace |
 | [ConnectionNotifier](../p2pInfo/connectionnotifier) | Notifers when a user connects or disconnects |
 | LastDisconnectedUsersReason | The reason of last disconnected user |
