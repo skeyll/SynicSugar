@@ -77,7 +77,7 @@ namespace SynicSugar.Samples {
             systemManager.chatText.text += chat;
 
             submitCount++;
-            systemManager.inputCount.text = $"ChatCount: {ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.LocalUserId).submitCount} / {ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.RemoteUserIds[0]).submitCount}";
+            systemManager.inputCount.text = $"ChatCount: {ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.LocalUserId).submitCount} / {ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.CurrentRemoteUserIds[0]).submitCount}";
         }
         [Rpc]
         public void UpdateName(string newName){
@@ -93,7 +93,7 @@ namespace SynicSugar.Samples {
             systemManager.chatText.text += chat;
 
             submitCount++;
-            systemManager.inputCount.text = $"ChatCount: {ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.LocalUserId).submitCount} / {ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.RemoteUserIds[0]).submitCount}";
+            systemManager.inputCount.text = $"ChatCount: {ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.LocalUserId).submitCount} / {ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.CurrentRemoteUserIds[0]).submitCount}";
         }
         //---For button
         public void DecideChat(){
@@ -165,7 +165,7 @@ namespace SynicSugar.Samples {
             systemManager.chatText.text += LargePacket;
             //When the 3rd arg is true, this becomea the rpc to send large packet.
             //Pass false to 4th arg. The opponent will drop the packets for self data except for the moment re-cconect.
-            ConnectHub.Instance.SyncSynic(p2pInfo.Instance.RemoteUserIds[0], 1, true, false);
+            ConnectHub.Instance.SyncSynic(p2pInfo.Instance.CurrentRemoteUserIds[0], 1, true, false);
         }
         public void DecideUserName(){
             UpdateName(systemManager.nameField.text);

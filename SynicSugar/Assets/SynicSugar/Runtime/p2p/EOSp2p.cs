@@ -280,17 +280,6 @@ namespace SynicSugar.P2P {
         #if SYNICSUGAR_LOG
             Debug.Log($"SendLargePackets: Finish to Send to {targetId}!");
         #endif
-            /// <summary>
-            /// index, chunk, sycned phase, is Specific sync, self or not
-            /// </summary>
-            byte[] GenerateHeader(int valueLength){
-                byte[] result = new byte[2];
-
-                result[0] = 0; 
-                result[1] = (byte)Math.Ceiling(valueLength / 1100f);
-
-                return result;
-            }
         }
         
         /// <summary>
@@ -355,17 +344,17 @@ namespace SynicSugar.P2P {
         #if SYNICSUGAR_LOG
             Debug.Log($"SendLargePackets: Finish to Send to {targetId}!");
         #endif
-            /// <summary>
-            /// index, chunk, sycned phase, is Specific sync, self or not
-            /// </summary>
-            byte[] GenerateHeader(int valueLength){
-                byte[] result = new byte[2];
+        }
+        /// <summary>
+        /// index, chunk, sycned phase, is Specific sync, self or not
+        /// </summary>
+        static byte[] GenerateHeader(int valueLength){
+            byte[] result = new byte[2];
 
-                result[0] = 0; 
-                result[1] = (byte)Math.Ceiling(valueLength / 1160f);
+            result[0] = 0; 
+            result[1] = (byte)Math.Ceiling(valueLength / 1160f);
 
-                return result;
-            }
+            return result;
         }
         /// <summary>
         /// Send RPC as LargePacket. <br />
@@ -470,20 +459,20 @@ namespace SynicSugar.P2P {
         #if SYNICSUGAR_LOG
             Debug.Log($"Send Large Packet: Success to {targetId}!");
         #endif
-            /// <summary>
-            /// index, chunk, sycned phase, is Specific sync, self or not
-            /// </summary>
-            byte[] GenerateHeader(int valueLength, byte phase, bool isOnly, bool isSelfData){
-                byte[] result = new byte[5];
+        }
+        /// <summary>
+        /// index, chunk, sycned phase, is Specific sync, self or not
+        /// </summary>
+        static byte[] GenerateHeader(int valueLength, byte phase, bool isOnly, bool isSelfData){
+            byte[] result = new byte[5];
 
-                result[0] = 0; 
-                result[1] = (byte)Math.Ceiling(valueLength / 1160f);
-                result[2] = phase;
-                result[3] = isOnly ? (byte)1 : (byte)0;
-                result[4] = isSelfData ? (byte)1 : (byte)0;
+            result[0] = 0; 
+            result[1] = (byte)Math.Ceiling(valueLength / 1160f);
+            result[2] = phase;
+            result[3] = isOnly ? (byte)1 : (byte)0;
+            result[4] = isSelfData ? (byte)1 : (byte)0;
 
-                return result;
-            }
+            return result;
         }
     #endregion
 

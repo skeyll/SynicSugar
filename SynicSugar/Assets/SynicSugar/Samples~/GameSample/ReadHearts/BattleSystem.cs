@@ -55,7 +55,7 @@ namespace  SynicSugar.Samples {
 
             GameObject enemyObject = this.transform.Find("EnemyHP").gameObject;
             opponent = enemyObject.GetComponent<Player>();
-            opponent.SetOwnerID(p2pInfo.Instance.RemoteUserIds[0]);
+            opponent.SetOwnerID(p2pInfo.Instance.CurrentRemoteUserIds[0]);
         }
 #endregion
 #region In GameSystem

@@ -19,7 +19,7 @@ Max 100 attributes can be set.
 | DOUBLE | The value when it was set as DOUBLE |
 | STRING | The value when it was set as STRING |
 | ValueType | The value type of holding |
-| [ComparisonOperator](../AttributeData/comparisonoperator) | Comparison Operator for this attribute |
+| [ComparisonOp](../AttributeData/comparisonop) | ComparisonOp for this attribute |
 
 
 

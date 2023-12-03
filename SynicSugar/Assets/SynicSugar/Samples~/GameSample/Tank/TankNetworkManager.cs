@@ -10,7 +10,7 @@ namespace  SynicSugar.Samples {
         [SerializeField] Text pingText;
         void Start(){
             //Generate other player data class
-            foreach(var id in p2pInfo.Instance.RemoteUserIds){
+            foreach(var id in p2pInfo.Instance.CurrentRemoteUserIds){
                 new TankPlayerData(){ OwnerUserID = id };
             }
             //For local player data class
@@ -37,7 +37,7 @@ namespace  SynicSugar.Samples {
             while(!token.IsCancellationRequested){
                 string pings = p2pInfo.Instance.GetNATType().ToString() + System.Environment.NewLine;
 
-                foreach(var id in p2pInfo.Instance.RemoteUserIds){
+                foreach(var id in p2pInfo.Instance.CurrentRemoteUserIds){
                     pings += $"{ConnectHub.Instance.GetUserInstance<TankPlayerData>(id).PlayerName}: {p2pInfo.Instance.GetPing(id)}{System.Environment.NewLine}";
                 }
                 

@@ -1,16 +1,16 @@
 +++
-title = "RemoteUserIds"
+title = "CurrentRemoteUserIds"
 weight = 1
 +++
-## RemoteUserIds
+## CurrentRemoteUserIds
 <small>*Namespace: SynicSugar.P2P* <br>
 *Class: p2pInfo* </small>
 
-public List<UserId> RemoteUserIds;
+public List<UserId> CurrentRemoteUserIds;
 
 
 ### Description
-UserIDs list of this connection This Id is unique to be assigned by EOS.<br>
+UserIDs list of this connection. This Id is unique to be assigned by EOS.<br>
 
 ```cs
 using SynicSugar.P2P;
@@ -21,7 +21,7 @@ public class p2pSample : MonoBehaviour {
     [Synic(5)] public Vector3 rotation;
 
     void SyncWithFakeTransformObject(){
-        foreach(var id in p2pInfo.Instance.RemoteUserIds){
+        foreach(var id in p2pInfo.Instance.CurrentRemoteUserIds){
             ConnectHub.Instance.SyncSynic(id, 5, true);
         }
     }

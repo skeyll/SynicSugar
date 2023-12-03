@@ -118,7 +118,7 @@ namespace SynicSugar.P2P {
                 bool recivePacket = p2pConnectorForOtherAssembly.Instance.GetPacketFromBuffer(ref ch_r, ref id_r, ref payload_r);
 
                 if(recivePacket){
-                    ConnectHub.Instance.ConvertFromPacket(ref ch_r, ref id_r, ref payload_r);
+                    ConvertFromPacket(ref ch_r, ref id_r, ref payload_r);
                 }
                 await UniTask.Delay(p2pConnectorForOtherAssembly.Instance.receiverInterval);
 
@@ -136,7 +136,7 @@ namespace SynicSugar.P2P {
                 count--;
 
                 if(recivePacket){
-                    ConnectHub.Instance.ConvertFromPacket(ref ch_r, ref id_r, ref payload_r);
+                    ConvertFromPacket(ref ch_r, ref id_r, ref payload_r);
                 }
 
                 if(count == 0 || !recivePacket){

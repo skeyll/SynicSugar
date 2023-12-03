@@ -11,7 +11,8 @@ public bool IsHost (UserId targetId) <br>
 public bool IsHost (string targetId) <br>
 
 ### Description
-If local or target user is host, return true<br>
+If local or target user is host, return true.
+When Host is disconnected from match, EOS switches Host to other user.<br>
 NetworkCommons has this same process in each class, so this is for other classes.
 
 

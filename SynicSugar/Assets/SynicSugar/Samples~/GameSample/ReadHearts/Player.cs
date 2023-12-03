@@ -34,7 +34,7 @@ namespace SynicSugar.Samples {
                 return;
             }
             damageText.text = ConnectHub.Instance.GetInstance<BattleSystem>().sliderValue.text;
-            ReflectDamage(p2pInfo.Instance.RemoteUserIds[0] ,int.Parse(damageText.text));
+            ReflectDamage(p2pInfo.Instance.CurrentRemoteUserIds[0] ,int.Parse(damageText.text));
         }
         [TargetRpc]
         public void ReflectDamage(UserId id, int damage){
@@ -42,7 +42,7 @@ namespace SynicSugar.Samples {
             currentTurn++;
         }
         public void DecideChat(){
-            UpdateChat(p2pInfo.Instance.RemoteUserIds[0], new ChatContent(){ Name = chatName.text, Contents = chatContent.text });
+            UpdateChat(p2pInfo.Instance.CurrentRemoteUserIds[0], new ChatContent(){ Name = chatName.text, Contents = chatContent.text });
         }
         [TargetRpc]
         public void UpdateChat(UserId id, ChatContent contents){

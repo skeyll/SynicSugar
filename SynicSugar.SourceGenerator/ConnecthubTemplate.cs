@@ -100,24 +100,24 @@ namespace SynicSugarGenerator
                     "(!p2pConnectorForOtherAssembly.Instance.p2pToken.IsCancellationRequested){\r\n    " +
                     "            bool recivePacket = p2pConnectorForOtherAssembly.Instance.GetPacketF" +
                     "romBuffer(ref ch_r, ref id_r, ref payload_r);\r\n\r\n                if(recivePacket" +
-                    "){\r\n                    ConnectHub.Instance.ConvertFromPacket(ref ch_r, ref id_r" +
-                    ", ref payload_r);\r\n                }\r\n                await UniTask.Delay(p2pCon" +
-                    "nectorForOtherAssembly.Instance.receiverInterval);\r\n\r\n                if(p2pConn" +
-                    "ectorForOtherAssembly.Instance == null || p2pConnectorForOtherAssembly.Instance." +
-                    "p2pToken.IsCancellationRequested){\r\n                    break;\r\n                " +
-                    "}\r\n            }\r\n        }\r\n        \r\n        async UniTask ReciveMultiplePacke" +
-                    "ts(){\r\n            int count = p2pConfig.Instance.BurstReceiveBatchSize;\r\n\r\n    " +
-                    "        while(!p2pConnectorForOtherAssembly.Instance.p2pToken.IsCancellationRequ" +
-                    "ested){\r\n                bool recivePacket = p2pConnectorForOtherAssembly.Instan" +
-                    "ce.GetPacketFromBuffer(ref ch_r, ref id_r, ref payload_r);\r\n                coun" +
-                    "t--;\r\n\r\n                if(recivePacket){\r\n                    ConnectHub.Instan" +
-                    "ce.ConvertFromPacket(ref ch_r, ref id_r, ref payload_r);\r\n                }\r\n\r\n " +
-                    "               if(count == 0 || !recivePacket){\r\n                    await UniTa" +
-                    "sk.Yield(PlayerLoopTiming.Update);\r\n                    \r\n                    if" +
-                    "(p2pConnectorForOtherAssembly.Instance == null){\r\n                        break;" +
-                    "\r\n                    }\r\n                    count = p2pConfig.Instance.BurstRec" +
-                    "eiveBatchSize;\r\n                }\r\n            }\r\n        }\r\n\r\n        //(for el" +
-                    "ements)\r\n        public enum CHANNELLIST{\r\n            ");
+                    "){\r\n                    ConvertFromPacket(ref ch_r, ref id_r, ref payload_r);\r\n " +
+                    "               }\r\n                await UniTask.Delay(p2pConnectorForOtherAssemb" +
+                    "ly.Instance.receiverInterval);\r\n\r\n                if(p2pConnectorForOtherAssembl" +
+                    "y.Instance == null || p2pConnectorForOtherAssembly.Instance.p2pToken.IsCancellat" +
+                    "ionRequested){\r\n                    break;\r\n                }\r\n            }\r\n  " +
+                    "      }\r\n        \r\n        async UniTask ReciveMultiplePackets(){\r\n            i" +
+                    "nt count = p2pConfig.Instance.BurstReceiveBatchSize;\r\n\r\n            while(!p2pCo" +
+                    "nnectorForOtherAssembly.Instance.p2pToken.IsCancellationRequested){\r\n           " +
+                    "     bool recivePacket = p2pConnectorForOtherAssembly.Instance.GetPacketFromBuff" +
+                    "er(ref ch_r, ref id_r, ref payload_r);\r\n                count--;\r\n\r\n            " +
+                    "    if(recivePacket){\r\n                    ConvertFromPacket(ref ch_r, ref id_r," +
+                    " ref payload_r);\r\n                }\r\n\r\n                if(count == 0 || !reciveP" +
+                    "acket){\r\n                    await UniTask.Yield(PlayerLoopTiming.Update);\r\n    " +
+                    "                \r\n                    if(p2pConnectorForOtherAssembly.Instance =" +
+                    "= null){\r\n                        break;\r\n                    }\r\n               " +
+                    "     count = p2pConfig.Instance.BurstReceiveBatchSize;\r\n                }\r\n     " +
+                    "       }\r\n        }\r\n\r\n        //(for elements)\r\n        public enum CHANNELLIST" +
+                    "{\r\n            ");
             
             #line 155 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(SyncList));

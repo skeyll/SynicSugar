@@ -11,15 +11,16 @@ public sealed class SynicAttribute : Attribute
 
 ### Description
 **This is experimental now.**<br>
-Synchronize all own Synic variables at once to TargetUser. We can set 0 - 9 as the sync phase can be set, and all variables below the phase or only variables in the specified phase are synchronized at once. This can send larger packets than 1170. To sync, call *[SyncSynic](../ConnectHub/syncsynic)*.<br>
+Synchronize all own Synic variables at once to TargetUser. We can set 0 - 9 as the sync phase can be set, and all variables below the phase or only variables in the specified phase are synchronized at once. This can send larger packets than 1170. To sync, call *[SyncSynic](../../SynicSugar.P2P/ConnectHub/syncsynic)*.<br>
 
 One of the greatest features of Synic is that Host user can synchronize the reconnecter's variables in the local with the recconecter instance data in Host's local. <br>
 SynicSugar can synchronize the data only from the owner instance to the same owner Instance. In other words, in order to send the data the reconnecter, Host must get the reconnecter data in the owner instance, and send these via Host's instance RPC that assigns the data in target Player instance.<br>
 With Synic, however, Host can synchronize data between the Host's local data and the target local data by simply calling SyncSynic. If the user is not reconnecter, the packets to synchronize data will be discarded.<br>
+Maximum packet limit is 296960(1160*256) bytes. When the packetes is over this, the RPC will cause an error in sending it.
 
-This method has created to sync basic data to re-connecter. Therefore, it is not intended to be called frequently.<br>
 
-*Note: Currently a variables cannot have SyncVar and Synic at the same time.*
+*Note: Currently a variables cannot have SyncVar and Synic at the same time.*<br>
+*If an error occurs due to around namespace, we need write the full path(like System.CollectionGeneric.AAA())  and it will pass. I will fix this issue in future.*
 
 #### Conditions for Synic
 ・Has public.<br>

@@ -43,6 +43,7 @@ If this is no longer needed, we call *[CancelCurrentMatchMake](../MatchMakeManag
 | [ConcludeMatchMake](../MatchMakeManager/concludematchmake) | Host finishes a matchmaking by hand |
 | [ReconnectLobby](../MatchMakeManager/reconnectlobby) | Join the Lobby with saved LobbyID |
 | [CancelCurrentMatchMake](../MatchMakeManager/cancelcurrentmatchmake) | Stop the current matchmaking |
+| [CloseCurrentMatchMake](../MatchMakeManager/closecurrentmatchmake) | Host destroys and Guest leaves lobby to stop the matchmaking |
 | [KickTargetFromLobby](../MatchMakeManager/kicktargetfromlobby) | (Host) kicks target from Lobby |
 | [GetLastErrorCode](../MatchMakeManager/getlasterrorcode) | Get Last ERROR Result code |
 | [GetCurrentLobbyID](../MatchMakeManager/getcurrentlobbyid) | Get LobbyID that a user participating |

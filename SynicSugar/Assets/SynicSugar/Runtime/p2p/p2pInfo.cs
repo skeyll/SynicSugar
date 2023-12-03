@@ -1,6 +1,6 @@
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using System.Threading;
+using System;
 using System.Collections.Generic;
 namespace SynicSugar.P2P {
     public class p2pInfo : MonoBehaviour {
@@ -34,14 +34,34 @@ namespace SynicSugar.P2P {
         internal p2pPing pings;
         internal RPCInformation lastRpcInfo;
         internal TargetRPCInformation lastTargetRPCInfo;
+    #region UserId basic info
         /// <summary>
-        /// UserId of this local user.
+        /// This lobby's Host UserId.
+        /// </summary>
+        public UserId HostUserId => userIds.HostUserId;
+        /// <summary>
+        /// This local UserId.
         /// </summary>
         public UserId LocalUserId => userIds.LocalUserId;
         /// <summary>
-        /// UserIds of current session.
+        /// Remote UserIds currently connected.
         /// </summary>
-        public List<UserId> RemoteUserIds => userIds.RemoteUserIds;
+        public List<UserId> CurrentRemoteUserIds => userIds.RemoteUserIds;
+        /// <summary>
+        /// All UserIds (include Local user) currently connected.
+        /// </summary>
+        public List<UserId> AllCurrentUserIds => userIds.AllCurrentUserIds;
+        /// <summary>
+        /// All UserIds (include Local user and disconencted user, excluding users leaving lobby by their own).
+        /// </summary>
+        public List<UserId> AllUserIds => userIds.AllUserIds;
+        /// <summary>
+        /// Disconnected user ids. (May come back)
+        /// </summary>
+        public List<UserId> DisconnectedUserIds => userIds.LeftUsers;
+    #endregion
+
+
         /// <summary>
         /// The notify events for connection and disconection on current session.
         /// </summary>
@@ -184,5 +204,14 @@ namespace SynicSugar.P2P {
         public UserId LastTargetRPCUserId => lastTargetRPCInfo.target;
         public bool LastRPCIsLargePacket => lastRpcInfo.isLargePacket;
         public bool LastTargetRPCIsLargePacket => lastTargetRPCInfo.isLargePacket;
+
+        #region Obsolete
+        
+        /// <summary>
+        /// UserIds of current session.
+        /// </summary>
+        [Obsolete("This is old. CurrentRemoteUserIds is new one.")]
+        public List<UserId> RemoteUserIds => userIds.RemoteUserIds;
+        #endregion
     }
 }

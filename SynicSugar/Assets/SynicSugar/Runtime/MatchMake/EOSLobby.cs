@@ -538,7 +538,7 @@ namespace SynicSugar.MatchMake {
             };
             LobbySearchSetParameterOptions paramOptions = new LobbySearchSetParameterOptions(){
                 Parameter = bucketAttribute,
-                ComparisonOp = ComparisonOp.Equal
+                ComparisonOp = ComparisonOp.Equal.AsEpic()
             };
 
             result = lobbySearchHandle.SetParameter(ref paramOptions);
@@ -553,7 +553,7 @@ namespace SynicSugar.MatchMake {
             foreach (var attribute in lobbyCondition.Attributes){
                 Epic.OnlineServices.Lobby.AttributeData data = attribute.AsLobbyAttribute();
                 paramOptions.Parameter = data;
-                paramOptions.ComparisonOp = attribute.ComparisonOperator; 
+                paramOptions.ComparisonOp = attribute.ComparisonOperator.AsEpic(); 
 
                 result = lobbySearchHandle.SetParameter(ref paramOptions);
 
@@ -804,7 +804,6 @@ namespace SynicSugar.MatchMake {
                     //This local player manage lobby, So dosen't need update notify.
                     LobbyUpdateNotification.Dispose();
                 }
-                Debug.Log(CurrentLobby.Members.Count);
                 if(useManualFinishMatchMake){
                     MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(UserId.GetUserId(info.TargetUserId), info.CurrentStatus == LobbyMemberStatus.Joined, CurrentLobby.Members.Count == requiredMembers);
                 }else{
@@ -826,11 +825,6 @@ namespace SynicSugar.MatchMake {
                 #if SYNICSUGAR_LOG
                     Debug.Log($"MemberStatusNotyfy: {info.TargetUserId} is promoted to host.");
                 #endif
-                if(!CurrentLobby.isHost()){
-                    //MEMO: Now, if user disconnect from Lobby and then change hosts, the user become newbie.
-                    //Guest Don't need to hold user id 
-                    // p2pInfo.Instance.userIds.LeftUsers = new List<UserId>();
-                }
             }else if(info.CurrentStatus == LobbyMemberStatus.Left) {
                 #if SYNICSUGAR_LOG
                     Debug.Log($"MemberStatusNotyfy: {info.TargetUserId} left from lobby.");
@@ -1030,26 +1024,6 @@ namespace SynicSugar.MatchMake {
 
             lobbyInterface.UpdateLobby(ref updateOptions, null, OnAddedUserAttributes);
         }
-        void AddUserAttributes(LobbyModification lobbyHandle){
-            if(userAttributes == null || userAttributes.Count == 0){
-                return;
-            }
-            ResultE result = ResultE.Success;
-
-            foreach(var attr in userAttributes){
-                var attrOptions = new LobbyModificationAddMemberAttributeOptions(){
-                    Attribute = attr.AsLobbyAttribute(),
-                    Visibility = LobbyAttributeVisibility.Public
-                };
-                result = lobbyHandle.AddMemberAttribute(ref attrOptions);
-
-                if (result != ResultE.Success){
-                    MatchMakeManager.Instance.LastResultCode = (Result)result;
-                    Debug.LogErrorFormat("AddUserAttributes: could not add member attribute. Error code: {0}", result);
-                    return;
-                }
-            }
-        }
         void OnAddedUserAttributes(ref UpdateLobbyCallbackInfo info){
             if (info.ResultCode != ResultE.Success){
                 MatchMakeManager.Instance.LastResultCode = (Result)info.ResultCode;
@@ -1072,7 +1046,48 @@ namespace SynicSugar.MatchMake {
             }
         }
 #endregion
-#region Cancel
+#region Cancel MatchMake
+    /// <summary>
+    /// Host close matchmaking. Guest Cancel matchmaking.
+    /// </summary>
+    /// <param name="matchingToken"></param>
+    /// <param name="token"></param>
+    /// <returns></returns>
+    internal async UniTask<bool> CloseMatchMaking(CancellationTokenSource matchingToken, CancellationToken token){
+        if(!CurrentLobby.isValid()){
+            MatchMakeManager.Instance.LastResultCode = Result.InvalidAPICall;
+            Debug.LogError($"Cancel MatchMaking: this user has not participated a lobby.");
+            return false;
+        }
+        //Remove notify
+        if(!CurrentLobby.isHost()){
+            LobbyUpdateNotification.Dispose();
+        }
+        LobbyMemberStatusNotification.Dispose();
+        LobbyMemberUpdateNotification.Dispose();
+
+        //Destroy or Leave the current lobby.
+        if(CurrentLobby.isHost()){
+            bool canDestroy = await DestroyLobby(token);
+            
+            if(canDestroy){
+                matchingToken?.Cancel();
+            }else{
+                Debug.LogError($"Cancel MatchMaking: has something problem when destroying the lobby");
+            }
+
+            return canDestroy;
+        }
+
+        bool canLeave = await LeaveLobby(true, token);
+        
+        if(canLeave){
+            matchingToken?.Cancel();
+        }else{
+            Debug.LogError($"Cancel MatchMaking: has something problem when leave from the lobby");
+        }
+        return canLeave;
+    }
     /// <summary>
     /// Cancel MatcgMaking and leave the lobby.
     /// </summary>
@@ -1263,11 +1278,18 @@ namespace SynicSugar.MatchMake {
             uint memberCount = lobbyHandle.GetMemberCount(ref countOptions);
             //Get other use's id
             LobbyDetailsGetMemberByIndexOptions memberOptions = new LobbyDetailsGetMemberByIndexOptions();
+            userIds.AllUserIds = new List<UserId>();
+            userIds.AllCurrentUserIds = new List<UserId>();
             userIds.RemoteUserIds = new List<UserId>();
             for(uint i = 0; i < memberCount; i++){
                 memberOptions.MemberIndex = i;
-                if(userIds.LocalUserId.AsEpic != lobbyHandle.GetMemberByIndex(ref memberOptions)){
-                    userIds.RemoteUserIds.Add(UserId.GetUserId(lobbyHandle.GetMemberByIndex(ref memberOptions)));
+                UserId targetId = UserId.GetUserId(lobbyHandle.GetMemberByIndex(ref memberOptions));
+
+                userIds.AllUserIds.Add(targetId);
+                userIds.AllCurrentUserIds.Add(targetId);
+
+                if(userIds.LocalUserId != targetId){
+                    userIds.RemoteUserIds.Add(targetId);
                 }
             }
             //Get lobby's attribute count
