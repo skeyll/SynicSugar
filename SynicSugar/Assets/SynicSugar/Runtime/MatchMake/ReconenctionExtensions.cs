@@ -38,10 +38,8 @@ namespace SynicSugar.MatchMake {
                 bool recivePacket = GetPacketFromBuffer(ref ch, ref id, ref payload);
 
                 if(recivePacket){
-                    bool getPacket = ConvertFromPacket();
-                    if(getPacket){
-                        return;
-                    }
+                    ConvertFromPacket();
+                    return;
                 }
                 await UniTask.Yield();
             }
@@ -83,9 +81,9 @@ namespace SynicSugar.MatchMake {
             return true;
         }
         
-        bool ConvertFromPacket(){
+        void ConvertFromPacket(){
             if(ch != RECONNECTIONCH){
-                return false;
+                return;
             }
 
             using var decompressor = new BrotliDecompressor();
@@ -93,8 +91,6 @@ namespace SynicSugar.MatchMake {
 
             List<string> data = MemoryPackSerializer.Deserialize<List<string>>(decompressed);
             p2pInfo.Instance.userIds.OverwriteAllUserIdsWithOrdered(data);
-
-            return true;
         }
     }
 }
