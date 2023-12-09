@@ -35,6 +35,16 @@ namespace SynicSugar.P2P {
             LocalUserId = UserId.GetUserId(EOSManager.Instance.GetProductUserId());
         }
         /// <summary>
+        /// Update AllUserIds with Host's sending data.
+        /// </summary>
+        /// <param name="ids"></param>
+        internal void OverwriteAllUserIdsWithOrdered(List<string> ids){
+            AllUserIds.Clear();
+            foreach(var id in ids){
+                AllUserIds.Add(UserId.GenerateFromStringForReconnecter(id));
+            }
+        }
+        /// <summary>
         /// Remove user ID when the user leaves lobby.<br />
         /// </summary>
         /// <param name="targetId"></param>
@@ -86,7 +96,19 @@ namespace SynicSugar.P2P {
             this.value = id;
             this.value_s = id.ToString();
         }
-
+        /// <summary>
+        /// Reconencter creates userid list 
+        /// </summary>
+        /// <param name="id">String to be got from Host.</param>
+        /// <returns></returns>
+        static internal UserId GenerateFromStringForReconnecter(string id){
+            if(idCache.ContainsKey(id)){
+                return idCache[id];
+            }
+            UserId obj = new UserId(ProductUserId.FromString(id));
+            idCache.Add(id, obj);
+            return obj;
+        }
         /// <summary>
         /// We can only create a new UserID Instance from Epic's product UserID.
         /// </summary>

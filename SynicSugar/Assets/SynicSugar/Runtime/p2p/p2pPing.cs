@@ -13,7 +13,7 @@ namespace SynicSugar.P2P {
             ObtainPing = 253, ReturnPong = 254, Synic = 255
         }
         internal void Init(){
-            foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
+            foreach(var id in p2pInfo.Instance.userIds.AllUserIds){
                 if(!pingInfo.ContainsKey(id.ToString())){
                     pingInfo.Add(id.ToString(), new PingInformation());
                 }
