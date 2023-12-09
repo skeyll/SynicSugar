@@ -15,7 +15,8 @@ Generate object with UserID.
 | API | description |
 |---|---|
 | [Instantiate](../SynicObject/instantiate) | Generate a object for UserID |
-| [AllSpawn](../SynicObject/allspawn) | Generate objects for all UserID in Lobby |
+| [AllSpawn](../SynicObject/allspawn) | Generate objects for all users(include disconencted user) |
+| [AllSpawnForCurrent](../SynicObject/allspawnforcurrent) | Generate objects for all current Users in Lobby |
 
 
 ```cs
