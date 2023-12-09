@@ -264,34 +264,46 @@ namespace SynicSugar.P2P {
         }
 
         <# if (needSyncSynic) { #>
-
+        
         /// <summary>
         /// Sync all Synic variables. This is very heavy because it handles multiple data and repeats compression and serialization.
         /// </summary>
         /// <param name="targetId">Target to be synced by this local user.</param>
+        /// /// <param name="type">Whose data Host sends in Host's local. When set WithTarget or WithOthers, can overwrite the target's local data in Host's local data.</param>
         /// <param name="syncedPhase">Phase to be synced. If syncSinglePhase is false, sync all variables in the phase up to this point.</param>
         /// <param name="syncSinglePhase">If true, send only variables in syncedPhase.</param>
-        /// <param name="syncTargetsData">If true, sync target's data in Host local. When the target AllowHostsSynic, can overwrite the target's data in that local only once.</param>
-        public void SyncSynic(UserId targetId, byte syncedPhase = 9, bool syncSinglePhase = false, bool syncTargetsData = true){
+        public async void SyncSynic(UserId targetId, SynicType type, byte syncedPhase = 9, bool syncSinglePhase = false){
             //Sync local data to target local
             SynicContainer synicContainer = GenerateSynicContainer(p2pInfo.Instance.LocalUserId, syncedPhase, syncSinglePhase);
 
             using var selfCompressor  = new BrotliCompressor();
             MemoryPackSerializer.Serialize(selfCompressor, synicContainer);
 
-            EOSp2p.SendSynicPackets((byte)CHANNELLIST.Synic, selfCompressor.ToArray(), targetId, syncedPhase, syncSinglePhase);
+            EOSp2p.SendSynicPackets((byte)CHANNELLIST.Synic, selfCompressor.ToArray(), targetId, p2pInfo.Instance.LocalUserId, syncedPhase, syncSinglePhase);
 
-            if(!syncTargetsData || !p2pInfo.Instance.IsHost()){
+            if(type == SynicType.OnlySelf || !p2pInfo.Instance.IsHost()){
                 return;
             }
-            //Sync target data in local to target local
+            if(type == SynicType.WithOthers){
+                foreach(var id in p2pInfo.Instance.DisconnectedUserIds){
+                    synicContainer = GenerateSynicContainer(id, syncedPhase, syncSinglePhase);
 
+                    using var targetCompressor  = new BrotliCompressor();
+                    MemoryPackSerializer.Serialize(targetCompressor, synicContainer);
+
+                    EOSp2p.SendSynicPackets((byte)CHANNELLIST.Synic, targetCompressor.ToArray(), targetId, id, syncedPhase, syncSinglePhase);
+                    
+                    await UniTask.Yield();
+                }
+            }
+            
+            //Sync target data in local to target local
             synicContainer = GenerateSynicContainer(targetId, syncedPhase, syncSinglePhase);
 
-            using var targetCompressor  = new BrotliCompressor();
-            MemoryPackSerializer.Serialize(targetCompressor, synicContainer);
+            using var reconnecterCompressor  = new BrotliCompressor();
+            MemoryPackSerializer.Serialize(reconnecterCompressor, synicContainer);
 
-            EOSp2p.SendSynicPackets((byte)CHANNELLIST.Synic, targetCompressor.ToArray(), targetId, syncedPhase, syncSinglePhase, false);
+            EOSp2p.SendSynicPackets((byte)CHANNELLIST.Synic, reconnecterCompressor.ToArray(), targetId, targetId, syncedPhase, syncSinglePhase);
         }
 
         <#= GenerateSynicContainer #>
@@ -326,15 +338,23 @@ namespace SynicSugar.P2P {
             return largePacketInfo[id][ch].currentSize + 1160 > largeBuffer[id][ch].Length ? true : false;
         }
 
-        //Synced 0 = index, 1 = chunk, 2 = phase, 3 = syncSinglePhase, 4 = isSelf
+        //Synced 0 = index, 1 = chunk, 2 = phase, 3 = syncSinglePhase, 4 = whose data?(0: localUser, 1: sender, 2: other), 5 = targetIndex
         bool RestoreSynicPackets(ref byte ch, ref string id, ref ArraySegment<byte> payload){
+            //Set target id
             if(payload[4] == 0){
                 if(p2pInfo.Instance.IsHost(id) && p2pInfo.Instance.AcceptHostSynic){
                     id = p2pInfo.Instance.LocalUserId.ToString();
                 }else{
                     return false;
                 }
+            }else if(payload[4] == 2){
+                if(p2pInfo.Instance.IsHost(id) && p2pInfo.Instance.AcceptHostSynic){
+                    id = p2pInfo.Instance.AllUserIds[payload[5]].ToString();
+                }else{
+                    return false;
+                }
             }
+
 
             if(!synicBuffer.ContainsKey(id)){
                 synicPacketInfo.Add(id, new SynicPacketInfomation(){  basis = new (){ chunk = payload[1]}, 
@@ -350,7 +370,7 @@ namespace SynicSugar.P2P {
             Debug.Log($"RestoreSynicPackets: PacketInfo:: index {payload[0]} / chunk {payload[1]} / phase {payload[2]} / syncSinglePhase {payload[3]}");
     #endif
             //Remove header
-            Span<byte> packetPayload = payload.Slice(5);
+            Span<byte> packetPayload = payload.Slice(6);
             synicPacketInfo[id].basis.currentSize += packetPayload.Length;
             //Copy Byte from what come in
             Buffer.BlockCopy(packetPayload.ToArray(), 0, synicBuffer[id], offset, packetPayload.Length);
@@ -381,6 +401,37 @@ namespace SynicSugar.P2P {
                 goto case 9;
             }
         }
+        #region Obsolete
+        [Obsolete("This is old. SyncSynic(UserId targetId, SynicType type, byte syncedPhase = 9, bool syncSinglePhase = false) is new one.")]
+        /// <summary>
+        /// Sync all Synic variables. This is very heavy because it handles multiple data and repeats compression and serialization.
+        /// </summary>
+        /// <param name="targetId">Target to be synced by this local user.</param>
+        /// <param name="syncedPhase">Phase to be synced. If syncSinglePhase is false, sync all variables in the phase up to this point.</param>
+        /// <param name="syncSinglePhase">If true, send only variables in syncedPhase.</param>
+        /// <param name="syncTargetsData">If true, sync target's data in Host local. When the target AllowHostsSynic, can overwrite the target's data in that local only once.</param>
+        public void SyncSynic(UserId targetId, byte syncedPhase = 9, bool syncSinglePhase = false, bool syncTargetsData = true){
+            //Sync local data to target local
+            SynicContainer synicContainer = GenerateSynicContainer(p2pInfo.Instance.LocalUserId, syncedPhase, syncSinglePhase);
+
+            using var selfCompressor  = new BrotliCompressor();
+            MemoryPackSerializer.Serialize(selfCompressor, synicContainer);
+
+            EOSp2p.SendSynicPackets((byte)CHANNELLIST.Synic, selfCompressor.ToArray(), targetId, syncedPhase, syncSinglePhase);
+
+            if(!syncTargetsData || !p2pInfo.Instance.IsHost()){
+                return;
+            }
+            //Sync target data in local to target local
+
+            synicContainer = GenerateSynicContainer(targetId, syncedPhase, syncSinglePhase);
+
+            using var targetCompressor  = new BrotliCompressor();
+            MemoryPackSerializer.Serialize(targetCompressor, synicContainer);
+
+            EOSp2p.SendSynicPackets((byte)CHANNELLIST.Synic, targetCompressor.ToArray(), targetId, syncedPhase, syncSinglePhase, false);
+        }
+        #endregion
         <#= SyncedItems #>
     }
 }

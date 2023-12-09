@@ -269,7 +269,7 @@ namespace SynicSugar.MatchMake {
 
             p2pInfo.Instance.userIds.isJustReconnected = true;
 
-            await OpenConnection(token);
+            await OpenConnectionForReconnecter(token);
             
             return true;
         }
@@ -463,9 +463,6 @@ namespace SynicSugar.MatchMake {
             isMatchSuccess = true;
             waitingMatch = false;
         }
-#endregion
-#region Manual Close
-
 #endregion
 //Guest
 #region Search
@@ -838,6 +835,10 @@ namespace SynicSugar.MatchMake {
                 p2pInfo.Instance.ConnectionNotifier.Disconnected(UserId.GetUserId(info.TargetUserId), Reason.Disconnected);
                 p2pInfo.Instance.userIds.MoveTargetUserIdToLefts(info.TargetUserId);
             }else if(info.CurrentStatus == LobbyMemberStatus.Joined){
+                // Send Id list.
+                if(p2pInfo.Instance.IsHost()){
+                    ReconenctionExtensions.SendUserLists(UserId.GetUserId(info.TargetUserId));
+                }
                 p2pInfo.Instance.userIds.MoveTargetUserIdToRemoteUsersFromLeft(info.TargetUserId);
                 p2pInfo.Instance.ConnectionNotifier.Connected(UserId.GetUserId(info.TargetUserId));
             }
@@ -1309,6 +1310,11 @@ namespace SynicSugar.MatchMake {
             lobbyHandle.Release();
             return true;
         }
+        /// <summary>
+        /// Open conenction and init some objects
+        /// </summary>
+        /// <param name="token"></param>
+        /// <returns></returns>
         async UniTask OpenConnection(CancellationToken token){
             p2pConnectorForOtherAssembly.Instance.OpenConnection(p2pConfig.Instance.FirstConnection == p2pConfig.FirstConnectionType.Strict);
             p2pInfo.Instance.infoMethod.Init();
@@ -1326,6 +1332,21 @@ namespace SynicSugar.MatchMake {
             }
         }
         /// <summary>
+        /// Open connection in strict and wait for AllUserLists(that has the same order in all local) from Host.
+        /// </summary>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        async UniTask OpenConnectionForReconnecter(CancellationToken token){
+            p2pConnectorForOtherAssembly.Instance.OpenConnection(p2pConfig.Instance.FirstConnection == p2pConfig.FirstConnectionType.Strict);
+            p2pInfo.Instance.infoMethod.Init();
+            await p2pInfoMethod.WaitConnectPreparation(token);
+            //Wait for user ids list from host.
+            ReconenctionExtensions reconenct = new();
+            await reconenct.ReciveUserIdsPacket(token);
+
+            p2pInfo.Instance.pings.Init();
+        }
+        /// <summary>
         /// For library user to save ID.
         /// </summary>
         /// <returns></returns>
@@ -1341,4 +1362,3 @@ namespace SynicSugar.MatchMake {
         }
     }
 }
-

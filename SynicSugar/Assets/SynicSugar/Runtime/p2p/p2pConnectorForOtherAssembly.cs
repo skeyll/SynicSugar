@@ -192,6 +192,9 @@ namespace SynicSugar.P2P {
         #endif
         }
 #region Notify(ConnectRquest)
+        /// <summary>
+        /// Ready to receive packets of users in the same socket.
+        /// </summary>
         void AddNotifyPeerConnectionRequest(){
             if (RequestNotifyId == 0){
                 AddNotifyPeerConnectionRequestOptions options = new AddNotifyPeerConnectionRequestOptions(){
@@ -258,7 +261,8 @@ namespace SynicSugar.P2P {
         ClearPacketQueue();
     }
     /// <summary>
-    /// For the end of matchmaking.
+    /// For the end of matchmaking. <br />
+    /// Immediate packet reception permission in advance
     /// </summary>
     void AcceptAllConenctions(){
         ResultE result = ResultE.Success;

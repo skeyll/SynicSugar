@@ -105,11 +105,13 @@ namespace SynicSugar.P2P {
         internal byte LastSyncedPhase { get; private set; }
         bool _receivedAllSyncSynic;
         List<string> ReceivedUsers = new List<string>();
+        bool isForAll;
         internal bool ReceivedAllSyncSynic(){
             if(_receivedAllSyncSynic){
                 //Init
                 ReceivedUsers.Clear();
                 _receivedAllSyncSynic = false;
+                isForAll = false;
 
                 return true;
             }
@@ -121,13 +123,17 @@ namespace SynicSugar.P2P {
                 ReceivedUsers.Add(id);
                 LastSyncedUserId = UserId.GetUserId(id);
                 LastSyncedPhase = phase;
-            }
-
-            if(ReceivedUsers.Count == p2pInfo.Instance.GetCurrentConnectionMemberCount()){
-                _receivedAllSyncSynic = true;
+                
+                if(!isForAll && !p2pInfo.Instance.AllCurrentUserIds.Contains(UserId.GetUserId(id))){
+                    isForAll = true;
+                }
             }
 
             OnSyncedSynic?.Invoke();
+
+            if(ReceivedUsers.Count == (isForAll ? p2pInfo.Instance.AllUserIds.Count : p2pInfo.Instance.AllCurrentUserIds.Count)){
+                _receivedAllSyncSynic = true;
+            }
         }
     }
 }
