@@ -123,11 +123,11 @@ namespace SynicSugar.P2P {
                 LastSyncedPhase = phase;
             }
 
+            OnSyncedSynic?.Invoke();
+
             if(ReceivedUsers.Count == p2pInfo.Instance.GetCurrentConnectionMemberCount()){
                 _receivedAllSyncSynic = true;
             }
-
-            OnSyncedSynic?.Invoke();
         }
     }
 }
