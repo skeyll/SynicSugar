@@ -53,7 +53,7 @@ namespace SynicSugar.Samples {
         void OnConnected(UserId id){
             chatText.text += $"{id} Join {System.Environment.NewLine}";
             //Send local data
-            ConnectHub.Instance.SyncSynic(p2pInfo.Instance.LastConnectedUsersId, 0, false, true);
+            ConnectHub.Instance.SyncSynic(p2pInfo.Instance.LastConnectedUsersId, SynicType.WithOthers, 0, false);
         }
         //Called each time a SyncSynic packet is received
         async void OnSyncedSynic(){

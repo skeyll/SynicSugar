@@ -163,9 +163,9 @@ namespace SynicSugar.Samples {
             }
             LargePacket = new string(array);
             systemManager.chatText.text += LargePacket;
+            //Pass OnlySelf to 2nd arg, to send Synic data as simple RPC. The opponent will drop the packets for self data except for the moment re-cconect.
             //When the 3rd arg is true, this becomea the rpc to send large packet.
-            //Pass false to 4th arg. The opponent will drop the packets for self data except for the moment re-cconect.
-            ConnectHub.Instance.SyncSynic(p2pInfo.Instance.CurrentRemoteUserIds[0], 1, true, false);
+            ConnectHub.Instance.SyncSynic(p2pInfo.Instance.CurrentRemoteUserIds[0], SynicType.OnlySelf, 1, true);
         }
         public void DecideUserName(){
             UpdateName(systemManager.nameField.text);

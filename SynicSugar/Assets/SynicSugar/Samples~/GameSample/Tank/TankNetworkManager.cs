@@ -18,7 +18,7 @@ namespace  SynicSugar.Samples {
             localPlayer.SetOwnerID(p2pInfo.Instance.LocalUserId);
 
             //Generate player models
-            SynicObject.AllSpawn(playerPrefab);
+            SynicObject.AllSpawnForCurrent(playerPrefab);
 
             p2pInfo.Instance.ConnectionNotifier.OnTargetDisconnected += OnDisconnected;
             p2pInfo.Instance.ConnectionNotifier.OnTargetEarlyDisconnected += OnEarlyDisconnected;
