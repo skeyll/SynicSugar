@@ -14,7 +14,7 @@ public static List<GameObject> AllSpawn(GameObject original, Vector3 position, Q
 
 
 ### Description
-Generate GameObjects, then set UserIDs of all members in Lobby to each NetworkPlayer.<br>
+Generate GameObjects, then set UserIDs of all members in Lobby to each NetworkPlayer. (include disconnected users)<br>
 If original prefab has many components, this will be heavy.
 
 

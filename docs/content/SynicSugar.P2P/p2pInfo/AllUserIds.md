@@ -10,9 +10,8 @@ public List<UserId> AllUserIds;
 
 
 ### Description
-UserIDs of this whole this session.<br>
-This Id is assigned by EOS.<br>
-The order is the same in lobby order, so all locals have the same order of this.<br>
+UserIDs of this whole this session. The Id is assigned by EOS.<br>
+The order is the same in lobby order, so all locals have the same order of this. Even if the local user is reconnecter, they has the list in same order because the host will sent the list.<br>
 When user will leave the lobby in manual, the id is removed from this List.<br>
 LocalUserId + CurrentRemoteUserIds + DisconnectedUserIds
 
