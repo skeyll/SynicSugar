@@ -5,12 +5,55 @@ namespace SynicSugar.P2P {
     public static class SynicObject {
         #region AllSpawn
         /// <summary>
-        /// Spawn all connected users as Gameobject.<br />
+        /// Spawn Gameobjects for all users include disconnected users.<br />
         /// If original has many components, this will becomes very heavy.
         /// </summary>
         /// <param name="original"></param>
         /// <returns></returns>
         public static List<GameObject> AllSpawn(GameObject original){
+            List<GameObject> objcs = new List<GameObject>();
+            foreach(UserId id in p2pInfo.Instance.userIds.AllUserIds){
+                objcs.Add(Instantiate(id, original));
+            }
+            return objcs; 
+        }
+        public static List<GameObject> AllSpawn(GameObject original, Transform parent){     
+            List<GameObject> objcs = new List<GameObject>();
+            foreach(UserId id in p2pInfo.Instance.userIds.AllUserIds){
+                objcs.Add(Instantiate(id, original, parent));
+            }
+            return objcs;
+        }
+        public static List<GameObject> AllSpawn(GameObject original, Transform parent, bool instantiateInWorldSpace){
+            List<GameObject> objcs = new List<GameObject>();
+            foreach(UserId id in p2pInfo.Instance.userIds.AllUserIds){
+                objcs.Add(Instantiate(id, original, parent, instantiateInWorldSpace));
+            }
+            return objcs;
+        }
+        public static List<GameObject> AllSpawn(GameObject original, Vector3 position, Quaternion rotation){
+            List<GameObject> objcs = new List<GameObject>();
+            foreach(UserId id in p2pInfo.Instance.userIds.AllUserIds){
+                objcs.Add(Instantiate(id, original, position, rotation));
+            }
+            return objcs;
+        }
+        public static List<GameObject> AllSpawn(GameObject original, Vector3 position, Quaternion rotation, Transform parent){
+            List<GameObject> objcs = new List<GameObject>();
+            foreach(UserId id in p2pInfo.Instance.userIds.AllUserIds){
+                objcs.Add(Instantiate(id, original, position, rotation, parent));
+            }
+            return objcs;
+        }
+        #endregion
+        #region AllSpawnForCurrent
+        /// <summary>
+        /// Spawn Gameobjects for all CURRENT connected users.<br />
+        /// If original has many components, this will becomes very heavy.
+        /// </summary>
+        /// <param name="original"></param>
+        /// <returns></returns>
+        public static List<GameObject> AllSpawnForCurrent(GameObject original){
             List<GameObject> objcs = new List<GameObject>();
             //Local User
             objcs.Add(Instantiate(p2pInfo.Instance.userIds.LocalUserId, original));
@@ -21,7 +64,7 @@ namespace SynicSugar.P2P {
             }
             return objcs; 
         }
-        public static List<GameObject> AllSpawn(GameObject original, Transform parent){     
+        public static List<GameObject> AllSpawnForCurrent(GameObject original, Transform parent){     
             List<GameObject> objcs = new List<GameObject>();
             //Local User
             objcs.Add(Instantiate(p2pInfo.Instance.userIds.LocalUserId, original, parent));
@@ -32,7 +75,7 @@ namespace SynicSugar.P2P {
             }
             return objcs;
         }
-        public static List<GameObject> AllSpawn(GameObject original, Transform parent, bool instantiateInWorldSpace){
+        public static List<GameObject> AllSpawnForCurrent(GameObject original, Transform parent, bool instantiateInWorldSpace){
             List<GameObject> objcs = new List<GameObject>();
             //Local User
             objcs.Add(Instantiate(p2pInfo.Instance.userIds.LocalUserId, original, parent, instantiateInWorldSpace));
@@ -43,7 +86,7 @@ namespace SynicSugar.P2P {
             }
             return objcs;
         }
-        public static List<GameObject> AllSpawn(GameObject original, Vector3 position, Quaternion rotation){
+        public static List<GameObject> AllSpawnForCurrent(GameObject original, Vector3 position, Quaternion rotation){
             List<GameObject> objcs = new List<GameObject>();
             //Local User
             objcs.Add(Instantiate(p2pInfo.Instance.userIds.LocalUserId, original, position, rotation));
@@ -54,7 +97,7 @@ namespace SynicSugar.P2P {
             }
             return objcs;
         }
-        public static List<GameObject> AllSpawn(GameObject original, Vector3 position, Quaternion rotation, Transform parent){
+        public static List<GameObject> AllSpawnForCurrent(GameObject original, Vector3 position, Quaternion rotation, Transform parent){
             List<GameObject> objcs = new List<GameObject>();
             //Local User
             objcs.Add(Instantiate(p2pInfo.Instance.userIds.LocalUserId, original, position, rotation, parent));
