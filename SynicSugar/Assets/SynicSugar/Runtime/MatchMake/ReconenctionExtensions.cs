@@ -9,6 +9,7 @@ using PlayEveryWare.EpicOnlineServices;
 using Epic.OnlineServices;
 using Epic.OnlineServices.P2P;
 using ResultE = Epic.OnlineServices.Result;
+using UnityEngine;
 
 namespace SynicSugar.MatchMake {
     internal class ReconenctionExtensions {
@@ -20,6 +21,7 @@ namespace SynicSugar.MatchMake {
         byte ch;
         string id;
         ArraySegment<byte> payload;
+        #region Send
         /// <summary>
         /// For Host to send List after reconnecter has came.
         /// </summary>
@@ -31,8 +33,30 @@ namespace SynicSugar.MatchMake {
             
             using var compressor  = new BrotliCompressor();
             MemoryPackSerializer.Serialize(compressor, tmp);
-            EOSp2p.SendPacket(RECONNECTIONCH, compressor.ToArray(), target);
+            SendPacket(RECONNECTIONCH, compressor.ToArray(), target);
         }
+        
+        static void SendPacket(byte ch, byte[] value, UserId targetId){
+            SendPacketOptions options = new SendPacketOptions(){
+                LocalUserId = EOSManager.Instance.GetProductUserId(),
+                RemoteUserId = targetId.AsEpic,
+                SocketId = p2pConnectorForOtherAssembly.Instance.SocketId,
+                Channel = ch,
+                AllowDelayedDelivery = true,
+                Reliability = PacketReliability.ReliableOrdered,
+                Data = new ArraySegment<byte>(value)
+            };
+
+            P2PInterface P2PHandle = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface();
+            ResultE result = P2PHandle.SendPacket(ref options);
+
+            if(result != ResultE.Success){
+                Debug.LogErrorFormat("SendUserLists: can't send packet, code: {0}", result);
+                return;
+            }
+        }
+        #endregion
+        #region Receive
         internal async UniTask ReciveUserIdsPacket(CancellationToken token){
             while(!token.IsCancellationRequested){
                 bool recivePacket = GetPacketFromBuffer(ref ch, ref id, ref payload);
@@ -56,12 +80,12 @@ namespace SynicSugar.MatchMake {
             ReceivePacketOptions options = new ReceivePacketOptions(){
                 LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
                 MaxDataSizeBytes = 1170,
-                RequestedChannel = ch
+                RequestedChannel = RECONNECTIONCH
             };
             //Next packet size
             var getNextReceivedPacketSizeOptions = new GetNextReceivedPacketSizeOptions {
                 LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
-                RequestedChannel = ch
+                RequestedChannel = RECONNECTIONCH
             };
 
             P2PInterface P2PHandle = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface();
@@ -92,5 +116,6 @@ namespace SynicSugar.MatchMake {
             List<string> data = MemoryPackSerializer.Deserialize<List<string>>(decompressed);
             p2pInfo.Instance.userIds.OverwriteAllUserIdsWithOrdered(data);
         }
+        #endregion
     }
 }
