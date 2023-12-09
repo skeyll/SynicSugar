@@ -245,39 +245,47 @@ namespace SynicSugarGenerator
             
             #line default
             #line hidden
-            this.Write("\r\n        /// <summary>\r\n        /// Sync all Synic variables. This is very heavy" +
-                    " because it handles multiple data and repeats compression and serialization.\r\n  " +
-                    "      /// </summary>\r\n        /// <param name=\"targetId\">Target to be synced by " +
-                    "this local user.</param>\r\n        /// <param name=\"syncedPhase\">Phase to be sync" +
-                    "ed. If syncSinglePhase is false, sync all variables in the phase up to this poin" +
-                    "t.</param>\r\n        /// <param name=\"syncSinglePhase\">If true, send only variabl" +
-                    "es in syncedPhase.</param>\r\n        /// <param name=\"syncTargetsData\">If true, s" +
-                    "ync target\'s data in Host local. When the target AllowHostsSynic, can overwrite " +
-                    "the target\'s data in that local only once.</param>\r\n        public void SyncSyni" +
-                    "c(UserId targetId, byte syncedPhase = 9, bool syncSinglePhase = false, bool sync" +
-                    "TargetsData = true){\r\n            //Sync local data to target local\r\n           " +
-                    " SynicContainer synicContainer = GenerateSynicContainer(p2pInfo.Instance.LocalUs" +
-                    "erId, syncedPhase, syncSinglePhase);\r\n\r\n            using var selfCompressor  = " +
-                    "new BrotliCompressor();\r\n            MemoryPackSerializer.Serialize(selfCompress" +
-                    "or, synicContainer);\r\n\r\n            EOSp2p.SendSynicPackets((byte)CHANNELLIST.Sy" +
-                    "nic, selfCompressor.ToArray(), targetId, syncedPhase, syncSinglePhase);\r\n\r\n     " +
-                    "       if(!syncTargetsData || !p2pInfo.Instance.IsHost()){\r\n                retu" +
-                    "rn;\r\n            }\r\n            //Sync target data in local to target local\r\n\r\n " +
-                    "           synicContainer = GenerateSynicContainer(targetId, syncedPhase, syncSi" +
-                    "nglePhase);\r\n\r\n            using var targetCompressor  = new BrotliCompressor();" +
-                    "\r\n            MemoryPackSerializer.Serialize(targetCompressor, synicContainer);\r" +
-                    "\n\r\n            EOSp2p.SendSynicPackets((byte)CHANNELLIST.Synic, targetCompressor" +
-                    ".ToArray(), targetId, syncedPhase, syncSinglePhase, false);\r\n        }\r\n\r\n      " +
-                    "  ");
+            this.Write("        \r\n        /// <summary>\r\n        /// Sync all Synic variables. This is ve" +
+                    "ry heavy because it handles multiple data and repeats compression and serializat" +
+                    "ion.\r\n        /// </summary>\r\n        /// <param name=\"targetId\">Target to be sy" +
+                    "nced by this local user.</param>\r\n        /// /// <param name=\"type\">Whose data " +
+                    "Host sends in Host\'s local. When set WithTarget or WithOthers, can overwrite the" +
+                    " target\'s local data in Host\'s local data.</param>\r\n        /// <param name=\"syn" +
+                    "cedPhase\">Phase to be synced. If syncSinglePhase is false, sync all variables in" +
+                    " the phase up to this point.</param>\r\n        /// <param name=\"syncSinglePhase\">" +
+                    "If true, send only variables in syncedPhase.</param>\r\n        public async void " +
+                    "SyncSynic(UserId targetId, SynicType type, byte syncedPhase = 9, bool syncSingle" +
+                    "Phase = false){\r\n            //Sync local data to target local\r\n            Syni" +
+                    "cContainer synicContainer = GenerateSynicContainer(p2pInfo.Instance.LocalUserId," +
+                    " syncedPhase, syncSinglePhase);\r\n\r\n            using var selfCompressor  = new B" +
+                    "rotliCompressor();\r\n            MemoryPackSerializer.Serialize(selfCompressor, s" +
+                    "ynicContainer);\r\n\r\n            EOSp2p.SendSynicPackets((byte)CHANNELLIST.Synic, " +
+                    "selfCompressor.ToArray(), targetId, p2pInfo.Instance.LocalUserId, syncedPhase, s" +
+                    "yncSinglePhase);\r\n\r\n            if(type == SynicType.OnlySelf || !p2pInfo.Instan" +
+                    "ce.IsHost()){\r\n                return;\r\n            }\r\n            if(type == Sy" +
+                    "nicType.WithOthers){\r\n                foreach(var id in p2pInfo.Instance.Disconn" +
+                    "ectedUserIds){\r\n                    synicContainer = GenerateSynicContainer(id, " +
+                    "syncedPhase, syncSinglePhase);\r\n\r\n                    using var targetCompressor" +
+                    "  = new BrotliCompressor();\r\n                    MemoryPackSerializer.Serialize(" +
+                    "targetCompressor, synicContainer);\r\n\r\n                    EOSp2p.SendSynicPacket" +
+                    "s((byte)CHANNELLIST.Synic, targetCompressor.ToArray(), targetId, id, syncedPhase" +
+                    ", syncSinglePhase);\r\n                    \r\n                    await UniTask.Yie" +
+                    "ld();\r\n                }\r\n            }\r\n            \r\n            //Sync target" +
+                    " data in local to target local\r\n            synicContainer = GenerateSynicContai" +
+                    "ner(targetId, syncedPhase, syncSinglePhase);\r\n\r\n            using var reconnecte" +
+                    "rCompressor  = new BrotliCompressor();\r\n            MemoryPackSerializer.Seriali" +
+                    "ze(reconnecterCompressor, synicContainer);\r\n\r\n            EOSp2p.SendSynicPacket" +
+                    "s((byte)CHANNELLIST.Synic, reconnecterCompressor.ToArray(), targetId, targetId, " +
+                    "syncedPhase, syncSinglePhase);\r\n        }\r\n\r\n        ");
             
-            #line 297 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 309 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GenerateSynicContainer));
             
             #line default
             #line hidden
             this.Write("\r\n        ");
             
-            #line 298 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 310 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
  } 
             
             #line default
@@ -299,49 +307,79 @@ namespace SynicSugarGenerator
                     "r.BlockCopy(packetPayload.ToArray(), 0, largeBuffer[id][ch], offset, packetPaylo" +
                     "ad.Length);\r\n\r\n            //Comming all?\r\n            return largePacketInfo[id" +
                     "][ch].currentSize + 1160 > largeBuffer[id][ch].Length ? true : false;\r\n        }" +
-                    "\r\n\r\n        //Synced 0 = index, 1 = chunk, 2 = phase, 3 = syncSinglePhase, 4 = i" +
-                    "sSelf\r\n        bool RestoreSynicPackets(ref byte ch, ref string id, ref ArraySeg" +
-                    "ment<byte> payload){\r\n            if(payload[4] == 0){\r\n                if(p2pIn" +
-                    "fo.Instance.IsHost(id) && p2pInfo.Instance.AcceptHostSynic){\r\n                  " +
-                    "  id = p2pInfo.Instance.LocalUserId.ToString();\r\n                }else{\r\n       " +
-                    "             return false;\r\n                }\r\n            }\r\n\r\n            if(!" +
-                    "synicBuffer.ContainsKey(id)){\r\n                synicPacketInfo.Add(id, new Synic" +
-                    "PacketInfomation(){  basis = new (){ chunk = payload[1]}, \r\n                    " +
-                    "                                                        phase = payload[2], \r\n  " +
-                    "                                                                          syncSi" +
-                    "nglePhase = payload[3] == 1 ? true : false });\r\n                //Prep enough by" +
-                    "te[]\r\n                synicBuffer.Add(id, new byte[payload[1] * 1160]);\r\n       " +
-                    "     }\r\n            int packetIndex = payload[0];\r\n            int offset = pack" +
-                    "etIndex * 1160;\r\n\r\n    #if SYNICSUGAR_LOG\r\n            Debug.Log($\"RestoreSynicP" +
-                    "ackets: PacketInfo:: index {payload[0]} / chunk {payload[1]} / phase {payload[2]" +
-                    "} / syncSinglePhase {payload[3]}\");\r\n    #endif\r\n            //Remove header\r\n  " +
-                    "          Span<byte> packetPayload = payload.Slice(5);\r\n            synicPacketI" +
-                    "nfo[id].basis.currentSize += packetPayload.Length;\r\n            //Copy Byte from" +
-                    " what come in\r\n            Buffer.BlockCopy(packetPayload.ToArray(), 0, synicBuf" +
-                    "fer[id], offset, packetPayload.Length);\r\n            //Comming all?\r\n           " +
-                    " return synicPacketInfo[id].basis.currentSize + 1160 > synicBuffer[id].Length ? " +
-                    "true : false;\r\n        }\r\n\r\n        /// <summary>\r\n        /// Call from Convert" +
-                    "FormPacket.\r\n        /// </summary>\r\n        void SyncedSynic(string overwriterU" +
-                    "serId){\r\n            //Deserialize packet\r\n            using var decompressor = " +
-                    "new BrotliDecompressor();\r\n            Span<byte> transmittedPaylaod = new Span<" +
-                    "byte>(synicBuffer[overwriterUserId]);\r\n\r\n            var decompressedBuffer = de" +
-                    "compressor.Decompress(transmittedPaylaod.Slice(0, synicPacketInfo[overwriterUser" +
-                    "Id].basis.currentSize));\r\n            SynicContainer container = MemoryPackSeria" +
-                    "lizer.Deserialize<SynicContainer>(decompressedBuffer);\r\n#if SYNICSUGAR_LOG\r\n    " +
-                    "        Debug.Log($\"SyncedSynic: Deserialize is Success for {overwriterUserId}\")" +
-                    ";\r\n    #endif\r\n\r\n            //Packet data\r\n            int phase = synicPacketI" +
-                    "nfo[overwriterUserId].phase;\r\n            bool syncSinglePhase = synicPacketInfo" +
-                    "[overwriterUserId].syncSinglePhase;\r\n\r\n            switch(phase){");
+                    "\r\n\r\n        //Synced 0 = index, 1 = chunk, 2 = phase, 3 = syncSinglePhase, 4 = w" +
+                    "hose data?(0: localUser, 1: sender, 2: other), 5 = targetIndex\r\n        bool Res" +
+                    "toreSynicPackets(ref byte ch, ref string id, ref ArraySegment<byte> payload){\r\n " +
+                    "           //Set target id\r\n            if(payload[4] == 0){\r\n                if" +
+                    "(p2pInfo.Instance.IsHost(id) && p2pInfo.Instance.AcceptHostSynic){\r\n            " +
+                    "        id = p2pInfo.Instance.LocalUserId.ToString();\r\n                }else{\r\n " +
+                    "                   return false;\r\n                }\r\n            }else if(payloa" +
+                    "d[4] == 2){\r\n                if(p2pInfo.Instance.IsHost(id) && p2pInfo.Instance." +
+                    "AcceptHostSynic){\r\n                    id = p2pInfo.Instance.AllUserIds[payload[" +
+                    "5]].ToString();\r\n                }else{\r\n                    return false;\r\n    " +
+                    "            }\r\n            }\r\n\r\n\r\n            if(!synicBuffer.ContainsKey(id)){\r" +
+                    "\n                synicPacketInfo.Add(id, new SynicPacketInfomation(){  basis = n" +
+                    "ew (){ chunk = payload[1]}, \r\n                                                  " +
+                    "                          phase = payload[2], \r\n                                " +
+                    "                                            syncSinglePhase = payload[3] == 1 ? " +
+                    "true : false });\r\n                //Prep enough byte[]\r\n                synicBuf" +
+                    "fer.Add(id, new byte[payload[1] * 1160]);\r\n            }\r\n            int packet" +
+                    "Index = payload[0];\r\n            int offset = packetIndex * 1160;\r\n\r\n    #if SYN" +
+                    "ICSUGAR_LOG\r\n            Debug.Log($\"RestoreSynicPackets: PacketInfo:: index {pa" +
+                    "yload[0]} / chunk {payload[1]} / phase {payload[2]} / syncSinglePhase {payload[3" +
+                    "]}\");\r\n    #endif\r\n            //Remove header\r\n            Span<byte> packetPay" +
+                    "load = payload.Slice(6);\r\n            synicPacketInfo[id].basis.currentSize += p" +
+                    "acketPayload.Length;\r\n            //Copy Byte from what come in\r\n            Buf" +
+                    "fer.BlockCopy(packetPayload.ToArray(), 0, synicBuffer[id], offset, packetPayload" +
+                    ".Length);\r\n            //Comming all?\r\n            return synicPacketInfo[id].ba" +
+                    "sis.currentSize + 1160 > synicBuffer[id].Length ? true : false;\r\n        }\r\n\r\n  " +
+                    "      /// <summary>\r\n        /// Call from ConvertFormPacket.\r\n        /// </sum" +
+                    "mary>\r\n        void SyncedSynic(string overwriterUserId){\r\n            //Deseria" +
+                    "lize packet\r\n            using var decompressor = new BrotliDecompressor();\r\n   " +
+                    "         Span<byte> transmittedPaylaod = new Span<byte>(synicBuffer[overwriterUs" +
+                    "erId]);\r\n\r\n            var decompressedBuffer = decompressor.Decompress(transmit" +
+                    "tedPaylaod.Slice(0, synicPacketInfo[overwriterUserId].basis.currentSize));\r\n    " +
+                    "        SynicContainer container = MemoryPackSerializer.Deserialize<SynicContain" +
+                    "er>(decompressedBuffer);\r\n#if SYNICSUGAR_LOG\r\n            Debug.Log($\"SyncedSyni" +
+                    "c: Deserialize is Success for {overwriterUserId}\");\r\n    #endif\r\n\r\n            /" +
+                    "/Packet data\r\n            int phase = synicPacketInfo[overwriterUserId].phase;\r\n" +
+                    "            bool syncSinglePhase = synicPacketInfo[overwriterUserId].syncSingleP" +
+                    "hase;\r\n\r\n            switch(phase){");
             
-            #line 379 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 399 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(SyncedInvoker));
             
             #line default
             #line hidden
             this.Write("\r\n                default:\r\n                goto case 9;\r\n            }\r\n        " +
-                    "}\r\n        ");
+                    "}\r\n        #region Obsolete\r\n        [Obsolete(\"This is old. SyncSynic(UserId ta" +
+                    "rgetId, SynicType type, byte syncedPhase = 9, bool syncSinglePhase = false) is n" +
+                    "ew one.\")]\r\n        /// <summary>\r\n        /// Sync all Synic variables. This is" +
+                    " very heavy because it handles multiple data and repeats compression and seriali" +
+                    "zation.\r\n        /// </summary>\r\n        /// <param name=\"targetId\">Target to be" +
+                    " synced by this local user.</param>\r\n        /// <param name=\"syncedPhase\">Phase" +
+                    " to be synced. If syncSinglePhase is false, sync all variables in the phase up t" +
+                    "o this point.</param>\r\n        /// <param name=\"syncSinglePhase\">If true, send o" +
+                    "nly variables in syncedPhase.</param>\r\n        /// <param name=\"syncTargetsData\"" +
+                    ">If true, sync target\'s data in Host local. When the target AllowHostsSynic, can" +
+                    " overwrite the target\'s data in that local only once.</param>\r\n        public vo" +
+                    "id SyncSynic(UserId targetId, byte syncedPhase = 9, bool syncSinglePhase = false" +
+                    ", bool syncTargetsData = true){\r\n            //Sync local data to target local\r\n" +
+                    "            SynicContainer synicContainer = GenerateSynicContainer(p2pInfo.Insta" +
+                    "nce.LocalUserId, syncedPhase, syncSinglePhase);\r\n\r\n            using var selfCom" +
+                    "pressor  = new BrotliCompressor();\r\n            MemoryPackSerializer.Serialize(s" +
+                    "elfCompressor, synicContainer);\r\n\r\n            EOSp2p.SendSynicPackets((byte)CHA" +
+                    "NNELLIST.Synic, selfCompressor.ToArray(), targetId, syncedPhase, syncSinglePhase" +
+                    ");\r\n\r\n            if(!syncTargetsData || !p2pInfo.Instance.IsHost()){\r\n         " +
+                    "       return;\r\n            }\r\n            //Sync target data in local to target" +
+                    " local\r\n\r\n            synicContainer = GenerateSynicContainer(targetId, syncedPh" +
+                    "ase, syncSinglePhase);\r\n\r\n            using var targetCompressor  = new BrotliCo" +
+                    "mpressor();\r\n            MemoryPackSerializer.Serialize(targetCompressor, synicC" +
+                    "ontainer);\r\n\r\n            EOSp2p.SendSynicPackets((byte)CHANNELLIST.Synic, targe" +
+                    "tCompressor.ToArray(), targetId, syncedPhase, syncSinglePhase, false);\r\n        " +
+                    "}\r\n        #endregion\r\n        ");
             
-            #line 384 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 435 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(SyncedItems));
             
             #line default
