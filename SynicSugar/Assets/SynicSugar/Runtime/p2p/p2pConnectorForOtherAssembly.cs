@@ -14,7 +14,6 @@ using SynicSugar.RTC;
 namespace SynicSugar.P2P {
     public class p2pConnectorForOtherAssembly : MonoBehaviour {
 #region Singleton
-        private p2pConnectorForOtherAssembly(){}
         public static p2pConnectorForOtherAssembly Instance { get; private set; }
         void Awake() {
             if( Instance != null ) {

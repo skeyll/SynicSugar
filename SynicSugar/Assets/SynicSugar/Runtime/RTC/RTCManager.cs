@@ -15,7 +15,6 @@ using UnityEngine.InputSystem;
 
 namespace SynicSugar.RTC {
     public class RTCManager : MonoBehaviour {
-        private RTCManager(){}
         public static RTCManager Instance { get; private set; }
         void Awake() {
             if( Instance != null ) {
