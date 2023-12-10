@@ -4,7 +4,6 @@ using System;
 namespace SynicSugar.P2P {
     public class p2pConfig : MonoBehaviour {
 #region Singleton
-        private p2pConfig(){}
         public static p2pConfig Instance { get; private set; }
         void Awake() {
             if( Instance != null ) {

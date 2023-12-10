@@ -10,7 +10,6 @@ using UnityEngine.Events;
 namespace SynicSugar.MatchMake {
     public class MatchMakeManager : MonoBehaviour {
 #region Singleton
-        private MatchMakeManager(){}
         public static MatchMakeManager Instance { get; private set; }
         void Awake() {
             if( Instance != null ) {
