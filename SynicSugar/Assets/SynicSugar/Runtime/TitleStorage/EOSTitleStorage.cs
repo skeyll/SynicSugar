@@ -392,7 +392,7 @@ namespace SynicSugar.TitleStorage {
         /// Destroy all used resources. Call before transition to next scene.
         /// </summary>
         public static void ReleaseAddressables() {
-            AddressableHelper.ReleaseAddressables();
+            AddressableHelper.ReleaseUsedResources();
         }
     #endif
         /// <summary>
