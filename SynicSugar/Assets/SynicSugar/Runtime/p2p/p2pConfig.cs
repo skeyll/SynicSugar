@@ -71,20 +71,25 @@ namespace SynicSugar.P2P {
         /// <summary>
         /// Frequency of BurstFPS's GetPacket in a frame. Recommend: 2-5
         /// </summary>
-        [Range(2, 10)]
+        [Range(2, 16)]
         public int BurstReceiveBatchSize = 5;
-        [Range(1, 10)]
+        [Range(1, 16)]
         /// <summary>
         /// The number of target users to be sent packet of RPC in a frame. Wait for a frame after a set. <br />
         /// The sending buffer is probably around 64 KB, so it should not exceed this. If we set 0 from the script, it will cause crash.
         /// </summary>
         public int RPCBatchSize = 3;
-        [Range(1, 10)]
+        [Range(1, 16)]
         /// <summary>
         /// The number of packets to be sent of a large packet in a frame. Wait for a frame after a set. <br />
         /// The sending buffer is probably around 64 KB, so it should not exceed this. If we set 0 from the script, it will cause crash.
         /// </summary>
         public int LargePacketBatchSize = 3;
+        /// <summary>
+        /// Frequency of GetSynicPacket in a frame. Recommend: 5-8
+        /// </summary>
+        [Range(2, 16)]
+        public int SynicReceiverBatchSize = 5;
         [Range(0, 5000)]
         /// <summary>
         /// Interval ms that a SyncVar dosen't been send even if the value changes after send that SyncVar.<br />

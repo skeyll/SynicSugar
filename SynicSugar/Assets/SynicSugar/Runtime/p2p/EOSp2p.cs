@@ -559,15 +559,6 @@ namespace SynicSugar.P2P {
         #if SYNICSUGAR_LOG
             Debug.Log($"SendSynicPackets: PacketInfo:: size {value.Length} / chunk {header[1]} / hierarchy {header[2]} / syncSpecificPhase {header[3]}");
         #endif
-        // if(payload[4] == 0){
-        //         if(p2pInfo.Instance.IsHost(id) && p2pInfo.Instance.AcceptHostSynic){
-        //             id = p2pInfo.Instance.LocalUserId.ToString();
-        //         }else{
-        //             return false;
-        //         }
-        //     }else if(payload[4] == 2){
-        //         id = p2pInfo.Instance.AllUserIds[(byte)2].ToString();
-        //     }
 
             //Max payload is 1170 but we need some header.
             for(int startIndex = 0; startIndex < value.Length; startIndex += 1160){
