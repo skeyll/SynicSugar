@@ -335,40 +335,40 @@ namespace SynicSugarGenerator
                     "hose data?(0: localUser, 1: sender, 2: other), 5 = targetIndex\r\n        bool Res" +
                     "toreSynicPackets(ref byte ch, ref string id, ref ArraySegment<byte> payload){\r\n " +
                     "           //Set target id\r\n            if(payload[4] == 0){\r\n                if" +
-                    "(p2pInfo.Instance.IsHost(id) && p2pInfo.Instance.AcceptHostSynic){\r\n            " +
-                    "        id = p2pInfo.Instance.LocalUserId.ToString();\r\n                }else{\r\n " +
-                    "                   return false;\r\n                }\r\n            }else if(payloa" +
-                    "d[4] == 2){\r\n                if(p2pInfo.Instance.IsHost(id) && p2pInfo.Instance." +
-                    "AcceptHostSynic){\r\n                    id = p2pInfo.Instance.AllUserIds[payload[" +
-                    "5]].ToString();\r\n                }else{\r\n                    return false;\r\n    " +
-                    "            }\r\n            }\r\n\r\n\r\n            if(!synicBuffer.ContainsKey(id)){\r" +
-                    "\n                synicPacketInfo.Add(id, new SynicPacketInfomation(){  basis = n" +
-                    "ew (){ chunk = payload[1]}, \r\n                                                  " +
-                    "                          phase = payload[2], \r\n                                " +
-                    "                                            syncSinglePhase = payload[3] == 1 ? " +
-                    "true : false });\r\n                //Prep enough byte[]\r\n                synicBuf" +
-                    "fer.Add(id, new byte[payload[1] * 1160]);\r\n            }\r\n            int packet" +
-                    "Index = payload[0];\r\n            int offset = packetIndex * 1160;\r\n\r\n    #if SYN" +
-                    "ICSUGAR_LOG\r\n            Debug.Log($\"RestoreSynicPackets: PacketInfo:: index {pa" +
-                    "yload[0]} / chunk {payload[1]} / phase {payload[2]} / syncSinglePhase {payload[3" +
-                    "]}\");\r\n    #endif\r\n            //Remove header\r\n            Span<byte> packetPay" +
-                    "load = payload.Slice(6);\r\n            synicPacketInfo[id].basis.currentSize += p" +
-                    "acketPayload.Length;\r\n            //Copy Byte from what come in\r\n            Buf" +
-                    "fer.BlockCopy(packetPayload.ToArray(), 0, synicBuffer[id], offset, packetPayload" +
-                    ".Length);\r\n            //Comming all?\r\n            return synicPacketInfo[id].ba" +
-                    "sis.currentSize + 1160 > synicBuffer[id].Length ? true : false;\r\n        }\r\n\r\n  " +
-                    "      /// <summary>\r\n        /// Call from ConvertFormPacket.\r\n        /// </sum" +
-                    "mary>\r\n        void SyncedSynic(string overwriterUserId){\r\n            //Deseria" +
-                    "lize packet\r\n            using var decompressor = new BrotliDecompressor();\r\n   " +
-                    "         Span<byte> transmittedPaylaod = new Span<byte>(synicBuffer[overwriterUs" +
-                    "erId]);\r\n\r\n            var decompressedBuffer = decompressor.Decompress(transmit" +
-                    "tedPaylaod.Slice(0, synicPacketInfo[overwriterUserId].basis.currentSize));\r\n    " +
-                    "        SynicContainer container = MemoryPackSerializer.Deserialize<SynicContain" +
-                    "er>(decompressedBuffer);\r\n#if SYNICSUGAR_LOG\r\n            Debug.Log($\"SyncedSyni" +
-                    "c: Deserialize is Success for {overwriterUserId}\");\r\n    #endif\r\n\r\n            /" +
-                    "/Packet data\r\n            int phase = synicPacketInfo[overwriterUserId].phase;\r\n" +
-                    "            bool syncSinglePhase = synicPacketInfo[overwriterUserId].syncSingleP" +
-                    "hase;\r\n\r\n            switch(phase){");
+                    "(p2pInfo.Instance.IsHost(id) && p2pInfo.Instance.IsReconnecter){\r\n              " +
+                    "      id = p2pInfo.Instance.LocalUserId.ToString();\r\n                }else{\r\n   " +
+                    "                 return false;\r\n                }\r\n            }else if(payload[" +
+                    "4] == 2){\r\n                if(p2pInfo.Instance.IsHost(id) && p2pInfo.Instance.Is" +
+                    "Reconnecter){\r\n                    id = p2pInfo.Instance.AllUserIds[payload[5]]." +
+                    "ToString();\r\n                }else{\r\n                    return false;\r\n        " +
+                    "        }\r\n            }\r\n\r\n\r\n            if(!synicBuffer.ContainsKey(id)){\r\n   " +
+                    "             synicPacketInfo.Add(id, new SynicPacketInfomation(){  basis = new (" +
+                    "){ chunk = payload[1]}, \r\n                                                      " +
+                    "                      phase = payload[2], \r\n                                    " +
+                    "                                        syncSinglePhase = payload[3] == 1 ? true" +
+                    " : false });\r\n                //Prep enough byte[]\r\n                synicBuffer." +
+                    "Add(id, new byte[payload[1] * 1160]);\r\n            }\r\n            int packetInde" +
+                    "x = payload[0];\r\n            int offset = packetIndex * 1160;\r\n\r\n    #if SYNICSU" +
+                    "GAR_LOG\r\n            Debug.Log($\"RestoreSynicPackets: PacketInfo:: index {payloa" +
+                    "d[0]} / chunk {payload[1]} / phase {payload[2]} / syncSinglePhase {payload[3]}\")" +
+                    ";\r\n    #endif\r\n            //Remove header\r\n            Span<byte> packetPayload" +
+                    " = payload.Slice(6);\r\n            synicPacketInfo[id].basis.currentSize += packe" +
+                    "tPayload.Length;\r\n            //Copy Byte from what come in\r\n            Buffer." +
+                    "BlockCopy(packetPayload.ToArray(), 0, synicBuffer[id], offset, packetPayload.Len" +
+                    "gth);\r\n            //Comming all?\r\n            return synicPacketInfo[id].basis." +
+                    "currentSize + 1160 > synicBuffer[id].Length ? true : false;\r\n        }\r\n\r\n      " +
+                    "  /// <summary>\r\n        /// Call from ConvertFormPacket.\r\n        /// </summary" +
+                    ">\r\n        void SyncedSynic(string overwriterUserId){\r\n            //Deserialize" +
+                    " packet\r\n            using var decompressor = new BrotliDecompressor();\r\n       " +
+                    "     Span<byte> transmittedPaylaod = new Span<byte>(synicBuffer[overwriterUserId" +
+                    "]);\r\n\r\n            var decompressedBuffer = decompressor.Decompress(transmittedP" +
+                    "aylaod.Slice(0, synicPacketInfo[overwriterUserId].basis.currentSize));\r\n        " +
+                    "    SynicContainer container = MemoryPackSerializer.Deserialize<SynicContainer>(" +
+                    "decompressedBuffer);\r\n#if SYNICSUGAR_LOG\r\n            Debug.Log($\"SyncedSynic: D" +
+                    "eserialize is Success for {overwriterUserId}\");\r\n    #endif\r\n\r\n            //Pac" +
+                    "ket data\r\n            int phase = synicPacketInfo[overwriterUserId].phase;\r\n    " +
+                    "        bool syncSinglePhase = synicPacketInfo[overwriterUserId].syncSinglePhase" +
+                    ";\r\n\r\n            switch(phase){");
             
             #line 436 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(SyncedInvoker));

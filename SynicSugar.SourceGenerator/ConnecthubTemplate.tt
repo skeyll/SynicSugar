@@ -379,13 +379,13 @@ namespace SynicSugar.P2P {
         bool RestoreSynicPackets(ref byte ch, ref string id, ref ArraySegment<byte> payload){
             //Set target id
             if(payload[4] == 0){
-                if(p2pInfo.Instance.IsHost(id) && p2pInfo.Instance.AcceptHostSynic){
+                if(p2pInfo.Instance.IsHost(id) && p2pInfo.Instance.IsReconnecter){
                     id = p2pInfo.Instance.LocalUserId.ToString();
                 }else{
                     return false;
                 }
             }else if(payload[4] == 2){
-                if(p2pInfo.Instance.IsHost(id) && p2pInfo.Instance.AcceptHostSynic){
+                if(p2pInfo.Instance.IsHost(id) && p2pInfo.Instance.IsReconnecter){
                     id = p2pInfo.Instance.AllUserIds[payload[5]].ToString();
                 }else{
                     return false;
