@@ -21,7 +21,10 @@ namespace SynicSugar.Samples {
         void Start(){
             GameObject chatCanvas = GameObject.Find("Chat");
             systemManager = chatCanvas.GetComponent<ChatSystemManager>();
-            Name = GenerateBasicName();
+            if(string.IsNullOrEmpty(Name)){
+                int userNumberInAllUserIds = p2pInfo.Instance.AllUserIds.FindIndex(id =>id == OwnerUserID);
+                Name = $"Player{userNumberInAllUserIds}";
+            }
             systemManager.GenerateVCStateObject(OwnerUserID);
 
             // For example, suppose this local Player's ID is A. 
@@ -33,10 +36,6 @@ namespace SynicSugar.Samples {
                 uiSets = Instantiate(systemManager.uiSetsPrefabs, chatCanvas.transform);
                 RegisterButtonEvent();
                 EOSDebug.Instance.Log("Chat Mode: Start");
-            }
-
-            string GenerateBasicName(){
-                return $"User{OwnerUserID.ToString().Substring(4, 8)}";
             }
         }
         void RegisterButtonEvent(){
@@ -77,7 +76,7 @@ namespace SynicSugar.Samples {
             systemManager.chatText.text += chat;
 
             submitCount++;
-            systemManager.inputCount.text = $"ChatCount: {ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.LocalUserId).submitCount} / {ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.CurrentRemoteUserIds[0]).submitCount}";
+            systemManager.UpdateChatCount();
         }
         [Rpc]
         public void UpdateName(string newName){
