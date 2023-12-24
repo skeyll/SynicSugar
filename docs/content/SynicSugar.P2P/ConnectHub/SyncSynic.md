@@ -49,7 +49,7 @@ public class p2pSample : MonoBehaviour {
     void OnConnected(){
         chatText.text += $"{p2pInfo.Instance.LastDisconnectedUsersId} Join {System.Environment.NewLine}";
         //Send local data
-        ConnectHub.Instance.SyncSynic(p2pInfo.Instance.LastDisconnectedUsersId, 5, false, true);
+        ConnectHub.Instance.SyncSynic(p2pInfo.Instance.LastConnectedUsersId, SynicType.WithOthers, 0, false);
     }
 }
 ```

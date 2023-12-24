@@ -21,9 +21,6 @@ using UnityEngine;
 public class TitleStorageSample : MonoBehaviour {
     [SerializeField] Text currentProgress;
     async void Start() {
-        List<string> tags = new();
-        tags.Add("audio");
-        tags.Add("image");
         await FetchFile("TestLogo");
     }
 }
