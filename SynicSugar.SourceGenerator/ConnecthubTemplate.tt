@@ -32,7 +32,8 @@ namespace SynicSugar.P2P {
         ArraySegment<byte> payload_r;
         //Start
         /// <summary>
-        /// Start the packet receiver. Call after creating the Network Instance required for reception.
+        /// Start the packet receiver. Call after creating the Network Instance required for reception.<br />
+        /// This cannot be called with other Receiver same time. If start the other Receiver, ConenctHub stop this Receiver automatically before start the new one.
         /// </summary>
         // Default Relay Setting is AllowRelay. To change this, get NatType.
         public void StartPacketReceiver(){
@@ -47,13 +48,27 @@ namespace SynicSugar.P2P {
             }
 
             if(p2pConfig.Instance.getPacketFrequency == p2pConfig.GetPacketFrequency.PerSecondBurstFPS){
-                ReciveMultiplePackets().Forget();
+                ReciveMultiplePackets(p2pConnectorForOtherAssembly.Instance.p2pToken.Token).Forget();
             }else{
-                RecivePacket().Forget();
+                RecivePacket(p2pConnectorForOtherAssembly.Instance.p2pToken.Token).Forget();
             }
             if(p2pConnectorForOtherAssembly.Instance.IsEnableRTC){
                 RTCManager.Instance.ToggleReceiveingFromTarget(null, true);
             }
+        }
+        
+        /// <summary>
+        /// To get only SynicPacket in burst FPS. Call after creating the Network Instance required for reception.<br />
+        /// This cannot be called with other Receiver same time. If start the other Receiver, ConenctHub stop this Receiver automatically before start the new one.
+        /// </summary>
+        public void StartSynicReceiver(){
+            if(p2pConnectorForOtherAssembly.Instance.p2pToken != null && !p2pConnectorForOtherAssembly.Instance.p2pToken.IsCancellationRequested){
+                p2pConnectorForOtherAssembly.Instance.p2pToken.Cancel();
+            }
+
+            p2pConnectorForOtherAssembly.Instance.p2pToken = new CancellationTokenSource();
+
+            ReciveSynicPackets(p2pConnectorForOtherAssembly.Instance.p2pToken.Token).Forget();
         }
         //Pause receiver
         /// <summary>
@@ -113,25 +128,26 @@ namespace SynicSugar.P2P {
             ClearReferenceDictionaries();
             return isSuccess;
         }
-        async UniTask RecivePacket(){
-            while(!p2pConnectorForOtherAssembly.Instance.p2pToken.IsCancellationRequested){
+
+
+        async UniTask RecivePacket(CancellationToken token){
+            while(!token.IsCancellationRequested){
                 bool recivePacket = p2pConnectorForOtherAssembly.Instance.GetPacketFromBuffer(ref ch_r, ref id_r, ref payload_r);
 
                 if(recivePacket){
                     ConvertFromPacket(ref ch_r, ref id_r, ref payload_r);
                 }
-                await UniTask.Delay(p2pConnectorForOtherAssembly.Instance.receiverInterval);
+                await UniTask.Delay(p2pConnectorForOtherAssembly.Instance.receiverInterval, cancellationToken: token);
 
-                if(p2pConnectorForOtherAssembly.Instance == null || p2pConnectorForOtherAssembly.Instance.p2pToken.IsCancellationRequested){
+                if(p2pConnectorForOtherAssembly.Instance == null){
                     break;
                 }
             }
         }
-        
-        async UniTask ReciveMultiplePackets(){
+        async UniTask ReciveMultiplePackets(CancellationToken token){
             int count = p2pConfig.Instance.BurstReceiveBatchSize;
 
-            while(!p2pConnectorForOtherAssembly.Instance.p2pToken.IsCancellationRequested){
+            while(!token.IsCancellationRequested){
                 bool recivePacket = p2pConnectorForOtherAssembly.Instance.GetPacketFromBuffer(ref ch_r, ref id_r, ref payload_r);
                 count--;
 
@@ -140,12 +156,33 @@ namespace SynicSugar.P2P {
                 }
 
                 if(count == 0 || !recivePacket){
-                    await UniTask.Yield(PlayerLoopTiming.Update);
+                    await UniTask.Yield(PlayerLoopTiming.Update, cancellationToken : token);
                     
                     if(p2pConnectorForOtherAssembly.Instance == null){
                         break;
                     }
                     count = p2pConfig.Instance.BurstReceiveBatchSize;
+                }
+            }
+        }
+        async UniTask ReciveSynicPackets(CancellationToken token){
+            int count = p2pConfig.Instance.SynicReceiverBatchSize;
+
+            while(!token.IsCancellationRequested){
+                bool recivePacket = p2pConnectorForOtherAssembly.Instance.GetSynicPacketFromBuffer(ref ch_r, ref id_r, ref payload_r);
+                count--;
+
+                if(recivePacket){
+                    ConvertFromPacket(ref ch_r, ref id_r, ref payload_r);
+                }
+
+                if(count == 0 || !recivePacket){
+                    await UniTask.Yield(PlayerLoopTiming.Update, cancellationToken : token);
+                    
+                    if(p2pConnectorForOtherAssembly.Instance == null){
+                        break;
+                    }
+                    count = p2pConfig.Instance.SynicReceiverBatchSize;
                 }
             }
         }
@@ -342,13 +379,13 @@ namespace SynicSugar.P2P {
         bool RestoreSynicPackets(ref byte ch, ref string id, ref ArraySegment<byte> payload){
             //Set target id
             if(payload[4] == 0){
-                if(p2pInfo.Instance.IsHost(id) && p2pInfo.Instance.AcceptHostSynic){
+                if(p2pInfo.Instance.IsHost(id) && p2pInfo.Instance.IsReconnecter){
                     id = p2pInfo.Instance.LocalUserId.ToString();
                 }else{
                     return false;
                 }
             }else if(payload[4] == 2){
-                if(p2pInfo.Instance.IsHost(id) && p2pInfo.Instance.AcceptHostSynic){
+                if(p2pInfo.Instance.IsHost(id) && p2pInfo.Instance.IsReconnecter){
                     id = p2pInfo.Instance.AllUserIds[payload[5]].ToString();
                 }else{
                     return false;

@@ -16,7 +16,7 @@ namespace SynicSugar.Samples {
         [SerializeField] Text vcStatePrefab;
         public RawImage ForLargePacket;
 
-        void Start() {
+        async UniTaskVoid Start() {
             vcStates = new();
             p2pInfo.Instance.ConnectionNotifier.OnTargetDisconnected += OnDisconect;
             p2pInfo.Instance.ConnectionNotifier.OnTargetConnected += OnConnected;
@@ -24,7 +24,17 @@ namespace SynicSugar.Samples {
             //At first, instantiate network objects.
             //It are registered to ConnectHub automatically.
             SynicObject.AllSpawn(chatPlayerPrefab);
+            //For reconencter
+            //IsReconnecter means that this local user is a reconnector and they has not received Synic data about themself.
+            if(p2pInfo.Instance.IsReconnecter){
+                //To get SynicPacket.
+                ConnectHub.Instance.StartSynicReceiver();
+                //This flag(HasReceivedAllSyncSynic) cannot be used at the same time. Once it returns True, it returns False again.
+                await UniTask.WaitUntil(() => p2pInfo.Instance.HasReceivedAllSyncSynic);
+                UpdateChatCount();
+            }
             
+            //To get AllPacket.
             ConnectHub.Instance.StartPacketReceiver();
             RTCManager.Instance.StartVoiceSending();
             // VC actions with No args
@@ -47,6 +57,10 @@ namespace SynicSugar.Samples {
             string tmpName = p2pInfo.Instance.IsLoaclUser(userId) ? "LocalPlayer" : "RemotePlayer";
             stateText.text = $"{tmpName}: Not-Speaking";
         }
+        
+        public void UpdateChatCount(){
+            inputCount.text = $"ChatCount: {ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.LocalUserId).submitCount} / {ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.CurrentRemoteUserIds[0]).submitCount}";
+        }
         void OnDisconect(UserId id){
             chatText.text += $"{id} is Disconnected / {p2pInfo.Instance.LastDisconnectedUsersReason}{System.Environment.NewLine}";
         }
@@ -55,15 +69,9 @@ namespace SynicSugar.Samples {
             //Send local data
             ConnectHub.Instance.SyncSynic(p2pInfo.Instance.LastConnectedUsersId, SynicType.WithOthers, 0, false);
         }
-        //Called each time a SyncSynic packet is received
-        async void OnSyncedSynic(){
-            //As for the reconnect process, it is done in the local user event.
-            if(p2pInfo.Instance.IsLoaclUser(p2pInfo.Instance.LastSyncedUserId) && p2pInfo.Instance.AcceptHostSynic){
-                await UniTask.WaitUntil(() => p2pInfo.Instance.HasReceivedAllSyncSynic);
-                //Update counter
-                inputCount.text = $"ChatCount: {ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.LocalUserId).submitCount} / {ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.CurrentRemoteUserIds[0]).submitCount}";
-                return;
-            }
+        //Called each time a SyncSynic packet is received.
+        //Use when Synic is used as just a large packet.
+        void OnSyncedSynic(){
             if(p2pInfo.Instance.SyncedSynicPhase == 1){  
                 EOSDebug.Instance.Log("GetLargePacket");
                 chatText.text = ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.CurrentRemoteUserIds[0]).LargePacket;

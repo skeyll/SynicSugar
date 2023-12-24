@@ -817,7 +817,7 @@ namespace SynicSugar.MatchMake {
             //In game
             // Hosts changed?
             if (info.CurrentStatus == LobbyMemberStatus.Promoted){
-                p2pInfo.Instance.userIds.HostUserId = UserId.GetUserId(CurrentLobby.LobbyOwner);
+                p2pInfo.Instance.userIds.HostUserId = UserId.GetUserId(info.TargetUserId);
 
                 #if SYNICSUGAR_LOG
                     Debug.Log($"MemberStatusNotyfy: {info.TargetUserId} is promoted to host.");
@@ -837,7 +837,7 @@ namespace SynicSugar.MatchMake {
             }else if(info.CurrentStatus == LobbyMemberStatus.Joined){
                 // Send Id list.
                 if(p2pInfo.Instance.IsHost()){
-                    ReconenctionExtensions.SendUserLists(UserId.GetUserId(info.TargetUserId));
+                    BasicInfoExtensions.SendUserList(UserId.GetUserId(info.TargetUserId));
                 }
                 p2pInfo.Instance.userIds.MoveTargetUserIdToRemoteUsersFromLeft(info.TargetUserId);
                 p2pInfo.Instance.ConnectionNotifier.Connected(UserId.GetUserId(info.TargetUserId));
@@ -1316,20 +1316,17 @@ namespace SynicSugar.MatchMake {
         /// <param name="token"></param>
         /// <returns></returns>
         async UniTask OpenConnection(CancellationToken token){
-            p2pConnectorForOtherAssembly.Instance.OpenConnection(p2pConfig.Instance.FirstConnection == p2pConfig.FirstConnectionType.Strict);
+            p2pConnectorForOtherAssembly.Instance.OpenConnection(true);
             p2pInfo.Instance.infoMethod.Init();
-            p2pInfo.Instance.pings.Init();
-            switch(p2pConfig.Instance.FirstConnection){
-                case p2pConfig.FirstConnectionType.Strict:
-                    await p2pInfoMethod.WaitConnectPreparation(token);
-                return;
-                case p2pConfig.FirstConnectionType.TempDelayedDelivery:
-                    p2pInfoMethod.DisableDelayedDeliveryAfterElapsed().Forget();
-                return;
-                case p2pConfig.FirstConnectionType.Casual:
-                case p2pConfig.FirstConnectionType.DelayedDelivery:
-                return;
+            await p2pInfoMethod.WaitConnectPreparation(token);
+            //Host sends AllUserIds list, Guest Receives AllUserIds.
+            if(p2pInfo.Instance.IsHost()){
+                await BasicInfoExtensions.SendUserListToAll(token);
+            }else{
+                BasicInfoExtensions basicInfo = new();
+                await basicInfo.ReciveUserIdsPacket(token);
             }
+            p2pInfo.Instance.pings.Init();
         }
         /// <summary>
         /// Open connection in strict and wait for AllUserLists(that has the same order in all local) from Host.
@@ -1337,12 +1334,12 @@ namespace SynicSugar.MatchMake {
         /// <param name="token"></param>
         /// <returns></returns>
         async UniTask OpenConnectionForReconnecter(CancellationToken token){
-            p2pConnectorForOtherAssembly.Instance.OpenConnection(p2pConfig.Instance.FirstConnection == p2pConfig.FirstConnectionType.Strict);
+            p2pConnectorForOtherAssembly.Instance.OpenConnection(true);
             p2pInfo.Instance.infoMethod.Init();
             await p2pInfoMethod.WaitConnectPreparation(token);
             //Wait for user ids list from host.
-            ReconenctionExtensions reconenct = new();
-            await reconenct.ReciveUserIdsPacket(token);
+            BasicInfoExtensions basicInfo = new();
+            await basicInfo.ReciveUserIdsPacket(token);
 
             p2pInfo.Instance.pings.Init();
         }

@@ -9,7 +9,14 @@ weight = 0
 
 ### Description
 Download and load data from EOS title storage.<br>
-***This API is under testing and I'm considering what the API should be. So, this will be changed in the next version.**
+***This API is under test and I'm considering what the API should be. So, this will be changed in the future version.**
+*If you use this, (I use TitleStorage in this way now) <br>
+1. Build a file(.bundle) as AssetBundle.<br>
+2. Upload the AssetBundle to EPIC title storage with EncriptionKey in EOS plugin's Client Credentials.<br>
+3. Build Game and delete 2 AssetBundle from APPNAME_Data/StreamingAssets/aa/PLATFORM/ASSETBUNDLENAME from build.<br>
+4. call LoadFromAssetBundle(Uploaded Path) in runtime.<br>
+**In the future, I will implement the proprietary code to build and read as Addressables.**<br>
+
 
 
 ### Event

@@ -300,7 +300,7 @@
         }
         internal (string text, bool needData) AddSyncSynicFrame(int index, string playerContent, string commonsContent) {
             string getPart = string.IsNullOrEmpty(playerContent) && string.IsNullOrEmpty(commonsContent) ? System.String.Empty :$@"
-                    SynicItem{index} synicItem{index} = p2pInfo.Instance.IsHost() ? new SynicItem{index}(){{{ playerContent }{ commonsContent }}} : new SynicItem{index}(){{{ playerContent }}};
+                    SynicItem{index} synicItem{index} = p2pInfo.Instance.IsHost(id) ? new SynicItem{index}(){{{ playerContent }{ commonsContent }}} : new SynicItem{index}(){{{ playerContent }}};
                     synicContainer.SynicItem{index} = JsonUtility.ToJson(synicItem{index});" ;
             string footer = index == 0 ? @"break;" : $@"if (syncSinglePhase) {{ break; }}
                 else {{ goto case {index - 1}; }}";

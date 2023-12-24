@@ -22,12 +22,13 @@ If this is no longer needed, we call *[CancelCurrentMatchMake](../../SynicSugar.
 | API | description |
 |---|---|
 | [packetReliability](../p2pConfig/packetreliability) | The delivery reliability of a packet |
-| [FirstConnection](../p2pConfig/firstconnection) | Delay to return true after matchmaking is completed |
+| AllowDelayedDelivery | Whether users that no connection with local user receives or discards this local user's packet. |
 | [UseDisconnectedEarlyNotify](../p2pConfig/usedisconnectedearlynotify) | Notify at the step of a connection interrupted |
 | [GetPacketFrequency](../p2pConfig/getpacketfrequency) | Frequency of getting packet |
 | [BurstReceiveBatchSize](../p2pConfig/burstreceivebatchsize) | Frequency of BurstFPS's GetPacket in a frame |
 | [RPCBatchSize](../p2pConfig/rpcbatchsize) | Frequency of sending RPC in a frame |
 | [LargePacketBatchSize](../p2pConfig/largepacketbatchsize) | Frequency of sending LargePacket(Target)RPC in a frame |
+| [SynicReceiverBatchSize](../p2pConfig/burstreceivebatchsize) | Frequency of getting (Synic) packet |
 | [autoSyncInterval](../p2pConfig/autosyncinterval) | Sending new value interval of SyncVar |
 | [AutoRefreshPing](../p2pConfig/autorefreshping) | If true, update ping automatically |
 | [SamplesPerPing](../p2pConfig/samplesperping) | Number of samples used for a ping |

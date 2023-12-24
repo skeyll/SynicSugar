@@ -25,6 +25,7 @@ Each assembly can have max 250 variables and functions with Network attribute (s
 ### Function 
 | API | description |
 |---|---|
+| [StartSynicReceiver](../ConnectHub/startsynicreceiver) | Start the synic receiver to get only synic packet from buffer |
 | [StartPacketReceiver](../ConnectHub/startpacketreceiver) | (Re)Start the packet receiver to get packet from buffer |
 | [PausePacketReceiver](../ConnectHub/pausepacketreceiver) | Pause to get a packet from the buffer |
 | [PauseConnections](../ConnectHub/pauseconnections) | Pause receiving a packet to the receive buffer |

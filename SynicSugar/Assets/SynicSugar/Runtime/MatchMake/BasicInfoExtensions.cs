@@ -12,12 +12,12 @@ using ResultE = Epic.OnlineServices.Result;
 using UnityEngine;
 
 namespace SynicSugar.MatchMake {
-    internal class ReconenctionExtensions {
+    internal class BasicInfoExtensions {
         /// <summary>
         /// Different Assembly can have same CH, but not sorted when receive packet. <br />
         /// So must not use the same ch for what SynicSugar may receive at the same time.
         /// </summary>
-        const byte RECONNECTIONCH = 252;
+        const byte USERLISTCH = 252;
         byte ch;
         string id;
         ArraySegment<byte> payload;
@@ -25,7 +25,7 @@ namespace SynicSugar.MatchMake {
         /// <summary>
         /// For Host to send List after reconnecter has came.
         /// </summary>
-        internal static void SendUserLists(UserId target){
+        internal static void SendUserList(UserId target){
             List<string> tmp = new List<string>();
             foreach(var id in p2pInfo.Instance.AllUserIds){
                 tmp.Add(id.ToString());
@@ -33,7 +33,38 @@ namespace SynicSugar.MatchMake {
             
             using var compressor  = new BrotliCompressor();
             MemoryPackSerializer.Serialize(compressor, tmp);
-            SendPacket(RECONNECTIONCH, compressor.ToArray(), target);
+            SendPacket(USERLISTCH, compressor.ToArray(), target);
+        }
+        /// <summary>
+        /// For Host to send AllUserList after conenction.
+        /// </summary>
+        internal static async UniTask SendUserListToAll(CancellationToken token){
+            List<string> tmp = new List<string>();
+            foreach(var id in p2pInfo.Instance.AllUserIds){
+                tmp.Add(id.ToString());
+            }
+            
+            using var compressor  = new BrotliCompressor();
+            MemoryPackSerializer.Serialize(compressor, tmp);
+            
+            int count = p2pConfig.Instance.RPCBatchSize;
+
+            foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
+
+                SendPacket(USERLISTCH, compressor.ToArray(), id);
+
+                count--;
+                if(count <= 0){
+                await UniTask.Yield(cancellationToken: token);
+                    if(token.IsCancellationRequested){
+                #if SYNICSUGAR_LOG
+                        Debug.Log("SendUserListToAll: get out of the loop by Cancel");
+                #endif
+                        break;
+                    }
+                    count = p2pConfig.Instance.RPCBatchSize;
+                }
+            }
         }
         
         static void SendPacket(byte ch, byte[] value, UserId targetId){
@@ -65,7 +96,7 @@ namespace SynicSugar.MatchMake {
                     ConvertFromPacket();
                     return;
                 }
-                await UniTask.Yield();
+                await UniTask.Yield(cancellationToken: token);
             }
         }
         /// <summary>
@@ -80,12 +111,12 @@ namespace SynicSugar.MatchMake {
             ReceivePacketOptions options = new ReceivePacketOptions(){
                 LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
                 MaxDataSizeBytes = 1170,
-                RequestedChannel = RECONNECTIONCH
+                RequestedChannel = USERLISTCH
             };
             //Next packet size
             var getNextReceivedPacketSizeOptions = new GetNextReceivedPacketSizeOptions {
                 LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
-                RequestedChannel = RECONNECTIONCH
+                RequestedChannel = USERLISTCH
             };
 
             P2PInterface P2PHandle = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface();
@@ -106,7 +137,7 @@ namespace SynicSugar.MatchMake {
         }
         
         void ConvertFromPacket(){
-            if(ch != RECONNECTIONCH){
+            if(ch != USERLISTCH){
                 return;
             }
 
