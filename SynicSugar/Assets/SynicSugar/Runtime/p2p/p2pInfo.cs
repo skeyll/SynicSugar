@@ -96,9 +96,9 @@ namespace SynicSugar.P2P {
         /// </summary>
         public UserId LastSyncedUserId { get { return SyncSnyicNotifier.LastSyncedUserId;} } 
         /// <summary>
-        /// Always return false. Just on reconnect, returns true until getting SyncSynic for self data from Host.
+        /// Always return false. Just on reconnect, returns true until getting SyncSynic for SELF data from Host.
         /// </summary>
-        public bool AcceptHostSynic => userIds.isJustReconnected;
+        public bool IsReconnecter => userIds.isJustReconnected;
         
         /// <summary>
         /// Get member count in just current match.
@@ -211,6 +211,12 @@ namespace SynicSugar.P2P {
         /// </summary>
         [Obsolete("This is old. CurrentRemoteUserIds is new one.")]
         public List<UserId> RemoteUserIds => userIds.RemoteUserIds;
+        
+        /// <summary>
+        /// Always return false. Just on reconnect, returns true until getting SyncSynic for self data from Host.
+        /// </summary>
+        [Obsolete("This is old. IsReconnecter is new one.")]
+        public bool AcceptHostSynic => userIds.isJustReconnected;
         #endregion
     }
 }

@@ -11,7 +11,6 @@ namespace SynicSugar.P2P {
                 return;
             }
             Instance = this;
-            AllowDelayedDelivery = FirstConnection == FirstConnectionType.TempDelayedDelivery || FirstConnection == FirstConnectionType.DelayedDelivery;
         }
         void OnDestroy() {
             if( Instance == this ) {
@@ -26,37 +25,11 @@ namespace SynicSugar.P2P {
         public PacketReliability packetReliability = PacketReliability.ReliableOrdered;
 
         /// <summary>
-        /// Delay time to return true after matchmaking.<br />
-        /// After the matchmaking is established, EOS need to request and accept connections with each other. This is the setting of how to handle it.
-        /// </summary>
-        public enum FirstConnectionType{
-            /// <summary>
-            /// Return true after having connected with all peers. This is reliable but need a time.
-            /// </summary>
-            Strict, 
-            /// <summary>
-            /// Return true after just sending connect request. Other peers will discard the initial some packets that the user sends during about 1-2sec after getting true. (Depends on the ping)
-            /// </summary>
-            Casual, 
-            /// <summary>
-            /// Return true after just sending connect request. Packets in 10 sec after matching are stored in the receive buffer even if the peer haven't accept the connection.
-            /// </summary>
-            TempDelayedDelivery, 
-            /// <summary>
-            /// Return true after just sending connect request. All packets are stored in the receive buffer even if the peer haven't accept the connection. PauseConnections() stops the work on this type.
-            /// </summary>
-            DelayedDelivery
-        }
-        
-        /// <summary>
-        /// Delay time to return true after matchmaking.<br />
-        /// After the connection is established, EOS has a lag before actual communication is possible.  This is the setting of how to handle it.<br />
-        /// </summary>
-        public FirstConnectionType FirstConnection;
-        /// <summary>
+        /// Which the packet to reach the users who have not yet got a connection or not.<br />
+        /// If True, PausePacketReceiver, etc. is not be available.<br />
         /// MEMO: Can't change this in game for performance now.
         /// </summary>
-        internal bool AllowDelayedDelivery;
+        public bool AllowDelayedDelivery = false;
         public bool UseDisconnectedEarlyNotify;
 
         public enum GetPacketFrequency {
