@@ -350,6 +350,9 @@ MigrationBackup/
 
 # End of https://www.toptal.com/developers/gitignore/api/csharp
 
+# Document
+docs/public
+
 # Unity
 
 ### Unity ###
@@ -360,6 +363,11 @@ SynicSugar/[Bb]uild/
 SynicSugar/[Bb]uilds/
 SynicSugar/[Uu]ser[Ss]ettings/
 SynicSugar/Assets/AssetStoreTools*
+SynicSugar/Assets/AddressableAssetsData*
+SynicSugar/Assets/Plugins/Android*
+SynicSugar/Assets/StreamingAssets*
+SynicSugar/Assets/Tests*
+SynicSugar/*/*/Samples/*
 
 SynicSugar/ExportedObj/
 SynicSugar/.consulo/
@@ -377,8 +385,6 @@ SynicSugar/bin/*
 SynicSugar/obj/*
 SynicSugar/*/EOS*
 */Assets/EOS*
-*Assets/StreamingAssets/*
-*Assets/Plugins/Android/*
 
 SynicSugar.SourceGenerator/bin/*
 SynicSugar.SourceGenerator/obj/*
