@@ -265,7 +265,7 @@ namespace SynicSugar.Generator {
                 }
 
                 
-                StringBuilder SyncSynic= new StringBuilder();
+                StringBuilder SyncSynic = new StringBuilder(string.Empty);
                 bool needSyncSynic = false;
                 foreach (var i in SyncPlayer) {
                     var result = cb.AddSyncSynicFrame(i.Key, i.Value.ToString(), SyncCommons[i.Key].ToString());
@@ -283,7 +283,7 @@ namespace SynicSugar.Generator {
                     SyncedItem.Append(cb.CreateSyncedItem(i.Key, i.Value.ToString(), SyncedCommons[i.Key].ToString()));
                 }
 
-                StringBuilder GenerateSynicContainer = new StringBuilder(cb.CreateGenerateSynicContainer(SyncSynic.ToString()));
+                //StringBuilder GenerateSynicContainer = new StringBuilder(cb.CreateGenerateSynicContainer(SyncSynic.ToString()));
 
                 var connectTemplate = new ConnecthubTemplate() {
                     SyncList = SyncList.ToString(),
@@ -294,7 +294,7 @@ namespace SynicSugar.Generator {
                     CommonsInstance = CommonsInstance.ToString(),
                     PacketConvert = PacketConvert.ToString(),
                     needSyncSynic = needSyncSynic,
-                    GenerateSynicContainer = GenerateSynicContainer.ToString(),
+                    GenerateSynicContainer = SyncSynic.ToString(),
                     SyncedInvoker = SyncedInvoker.ToString(),
                     SyncedItems = SyncedItem.ToString()
                 }.TransformText();
