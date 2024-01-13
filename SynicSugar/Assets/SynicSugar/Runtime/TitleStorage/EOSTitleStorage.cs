@@ -5,58 +5,171 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using ResultE = Epic.OnlineServices.Result;
 using System;
+using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Collections.Generic;
-using System.Linq;
 using MemoryPack;
 
 namespace SynicSugar.TitleStorage {
     public static class EOSTitleStorage {
         //Options
         const uint MAXCHUNKLENGTH = 4 * 4 * 4096;
+        static string METAFILENAME = "sstsmeta.byte";
+        static string METAFILEPATH = $"{Application.persistentDataPath}/synicsugar";
         public static TransferProgressEvent ProgressInfo = new();
         //Query
-        static Dictionary<string, uint> FileMetaDatas = new ();
+        static Dictionary<string, EOSFileMetaData> MetaData = new ();
         //Read
         static TransferInProgress CurrentTransfer = new();
 
-        #region Query
-        //FileName, FileSizeBytes
+        #region Setup
         /// <summary>
-        /// Query the file List from backend. Hold FileSizeBytes to read file.
-        /// When we know the filename to want to get, can also call ReadFile not to call this.
+        /// Load local meta data with default name and path.<br />
         /// </summary>
-        /// <param name="tags"></param>
+        public async static UniTask Init(){
+            var data = await File.ReadAllBytesAsync(Path.Combine(METAFILEPATH, METAFILENAME));
+            MetaData = MemoryPackSerializer.Deserialize<Dictionary<string, EOSFileMetaData>>(data);
+        }
+        /// <summary>
+        /// Set options and Load local meta data.<br />
+        /// </summary>
+        /// <param name="metafileName">File name to be saved meta data</param>
+        /// <param name="metafilePath">Path metafileName's file</param>
+        public async static UniTask Init(string metafileName, string metafilePath){
+            METAFILEPATH = metafilePath;
+            METAFILENAME = metafileName;
+
+            var data = await File.ReadAllBytesAsync(Path.Combine(metafilePath, metafileName));
+            MetaData = MemoryPackSerializer.Deserialize<Dictionary<string, EOSFileMetaData>>(data);
+        }
+        #endregion
+        #region Catalog
+    #if !SYNICSUGAR_ADDRESSABLE
+        /// <summary>
+        /// Check Addressable catalog data updated by calling QueryFile("catalog.json").<br />
+        /// This just checks for differences in MetaData's MD5Hash, so to actually update it, call UpdateCatalog().
+        /// </summary>
+        /// <param name="catalogName">File to get</param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        public static async UniTask<bool> CheckForCatalogUpdates(string catalogName = "catalog.json", CancellationToken token = default(CancellationToken)){
+            return await QueryFile(catalogName, token);
+        }
+        
+        /// <summary>
+        /// Check Addressable catalog data updated by calling QueryFile("catalog.json").<br />
+        /// This just checks for differences in MetaData's MD5Hash, so to actually update it, call UpdateCatalog().
+        /// </summary>
+        /// <param name="catalogName">File to get</param>
+        /// <param name="metafileSavedPath">Local Path to save the MetaFile. Default is Application.persistentDataPath</param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        // public static async UniTask<bool> UpdateCatalog(string catalogName = "catalog.json", string catalogSavedPath = "", CancellationToken token = default(CancellationToken)){
+        //     await FetchFile(catalogName, metafileSavedPath, token)
+        //     return true;
+        // }
+    #endif
+        #endregion
+        #region Query File
+        /// <summary>
+        /// Query a specific file's metadata. And update local metadata list.
+        /// </summary>
+        /// <param name="fileName">File to get</param>
+        public static async UniTask<bool> QueryFile(string fileName, CancellationToken token = default(CancellationToken)){
+            QueryFileOptions queryOptions = new QueryFileOptions(){
+                LocalUserId = EOSManager.Instance.GetProductUserId(),
+                Filename = fileName
+            };
+
+            TitleStorageInterface titleStorageInterface = EOSManager.Instance.GetEOSPlatformInterface().GetTitleStorageInterface();
+            bool finishQuery = false;
+            bool canGetFileName = false;
+            titleStorageInterface.QueryFile(ref queryOptions, null, OnQueryFileComplete);
+            await UniTask.WaitUntil(() => finishQuery, cancellationToken: token);
+
+            return canGetFileName;
+            
+
+            void OnQueryFileComplete(ref QueryFileCallbackInfo data) {
+                //Result
+                canGetFileName = data.ResultCode == ResultE.Success;
+
+                if (!canGetFileName){
+                    Debug.LogErrorFormat("QueryFile: Failure by {0}", data.ResultCode);
+                    finishQuery = true;
+                    return;
+                }
+                CopyFileMetadataByFilenameOptions options = new CopyFileMetadataByFilenameOptions(){
+                    LocalUserId = EOSManager.Instance.GetProductUserId(),
+                    Filename = fileName
+                };
+                //Copy meta data
+                titleStorageInterface.CopyFileMetadataByFilename(ref options, out FileMetadata? fileMetadata);
+                if(string.IsNullOrEmpty(fileMetadata?.Filename)){
+                    Debug.LogErrorFormat("QueryFile: Meta file is null.", data.ResultCode);
+                    finishQuery = true;
+                    return;
+                }
+
+                if(MetaData.ContainsKey(fileMetadata?.Filename)){
+                    //No need update
+                    if(fileMetadata?.MD5Hash == MetaData[fileName].MD5Hash){
+                        finishQuery = true;
+                        return;
+                    }
+                    //New data
+                    MetaData[fileName].MD5Hash = fileMetadata?.MD5Hash;
+                    MetaData[fileName].NeedUpdate = true;
+                    MetaData[fileName].SizeByte = (uint)fileMetadata?.FileSizeBytes;
+                }else{
+                    MetaData.Add(fileMetadata?.Filename, new EOSFileMetaData(fileMetadata?.MD5Hash, true, (uint)fileMetadata?.FileSizeBytes));
+                }
+
+                File.WriteAllBytes(Path.Combine(METAFILEPATH, METAFILENAME), MemoryPackSerializer.Serialize(MetaData));
+
+                finishQuery = true;
+            }
+        }
+        #endregion
+
+
+
+        #region Query List
+        /// <summary>
+        /// Query the file List with tag from backend. <br />
+        /// When know the filename to get, can call ReadFile directly.
+        /// </summary>
+        /// <param name="tags">Tag set on EOS dev portal.</param>
         public static async UniTask<List<string>> QueryFileList(string[] tags, CancellationToken token = default(CancellationToken)){
             Utf8String[] utf8StringTags = new Utf8String[tags.Length];
 
             for (int i = 0; i < tags.Length; ++i){
                 utf8StringTags[i] = tags[i];
             }
-            await QueryFileList(utf8StringTags);
             
-            return FileMetaDatas.Keys.ToList();
+            List<string> fileList = await QueryFileList(utf8StringTags, token);
+            return fileList;
         }
         /// <summary>
-        /// Query the file List from backend. Hold FileSizeBytes to read file.
-        /// When we know the filename to want to get, can also call ReadFile not to call this.
+        /// Query the file List with tag from backend. <br />
+        /// When know the filename to get, can call ReadFile directly.
         /// </summary>
-        /// <param name="tags"></param>
+        /// <param name="tags">Tag set on EOS dev portal.</param>
         public static async UniTask<List<string>> QueryFileList(List<string> tags, CancellationToken token = default(CancellationToken)){
             Utf8String[] utf8StringTags = new Utf8String[tags.Count];
 
             for (int i = 0; i < tags.Count; ++i){
                 utf8StringTags[i] = tags[i];
             }
-            await QueryFileList(utf8StringTags);
-            return FileMetaDatas.Keys.ToList();
+            List<string> fileList = await QueryFileList(utf8StringTags, token);
+            return fileList;
         }
         /// <summary>
-        /// Substance for QueryFileList. Get file count, then create File namelist with the index.
-        /// MEMO: Is FileMetadata's Release unnecessary in C#?
+        /// Entity for QueryFileList. Get file count, then create File namelist with the index.
         /// </summary>
         /// <param name="tags"></param>
-        static async UniTask<bool> QueryFileList(Utf8String[] tags){
+        static async UniTask<List<string>> QueryFileList(Utf8String[] tags, CancellationToken token){
             QueryFileListOptions queryOptions = new QueryFileListOptions(){
                 LocalUserId = EOSManager.Instance.GetProductUserId(),
                 ListOfTags = tags
@@ -64,22 +177,19 @@ namespace SynicSugar.TitleStorage {
 
             TitleStorageInterface titleStorageInterface = EOSManager.Instance.GetEOSPlatformInterface().GetTitleStorageInterface();
             bool finishQuery = false;
-            bool canGetFileNames = false;
+            List<string> fileList = new();
             titleStorageInterface.QueryFileList(ref queryOptions, null, OnQueryFileListComplete);
-            await UniTask.WaitUntil(() => finishQuery);
-            return canGetFileNames;
+            await UniTask.WaitUntil(() => finishQuery, cancellationToken: token);
+
+            return fileList;
 
             void OnQueryFileListComplete(ref QueryFileListCallbackInfo data) {
-                //Result
-                canGetFileNames = data.ResultCode == ResultE.Success;
-
-                if (!canGetFileNames){
+                if (data.ResultCode != ResultE.Success){
                     Debug.LogErrorFormat("QueryFileList: Failure by {0}", data.ResultCode);
                     finishQuery = true;
                     return;
                 }
 
-                FileMetaDatas.Clear();
                 //Create file list with index
                 for (uint fileIndex = 0; fileIndex < data.FileCount; fileIndex++) {
                     CopyFileMetadataAtIndexOptions indexOptions = new CopyFileMetadataAtIndexOptions(){
@@ -89,16 +199,35 @@ namespace SynicSugar.TitleStorage {
 
                     titleStorageInterface.CopyFileMetadataAtIndex(ref indexOptions, out FileMetadata? fileMetadata);
 
-                    if (fileMetadata != null){
-                        if (!string.IsNullOrEmpty(fileMetadata?.Filename)){
-                            FileMetaDatas.Add(fileMetadata?.Filename, (uint)fileMetadata?.FileSizeBytes);
+                    if (fileMetadata == null){
+                        continue;
+                    }
+                    //only for tag
+                    fileList.Add(fileMetadata?.Filename);
+                    //For meta file
+                    if(MetaData.ContainsKey(fileMetadata?.Filename)){
+                        //No need update
+                        if(fileMetadata?.MD5Hash == MetaData[fileMetadata?.Filename].MD5Hash){
+                            finishQuery = true;
+                            continue;
                         }
+                        //New data
+                        MetaData[fileMetadata?.Filename].MD5Hash = fileMetadata?.MD5Hash;
+                        MetaData[fileMetadata?.Filename].NeedUpdate = true;
+                        MetaData[fileMetadata?.Filename].SizeByte = (uint)fileMetadata?.FileSizeBytes;
+                    }else{
+                        MetaData.Add(fileMetadata?.Filename, new EOSFileMetaData(fileMetadata?.MD5Hash, true, (uint)fileMetadata?.FileSizeBytes));
                     }
                 }
+                File.WriteAllBytes(Path.Combine(METAFILEPATH, METAFILENAME), MemoryPackSerializer.Serialize(MetaData));
                 finishQuery = true;
             }
         }
         #endregion
+
+
+
+
         #region Download
         /// <summary>
         /// Exsist target? If not, Download it from EOS server. <br />
@@ -110,7 +239,7 @@ namespace SynicSugar.TitleStorage {
             TitleStorageInterface titleStorageInterface = EOSManager.Instance.GetEOSPlatformInterface().GetTitleStorageInterface();
             //Prep.
             //If can use local data, use the query data.
-            if(!FileMetaDatas.ContainsKey(fileName)){
+            if(!MetaData.ContainsKey(fileName)){
                 //Get query
                 var queryOptions = new QueryFileOptions {
                     LocalUserId = EOSManager.Instance.GetProductUserId(),
@@ -140,7 +269,7 @@ namespace SynicSugar.TitleStorage {
                     Debug.LogError("ReadFile: can't find the meta data in query.");
                     return false;
                 }
-                FileMetaDatas.Add(fileMetadata?.Filename, (uint)fileMetadata?.FileSizeBytes);
+                // MetaData.Add(fileMetadata?.Filename, new EOSFileMetaData(fileMetadata?.MD5Hash, (uint)fileMetadata?.FileSizeBytes));
             }
             if(string.Compare(fileName, CurrentTransfer.FileName,true) == 0){
                 Debug.LogError("ReadFile: This call is Duplicateds. Downloading it now.");
@@ -404,7 +533,7 @@ namespace SynicSugar.TitleStorage {
             TitleStorageInterface titleStorageInterface = EOSManager.Instance.GetEOSPlatformInterface().GetTitleStorageInterface();
             //Prep.
             //If can use local data, use the query data.
-            if(!FileMetaDatas.ContainsKey(fileName)){
+            if(!MetaData.ContainsKey(fileName)){
                 //Get query
                 var queryOptions = new QueryFileOptions {
                     LocalUserId = EOSManager.Instance.GetProductUserId(),
@@ -434,7 +563,7 @@ namespace SynicSugar.TitleStorage {
                     Debug.LogError("LoadFile: can't find the meta data in query.");
                     return null;
                 }
-                FileMetaDatas.Add(fileMetadata?.Filename, (uint)fileMetadata?.FileSizeBytes);
+                // MetaData.Add(fileMetadata?.Filename, new EOSFileMetaData(fileMetadata?.MD5Hash, (uint)fileMetadata?.FileSizeBytes));
             }
             if(string.Compare(fileName, CurrentTransfer.FileName,true) == 0){
                 Debug.LogError("LoadFile: This call is Duplicateds. Already is loading it.");
@@ -477,7 +606,7 @@ namespace SynicSugar.TitleStorage {
         }
         static void FinishFileDownload(string fileName, bool success, out byte[] result){
             if (string.Compare(fileName, CurrentTransfer.FileName, true) != 0){
-                Debug.LogError("LoadFile: Failure.  This is a wrong download.");
+                Debug.LogError("LoadFile: Failure. This is a wrong download.");
                 result = null;
                 return;
             }
@@ -499,10 +628,6 @@ namespace SynicSugar.TitleStorage {
             }
             result = new byte[CurrentTransfer.Data.Length];
             Buffer.BlockCopy(CurrentTransfer.Data, 0, result, 0, result.Length);
-            string test = string.Empty;
-            for(int i = 1; i < 10; i++){
-                test += result[CurrentTransfer.Data.Length - i];
-            }
 
         #if SYNICSUGAR_LOG
             Debug.Log("LoadFile: Finish to read " + fileName + result.Length);
