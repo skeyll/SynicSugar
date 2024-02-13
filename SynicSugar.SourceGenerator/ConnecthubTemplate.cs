@@ -300,16 +300,45 @@ namespace SynicSugarGenerator
                     "rCompressor  = new BrotliCompressor();\r\n            MemoryPackSerializer.Seriali" +
                     "ze(reconnecterCompressor, synicContainer);\r\n\r\n            EOSp2p.SendSynicPacket" +
                     "s((byte)CHANNELLIST.Synic, reconnecterCompressor.ToArray(), targetId, targetId, " +
-                    "syncedPhase, syncSinglePhase);\r\n        }\r\n\r\n        ");
+                    "syncedPhase, syncSinglePhase);\r\n        }\r\n        \r\n        SynicContainer Gene" +
+                    "rateSynicContainer(UserId id, byte syncedPhase, bool syncSinglePhase){\r\n        " +
+                    "    SynicContainer synicContainer = new SynicContainer();\r\n            switch(sy" +
+                    "ncedPhase){");
             
-            #line 346 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 348 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GenerateSynicContainer));
             
             #line default
             #line hidden
-            this.Write("\r\n        ");
+            this.Write("\r\n                default:\r\n                goto case 9;\r\n            }\r\n        " +
+                    "    return synicContainer;\r\n        }\r\n        \r\n        #region Obsolete\r\n     " +
+                    "   [Obsolete(\"This is old. SyncSynic(UserId targetId, SynicType type, byte synce" +
+                    "dPhase = 9, bool syncSinglePhase = false) is new one.\")]\r\n        /// <summary>\r" +
+                    "\n        /// Sync all Synic variables. This is very heavy because it handles mul" +
+                    "tiple data and repeats compression and serialization.\r\n        /// </summary>\r\n " +
+                    "       /// <param name=\"targetId\">Target to be synced by this local user.</param" +
+                    ">\r\n        /// <param name=\"syncedPhase\">Phase to be synced. If syncSinglePhase " +
+                    "is false, sync all variables in the phase up to this point.</param>\r\n        ///" +
+                    " <param name=\"syncSinglePhase\">If true, send only variables in syncedPhase.</par" +
+                    "am>\r\n        /// <param name=\"syncTargetsData\">If true, sync target\'s data in Ho" +
+                    "st local. When the target AllowHostsSynic, can overwrite the target\'s data in th" +
+                    "at local only once.</param>\r\n        public void SyncSynic(UserId targetId, byte" +
+                    " syncedPhase = 9, bool syncSinglePhase = false, bool syncTargetsData = true){\r\n " +
+                    "           //Sync local data to target local\r\n            SynicContainer synicCo" +
+                    "ntainer = GenerateSynicContainer(p2pInfo.Instance.LocalUserId, syncedPhase, sync" +
+                    "SinglePhase);\r\n\r\n            using var selfCompressor  = new BrotliCompressor();" +
+                    "\r\n            MemoryPackSerializer.Serialize(selfCompressor, synicContainer);\r\n\r" +
+                    "\n            EOSp2p.SendSynicPackets((byte)CHANNELLIST.Synic, selfCompressor.ToA" +
+                    "rray(), targetId, syncedPhase, syncSinglePhase);\r\n\r\n            if(!syncTargetsD" +
+                    "ata || !p2pInfo.Instance.IsHost()){\r\n                return;\r\n            }\r\n   " +
+                    "         //Sync target data in local to target local\r\n\r\n            synicContain" +
+                    "er = GenerateSynicContainer(targetId, syncedPhase, syncSinglePhase);\r\n\r\n        " +
+                    "    using var targetCompressor  = new BrotliCompressor();\r\n            MemoryPac" +
+                    "kSerializer.Serialize(targetCompressor, synicContainer);\r\n\r\n            EOSp2p.S" +
+                    "endSynicPackets((byte)CHANNELLIST.Synic, targetCompressor.ToArray(), targetId, s" +
+                    "yncedPhase, syncSinglePhase, false);\r\n        }\r\n        #endregion\r\n        ");
             
-            #line 347 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 386 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
  } 
             
             #line default
@@ -370,40 +399,15 @@ namespace SynicSugarGenerator
                     "        bool syncSinglePhase = synicPacketInfo[overwriterUserId].syncSinglePhase" +
                     ";\r\n\r\n            switch(phase){");
             
-            #line 436 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 475 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(SyncedInvoker));
             
             #line default
             #line hidden
             this.Write("\r\n                default:\r\n                goto case 9;\r\n            }\r\n        " +
-                    "}\r\n        #region Obsolete\r\n        [Obsolete(\"This is old. SyncSynic(UserId ta" +
-                    "rgetId, SynicType type, byte syncedPhase = 9, bool syncSinglePhase = false) is n" +
-                    "ew one.\")]\r\n        /// <summary>\r\n        /// Sync all Synic variables. This is" +
-                    " very heavy because it handles multiple data and repeats compression and seriali" +
-                    "zation.\r\n        /// </summary>\r\n        /// <param name=\"targetId\">Target to be" +
-                    " synced by this local user.</param>\r\n        /// <param name=\"syncedPhase\">Phase" +
-                    " to be synced. If syncSinglePhase is false, sync all variables in the phase up t" +
-                    "o this point.</param>\r\n        /// <param name=\"syncSinglePhase\">If true, send o" +
-                    "nly variables in syncedPhase.</param>\r\n        /// <param name=\"syncTargetsData\"" +
-                    ">If true, sync target\'s data in Host local. When the target AllowHostsSynic, can" +
-                    " overwrite the target\'s data in that local only once.</param>\r\n        public vo" +
-                    "id SyncSynic(UserId targetId, byte syncedPhase = 9, bool syncSinglePhase = false" +
-                    ", bool syncTargetsData = true){\r\n            //Sync local data to target local\r\n" +
-                    "            SynicContainer synicContainer = GenerateSynicContainer(p2pInfo.Insta" +
-                    "nce.LocalUserId, syncedPhase, syncSinglePhase);\r\n\r\n            using var selfCom" +
-                    "pressor  = new BrotliCompressor();\r\n            MemoryPackSerializer.Serialize(s" +
-                    "elfCompressor, synicContainer);\r\n\r\n            EOSp2p.SendSynicPackets((byte)CHA" +
-                    "NNELLIST.Synic, selfCompressor.ToArray(), targetId, syncedPhase, syncSinglePhase" +
-                    ");\r\n\r\n            if(!syncTargetsData || !p2pInfo.Instance.IsHost()){\r\n         " +
-                    "       return;\r\n            }\r\n            //Sync target data in local to target" +
-                    " local\r\n\r\n            synicContainer = GenerateSynicContainer(targetId, syncedPh" +
-                    "ase, syncSinglePhase);\r\n\r\n            using var targetCompressor  = new BrotliCo" +
-                    "mpressor();\r\n            MemoryPackSerializer.Serialize(targetCompressor, synicC" +
-                    "ontainer);\r\n\r\n            EOSp2p.SendSynicPackets((byte)CHANNELLIST.Synic, targe" +
-                    "tCompressor.ToArray(), targetId, syncedPhase, syncSinglePhase, false);\r\n        " +
-                    "}\r\n        #endregion\r\n        ");
+                    "}\r\n        ");
             
-            #line 472 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
+            #line 480 "D:\SynicSugarGitTest\SynicSugar\SynicSugar.SourceGenerator\ConnecthubTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(SyncedItems));
             
             #line default

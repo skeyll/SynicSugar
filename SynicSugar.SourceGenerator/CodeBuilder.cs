@@ -309,17 +309,6 @@
                 case {index}: {getPart}
                 {footer}", !string.IsNullOrEmpty(getPart));
         }
-        internal string CreateGenerateSynicContainer(string content) {
-            return $@"SynicContainer GenerateSynicContainer(UserId id, byte syncedPhase, bool syncSinglePhase){{
-            SynicContainer synicContainer = new SynicContainer();
-            switch(syncedPhase){{ {content}
-                default:
-                goto case 9;
-            }}
-            return synicContainer;
-        }}
-";
-        }
         //SyncedSynic
         internal string CreateSyncedInvoker(int index) {
             string footer = index == 0 ? @"

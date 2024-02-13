@@ -342,8 +342,47 @@ namespace SynicSugar.P2P {
 
             EOSp2p.SendSynicPackets((byte)CHANNELLIST.Synic, reconnecterCompressor.ToArray(), targetId, targetId, syncedPhase, syncSinglePhase);
         }
+        
+        SynicContainer GenerateSynicContainer(UserId id, byte syncedPhase, bool syncSinglePhase){
+            SynicContainer synicContainer = new SynicContainer();
+            switch(syncedPhase){<#= GenerateSynicContainer #>
+                default:
+                goto case 9;
+            }
+            return synicContainer;
+        }
+        
+        #region Obsolete
+        [Obsolete("This is old. SyncSynic(UserId targetId, SynicType type, byte syncedPhase = 9, bool syncSinglePhase = false) is new one.")]
+        /// <summary>
+        /// Sync all Synic variables. This is very heavy because it handles multiple data and repeats compression and serialization.
+        /// </summary>
+        /// <param name="targetId">Target to be synced by this local user.</param>
+        /// <param name="syncedPhase">Phase to be synced. If syncSinglePhase is false, sync all variables in the phase up to this point.</param>
+        /// <param name="syncSinglePhase">If true, send only variables in syncedPhase.</param>
+        /// <param name="syncTargetsData">If true, sync target's data in Host local. When the target AllowHostsSynic, can overwrite the target's data in that local only once.</param>
+        public void SyncSynic(UserId targetId, byte syncedPhase = 9, bool syncSinglePhase = false, bool syncTargetsData = true){
+            //Sync local data to target local
+            SynicContainer synicContainer = GenerateSynicContainer(p2pInfo.Instance.LocalUserId, syncedPhase, syncSinglePhase);
 
-        <#= GenerateSynicContainer #>
+            using var selfCompressor  = new BrotliCompressor();
+            MemoryPackSerializer.Serialize(selfCompressor, synicContainer);
+
+            EOSp2p.SendSynicPackets((byte)CHANNELLIST.Synic, selfCompressor.ToArray(), targetId, syncedPhase, syncSinglePhase);
+
+            if(!syncTargetsData || !p2pInfo.Instance.IsHost()){
+                return;
+            }
+            //Sync target data in local to target local
+
+            synicContainer = GenerateSynicContainer(targetId, syncedPhase, syncSinglePhase);
+
+            using var targetCompressor  = new BrotliCompressor();
+            MemoryPackSerializer.Serialize(targetCompressor, synicContainer);
+
+            EOSp2p.SendSynicPackets((byte)CHANNELLIST.Synic, targetCompressor.ToArray(), targetId, syncedPhase, syncSinglePhase, false);
+        }
+        #endregion
         <# } #>
         
         //Synced 0 = index, 1 = chunk
@@ -438,37 +477,6 @@ namespace SynicSugar.P2P {
                 goto case 9;
             }
         }
-        #region Obsolete
-        [Obsolete("This is old. SyncSynic(UserId targetId, SynicType type, byte syncedPhase = 9, bool syncSinglePhase = false) is new one.")]
-        /// <summary>
-        /// Sync all Synic variables. This is very heavy because it handles multiple data and repeats compression and serialization.
-        /// </summary>
-        /// <param name="targetId">Target to be synced by this local user.</param>
-        /// <param name="syncedPhase">Phase to be synced. If syncSinglePhase is false, sync all variables in the phase up to this point.</param>
-        /// <param name="syncSinglePhase">If true, send only variables in syncedPhase.</param>
-        /// <param name="syncTargetsData">If true, sync target's data in Host local. When the target AllowHostsSynic, can overwrite the target's data in that local only once.</param>
-        public void SyncSynic(UserId targetId, byte syncedPhase = 9, bool syncSinglePhase = false, bool syncTargetsData = true){
-            //Sync local data to target local
-            SynicContainer synicContainer = GenerateSynicContainer(p2pInfo.Instance.LocalUserId, syncedPhase, syncSinglePhase);
-
-            using var selfCompressor  = new BrotliCompressor();
-            MemoryPackSerializer.Serialize(selfCompressor, synicContainer);
-
-            EOSp2p.SendSynicPackets((byte)CHANNELLIST.Synic, selfCompressor.ToArray(), targetId, syncedPhase, syncSinglePhase);
-
-            if(!syncTargetsData || !p2pInfo.Instance.IsHost()){
-                return;
-            }
-            //Sync target data in local to target local
-
-            synicContainer = GenerateSynicContainer(targetId, syncedPhase, syncSinglePhase);
-
-            using var targetCompressor  = new BrotliCompressor();
-            MemoryPackSerializer.Serialize(targetCompressor, synicContainer);
-
-            EOSp2p.SendSynicPackets((byte)CHANNELLIST.Synic, targetCompressor.ToArray(), targetId, syncedPhase, syncSinglePhase, false);
-        }
-        #endregion
         <#= SyncedItems #>
     }
 }

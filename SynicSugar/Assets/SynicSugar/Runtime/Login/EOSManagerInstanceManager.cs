@@ -3,8 +3,7 @@ using UnityEngine;
 namespace SynicSugar {
     public class EOSManagerInstanceManger : MonoBehaviour {
 #region Singleton
-        private EOSManagerInstanceManger(){}
-        private static EOSManagerInstanceManger Instance { get; set; }
+        public static EOSManagerInstanceManger Instance { get; private set; }
         void Awake() {
             if( Instance != null ) {
                 Destroy( this.gameObject );
