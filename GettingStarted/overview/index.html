@@ -1,0 +1,224 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://skeyll.github.io/SynicSugar/main.css">
+    <link rel="icon" href="https://github.com/skeyll/SynicSugar/blob/main/Resources/favicon.ico?raw=true">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <title> SynicSugar | Overview </title>
+</head>
+<body>
+
+<script>
+        fetch('https://api.github.com/repos/skeyll/SynicSugar/releases/latest')
+            .then((response) => {
+                return response.json();
+            })
+            .then((data) => {
+                let release_name = data.name;
+                let html_url = data.html_url;
+                release.innerHTML = `<a href='${html_url}'>${release_name}</a>`;
+            });
+    </script>
+<main>
+    
+    <nav>
+            <a href="https:&#x2F;&#x2F;skeyll.github.io&#x2F;SynicSugar&#x2F;">
+                        <img src="https://github.com/skeyll/SynicSugar/blob/main/Resources/Logo_doc.png?raw=true" alt="logo"/>
+                    </a>
+                <div id="release"></div>
+            <a href="javascript:void(0);" onclick="burger()" id="mobile" class="ms-Icon--GlobalNavButton"></a>
+            <div id="trees">
+                <input class="tree-toggle" type="checkbox" id="gettingstarted"
+                           checked/>
+                    <label class="tree-toggle-label"
+                           for="gettingstarted">GettingStarted</label>
+
+                    <ul class="subtree">
+                        <li class="active">
+                                <a href="https://skeyll.github.io/SynicSugar/GettingStarted/overview/">Overview</a>
+                            </li>
+
+                            
+                                    
+                                    
+                                        <li >
+                                <a href="https://skeyll.github.io/SynicSugar/GettingStarted/import-setup/">Import and Set up</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/GettingStarted/helloworld/">Hello World</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/GettingStarted/symbols/">Symbols</a>
+                            </li>
+
+                            </ul>
+                <input class="tree-toggle" type="checkbox" id="synicsugar-login"
+                           />
+                    <label class="tree-toggle-label"
+                           for="synicsugar-login">SynicSugar.Login</label>
+
+                    <ul class="subtree">
+                        <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.Login/eosconnect/">EOSConnect</a>
+                            </li>
+
+                            </ul>
+                <input class="tree-toggle" type="checkbox" id="synicsugar-matchmake"
+                           />
+                    <label class="tree-toggle-label"
+                           for="synicsugar-matchmake">SynicSugar.MatchMake</label>
+
+                    <ul class="subtree">
+                        <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.MatchMake/matchmakemanager/">MatchMakeManager</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.MatchMake/lobby/">Lobby</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.MatchMake/attributedata/">AttributeData</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.MatchMake/matchmakingguievents/">MatchMakingGUIEvents</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.MatchMake/lobbyidmethod/">LobbyIDMethod</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.MatchMake/asynclobbyidmethod/">AsyncLobbyIDMethod</a>
+                            </li>
+
+                            </ul>
+                <input class="tree-toggle" type="checkbox" id="synicsugar-p2p"
+                           />
+                    <label class="tree-toggle-label"
+                           for="synicsugar-p2p">SynicSugar.P2P</label>
+
+                    <ul class="subtree">
+                        <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/p2pconfig/">p2pConfig</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/attributes/">Attributes</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/synicobject/">SynicObject</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/userid/">UserId</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/connecthub/">ConnectHub</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/p2pinfo/">p2pInfo</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/p2pstrcut/">p2pStruct</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/p2pconnectorforotherassembly/">p2pConnectorForOtherAssembly</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/additionalclass/">AdditionalClass</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/eosp2p/">EOSp2p</a>
+                            </li>
+
+                            </ul>
+                <input class="tree-toggle" type="checkbox" id="synicsugar-rtc"
+                           />
+                    <label class="tree-toggle-label"
+                           for="synicsugar-rtc">SynicSugar.RTC</label>
+
+                    <ul class="subtree">
+                        <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.RTC/rtcconfig/">RTCConfig</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.RTC/rtcmanager/">RTCManager</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.RTC/rtcstruct/">RTCStruct</a>
+                            </li>
+
+                            </ul>
+                <input class="tree-toggle" type="checkbox" id="synicsugar-titlesorage"
+                           />
+                    <label class="tree-toggle-label"
+                           for="synicsugar-titlesorage">SynicSugar.TitleSorage</label>
+
+                    <ul class="subtree">
+                        <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.TitleSorage/eostitlestorage/">EOSTitleStorage</a>
+                            </li>
+
+                            </ul>
+                </div>
+        </nav>
+    <article>
+
+        <div id="on_right">
+                <span id="search-ico" class="ms-Icon--Search"></span>
+            </div>
+            <div class="search-container">
+                <input id="search" type="search" placeholder="Search as you type...">
+                <div class="search-results">
+                    <div class="search-results__header"></div>
+                    <ul class="search-results__items"></ul>
+                </div>
+            </div>
+        <div id="wrap">
+            
+        <h3 id="overview">Overview&nbsp;<a class="anchor" href="#overview">&#xE732;</a></h3>
+<p>SynicSugar is  high-level networking library for Unity.<br>
+In addition to RPC, SynicSugar includes developer-friendly features like matchmaking and host-migration. <br>
+The backend server is EOS, which is available for free of charge. EOS has no CCU limit if used for online games. In other word, all we need for online game development with SynicSugar is just on registring EOS.<br></p>
+<p>In SynicSugar, a user sign-in EOS with DeviceID. SynicSugar isn't required epic brand review, but we cannot use EAS (Epic Account Services). EAS includes features like authentication with store accounts, an account cross-platform and friends. In short, SynicSugar adopts EOS only for multi-play.<br></p>
+<p>The transport is DTLS (Datagram Transport Layer Security), which operates over UDP. The packets are encrypted, and optionally, can have the reliability and the ordered.<br></p>
+<h5 id="note">Note&nbsp;<a class="anchor" href="#note">&#xE732;</a></h5>
+<p>UDP is favored in many online games due to its speed and packet size.In fact, Mirror also adopts UDP as default transport. However, we should acknowledge of certain problems of UDP. When using UDP, we cannot build for WebGL: browsers operate over TCP. In addition to it, when iOS app's initial review for release, it will be rejected: the review's done in a TCP environment. (We need to request the review over UDP to pass it.) In this view, SynicSugar is also exploring TCP option in future just to solve these problems.<br><br></p>
+<h3 id="why-synicsugar-is-developed">Why SynicSugar is Developed?&nbsp;<a class="anchor" href="#why-synicsugar-is-developed">&#xE732;</a></h3>
+<p>SynicSugar has been developed for my game. On that time, Mirror had already gotten stable, and various other network services existed. However, there was still no definitive solution for the kind of small-scale game and mobile-game.<br></p>
+<p>My first choice was Mirror with EOS relay. This approach similar to SynicSugar. Mirror was designed for MMOs, normally using a dedicated server. Even with EOS as the transport, this structure is the same. In other words, Mirror centers connections around the host. This topology doesn't suite my game.<br></p>
+<p>My game is 1v1 pvp (mobile) game. A client might crash or a user could get frustrated and away from keyboard. However, I didn't intend to use a server for a battle and want to adopt P2P. In Mirror, it is difficult to deal with such situations. Mirror's Host is always a server that dosen't throw away the game. (Even if use client-host on p2p, it remains hard.)<br></p>
+<p>Another is Photon. Photon provides netcodes and cloud servers for it. We can get server and supports, but of course, need the charge to use. If we don't need Support, the same can be achieved with Mirror + EOS relay for free. PhotonFusion, the newest one, offers host migration and high-quality synchronization on tick rate, but I don’t need such advanced for my game.<br>
+Could a (simple) synchronization system be implemented with EOS for small party and mobile games? This is reason to develop SynicSugar. The concept is a network library for games that are difficult to develop in Mirror.<br></p>
+<p>I start this project as &quot;EOS Sample&quot; only to test EOS SDK for my game. So, some APIs was for my game. Other many ones also has been added as general function to SynicSugar instead of implementing just for my game. I will continue to develop SynicSugar on this base principle. In other words, the library isn't for paper but for actual games. Furthermore, all of these APIs are tested with my games. About optimization, SynicSugar is also improved on actual results. Of course,  SynicSugar will adopt excellent functions. However, I don't have another idea except for my game genre. If you possess good thoughts, please help the development. The more detail is in project.<br><br></p>
+<h3 id="support-on-unity">Support on Unity&nbsp;<a class="anchor" href="#support-on-unity">&#xE732;</a></h3>
+<p>SynicSugar support Unity 21.3 and later, which adopts Roslyn Source Generator. SynicSugar use SourceGenerator and IL PostProcesser to generate codes for network process. SynicSugar will not support older Unity. In addition to it, we have to build  with IL2CPP a game that uses SynicSugar for some depend libraries. Currently, SynicSugar officially supports games developed with the traditional MonoBehaviour/Component. For ECS, it isn't yet.<br></p>
+<p>‥‥</p>
+
+    
+        </div>
+
+    </article>
+</main>
+
+
+    <script type="text/javascript" src="https://skeyll.github.io/SynicSugar/elasticlunr.min.js" defer></script>
+    <script type="text/javascript" src="https://skeyll.github.io/SynicSugar/search_index.en.js" defer></script>
+<script type="text/javascript" src="https://skeyll.github.io/SynicSugar/js.js" defer></script>
+
+</body>
+</html>
