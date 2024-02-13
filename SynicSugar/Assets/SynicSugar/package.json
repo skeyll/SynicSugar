@@ -2,7 +2,7 @@
 {
   "name": "net.skeyll.synicsugar",
   "displayName": "SynicSugar",
-  "version": "0.4.4",
+  "version": "0.5.0",
   "unity": "2021.3",
   "description": "High-level Networking Library for Mobile and Small-party Games with Epic Online Services.",
   "keywords": ["Network", "Services"],
@@ -11,7 +11,7 @@
   "changelogUrl": "https://github.com/skeyll/SynicSugar/releases",
   "licensesUrl": "https://github.com/skeyll/SynicSugar/main/LICENSE",
   "dependencies": {
-    "com.playeveryware.eos": "2.2.0",
+    "com.playeveryware.eos": "3.0.2",
     "com.cysharp.unitask": "2.3.3",
     "com.cysharp.memorypack": "1.9.13", 
     "com.unity.nuget.mono-cecil": "1.11.4"
