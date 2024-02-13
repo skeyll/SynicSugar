@@ -11,7 +11,7 @@ title = "SynicSugar"
 
 +++
 # What is SynicSugar?
-SynicSugar is Unity High-Level Network Library with EpicOnlineServices. The concept is the syntax sugar of netcode. Matchmaking, Relay and VC are for free thanks to Epic Game, and have high-level APIs for actual game development. Almost SynicSugar APIs are zero-allocation, so the runtime process is sonic. SynicSugar will be optimized for small-party game not covered by [Mirror](https://github.com/MirrorNetworking/Mirror). Can get it from [Github](https://github.com/skeyll/SynicSugar).
+SynicSugar is Unity High-Level Network Library with EpicOnlineServices. The concept is the syntax sugar of netcode. Matchmaking, Relay and VC are for free thanks to EpicGames, and have high-level APIs for actual game development. Almost SynicSugar APIs are zero-allocation, so the runtime process is sonic. SynicSugar will be optimized for small-party game not covered by [Mirror](https://github.com/MirrorNetworking/Mirror). Can get it from [Github](https://github.com/skeyll/SynicSugar).
 
 
 ```cs
@@ -55,7 +55,10 @@ public partial class Player {
  - Almost all RPC processes are zero-allocation
  - Free VoiceChat
  - Cross-platform connction <br>
-    (Current: Android, iOS, and PC / InTest: Console / Future?: WebGL)
+    (Windows / Linux / macOS <br>
+    Android / iOS <br>
+    Nintendo Switch / Xbox One / Xbox Series X / PlayStation 4 / PlayStation 5)
+
 
 ## Requirement
  - Unity 2021-3 or later
