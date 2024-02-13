@@ -640,27 +640,22 @@ namespace SynicSugar.MatchMake {
             }
 
             var lobbySearchGetSearchResultCountOptions = new LobbySearchGetSearchResultCountOptions(); 
-            uint numSearchResult = CurrentSearch.GetSearchResultCount(ref lobbySearchGetSearchResultCountOptions);
+            uint searchResultCount = CurrentSearch.GetSearchResultCount(ref lobbySearchGetSearchResultCountOptions);
             
-            if(numSearchResult == 0){
+            if(searchResultCount == 0){
                 return false;
             }
             SearchResults.Clear();
 
             LobbySearchCopySearchResultByIndexOptions indexOptions = new LobbySearchCopySearchResultByIndexOptions();
             isMatchSuccess = false; //Init
-            for (uint i = 0; i < numSearchResult; i++){
+            for (uint i = 0; i < searchResultCount; i++){
                 Lobby lobbyObj = new Lobby();
                 indexOptions.LobbyIndex = i;
 
                 ResultE result = CurrentSearch.CopySearchResultByIndex(ref indexOptions, out LobbyDetails lobbyHandle);
 
                 if (result == ResultE.Success && lobbyHandle != null){
-                    lobbyObj.InitFromLobbyDetails(lobbyHandle);
-
-                    if (lobbyObj == null || !lobbyObj.isValid()){
-                        continue;
-                    }
                     waitingMatch = true;
                     JoinLobby(lobbyHandle);
                     
