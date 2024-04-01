@@ -11,9 +11,7 @@ public async UniTask&lt;bool&gt; ExitSession(CancellationTokenSource cancelToken
 
 ### Description
 Stop the packet receiver, close all connections, remove the notify events and destroy ConnectManager object. Then, the user leaves Lobby.<br>
-This is just to exit from Lobby alone during in-game(= not whole, only one battle).
-For the end of battle and game, we use *[CloseSession](../ConnectHub/closesession)*.
-
+The last user closes the lobby in Backend.
 
 
 ```cs

@@ -10,7 +10,8 @@ public async UniTask&lt;bool&gt; CloseSession(CancellationTokenSource cancelToke
 
 
 ### Description
-Stop the packet receiver, close all connections, remove the notify events and destroy ConnectManager object. Then, Host closees and Guest leaves the lobby.
+Stop the packet receiver, close all connections, remove the notify events and destroy ConnectManager object. Then, Host closees and Guest leaves the lobby. <br>
+When Host closes Lobby, Guests are automatically kicked out from the Lobby.
 
 
 ```cs
