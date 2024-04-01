@@ -260,14 +260,14 @@ namespace SynicSugar.MatchMake {
             LobbyMemberStatusNotification = new NotifyEventHandle(AddNotifyLobbyMemberStatusReceived(lobbyInterface, OnLobbyMemberStatusReceived), (ulong handle) =>{
                 EOSManager.Instance.GetEOSLobbyInterface().RemoveNotifyLobbyMemberStatusReceived(handle);
             });
+            //Create new instance with Reconnecter flag.
+            p2pInfo.Instance.userIds = new UserIds(true);
             //Prep Connection
             bool canInit = InitConnectConfig(ref p2pInfo.Instance.userIds);
             if(!canInit){
                 Debug.LogError("Fail InitConnectConfig");
                 return false;
             }
-
-            p2pInfo.Instance.userIds.isJustReconnected = true;
 
             await OpenConnectionForReconnecter(token);
             
