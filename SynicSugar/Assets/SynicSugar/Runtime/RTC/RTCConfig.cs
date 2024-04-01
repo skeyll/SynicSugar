@@ -80,7 +80,7 @@ namespace SynicSugar.RTC {
         /// The way to cancel this notifier is in MANUAL by calling RemoteNotifyAudioDevicesChanged(), or in AUTO when the current scene changes or when the object becomes inactive.<br />
         /// This notify is removed automatically when scene is changed.
         /// </summary>
-        /// <param name="MoniterTargetObject">Notify is automatically removes when the target is unactivated.</param>
+        /// <param name="MoniterTargetObject">Notify is automatically removes when the target is deleted or dis-activate.</param>
         /// <param name="OnDeviceChangedAction">Notification is called when the list on OS of Input and Output devices is changes, and this event is invoked. <br />
         /// This notify is mainly used when the user switches the device configuration on the setting screen (to display new devices on dropdown). <br />
         /// In normal, Library automatically switches removed device to the available one.<br />
