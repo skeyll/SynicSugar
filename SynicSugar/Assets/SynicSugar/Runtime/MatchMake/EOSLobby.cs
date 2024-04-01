@@ -368,8 +368,7 @@ namespace SynicSugar.MatchMake {
                 waitingMatch = false;
                 return;
             }
-
-            CurrentLobby.LobbyId = info.LobbyId;
+            CurrentLobby.InitFromLobbyHandle(info.LobbyId);
             //RTC
             RTCManager.Instance.AddNotifyParticipantStatusChanged();
 
@@ -379,7 +378,7 @@ namespace SynicSugar.MatchMake {
         /// <summary>
         /// Set attribute for search. This process is only for Host player.
         /// </summary>
-        /// <param name="attributes"></param>
+        /// <param name="lobbyCondition"></param>
         /// <param name="token"></param>
         /// <returns></returns>
         async UniTask<bool> AddSerachLobbyAttribute(Lobby lobbyCondition, CancellationToken token){
@@ -440,13 +439,13 @@ namespace SynicSugar.MatchMake {
             waitingMatch = true;
             isMatchSuccess = false;
             
-            lobbyInterface.UpdateLobby(ref updateOptions, null, OnAddSerchAttribute);
+            lobbyInterface.UpdateLobby(ref updateOptions, null, OnAddSearchAttribute);
 
             await UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token);
 
             return isMatchSuccess; //"isMatchSuccess" is changed in async and callback method with result.
         }
-        void OnAddSerchAttribute(ref UpdateLobbyCallbackInfo info){
+        void OnAddSearchAttribute(ref UpdateLobbyCallbackInfo info){
             if (info.ResultCode != ResultE.Success){
                 waitingMatch = false;
                 MatchMakeManager.Instance.LastResultCode = (Result)info.ResultCode;
@@ -456,9 +455,12 @@ namespace SynicSugar.MatchMake {
 
             OnLobbyUpdated(info.LobbyId);
 
+            //For GUI events
             MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(UserId.GetUserId(EOSManager.Instance.GetProductUserId()), true);
             //Get more performance to add user attribute in AddSerachAttribute, but that becomes difficult about event timing.
             AddUserAttributes();
+            
+            MatchMakeManager.Instance.MemberUpdatedNotifier.MemberAttributesUpdated(UserId.GetUserId(EOSManager.Instance.GetProductUserId()));
 
             isMatchSuccess = true;
             waitingMatch = false;
