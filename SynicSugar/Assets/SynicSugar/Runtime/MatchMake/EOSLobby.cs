@@ -38,7 +38,7 @@ namespace SynicSugar.MatchMake {
         NotifyEventHandle LobbyMemberUpdateNotification;
 
         bool isMatchSuccess;
-        string socketName = System.String.Empty;
+        string socketName = string.Empty;
 
         internal EOSLobby(uint maxSearch, int timeout){
             MAX_SEARCH_RESULT = maxSearch;
@@ -307,7 +307,7 @@ namespace SynicSugar.MatchMake {
 #if SYNICSUGAR_LOG
                 Debug.LogWarningFormat("Create Lobby: Leaving Current Lobby '{0}'", CurrentLobby.LobbyId);
 #endif
-                LeaveLobby(true, token).Forget();
+                await LeaveLobby(true, token);
             }
 
             //Lobby Option
@@ -368,9 +368,11 @@ namespace SynicSugar.MatchMake {
                 waitingMatch = false;
                 return;
             }
-            CurrentLobby.InitFromLobbyHandle(info.LobbyId);
+            CurrentLobby.LobbyId = info.LobbyId;
             //RTC
             RTCManager.Instance.AddNotifyParticipantStatusChanged();
+            //For GUI events
+            MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(UserId.GetUserId(EOSManager.Instance.GetProductUserId()), true);
 
             isMatchSuccess = true;
             waitingMatch = false;
@@ -429,7 +431,7 @@ namespace SynicSugar.MatchMake {
                 }
             }
             // Get performance to add for User Attribute here
-            // AddUserAttributes(lobbyHandle);
+            // AddUserAttributes();
 
             //Add attribute with handle
             UpdateLobbyOptions updateOptions = new UpdateLobbyOptions(){
@@ -455,8 +457,6 @@ namespace SynicSugar.MatchMake {
 
             OnLobbyUpdated(info.LobbyId);
 
-            //For GUI events
-            MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(UserId.GetUserId(EOSManager.Instance.GetProductUserId()), true);
             //Get more performance to add user attribute in AddSerachAttribute, but that becomes difficult about event timing.
             AddUserAttributes();
             
@@ -1352,7 +1352,8 @@ namespace SynicSugar.MatchMake {
            return CurrentLobby.Members.Count;
         }
         internal int GetMaxLobbyMemberCount(){
-           return (int)CurrentLobby.MaxLobbyMembers;
+            //When Host create lobby, they can't count self. This is called before adding member attributes.
+           return CurrentLobby._BeingCreated ? 1 : (int)CurrentLobby.MaxLobbyMembers;
         }
     }
 }

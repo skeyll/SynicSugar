@@ -46,7 +46,7 @@ namespace SynicSugar.MatchMake {
  
         internal Dictionary<string, MemberState> Members = new();
 
-        // Utility data
+        // Return True only when create Lobby. Otherwise, return False because this is re-created by constructor.
         internal bool _BeingCreated = false;
 
         #region RTC
@@ -160,8 +160,6 @@ namespace SynicSugar.MatchMake {
             }
 
             // Get members
-            // List<LobbyMember> OldMembers = new List<LobbyMember>(Members);
-            Dictionary<string, MemberState> tmp = new (Members);
             Members.Clear();
 
             var lobbyDetailsGetMemberCountOptions = new LobbyDetailsGetMemberCountOptions();
