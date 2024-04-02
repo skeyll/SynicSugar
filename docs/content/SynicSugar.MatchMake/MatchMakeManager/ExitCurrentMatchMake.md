@@ -1,16 +1,16 @@
 +++
-title = "CancelCurrentMatchMake"
+title = "ExitCurrentMatchMake"
 weight = 14
 +++
 ## CancelCurrentMatchMake
 <small>*Namespace: SynicSugar.MatchMake* <br>
 *Class: MatchMakeManager* </small>
 
-public async UniTask&lt;bool&gt; CancelCurrentMatchMake(bool removeManager = false, CancellationToken token = default(CancellationToken))
+public async UniTask&lt;bool&gt; CancelCurrentMatchMake(bool destroyManager = true, CancellationToken token = default(CancellationToken))
 
 
 ### Description
-Exit lobby and cancel matchmake.<br>
+Exit lobby to cancel matchmake.<br>
 This can only be called in mathmaking. SynicSugar judges in matchmaking or not based on the cancel token that we passed Create/SearchXXX.<br>
 If can, return true.<br>
 If we pass true to 1st arg, this will destroy ConnectManager after being able to cancel matchmaking. When we have the two scene for using ConnectManager and not, pass true.<br>

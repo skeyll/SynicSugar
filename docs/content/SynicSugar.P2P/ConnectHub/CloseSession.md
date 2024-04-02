@@ -6,7 +6,7 @@ weight = 7
 <small>*Namespace: SynicSugar.P2P* <br>
 *Class: ConnectHub* </small>
 
-public async UniTask&lt;bool&gt; CloseSession(CancellationTokenSource cancelToken = default(CancellationTokenSource))
+public async UniTask&lt;bool&gt; CloseSession(bool destroyManager = true, CancellationTokenSource cancelToken = default(CancellationTokenSource))
 
 
 ### Description
@@ -21,8 +21,7 @@ using Cysharp.Threading.Tasks;
 
 public class p2pSample {
     public async UniTask ConnectHubSample(){
-        CancellationTokenSource token = new CancellationTokenSource();
-        await ConnectHub.Instance.CloseSession(token);
+        await ConnectHub.Instance.CloseSession();
     }
 }
 ```
