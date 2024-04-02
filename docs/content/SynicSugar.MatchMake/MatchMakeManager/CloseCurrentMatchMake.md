@@ -6,11 +6,12 @@ weight = 14
 <small>*Namespace: SynicSugar.MatchMake* <br>
 *Class: MatchMakeManager* </small>
 
-public async UniTask&lt;bool&gt; CloseCurrentMatchMake(bool removeManager = false, CancellationToken token = default(CancellationToken))
+public async UniTask&lt;bool&gt; CloseCurrentMatchMake(bool destroyManager = true, CancellationToken token = default(CancellationToken))
 
 
 ### Description
-Destroy or leave lobby to cancel matchmake not to do host migration.<br>
+Host destroys lobby to cancel matchmake. After Host calls this, all Guests
+When Guest call this, just leave lobby.<br>
 This can only be called in mathmaking. SynicSugar judges in matchmaking or not based on the cancel token that we passed Create/SearchXXX.<br>
 If can, return true.<br>
 If we pass true to 1st arg, this will destroy ConnectManager after being able to cancel matchmaking. When we have the two scene for using ConnectManager and not, pass true.<br>

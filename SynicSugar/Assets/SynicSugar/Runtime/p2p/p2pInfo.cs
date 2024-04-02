@@ -58,6 +58,24 @@ namespace SynicSugar.P2P {
         /// Disconnected user ids. (May come back)
         /// </summary>
         public List<UserId> DisconnectedUserIds => userIds.LeftUsers;
+
+        /// <summary>
+        /// Get LocalUser' UserIndex in AllUserIds<br />
+        /// This is the same　value in all locals.
+        /// </summary>
+        /// <returns>(0, max lobby members count -1)</returns>
+        public int GetUserIndex(){
+            return userIds.AllUserIds.IndexOf(userIds.LocalUserId);
+        }
+        /// <summary>
+        /// Get UserIndex in AllUserIds<br />
+        /// This is the same　value in all locals.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>(0, max lobby members count -1)</returns>
+        public int GetUserIndex(UserId id){
+            return userIds.AllUserIds.IndexOf(id);
+        }
     #endregion
 
 

@@ -202,16 +202,14 @@ namespace SynicSugar.Samples {
         public async void LeaveSession(){
             isStressTesting = false;
             EOSDebug.Instance.Log("Chat Mode: Leave");
-            CancellationTokenSource token = new CancellationTokenSource();
-            await ConnectHub.Instance.ExitSession(token);
+            await ConnectHub.Instance.ExitSession();
             systemManager.modeSelect.ChangeGameScene("MainMenu");
 
         }
         public async void CloseSession(){
             isStressTesting = false;
             EOSDebug.Instance.Log("Chat Mode: Close");
-            CancellationTokenSource token = new CancellationTokenSource();
-            await ConnectHub.Instance.CloseSession(token);
+            await ConnectHub.Instance.CloseSession();
             systemManager.modeSelect.ChangeGameScene("MainMenu");
         }
     }

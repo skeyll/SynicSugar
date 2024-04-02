@@ -38,7 +38,7 @@ namespace SynicSugar.MatchMake {
         NotifyEventHandle LobbyMemberUpdateNotification;
 
         bool isMatchSuccess;
-        string socketName = System.String.Empty;
+        string socketName = string.Empty;
 
         internal EOSLobby(uint maxSearch, int timeout){
             MAX_SEARCH_RESULT = maxSearch;
@@ -260,14 +260,14 @@ namespace SynicSugar.MatchMake {
             LobbyMemberStatusNotification = new NotifyEventHandle(AddNotifyLobbyMemberStatusReceived(lobbyInterface, OnLobbyMemberStatusReceived), (ulong handle) =>{
                 EOSManager.Instance.GetEOSLobbyInterface().RemoveNotifyLobbyMemberStatusReceived(handle);
             });
+            //Create new instance with Reconnecter flag.
+            p2pInfo.Instance.userIds = new UserIds(true);
             //Prep Connection
             bool canInit = InitConnectConfig(ref p2pInfo.Instance.userIds);
             if(!canInit){
                 Debug.LogError("Fail InitConnectConfig");
                 return false;
             }
-
-            p2pInfo.Instance.userIds.isJustReconnected = true;
 
             await OpenConnectionForReconnecter(token);
             
@@ -307,7 +307,7 @@ namespace SynicSugar.MatchMake {
 #if SYNICSUGAR_LOG
                 Debug.LogWarningFormat("Create Lobby: Leaving Current Lobby '{0}'", CurrentLobby.LobbyId);
 #endif
-                LeaveLobby(true, token).Forget();
+                await LeaveLobby(true, token);
             }
 
             //Lobby Option
@@ -368,10 +368,11 @@ namespace SynicSugar.MatchMake {
                 waitingMatch = false;
                 return;
             }
-
             CurrentLobby.LobbyId = info.LobbyId;
             //RTC
             RTCManager.Instance.AddNotifyParticipantStatusChanged();
+            //For GUI events
+            MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(UserId.GetUserId(EOSManager.Instance.GetProductUserId()), true);
 
             isMatchSuccess = true;
             waitingMatch = false;
@@ -379,7 +380,7 @@ namespace SynicSugar.MatchMake {
         /// <summary>
         /// Set attribute for search. This process is only for Host player.
         /// </summary>
-        /// <param name="attributes"></param>
+        /// <param name="lobbyCondition"></param>
         /// <param name="token"></param>
         /// <returns></returns>
         async UniTask<bool> AddSerachLobbyAttribute(Lobby lobbyCondition, CancellationToken token){
@@ -430,7 +431,7 @@ namespace SynicSugar.MatchMake {
                 }
             }
             // Get performance to add for User Attribute here
-            // AddUserAttributes(lobbyHandle);
+            // AddUserAttributes();
 
             //Add attribute with handle
             UpdateLobbyOptions updateOptions = new UpdateLobbyOptions(){
@@ -440,13 +441,13 @@ namespace SynicSugar.MatchMake {
             waitingMatch = true;
             isMatchSuccess = false;
             
-            lobbyInterface.UpdateLobby(ref updateOptions, null, OnAddSerchAttribute);
+            lobbyInterface.UpdateLobby(ref updateOptions, null, OnAddSearchAttribute);
 
             await UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token);
 
             return isMatchSuccess; //"isMatchSuccess" is changed in async and callback method with result.
         }
-        void OnAddSerchAttribute(ref UpdateLobbyCallbackInfo info){
+        void OnAddSearchAttribute(ref UpdateLobbyCallbackInfo info){
             if (info.ResultCode != ResultE.Success){
                 waitingMatch = false;
                 MatchMakeManager.Instance.LastResultCode = (Result)info.ResultCode;
@@ -456,9 +457,10 @@ namespace SynicSugar.MatchMake {
 
             OnLobbyUpdated(info.LobbyId);
 
-            MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(UserId.GetUserId(EOSManager.Instance.GetProductUserId()), true);
             //Get more performance to add user attribute in AddSerachAttribute, but that becomes difficult about event timing.
             AddUserAttributes();
+            
+            MatchMakeManager.Instance.MemberUpdatedNotifier.MemberAttributesUpdated(UserId.GetUserId(EOSManager.Instance.GetProductUserId()));
 
             isMatchSuccess = true;
             waitingMatch = false;
@@ -1347,9 +1349,10 @@ namespace SynicSugar.MatchMake {
         }
         
         internal int GetCurrentLobbyMemberCount(){
-           return CurrentLobby.Members.Count;
+            //When Host create lobby, they can't count self. This is called before adding member attributes.
+           return CurrentLobby._BeingCreated ? 1 : CurrentLobby.Members.Count;
         }
-        internal int GetMaxLobbyMemberCount(){
+        internal int GetLobbyMemberLimit(){
            return (int)CurrentLobby.MaxLobbyMembers;
         }
     }

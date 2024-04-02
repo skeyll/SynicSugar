@@ -106,25 +106,30 @@ namespace SynicSugar.P2P {
         /// <summary>
         /// Stop receiver, close all connections and remove the notify events.
         /// Then, the user leave the lobby.<br />
-        /// To exit from lobby alone during a game(= not whole, only one battle). Usually use CloseSession().
+        /// The last user closes the lobby in Backend.
+        /// <param name="destroyManager">Destroy NetworkManager after exit lobby.</param>
+        /// <param name="cancelToken">Cancel token for this task</param>
         /// </summary>
-        public async UniTask<bool> ExitSession(CancellationTokenSource cancelToken = default(CancellationTokenSource)){
-            if(cancelToken == default(CancellationTokenSource)){
-                cancelToken = new CancellationTokenSource();
+        public async UniTask<bool> ExitSession(bool destroyManager = true, CancellationToken cancelToken = default(CancellationToken)){
+            if(cancelToken == default(CancellationToken)){
+                cancelToken = p2pConnectorForOtherAssembly.Instance.gameObject.GetCancellationTokenOnDestroy();
             }
-            bool isSuccess = await p2pConnectorForOtherAssembly.Instance.ExitSession(cancelToken.Token);
+            bool isSuccess = await p2pConnectorForOtherAssembly.Instance.ExitSession(destroyManager, cancelToken);
             ClearReferenceDictionaries();
             return isSuccess;
         }
         /// <summary>
-        /// Stop receiver, close all connections and remove the notify events.<br />
-        /// Then, Host closees and Guest leaves the lobby.
+        /// Stop receiver, close all connections and remove the notify events.
+        /// Then, Host closes and Guest leaves the Lobby.<br />
+        /// When Host closes Lobby, Guests are automatically kicked out from the Lobby.
+        /// <param name="destroyManager">Destroy NetworkManager after exit lobby.</param>
+        /// <param name="cancelToken">Cancel token for this task</param>
         /// </summary>
-        public async UniTask<bool> CloseSession(CancellationTokenSource cancelToken = default(CancellationTokenSource)){
-            if(cancelToken == default(CancellationTokenSource)){
-                cancelToken = new CancellationTokenSource();
+        public async UniTask<bool> CloseSession(bool destroyManager = true, CancellationToken cancelToken = default(CancellationToken)){
+            if(cancelToken == default(CancellationToken)){
+                cancelToken = p2pConnectorForOtherAssembly.Instance.gameObject.GetCancellationTokenOnDestroy();
             }
-            bool isSuccess = await p2pConnectorForOtherAssembly.Instance.CloseSession(cancelToken.Token);
+            bool isSuccess = await p2pConnectorForOtherAssembly.Instance.CloseSession(destroyManager, cancelToken);
             ClearReferenceDictionaries();
             return isSuccess;
         }

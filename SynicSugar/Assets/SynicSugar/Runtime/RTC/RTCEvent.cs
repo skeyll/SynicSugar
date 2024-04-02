@@ -21,12 +21,10 @@ namespace SynicSugar.RTC {
         internal async UniTask MonitorGameToUnsubscribe(string sceneName){
             await UniTask.WaitUntil(() => SceneManager.GetActiveScene().name != sceneName);
             RTCConfig.Instance.RemoveNotifyAudioDevicesChanged();
-            Clear();
         }
         internal async UniTask MonitorGameToUnsubscribe(GameObject targetObject){
-            await UniTask.WaitUntil(() => !targetObject.activeSelf);
+            await UniTask.WaitUntil(() => !targetObject.activeSelf, cancellationToken: targetObject.GetCancellationTokenOnDestroy());
             RTCConfig.Instance.RemoveNotifyAudioDevicesChanged();
-            Clear();
         }
     }
     public class ParticipantUpdatedNotifier {

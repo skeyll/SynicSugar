@@ -3,8 +3,6 @@ using Epic.OnlineServices;
 using Epic.OnlineServices.Lobby;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.Events;
 using SynicSugar.RTC;
 using ResultE = Epic.OnlineServices.Result;
 using SynicSugar.P2P;
@@ -29,14 +27,14 @@ namespace SynicSugar.MatchMake {
             }
         }
         internal LobbyPermissionLevel PermissionLevel = LobbyPermissionLevel.Publicadvertised;
-        public string BucketId = System.String.Empty;
+        public string BucketId = string.Empty;
         internal bool bAllowInvites = false;
         internal bool bDisableHostMigration = true;
         internal bool bEnableRTCRoom = false;
         public List<AttributeData> Attributes = new List<AttributeData>();
         internal uint AvailableSlots = 0;
         internal void SetBucketID(string[] conditions){
-            BucketId = System.String.Empty;
+            BucketId = string.Empty;
             if(conditions.Length == 0){
                 BucketId = "NONE";
                 return;
@@ -48,11 +46,11 @@ namespace SynicSugar.MatchMake {
  
         internal Dictionary<string, MemberState> Members = new();
 
-        // Utility data
+        // Return True only when create Lobby. Otherwise, return False because this is re-created by constructor.
         internal bool _BeingCreated = false;
 
         #region RTC
-        internal string RTCRoomName = System.String.Empty;
+        internal string RTCRoomName = string.Empty;
         internal bool hasConnectedRTCRoom = false;
         //for joing or leaving
         internal NotifyEventHandle RTCParticipantStatusChanged; 
@@ -162,8 +160,6 @@ namespace SynicSugar.MatchMake {
             }
 
             // Get members
-            // List<LobbyMember> OldMembers = new List<LobbyMember>(Members);
-            Dictionary<string, MemberState> tmp = new (Members);
             Members.Clear();
 
             var lobbyDetailsGetMemberCountOptions = new LobbyDetailsGetMemberCountOptions();

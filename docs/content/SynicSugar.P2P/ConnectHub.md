@@ -30,7 +30,7 @@ Each assembly can have max 250 variables and functions with Network attribute (s
 | [PausePacketReceiver](../ConnectHub/pausepacketreceiver) | Pause to get a packet from the buffer |
 | [PauseConnections](../ConnectHub/pauseconnections) | Pause receiving a packet to the receive buffer |
 | [RestartConnections](../ConnectHub/restartconnections) | Restart to receive packets receive buffer |
-| [ExitSession](../ConnectHub/exitsession) | Leave connection in in-game |
+| [ExitSession](../ConnectHub/exitsession) | Leave connection |
 | [CloseSession](../ConnectHub/closesession) | Close connection. (If Host, close the Lobby) |
 | [RegisterInstance](../ConnectHub/registerinstance) | Register instance to receive packets |
 | [GetUserInstance](../ConnectHub/getuserinstance) | Get a NetworkPlayer instance of target user registered to ConnectHub |
