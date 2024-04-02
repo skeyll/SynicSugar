@@ -101,22 +101,30 @@ namespace SynicSugar.P2P {
         /// <summary>
         /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll.</ br>
         /// Stop connections, exit current lobby.<br />
-        /// To just leave from the current lobby.(This is not destroying it)
+        /// The Last user closes lobby.
         /// </summary>
-        public async UniTask<bool> ExitSession(CancellationToken token){
+        public async UniTask<bool> ExitSession(bool destroyManager, CancellationToken token){
             ResetConnections();
-
-            bool canExit = await MatchMakeManager.Instance.ExitCurrentLobby(token);
+            bool canExit = true;
+            //The last user
+            if (p2pInfo.Instance.IsHost() && p2pInfo.Instance.AllUserIds.Count == 1){
+                canExit = await MatchMakeManager.Instance.CloseCurrentLobby(token);
+            }else{
+                canExit = await MatchMakeManager.Instance.ExitCurrentLobby(token);
+            }
             
-            Destroy(this.gameObject);
+            if(destroyManager){
+                Destroy(this.gameObject);
+            }
             return canExit;
         }
         /// <summary>
         /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll.</ br>
         /// Stop connections, exit current lobby.<br />
-        /// To just leave from the current lobby.(This is not destroying it)
+        /// Host closes lobby. Guest leaves lobby. <br />
+        /// If host call this after the lobby has other users, Guests in this lobby are kicked out from the lobby.
         /// </summary>
-        public async UniTask<bool> CloseSession(CancellationToken token){
+        public async UniTask<bool> CloseSession(bool destroyManager, CancellationToken token){
             ResetConnections();
             bool canLeave = true;
             if(p2pInfo.Instance.IsHost()){
@@ -124,7 +132,9 @@ namespace SynicSugar.P2P {
             }else{
                 canLeave = await MatchMakeManager.Instance.ExitCurrentLobby(token);
             }
-            Destroy(this.gameObject);
+            if(destroyManager){
+                Destroy(this.gameObject);
+            }
             return canLeave;
         }
 
@@ -409,7 +419,8 @@ namespace SynicSugar.P2P {
         /// Update SyncedInfo, then Invoke SyncedSynic event.
         /// </summary>
         /// <param name="id"></param>
-        /// <param name="phase"></param> <summary>
+        /// <param name="phase"></param>
+        /// <summary>
         public void UpdateSyncedState(string id, byte phase){
             p2pInfo.Instance.SyncSnyicNotifier.UpdateSyncedState(id, phase);
         }
