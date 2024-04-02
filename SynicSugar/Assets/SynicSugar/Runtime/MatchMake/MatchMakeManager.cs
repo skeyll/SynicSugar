@@ -105,7 +105,7 @@ namespace SynicSugar.MatchMake {
         }
 
         public int GetMaxLobbyMemberCount(){
-           return eosLobby.GetMaxLobbyMemberCount();
+           return eosLobby.GetLobbyMemberLimit();
         }
 
         /// <summary>

@@ -1349,11 +1349,11 @@ namespace SynicSugar.MatchMake {
         }
         
         internal int GetCurrentLobbyMemberCount(){
-           return CurrentLobby.Members.Count;
-        }
-        internal int GetMaxLobbyMemberCount(){
             //When Host create lobby, they can't count self. This is called before adding member attributes.
-           return CurrentLobby._BeingCreated ? 1 : (int)CurrentLobby.MaxLobbyMembers;
+           return CurrentLobby._BeingCreated ? 1 : CurrentLobby.Members.Count;
+        }
+        internal int GetLobbyMemberLimit(){
+           return (int)CurrentLobby.MaxLobbyMembers;
         }
     }
 }
