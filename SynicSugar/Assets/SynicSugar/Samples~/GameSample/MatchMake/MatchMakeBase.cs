@@ -95,7 +95,7 @@ namespace  SynicSugar.Samples {
         /// Host delete and Guest leave the current lobby.
         /// </summary>
         public virtual void CancelMatchMaking(){
-            MatchMakeManager.Instance.CancelCurrentMatchMake().Forget();
+            MatchMakeManager.Instance.ExitCurrentMatchMake(false).Forget();
         }
         /// <summary>
         /// Register to ReturnMenu button.<br />
@@ -103,7 +103,7 @@ namespace  SynicSugar.Samples {
         /// </summary>
         /// <returns></returns>
         public virtual async void CanelMatchMakingAndReturnToLobby(){
-            await MatchMakeManager.Instance.CancelCurrentMatchMake(true);
+            await MatchMakeManager.Instance.ExitCurrentMatchMake(true);
         }
         /// <summary>
         /// Manage UIs on after and before matchmaking.

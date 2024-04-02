@@ -169,7 +169,7 @@ namespace  SynicSugar.Samples {
         /// Host delete and Guest leave the current lobby.
         /// </summary>
         public void CancelMatchMaking(){
-            MatchMakeManager.Instance.CancelCurrentMatchMake().Forget();
+            MatchMakeManager.Instance.ExitCurrentMatchMake(false).Forget();
 
             if(nameField != null){
                 nameField.gameObject.SetActive(true);
@@ -181,7 +181,7 @@ namespace  SynicSugar.Samples {
         /// </summary>
         /// <returns></returns>
         public async void CanelMatchMakingAndReturnToLobby(){
-            await MatchMakeManager.Instance.CancelCurrentMatchMake(true);
+            await MatchMakeManager.Instance.ExitCurrentMatchMake(true);
             
             modeSelect.ChangeGameScene(GameModeSelect.GameScene.MainMenu.ToString());
         }

@@ -142,7 +142,6 @@ namespace SynicSugar.Samples {
             
             modeSelect.ChangeGameScene(GameModeSelect.GameScene.Tank.ToString());
         }
-
         // SEARCH
         /// <summary>
         /// Just Search lobby.
