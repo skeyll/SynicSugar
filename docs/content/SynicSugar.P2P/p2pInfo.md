@@ -41,7 +41,6 @@ If this is no longer needed, we call *[CancelCurrentMatchMake](../../SynicSugar.
 | LastTargetRPCPayload | The last byte array sent with TargetRPC that record data |
 | LastTargetRPCch | The last ch sent with TargetRPC that record data |
 | LastTargetRPCUserId | The last UserId sent with TargetRPC that record data |
-| IsReconnecter | Return true until reconencter gets self Synic data. |
 
 ### Function
 | API | description |
