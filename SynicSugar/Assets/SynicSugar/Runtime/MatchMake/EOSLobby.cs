@@ -1311,7 +1311,7 @@ namespace SynicSugar.MatchMake {
         /// <returns></returns>
         async UniTask OpenConnection(CancellationToken token){
             p2pConnectorForOtherAssembly.Instance.OpenConnection(true);
-            p2pInfo.Instance.infoMethod.Init();
+            var getNatType = p2pInfo.Instance.infoMethod.Init();
             await p2pInfoMethod.WaitConnectPreparation(token);
             //Host sends AllUserIds list, Guest Receives AllUserIds.
             if(p2pInfo.Instance.IsHost()){
@@ -1320,6 +1320,7 @@ namespace SynicSugar.MatchMake {
                 BasicInfoExtensions basicInfo = new();
                 await basicInfo.ReciveUserIdsPacket(token);
             }
+            await getNatType;
             p2pInfo.Instance.pings.Init();
         }
         /// <summary>
@@ -1329,12 +1330,13 @@ namespace SynicSugar.MatchMake {
         /// <returns></returns>
         async UniTask OpenConnectionForReconnecter(CancellationToken token){
             p2pConnectorForOtherAssembly.Instance.OpenConnection(true);
-            p2pInfo.Instance.infoMethod.Init();
+            var getNatType = p2pInfo.Instance.infoMethod.Init();
             await p2pInfoMethod.WaitConnectPreparation(token);
             //Wait for user ids list from host.
             BasicInfoExtensions basicInfo = new();
             await basicInfo.ReciveUserIdsPacket(token);
 
+            await getNatType;
             p2pInfo.Instance.pings.Init();
         }
         /// <summary>
