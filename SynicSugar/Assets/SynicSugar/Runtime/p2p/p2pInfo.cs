@@ -49,7 +49,7 @@ namespace SynicSugar.P2P {
         /// <summary>
         /// All UserIds (include Local user) currently connected.
         /// </summary>
-        public List<UserId> AllCurrentUserIds => userIds.AllCurrentUserIds;
+        public List<UserId> CurrentConnectedUserIds => userIds.CurrentConnectedUserIds;
         /// <summary>
         /// All UserIds (include Local user and disconencted user, excluding users leaving lobby by their own).
         /// </summary>
@@ -224,6 +224,11 @@ namespace SynicSugar.P2P {
 
         #region Obsolete
         
+        /// <summary>
+        /// All UserIds (include Local user) currently connected.
+        /// </summary>
+        [Obsolete("This is old. CurrentConnectedUserIds is new one.")]
+        public List<UserId> AllCurrentUserIds => userIds.CurrentConnectedUserIds;
         /// <summary>
         /// UserIds of current session.
         /// </summary>

@@ -15,13 +15,17 @@ namespace SynicSugar.P2P {
         /// </summary>
         internal List<UserId> RemoteUserIds;
         /// <summary>
-        /// Whole session include Local user
+        /// All users throughout this session include Local and Leave Users.
         /// </summary>
         internal List<UserId> AllUserIds;
         /// <summary>
+        /// AllUserIds - Leave Users.
+        /// </summary>
+        internal List<UserId> CurrentAllUserIds;
+        /// <summary>
         /// Current Session include Local user, but exclude Disconencted user
         /// </summary>
-        internal List<UserId> AllCurrentUserIds;
+        internal List<UserId> CurrentConnectedUserIds;
 
         //Options
         internal UserId HostUserId;
@@ -63,8 +67,8 @@ namespace SynicSugar.P2P {
         internal void RemoveUserId(ProductUserId targetId){
             UserId userId = UserId.GetUserId(targetId);
             RemoteUserIds.Remove(userId);
-            AllUserIds.Remove(userId);
-            AllCurrentUserIds.Remove(userId);
+            CurrentAllUserIds.Remove(userId);
+            CurrentConnectedUserIds.Remove(userId);
             p2pInfo.Instance.pings.pingInfo.Remove(userId.ToString());
         }
         /// <summary>
@@ -74,7 +78,7 @@ namespace SynicSugar.P2P {
         internal void MoveTargetUserIdToLefts(ProductUserId targetId){
             UserId userId = UserId.GetUserId(targetId);
             RemoteUserIds.Remove(userId);
-            AllCurrentUserIds.Remove(userId);
+            CurrentConnectedUserIds.Remove(userId);
             LeftUsers.Add(userId);
             p2pInfo.Instance.pings.pingInfo[userId.ToString()].Ping = -1;
         }
@@ -86,7 +90,7 @@ namespace SynicSugar.P2P {
         internal void MoveTargetUserIdToRemoteUsersFromLeft(ProductUserId targetId){
             UserId userId = UserId.GetUserId(targetId);
             LeftUsers.Remove(userId);
-            AllCurrentUserIds.Add(userId);
+            CurrentConnectedUserIds.Add(userId);
             RemoteUserIds.Add(userId);
         }
     }

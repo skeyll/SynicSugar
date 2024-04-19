@@ -1277,14 +1277,14 @@ namespace SynicSugar.MatchMake {
             //Get other use's id
             LobbyDetailsGetMemberByIndexOptions memberOptions = new LobbyDetailsGetMemberByIndexOptions();
             userIds.AllUserIds = new List<UserId>();
-            userIds.AllCurrentUserIds = new List<UserId>();
+            userIds.CurrentConnectedUserIds = new List<UserId>();
             userIds.RemoteUserIds = new List<UserId>();
             for(uint i = 0; i < memberCount; i++){
                 memberOptions.MemberIndex = i;
                 UserId targetId = UserId.GetUserId(lobbyHandle.GetMemberByIndex(ref memberOptions));
 
                 userIds.AllUserIds.Add(targetId);
-                userIds.AllCurrentUserIds.Add(targetId);
+                userIds.CurrentConnectedUserIds.Add(targetId);
 
                 if(userIds.LocalUserId != targetId){
                     userIds.RemoteUserIds.Add(targetId);
