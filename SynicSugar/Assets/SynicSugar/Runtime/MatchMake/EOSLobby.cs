@@ -1276,20 +1276,18 @@ namespace SynicSugar.MatchMake {
             uint memberCount = lobbyHandle.GetMemberCount(ref countOptions);
             //Get other use's id
             LobbyDetailsGetMemberByIndexOptions memberOptions = new LobbyDetailsGetMemberByIndexOptions();
-            userIds.AllUserIds = new List<UserId>();
-            userIds.CurrentConnectedUserIds = new List<UserId>();
-            userIds.RemoteUserIds = new List<UserId>();
             for(uint i = 0; i < memberCount; i++){
                 memberOptions.MemberIndex = i;
                 UserId targetId = UserId.GetUserId(lobbyHandle.GetMemberByIndex(ref memberOptions));
 
                 userIds.AllUserIds.Add(targetId);
-                userIds.CurrentConnectedUserIds.Add(targetId);
 
                 if(userIds.LocalUserId != targetId){
                     userIds.RemoteUserIds.Add(targetId);
                 }
             }
+            userIds.CurrentAllUserIds = new List<UserId>(userIds.AllUserIds);
+            userIds.CurrentConnectedUserIds = new List<UserId>(userIds.AllUserIds);
             //Get lobby's attribute count
             LobbyDetailsCopyAttributeByKeyOptions attrOptions = new LobbyDetailsCopyAttributeByKeyOptions();
             attrOptions.AttrKey = "socket";
@@ -1303,7 +1301,6 @@ namespace SynicSugar.MatchMake {
             p2pConnectorForOtherAssembly.Instance.ScoketName = EOSLobbyExtensions.GenerateLobbyAttribute(socket).STRING;
             //For options
             userIds.HostUserId = UserId.GetUserId(CurrentLobby.LobbyOwner);
-            userIds.LeftUsers = new();
             lobbyHandle.Release();
             return true;
         }

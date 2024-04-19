@@ -13,24 +13,24 @@ namespace SynicSugar.P2P {
         /// <summary>
         /// Just current
         /// </summary>
-        internal List<UserId> RemoteUserIds;
+        internal List<UserId> RemoteUserIds = new();
         /// <summary>
         /// All users throughout this session include Local and Leave Users.
         /// </summary>
-        internal List<UserId> AllUserIds;
+        internal List<UserId> AllUserIds = new();
         /// <summary>
-        /// AllUserIds - Leave Users.
+        /// AllUserIds - LeftUsers.(Not tmp Disconnected)
         /// </summary>
-        internal List<UserId> CurrentAllUserIds;
+        internal List<UserId> CurrentAllUserIds = new();
         /// <summary>
-        /// Current Session include Local user, but exclude Disconencted user
+        /// Current Session include Local user, but exclude Disconencted userｓ
         /// </summary>
-        internal List<UserId> CurrentConnectedUserIds;
+        internal List<UserId> CurrentConnectedUserIds = new();
 
         //Options
         internal UserId HostUserId;
         // For the Host to pass the user's data to the player.
-        internal List<UserId> LeftUsers = new List<UserId>();
+        internal List<UserId> DisconnectedUserIds = new();
         // If true, host can manage the this local user's data in direct.
         // If not, only the local user can manipulate the local user's data.
         // For Anti-Cheat to rewrite other player data.
@@ -53,11 +53,24 @@ namespace SynicSugar.P2P {
         /// <summary>
         /// Update AllUserIds with Host's sending data.
         /// </summary>
-        /// <param name="ids"></param>
-        internal void OverwriteAllUserIdsWithOrdered(List<string> ids){
+        /// <param name="data">Contains All UserIds and Disconnected user indexes</param>
+        internal void OverwriteAllUserIdsWithOrdered(BasicInfo data){
             AllUserIds.Clear();
-            foreach(var id in ids){
+            //Change order　to same in host local.
+            foreach(var id in data.userIds){
                 AllUserIds.Add(UserId.GenerateFromStringForReconnecter(id));
+            }
+
+            if(!isJustReconnected){
+                return;
+            }
+            //Create current lefted user list
+            foreach(var index in data.disconnectedUserIndexes){
+                DisconnectedUserIds.Add(AllUserIds[index]);
+            }
+            //Complement disconnected users.
+            foreach(var id in DisconnectedUserIds){
+                CurrentAllUserIds.Add(id);
             }
         }
         /// <summary>
@@ -79,7 +92,7 @@ namespace SynicSugar.P2P {
             UserId userId = UserId.GetUserId(targetId);
             RemoteUserIds.Remove(userId);
             CurrentConnectedUserIds.Remove(userId);
-            LeftUsers.Add(userId);
+            DisconnectedUserIds.Add(userId);
             p2pInfo.Instance.pings.pingInfo[userId.ToString()].Ping = -1;
         }
         /// <summary>
@@ -89,7 +102,7 @@ namespace SynicSugar.P2P {
         /// <returns></returns>
         internal void MoveTargetUserIdToRemoteUsersFromLeft(ProductUserId targetId){
             UserId userId = UserId.GetUserId(targetId);
-            LeftUsers.Remove(userId);
+            DisconnectedUserIds.Remove(userId);
             CurrentConnectedUserIds.Add(userId);
             RemoteUserIds.Add(userId);
         }

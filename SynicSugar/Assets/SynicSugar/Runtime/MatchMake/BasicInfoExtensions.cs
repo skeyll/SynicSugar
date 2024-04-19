@@ -1,6 +1,5 @@
 using System;
 using System.Threading;
-using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using SynicSugar.P2P;
 using MemoryPack;
@@ -23,34 +22,35 @@ namespace SynicSugar.MatchMake {
         ArraySegment<byte> payload;
         #region Send
         /// <summary>
-        /// For Host to send List after reconnecter has came.
+        /// For Host to send List after re-connecter has came.
         /// </summary>
         internal static void SendUserList(UserId target){
-            List<string> tmp = new List<string>();
-            foreach(var id in p2pInfo.Instance.AllUserIds){
-                tmp.Add(id.ToString());
-            }
+            BasicInfo basicInfo = new BasicInfo();
+            basicInfo.userIds = p2pInfo.Instance.AllUserIds.ConvertAll(id => id.ToString());
             
+            if(p2pInfo.Instance.DisconnectedUserIds.Count > 0){
+                for(int i = 0; i < p2pInfo.Instance.DisconnectedUserIds.Count; i++){
+                    basicInfo.disconnectedUserIndexes.Add(p2pInfo.Instance.AllUserIds.IndexOf(p2pInfo.Instance.DisconnectedUserIds[i]));
+                }
+            }
+
             using var compressor  = new BrotliCompressor();
-            MemoryPackSerializer.Serialize(compressor, tmp);
+            MemoryPackSerializer.Serialize(compressor, basicInfo);
             SendPacket(USERLISTCH, compressor.ToArray(), target);
         }
         /// <summary>
-        /// For Host to send AllUserList after conenction.
+        /// For Host to send AllUserList after connection.
         /// </summary>
         internal static async UniTask SendUserListToAll(CancellationToken token){
-            List<string> tmp = new List<string>();
-            foreach(var id in p2pInfo.Instance.AllUserIds){
-                tmp.Add(id.ToString());
-            }
+            BasicInfo basicInfo = new BasicInfo();
+            basicInfo.userIds = p2pInfo.Instance.AllUserIds.ConvertAll(id => id.ToString());
             
             using var compressor  = new BrotliCompressor();
-            MemoryPackSerializer.Serialize(compressor, tmp);
+            MemoryPackSerializer.Serialize(compressor, basicInfo);
             
             int count = p2pConfig.Instance.RPCBatchSize;
 
             foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
-
                 SendPacket(USERLISTCH, compressor.ToArray(), id);
 
                 count--;
@@ -144,7 +144,7 @@ namespace SynicSugar.MatchMake {
             using var decompressor = new BrotliDecompressor();
             var decompressed = decompressor.Decompress(payload);
 
-            List<string> data = MemoryPackSerializer.Deserialize<List<string>>(decompressed);
+            BasicInfo data = MemoryPackSerializer.Deserialize<BasicInfo>(decompressed);
             p2pInfo.Instance.userIds.OverwriteAllUserIdsWithOrdered(data);
         }
         #endregion
