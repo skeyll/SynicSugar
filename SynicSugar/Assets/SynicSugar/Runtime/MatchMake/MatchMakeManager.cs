@@ -169,7 +169,6 @@ namespace SynicSugar.MatchMake {
             matchingToken = needTryCatch ? new CancellationTokenSource() : token;
 
             if(minLobbyMember < 2 || minLobbyMember > lobbyCondition.MaxLobbyMembers){
-                Debug.Log("To 0");
                 minLobbyMember = 0;
             }
             

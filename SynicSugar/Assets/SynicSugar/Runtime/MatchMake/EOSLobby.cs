@@ -369,9 +369,10 @@ namespace SynicSugar.MatchMake {
                 return;
             }
             CurrentLobby.LobbyId = info.LobbyId;
+
             //RTC
             RTCManager.Instance.AddNotifyParticipantStatusChanged();
-            //For GUI events
+            //For self
             MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(UserId.GetUserId(EOSManager.Instance.GetProductUserId()), true);
 
             isMatchSuccess = true;
@@ -456,11 +457,10 @@ namespace SynicSugar.MatchMake {
             }
 
             OnLobbyUpdated(info.LobbyId);
+            CurrentLobby._BeingCreated = false;
 
             //Get more performance to add user attribute in AddSerachAttribute, but that becomes difficult about event timing.
             AddUserAttributes();
-            
-            MatchMakeManager.Instance.MemberUpdatedNotifier.MemberAttributesUpdated(UserId.GetUserId(EOSManager.Instance.GetProductUserId()));
 
             isMatchSuccess = true;
             waitingMatch = false;
@@ -509,7 +509,7 @@ namespace SynicSugar.MatchMake {
         /// For use in normal matching. Retrive Lobby by Attributes. 
         /// Retrun true on getting Lobby data.
         /// </summary>
-        /// <param name="lobbyCodition"></param>
+        /// <param name="lobbyCondition"></param>
         /// <param name="token"></param>
         /// <returns></returns>
         async UniTask<bool> RetriveLobbyByAttribute(Lobby lobbyCondition, CancellationToken token){
