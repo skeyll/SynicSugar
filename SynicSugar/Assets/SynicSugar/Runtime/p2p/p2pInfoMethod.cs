@@ -9,9 +9,9 @@ namespace SynicSugar.P2P {
     internal class p2pInfoMethod {
         internal P2PInterface P2PHandle;
 
-        internal void Init(){
+        internal async UniTask Init(){
             P2PHandle = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface();
-            QueryNATType().Forget();
+            await QueryNATType();
         }
 
         bool gettingNATType;
@@ -49,7 +49,7 @@ namespace SynicSugar.P2P {
             gettingNATType = true;
             P2PHandle.QueryNATType(ref options, null, OnQueryNATTypeCompleteCallback);
 
-            await UniTask.WaitUntil(() => gettingNATType);
+            await UniTask.WaitUntil(() => !gettingNATType);
         }
         void OnQueryNATTypeCompleteCallback (ref OnQueryNATTypeCompleteInfo data){
             gettingNATType = false;

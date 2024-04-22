@@ -47,17 +47,24 @@ namespace SynicSugar.P2P {
         /// </summary>
         public List<UserId> CurrentRemoteUserIds => userIds.RemoteUserIds;
         /// <summary>
-        /// All UserIds (include Local user) currently connected.
+        /// All Connected UserIds　（Excluding disconnected and left users)
         /// </summary>
-        public List<UserId> AllCurrentUserIds => userIds.AllCurrentUserIds;
+        public List<UserId> CurrentConnectedUserIds => userIds.CurrentConnectedUserIds;
         /// <summary>
-        /// All UserIds (include Local user and disconencted user, excluding users leaving lobby by their own).
+        /// AllUserIds - Left Users.
+        /// </summary>
+        public List<UserId> CurrentAllUserIds => userIds.CurrentAllUserIds;
+        /// <summary>
+        /// All UserIds throughout this session include Local and Left Users.<br />
+        /// This value is the same value and same order with all locals through the whole game.
         /// </summary>
         public List<UserId> AllUserIds => userIds.AllUserIds;
+
+
         /// <summary>
         /// Disconnected user ids. (May come back)
         /// </summary>
-        public List<UserId> DisconnectedUserIds => userIds.LeftUsers;
+        public List<UserId> DisconnectedUserIds => userIds.DisconnectedUserIds;
 
         /// <summary>
         /// Get LocalUser' UserIndex in AllUserIds<br />
@@ -118,22 +125,6 @@ namespace SynicSugar.P2P {
         /// </summary>
         public bool IsReconnecter => userIds.isJustReconnected;
         
-        /// <summary>
-        /// Get member count in just current match.
-        /// </summary>
-        /// <param name="targetId"></param>
-        /// <returns></returns>
-        public int GetCurrentConnectionMemberCount(){
-            return 1 + userIds.RemoteUserIds.Count; 
-        }
-        /// <summary>
-        /// Get all member count that is current and past participation member count instead of just current.
-        /// </summary>
-        /// <param name="targetId"></param>
-        /// <returns></returns>
-        public int GetAllConnectionMemberCount(){
-            return 1 + userIds.RemoteUserIds.Count + userIds.LeftUsers.Count; 
-        }
         /// <summary>
         /// Update local user's NATType to the latest state.
         /// </summary>
@@ -224,6 +215,27 @@ namespace SynicSugar.P2P {
 
         #region Obsolete
         
+        /// <summary>
+        /// Get member count in just current match.
+        /// </summary>
+        /// <returns></returns>
+        [Obsolete("Can get this value p2pInfo.Instance.CurrentConnectedUserIds.Count")]
+        public int GetCurrentConnectionMemberCount(){
+            return userIds.CurrentConnectedUserIds.Count; 
+        }
+        /// <summary>
+        /// Get all member count .
+        /// </summary>
+        /// <returns></returns>
+        [Obsolete("Can get this value p2pInfo.Instance.AllUserIds.Count")]
+        public int GetAllConnectionMemberCount(){
+            return userIds.AllUserIds.Count; 
+        }
+        /// <summary>
+        /// All UserIds (include Local user) currently connected.
+        /// </summary>
+        [Obsolete("This is old. CurrentConnectedUserIds is new one.")]
+        public List<UserId> AllCurrentUserIds => userIds.CurrentConnectedUserIds;
         /// <summary>
         /// UserIds of current session.
         /// </summary>

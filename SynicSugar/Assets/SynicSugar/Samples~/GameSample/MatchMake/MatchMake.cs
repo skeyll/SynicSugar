@@ -12,6 +12,10 @@ using TMPro;
 #endif
 
 namespace  SynicSugar.Samples {
+    /// <summary>
+    /// This is old sample. I Create XXXXMatchMake that has MatchMakeBase as base class.
+    /// Only ReadHert use this yet.
+    /// </summary>
     public class MatchMake : MonoBehaviour{
         [SerializeField] GameObject matchmakePrefab;
         [SerializeField] Button startMatchMake, closeLobby, startGame, backtoMenu, hostConclude;

@@ -124,14 +124,14 @@ namespace SynicSugar.P2P {
                 LastSyncedUserId = UserId.GetUserId(id);
                 LastSyncedPhase = phase;
                 
-                if(!isForAll && !p2pInfo.Instance.AllCurrentUserIds.Contains(UserId.GetUserId(id))){
+                if(!isForAll && !p2pInfo.Instance.CurrentConnectedUserIds.Contains(UserId.GetUserId(id))){
                     isForAll = true;
                 }
             }
 
             OnSyncedSynic?.Invoke();
 
-            if(ReceivedUsers.Count == (isForAll ? p2pInfo.Instance.AllUserIds.Count : p2pInfo.Instance.AllCurrentUserIds.Count)){
+            if(ReceivedUsers.Count == (isForAll ? p2pInfo.Instance.AllUserIds.Count : p2pInfo.Instance.CurrentConnectedUserIds.Count)){
                 _receivedAllSyncSynic = true;
             }
         }

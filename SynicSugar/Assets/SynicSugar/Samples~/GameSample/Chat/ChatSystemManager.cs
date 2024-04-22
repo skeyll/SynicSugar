@@ -18,9 +18,11 @@ namespace SynicSugar.Samples {
 
         async UniTaskVoid Start() {
             vcStates = new();
-            p2pInfo.Instance.ConnectionNotifier.OnTargetDisconnected += OnDisconect;
-            p2pInfo.Instance.ConnectionNotifier.OnTargetConnected += OnConnected;
-            p2pInfo.Instance.SyncSnyicNotifier.OnSyncedSynic += OnSyncedSynic;
+            if(p2pInfo.Instance.AllUserIds.Count > 1){ //Regsiter notify for Online mode.
+                p2pInfo.Instance.ConnectionNotifier.OnTargetDisconnected += OnDisconect;
+                p2pInfo.Instance.ConnectionNotifier.OnTargetConnected += OnConnected;
+                p2pInfo.Instance.SyncSnyicNotifier.OnSyncedSynic += OnSyncedSynic;
+            }
             //At first, instantiate network objects.
             //It are registered to ConnectHub automatically.
             SynicObject.AllSpawn(chatPlayerPrefab);
@@ -36,10 +38,12 @@ namespace SynicSugar.Samples {
             
             //To get AllPacket.
             ConnectHub.Instance.StartPacketReceiver();
-            RTCManager.Instance.StartVoiceSending();
-            // VC actions with No args
-            // RTCManager.Instance.ParticipantUpdatedNotifier.Register(() => OnStartSpeaking(), t => OnStopSpeaking());
-            RTCManager.Instance.ParticipantUpdatedNotifier.Register(t => OnStartSpeaking(t), t => OnStopSpeaking(t));
+            if(p2pInfo.Instance.AllUserIds.Count > 1){ //VC setting for Online mode.
+                RTCManager.Instance.StartVoiceSending();
+                // VC actions with No args
+                // RTCManager.Instance.ParticipantUpdatedNotifier.Register(() => OnStartSpeaking(), t => OnStopSpeaking());
+                RTCManager.Instance.ParticipantUpdatedNotifier.Register(t => OnStartSpeaking(t), t => OnStopSpeaking(t));
+            }
         }
     #if SYNICSUGAR_FPSTEST
         void Update(){
@@ -59,7 +63,11 @@ namespace SynicSugar.Samples {
         }
         
         public void UpdateChatCount(){
-            inputCount.text = $"ChatCount: {ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.LocalUserId).submitCount} / {ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.CurrentRemoteUserIds[0]).submitCount}";
+            if(p2pInfo.Instance.AllUserIds.Count > 1){
+                inputCount.text = $"ChatCount: {ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.LocalUserId).submitCount} / {ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.CurrentRemoteUserIds[0]).submitCount}";
+            }else{
+                inputCount.text = $"ChatCount: {ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.LocalUserId).submitCount} / --";
+            }
         }
         void OnDisconect(UserId id){
             chatText.text += $"{id} is Disconnected / {p2pInfo.Instance.LastDisconnectedUsersReason}{System.Environment.NewLine}";

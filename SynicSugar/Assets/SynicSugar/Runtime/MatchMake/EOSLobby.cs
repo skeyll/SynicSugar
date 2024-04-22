@@ -369,9 +369,10 @@ namespace SynicSugar.MatchMake {
                 return;
             }
             CurrentLobby.LobbyId = info.LobbyId;
+
             //RTC
             RTCManager.Instance.AddNotifyParticipantStatusChanged();
-            //For GUI events
+            //For self
             MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(UserId.GetUserId(EOSManager.Instance.GetProductUserId()), true);
 
             isMatchSuccess = true;
@@ -456,11 +457,10 @@ namespace SynicSugar.MatchMake {
             }
 
             OnLobbyUpdated(info.LobbyId);
+            CurrentLobby._BeingCreated = false;
 
             //Get more performance to add user attribute in AddSerachAttribute, but that becomes difficult about event timing.
             AddUserAttributes();
-            
-            MatchMakeManager.Instance.MemberUpdatedNotifier.MemberAttributesUpdated(UserId.GetUserId(EOSManager.Instance.GetProductUserId()));
 
             isMatchSuccess = true;
             waitingMatch = false;
@@ -509,7 +509,7 @@ namespace SynicSugar.MatchMake {
         /// For use in normal matching. Retrive Lobby by Attributes. 
         /// Retrun true on getting Lobby data.
         /// </summary>
-        /// <param name="lobbyCodition"></param>
+        /// <param name="lobbyCondition"></param>
         /// <param name="token"></param>
         /// <returns></returns>
         async UniTask<bool> RetriveLobbyByAttribute(Lobby lobbyCondition, CancellationToken token){
@@ -1239,6 +1239,63 @@ namespace SynicSugar.MatchMake {
             waitLeave = false;
         }
 #endregion
+#region Offline
+        /// <summary>
+        /// Search for lobbies in backend and join in one to meet conditions.<br />
+        /// When player could not join, they create lobby as host and wait for other player.
+        /// </summary>
+        /// <param name="lobbyCondition">Create and search condition. <c>MUST NOT</c> add the data not to open public.</param>
+        /// <param name="delay"></param>
+        /// <param name="userAttributes"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        internal async UniTask CreateOfflineLobby(Lobby lobbyCondition, OfflineMatchmakingDelay delay, List<AttributeData> userAttributes, CancellationToken token){
+            MatchMakeManager.Instance.LastResultCode = Result.None;
+            this.userAttributes = userAttributes;
+
+            if(delay.StartMatchmakingDelay > 0){
+                MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Start);
+                await UniTask.Delay((int)delay.StartMatchmakingDelay, cancellationToken: token);
+            }
+            //Create Lobby
+            CurrentLobby = lobbyCondition;
+            CurrentLobby.LobbyId = "OFFLINEMODE";
+            CurrentLobby.LobbyOwner = EOSManager.Instance.GetProductUserId();
+            CurrentLobby.Members.Add(UserId.GetUserId(EOSManager.Instance.GetProductUserId()).ToString(), new MemberState() { Attributes = userAttributes });
+            CurrentLobby.hasConnectedRTCRoom = false;
+
+            MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(UserId.GetUserId(EOSManager.Instance.GetProductUserId()), true);
+            MatchMakeManager.Instance.MemberUpdatedNotifier.MemberAttributesUpdated(UserId.GetUserId(EOSManager.Instance.GetProductUserId()));
+
+            if(delay.WaitForOpponentsDelay > 0){
+                MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Wait);
+                await UniTask.Delay((int)delay.WaitForOpponentsDelay, cancellationToken: token);
+            }
+            if(delay.FinishMatchmakingDelay > 0){
+                MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Conclude);
+                await UniTask.Delay((int)delay.FinishMatchmakingDelay, cancellationToken: token);
+            }
+            //Set User info
+            p2pConnectorForOtherAssembly.Instance.ScoketName = "OFFLINEMODE";
+            p2pInfo.Instance.userIds.HostUserId = UserId.GetUserId(CurrentLobby.LobbyOwner);
+            p2pInfo.Instance.userIds.AllUserIds.Add(p2pInfo.Instance.LocalUserId);
+            p2pInfo.Instance.userIds.CurrentAllUserIds.Add(p2pInfo.Instance.LocalUserId);
+            p2pInfo.Instance.userIds.CurrentConnectedUserIds.Add(p2pInfo.Instance.LocalUserId);
+            
+            await MatchMakeManager.Instance.OnSaveLobbyID();
+            if(delay.ReadyForConnectionDelay > 0){
+                MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Ready);
+                await UniTask.Delay((int)delay.ReadyForConnectionDelay, cancellationToken: token);
+            }
+            MatchMakeManager.Instance.LastResultCode = Result.Success;
+        }
+        internal async UniTask DestroyOfflineLobby(){
+            MatchMakeManager.Instance.LastResultCode = Result.None;
+            await MatchMakeManager.Instance.OnDeleteLobbyID();
+            CurrentLobby.Clear();
+            MatchMakeManager.Instance.LastResultCode = Result.Success;
+        }
+#endregion
         /// <summary>
         /// Init p2pManager's room info with new lobby data.
         /// </summary>
@@ -1276,20 +1333,18 @@ namespace SynicSugar.MatchMake {
             uint memberCount = lobbyHandle.GetMemberCount(ref countOptions);
             //Get other use's id
             LobbyDetailsGetMemberByIndexOptions memberOptions = new LobbyDetailsGetMemberByIndexOptions();
-            userIds.AllUserIds = new List<UserId>();
-            userIds.AllCurrentUserIds = new List<UserId>();
-            userIds.RemoteUserIds = new List<UserId>();
             for(uint i = 0; i < memberCount; i++){
                 memberOptions.MemberIndex = i;
                 UserId targetId = UserId.GetUserId(lobbyHandle.GetMemberByIndex(ref memberOptions));
 
                 userIds.AllUserIds.Add(targetId);
-                userIds.AllCurrentUserIds.Add(targetId);
 
                 if(userIds.LocalUserId != targetId){
                     userIds.RemoteUserIds.Add(targetId);
                 }
             }
+            userIds.CurrentAllUserIds = new List<UserId>(userIds.AllUserIds);
+            userIds.CurrentConnectedUserIds = new List<UserId>(userIds.AllUserIds);
             //Get lobby's attribute count
             LobbyDetailsCopyAttributeByKeyOptions attrOptions = new LobbyDetailsCopyAttributeByKeyOptions();
             attrOptions.AttrKey = "socket";
@@ -1303,7 +1358,6 @@ namespace SynicSugar.MatchMake {
             p2pConnectorForOtherAssembly.Instance.ScoketName = EOSLobbyExtensions.GenerateLobbyAttribute(socket).STRING;
             //For options
             userIds.HostUserId = UserId.GetUserId(CurrentLobby.LobbyOwner);
-            userIds.LeftUsers = new();
             lobbyHandle.Release();
             return true;
         }
@@ -1314,7 +1368,7 @@ namespace SynicSugar.MatchMake {
         /// <returns></returns>
         async UniTask OpenConnection(CancellationToken token){
             p2pConnectorForOtherAssembly.Instance.OpenConnection(true);
-            p2pInfo.Instance.infoMethod.Init();
+            var getNatType = p2pInfo.Instance.infoMethod.Init();
             await p2pInfoMethod.WaitConnectPreparation(token);
             //Host sends AllUserIds list, Guest Receives AllUserIds.
             if(p2pInfo.Instance.IsHost()){
@@ -1323,6 +1377,7 @@ namespace SynicSugar.MatchMake {
                 BasicInfoExtensions basicInfo = new();
                 await basicInfo.ReciveUserIdsPacket(token);
             }
+            await getNatType;
             p2pInfo.Instance.pings.Init();
         }
         /// <summary>
@@ -1332,12 +1387,13 @@ namespace SynicSugar.MatchMake {
         /// <returns></returns>
         async UniTask OpenConnectionForReconnecter(CancellationToken token){
             p2pConnectorForOtherAssembly.Instance.OpenConnection(true);
-            p2pInfo.Instance.infoMethod.Init();
+            var getNatType = p2pInfo.Instance.infoMethod.Init();
             await p2pInfoMethod.WaitConnectPreparation(token);
             //Wait for user ids list from host.
             BasicInfoExtensions basicInfo = new();
             await basicInfo.ReciveUserIdsPacket(token);
 
+            await getNatType;
             p2pInfo.Instance.pings.Init();
         }
         /// <summary>

@@ -1,5 +1,5 @@
-using System.Threading;
 using Cysharp.Threading.Tasks;
+using SynicSugar.MatchMake;
 using SynicSugar.P2P;
 using SynicSugar.RTC;
 using UnityEngine;
@@ -46,15 +46,26 @@ namespace SynicSugar.Samples {
             uiSets.transform.Find("Large").GetComponent<Button>().onClick.AddListener(SetTextureWithNewColor);
             uiSets.transform.Find("Name").GetComponent<Button>().onClick.AddListener(DecideUserName);
             uiSets.transform.Find("Clear").GetComponent<Button>().onClick.AddListener(ClearChat);
-            uiSets.transform.Find("StopReceiver").GetComponent<Button>().onClick.AddListener(() => StopReceiver());
-            uiSets.transform.Find("StartReceiver").GetComponent<Button>().onClick.AddListener(() => RestartReceiver());
-            uiSets.transform.Find("Pause").GetComponent<Button>().onClick.AddListener(() => PauseSession(false));
-            uiSets.transform.Find("PauseF").GetComponent<Button>().onClick.AddListener(() => PauseSession(true));
-            uiSets.transform.Find("Restart").GetComponent<Button>().onClick.AddListener(RestartSession);
             uiSets.transform.Find("Leave").GetComponent<Button>().onClick.AddListener(LeaveSession);
             uiSets.transform.Find("Close").GetComponent<Button>().onClick.AddListener(CloseSession);
-            uiSets.transform.Find("StartVC").GetComponent<Button>().onClick.AddListener(StartVC);
-            uiSets.transform.Find("StopVC").GetComponent<Button>().onClick.AddListener(StopVC);
+
+            if(p2pInfo.Instance.AllUserIds.Count > 1){ //Just for online mode
+                uiSets.transform.Find("StopReceiver").GetComponent<Button>().onClick.AddListener(() => StopReceiver());
+                uiSets.transform.Find("StartReceiver").GetComponent<Button>().onClick.AddListener(() => RestartReceiver());
+                uiSets.transform.Find("Pause").GetComponent<Button>().onClick.AddListener(() => PauseSession(false));
+                uiSets.transform.Find("PauseF").GetComponent<Button>().onClick.AddListener(() => PauseSession(true));
+                uiSets.transform.Find("Restart").GetComponent<Button>().onClick.AddListener(RestartSession);
+                uiSets.transform.Find("StartVC").GetComponent<Button>().onClick.AddListener(StartVC);
+                uiSets.transform.Find("StopVC").GetComponent<Button>().onClick.AddListener(StopVC);
+            }else{
+                Destroy(uiSets.transform.Find("StopReceiver").gameObject);
+                Destroy(uiSets.transform.Find("StartReceiver").gameObject);
+                Destroy(uiSets.transform.Find("Pause").gameObject);
+                Destroy(uiSets.transform.Find("PauseF").gameObject);
+                Destroy(uiSets.transform.Find("Restart").gameObject);
+                Destroy(uiSets.transform.Find("StartVC").gameObject);
+                Destroy(uiSets.transform.Find("StopVC").gameObject);
+            }
         }
         //On call, send this ch byte with args.
         //This args means Record packet info and send it as normal way (No split packet).
@@ -92,7 +103,11 @@ namespace SynicSugar.Samples {
             systemManager.chatText.text += chat;
 
             submitCount++;
-            systemManager.inputCount.text = $"ChatCount: {ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.LocalUserId).submitCount} / {ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.CurrentRemoteUserIds[0]).submitCount}";
+            if(p2pInfo.Instance.AllUserIds.Count > 1){ 
+                systemManager.inputCount.text = $"ChatCount: {ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.LocalUserId).submitCount} / {ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.CurrentRemoteUserIds[0]).submitCount}";
+            }else{
+                systemManager.inputCount.text = $"ChatCount: {ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.LocalUserId).submitCount} / --";
+            }
         }
         //---For button
         public void DecideChat(){
@@ -164,7 +179,10 @@ namespace SynicSugar.Samples {
             systemManager.chatText.text += LargePacket;
             //Pass OnlySelf to 2nd arg, to send Synic data as simple RPC. The opponent will drop the packets for self data except for the moment re-cconect.
             //When the 3rd arg is true, this becomea the rpc to send large packet.
-            ConnectHub.Instance.SyncSynic(p2pInfo.Instance.CurrentRemoteUserIds[0], SynicType.OnlySelf, 1, true);
+            
+            foreach (var id in p2pInfo.Instance.CurrentRemoteUserIds){
+                ConnectHub.Instance.SyncSynic(id, SynicType.OnlySelf, 1, true);
+            }
         }
         public void DecideUserName(){
             UpdateName(systemManager.nameField.text);
@@ -202,14 +220,23 @@ namespace SynicSugar.Samples {
         public async void LeaveSession(){
             isStressTesting = false;
             EOSDebug.Instance.Log("Chat Mode: Leave");
-            await ConnectHub.Instance.ExitSession();
+            if(p2pInfo.Instance.AllUserIds.Count > 1){
+                await ConnectHub.Instance.ExitSession();
+            }else{
+                await MatchMakeManager.Instance.DestoryOfflineLobby();
+            }
             systemManager.modeSelect.ChangeGameScene("MainMenu");
 
         }
         public async void CloseSession(){
             isStressTesting = false;
             EOSDebug.Instance.Log("Chat Mode: Close");
-            await ConnectHub.Instance.CloseSession();
+
+            if(p2pInfo.Instance.AllUserIds.Count > 1){
+                await ConnectHub.Instance.CloseSession();
+            }else{
+                await MatchMakeManager.Instance.DestoryOfflineLobby();
+            }
             systemManager.modeSelect.ChangeGameScene("MainMenu");
         }
     }

@@ -442,6 +442,6 @@ namespace SynicSugar.P2P {
         public void GetPong(string id, ArraySegment<byte> utc){
             p2pInfo.Instance.pings.GetPong(id, utc);
         }
-        public bool IsEnableRTC => MatchMakeManager.Instance.eosLobby.CurrentLobby.bEnableRTCRoom;
+        public bool IsEnableRTC => MatchMakeManager.Instance.eosLobby.CurrentLobby.hasConnectedRTCRoom;
     }
 }
