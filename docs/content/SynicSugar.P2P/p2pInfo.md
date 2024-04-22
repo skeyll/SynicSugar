@@ -25,8 +25,9 @@ If this is no longer needed, we call *[CancelCurrentMatchMake](../../SynicSugar.
 | [LocalUserId](../p2pInfo/localuserid) | UserID of this local |
 | [CurrentRemoteUserIds](../p2pInfo/currentremoteuserids) | UserIDs of current conenction |
 | DisconnectedUserIds | Disconnected user ids. (May come back, not exit) |
-| AllCurrentUserIds | UserIDs of current conenction include LocalUser |
-| [AllUserIds](../p2pInfo/alluserids) | AllCurrentUserIds + DisconnectedUserIds |
+| CurrentConnectedUserIds | Connected user ids include Local UserId |
+| CurrentAllUserIds | AllUserIds - LeftUsers (not disconnected) |
+| [AllUserIds](../p2pInfo/alluserids) | AllUserIds in the session |
 | [AcceptHostSynic](../p2pInfo/accepthostsynic) | If true, host overwrite this local user instnace |
 | [ConnectionNotifier](../p2pInfo/connectionnotifier) | Notifers when a user connects or disconnects |
 | LastDisconnectedUsersReason | The reason of last disconnected user |
@@ -48,8 +49,6 @@ If this is no longer needed, we call *[CancelCurrentMatchMake](../../SynicSugar.
 |---|---|
 | [IsLoaclUser](../p2pInfo/isloacluser) | If target is LocalUser, return true |
 | [IsHost](../p2pInfo/ishost) | If local or target user is host, return true |
-| [GetCurrentConnectionMemberCount](../p2pInfo/getcurrentconnectionmembercount) | Get the current member count in connection |
-| [GetAllConnectionMemberCount](../p2pInfo/getallconnectionmembercount) | Get the all member's count of current and left connection |
 | GetUserIndex | Get the user unique index in AllUserIds |
 | [QueryNATType](../p2pInfo/querynattype) | Update local user's NATType to the latest |
 | [GetNATType](../p2pInfo/getnattype) | Get last-queried NAT-type |

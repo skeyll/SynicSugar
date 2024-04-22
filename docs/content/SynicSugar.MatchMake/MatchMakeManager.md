@@ -45,6 +45,8 @@ If this is no longer needed, we call *[CancelCurrentMatchMake](../MatchMakeManag
 | [ExitCurrentMatchMake](../MatchMakeManager/exitcurrentmatchmake) | Stop the current matchmaking |
 | [CloseCurrentMatchMake](../MatchMakeManager/closecurrentmatchmake) | (Host) destroys lobby to stop the matchmaking |
 | [KickTargetFromLobby](../MatchMakeManager/kicktargetfromlobby) | (Host) kicks target from Lobby |
+| [CreateOfflineLobby](../MatchMakeManager/createofflinelobby) | Create fake-lobby as Host for tutorial |
+| DestoryOfflineLobby | Destory offline-lobby and stop offline mode |
 | [GetLastErrorCode](../MatchMakeManager/getlasterrorcode) | Get Last ERROR Result code |
 | [GetCurrentLobbyID](../MatchMakeManager/getcurrentlobbyid) | Get LobbyID that a user participating |
 | [GetReconnectLobbyID](../MatchMakeManager/getreconnectlobbyid) | Get LobbyID by Playerprefs |

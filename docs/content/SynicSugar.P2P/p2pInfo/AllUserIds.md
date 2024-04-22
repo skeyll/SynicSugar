@@ -10,10 +10,9 @@ public List<UserId> AllUserIds;
 
 
 ### Description
-UserIDs of this whole this session. The Id is assigned by EOS.<br>
+UserIDs of this whole session. The Id is assigned by EOS.<br>
 The order is the same in lobby order, so all locals have the same order of this. Even if the local user is reconnecter, they has the list in same order because the host will sent the list.<br>
-When user will leave the lobby in manual, the id is removed from this List.<br>
-LocalUserId + CurrentRemoteUserIds + DisconnectedUserIds
+Even if user will leave the lobby in manual, this list remains the same. When we can know JUST current user ids, can use CurrentAllUserIds. This list contains LocalUserId + CurrentRemoteUserIds + DisconnectedUserIds. (exclude of LeftUserIds)<br> If we need current connected user ids, can use CurrentConnectedUserIds. It has LocalUserId + CurrentRemoteUserIds. (exclude of DisconnectedUserIds and LeftUserIds)
 
 ```cs
 using SynicSugar.P2P;
