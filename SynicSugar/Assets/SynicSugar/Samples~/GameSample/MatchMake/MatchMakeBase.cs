@@ -125,7 +125,7 @@ namespace  SynicSugar.Samples {
             SwitchCancelButtonActive(true);
             buttonText.text = "Cancel Matchmaking";
         }
-        internal void SwitchCancelButtonActive(bool isActivate){
+        internal virtual void SwitchCancelButtonActive(bool isActivate){
             closeLobby.gameObject.SetActive(isActivate);
         }
     #endregion
