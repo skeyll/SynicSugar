@@ -425,7 +425,8 @@ namespace SynicSugar.MatchMake {
         }
         /// <summary>
         /// If Host, destroy lobby and cancels MatchMake.<br />
-        /// IF Guest, just leave lobby and cancels MatchMake.
+        /// IF Guest, just leave lobby and cancels MatchMake.<br />
+        /// We use ConnectHub.Instance.ExitSession and ConnectHub.Instance.CloseSession after matchmaking.
         /// </summary>
         /// <param name="token">token for this task</param>
         /// <param name="destroyManager">If true, destroy NetworkManager after cancel matchmake.</param>
@@ -477,6 +478,47 @@ namespace SynicSugar.MatchMake {
 
             return canDestroy;
         }
+    #region Offline Mode
+        /// <summary>
+        /// Just for solo mode like as tutorial. <br />
+        /// This lobby is not connected to the network and backend and is just for a local Host. <br />
+        /// When Quit OfflineMode, call MatchMakeManager.Instance.DestoryOfflineLobby or just Unity's Destory(MatchMakeManager.Instance)　and delete LobbyID method.<br />
+        /// *No Timeout and failure
+        /// </summary>
+        /// <returns>Always return true. the LastResultCode becomes Success after return true.</returns>
+        public async UniTask<bool> CreateOfflineLobby(Lobby lobbyCondition, OfflineMatchmakingDelay delay, List<AttributeData> userAttributes = null, CancellationTokenSource token = default(CancellationTokenSource)){
+            bool needTryCatch = token == default;
+            matchingToken = needTryCatch ? new CancellationTokenSource() : token;
+
+            if(needTryCatch){
+                try{
+                    await eosLobby.CreateOfflineLobby(lobbyCondition, delay, userAttributes, matchingToken.Token);
+                }catch(OperationCanceledException){
+                #if SYNICSUGAR_LOG
+                    Debug.Log("MatchMaking is canceled");
+                #endif
+                    MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
+                    return false;
+                }
+            }else{
+                await eosLobby.CreateOfflineLobby(lobbyCondition, delay, userAttributes, matchingToken.Token);
+            }
+            return true;
+        }
+        /// <summary>
+        /// Just for solo mode like as tutorial. <br />
+        /// Destory Lobby Instance. We can use just Destory(MatchMakeManager.Instance)　and delete LobbyID method without calling this.<br />
+        /// </summary>
+        /// <returns>Always return true. the LastResultCode becomes Success after return true.</returns>
+        public async UniTask<bool> DestoryOfflineLobby(bool destroyManager = true){
+            p2pConnectorForOtherAssembly.Instance.p2pToken?.Cancel();
+            await eosLobby.DestroyOfflineLobby();
+            if(destroyManager){
+                Destroy(this.gameObject);
+            }
+            return true;
+        }
+    #endregion
         /// <summary>
         /// Get Last ERROR Result code. None means init state. 
         /// </summary>

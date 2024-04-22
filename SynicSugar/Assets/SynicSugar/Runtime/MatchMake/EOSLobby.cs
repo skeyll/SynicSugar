@@ -1239,6 +1239,63 @@ namespace SynicSugar.MatchMake {
             waitLeave = false;
         }
 #endregion
+#region Offline
+        /// <summary>
+        /// Search for lobbies in backend and join in one to meet conditions.<br />
+        /// When player could not join, they create lobby as host and wait for other player.
+        /// </summary>
+        /// <param name="lobbyCondition">Create and search condition. <c>MUST NOT</c> add the data not to open public.</param>
+        /// <param name="delay"></param>
+        /// <param name="userAttributes"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        internal async UniTask CreateOfflineLobby(Lobby lobbyCondition, OfflineMatchmakingDelay delay, List<AttributeData> userAttributes, CancellationToken token){
+            MatchMakeManager.Instance.LastResultCode = Result.None;
+            this.userAttributes = userAttributes;
+
+            if(delay.StartMatchmakingDelay > 0){
+                MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Start);
+                await UniTask.Delay((int)delay.StartMatchmakingDelay, cancellationToken: token);
+            }
+            //Create Lobby
+            CurrentLobby = lobbyCondition;
+            CurrentLobby.LobbyId = "OFFLINEMODE";
+            CurrentLobby.LobbyOwner = EOSManager.Instance.GetProductUserId();
+            CurrentLobby.Members.Add(UserId.GetUserId(EOSManager.Instance.GetProductUserId()).ToString(), new MemberState() { Attributes = userAttributes });
+            CurrentLobby.hasConnectedRTCRoom = false;
+
+            MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(UserId.GetUserId(EOSManager.Instance.GetProductUserId()), true);
+            MatchMakeManager.Instance.MemberUpdatedNotifier.MemberAttributesUpdated(UserId.GetUserId(EOSManager.Instance.GetProductUserId()));
+
+            if(delay.WaitForOpponentsDelay > 0){
+                MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Wait);
+                await UniTask.Delay((int)delay.WaitForOpponentsDelay, cancellationToken: token);
+            }
+            if(delay.FinishMatchmakingDelay > 0){
+                MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Conclude);
+                await UniTask.Delay((int)delay.FinishMatchmakingDelay, cancellationToken: token);
+            }
+            //Set User info
+            p2pConnectorForOtherAssembly.Instance.ScoketName = "OFFLINEMODE";
+            p2pInfo.Instance.userIds.HostUserId = UserId.GetUserId(CurrentLobby.LobbyOwner);
+            p2pInfo.Instance.userIds.AllUserIds.Add(p2pInfo.Instance.LocalUserId);
+            p2pInfo.Instance.userIds.CurrentAllUserIds.Add(p2pInfo.Instance.LocalUserId);
+            p2pInfo.Instance.userIds.CurrentConnectedUserIds.Add(p2pInfo.Instance.LocalUserId);
+            
+            await MatchMakeManager.Instance.OnSaveLobbyID();
+            if(delay.ReadyForConnectionDelay > 0){
+                MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Ready);
+                await UniTask.Delay((int)delay.ReadyForConnectionDelay, cancellationToken: token);
+            }
+            MatchMakeManager.Instance.LastResultCode = Result.Success;
+        }
+        internal async UniTask DestroyOfflineLobby(){
+            MatchMakeManager.Instance.LastResultCode = Result.None;
+            await MatchMakeManager.Instance.OnDeleteLobbyID();
+            CurrentLobby.Clear();
+            MatchMakeManager.Instance.LastResultCode = Result.Success;
+        }
+#endregion
         /// <summary>
         /// Init p2pManager's room info with new lobby data.
         /// </summary>

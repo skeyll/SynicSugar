@@ -55,7 +55,7 @@ namespace SynicSugar.P2P {
         /// </summary>
         public List<UserId> CurrentAllUserIds => userIds.CurrentAllUserIds;
         /// <summary>
-        /// All UserIds throughout this session include Local and Leave Users.<br />
+        /// All UserIds throughout this session include Local and Left Users.<br />
         /// This value is the same value and same order with all locals through the whole game.
         /// </summary>
         public List<UserId> AllUserIds => userIds.AllUserIds;
