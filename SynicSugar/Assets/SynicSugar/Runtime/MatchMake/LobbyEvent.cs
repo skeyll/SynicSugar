@@ -218,10 +218,9 @@ namespace SynicSugar.MatchMake {
         /// <param name="meetMinCondition"></param>
         internal void LobbyMemberCountChanged(UserId target, bool isParticipated, bool meetMinCondition){
             OnLobbyMemberCountChanged?.Invoke(target, isParticipated);
-                UnityEngine.Debug.Log("LobbyMemberCountChanged1");
             if(enabledManualConclude != meetMinCondition){
                 enabledManualConclude = meetMinCondition;
-                UnityEngine.Debug.Log("LobbyMemberCountChanged2");
+                
                 if(meetMinCondition){
                     EnableHostConclude?.Invoke();
                 }else{
