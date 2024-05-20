@@ -432,8 +432,19 @@ namespace SynicSugar.MatchMake {
                 }
             }
             // Get performance to add for User Attribute here
-            // AddUserAttributes();
+            foreach(var attr in userAttributes){
+                var attrOptions = new LobbyModificationAddMemberAttributeOptions(){
+                    Attribute = attr.AsLobbyAttribute(),
+                    Visibility = LobbyAttributeVisibility.Public
+                };
+                result = lobbyHandle.AddMemberAttribute(ref attrOptions);
 
+                if (result != ResultE.Success){
+                    MatchMakeManager.Instance.LastResultCode = (Result)result;
+                    Debug.LogErrorFormat("AddMemberAttribute: could not add member attribute. Error code: {0}", result);
+                    return false;
+                }
+            }
             //Add attribute with handle
             UpdateLobbyOptions updateOptions = new UpdateLobbyOptions(){
                 LobbyModificationHandle = lobbyHandle
@@ -443,6 +454,7 @@ namespace SynicSugar.MatchMake {
             isMatchSuccess = false;
             
             lobbyInterface.UpdateLobby(ref updateOptions, null, OnAddSearchAttribute);
+            lobbyHandle.Release();
 
             await UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token);
 
@@ -460,7 +472,7 @@ namespace SynicSugar.MatchMake {
             CurrentLobby._BeingCreated = false;
 
             //Get more performance to add user attribute in AddSerachAttribute, but that becomes difficult about event timing.
-            AddUserAttributes();
+            // AddUserAttributes();
 
             isMatchSuccess = true;
             waitingMatch = false;
@@ -952,7 +964,6 @@ namespace SynicSugar.MatchMake {
                 Debug.LogErrorFormat("SwitchLobbyAttribute: could not add socket name. Error code: {0}", result);
                 return;
             }
-
             // Set attribute to handle in local
             foreach(var attribute in CurrentLobby.Attributes){
                 LobbyModificationRemoveAttributeOptions removeAttributeOptions = new LobbyModificationRemoveAttributeOptions(){
@@ -1021,6 +1032,7 @@ namespace SynicSugar.MatchMake {
             };
 
             lobbyInterface.UpdateLobby(ref updateOptions, null, OnAddedUserAttributes);
+            lobbyHandle.Release();
         }
         void OnAddedUserAttributes(ref UpdateLobbyCallbackInfo info){
             if (info.ResultCode != ResultE.Success){
