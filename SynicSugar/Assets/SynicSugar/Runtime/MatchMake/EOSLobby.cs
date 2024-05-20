@@ -379,7 +379,7 @@ namespace SynicSugar.MatchMake {
             waitingMatch = false;
         }
         /// <summary>
-        /// Set attribute for search. This process is only for Host player.
+        /// Set attribute for search and Host attributes.. This process is only for Host player.
         /// </summary>
         /// <param name="lobbyCondition"></param>
         /// <param name="token"></param>
@@ -427,11 +427,10 @@ namespace SynicSugar.MatchMake {
                 result = lobbyHandle.AddAttribute(ref attributeOptions);
                 if (result != ResultE.Success){
                     MatchMakeManager.Instance.LastResultCode = (Result)result;
-                    Debug.LogErrorFormat("Change Lobby: could not add attribute. Error code: {0}", result);
+                    Debug.LogErrorFormat("AddSerachLobbyAttributey: could not add attribute. Error code: {0}", result);
                     return false;
                 }
             }
-            // Get performance to add for User Attribute here
             foreach(var attr in userAttributes){
                 var attrOptions = new LobbyModificationAddMemberAttributeOptions(){
                     Attribute = attr.AsLobbyAttribute(),
@@ -441,7 +440,7 @@ namespace SynicSugar.MatchMake {
 
                 if (result != ResultE.Success){
                     MatchMakeManager.Instance.LastResultCode = (Result)result;
-                    Debug.LogErrorFormat("AddMemberAttribute: could not add member attribute. Error code: {0}", result);
+                    Debug.LogErrorFormat("AddSerachLobbyAttribute: could not add Host's member attribute. Error code: {0}", result);
                     return false;
                 }
             }
@@ -977,12 +976,27 @@ namespace SynicSugar.MatchMake {
                     return;
                 }
             }
+            //For Host's attribute.
+            foreach(var attr in userAttributes){
+                var attrOptions = new LobbyModificationAddMemberAttributeOptions(){
+                    Attribute = attr.AsLobbyAttribute(),
+                    Visibility = LobbyAttributeVisibility.Public
+                };
+                result = lobbyHandle.AddMemberAttribute(ref attrOptions);
+
+                if (result != ResultE.Success){
+                    MatchMakeManager.Instance.LastResultCode = (Result)result;
+                    Debug.LogErrorFormat("AddSerachLobbyAttribute: could not add Host's member attribute. Error code: {0}", result);
+                    return;
+                }
+            }
             //Change lobby attributes with handle
             UpdateLobbyOptions updateOptions = new UpdateLobbyOptions(){
                 LobbyModificationHandle = lobbyHandle
             };
 
             lobbyInterface.UpdateLobby(ref updateOptions, null, OnSwitchLobbyAttribute);
+            lobbyHandle.Release();
         }
         void OnSwitchLobbyAttribute(ref UpdateLobbyCallbackInfo info){
             if (info.ResultCode != ResultE.Success){
