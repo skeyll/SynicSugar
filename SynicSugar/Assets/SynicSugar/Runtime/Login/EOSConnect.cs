@@ -25,7 +25,7 @@ namespace SynicSugar.Login {
             Result resultS = Result.Canceled;
             //DeviceID
             var connectInterface = EOSManager.Instance.GetEOSPlatformInterface().GetConnectInterface();
-            var createDeviceIdOptions = new Epic.OnlineServices.Connect.CreateDeviceIdOptions() { DeviceModel = SystemInfo.deviceModel };
+            var createDeviceIdOptions = new CreateDeviceIdOptions() { DeviceModel = SystemInfo.deviceModel };
 
             connectInterface.CreateDeviceId(ref createDeviceIdOptions, null, 
                 (ref CreateDeviceIdCallbackInfo data) => {
@@ -68,7 +68,7 @@ namespace SynicSugar.Login {
                     waitingAuth = false;
                 });
 
-            if(needTryCatch){     
+            if(needTryCatch){
                 try{
                     await UniTask.WaitUntil(() => !waitingAuth, cancellationToken: token);
                 }catch(OperationCanceledException){
@@ -78,7 +78,44 @@ namespace SynicSugar.Login {
             }else{
                 await UniTask.WaitUntil(() => !waitingAuth, cancellationToken: token);
             }
+            await DeleteDeviceID();
             return (isSuccess, resultS);
+        }
+        /// <summary>
+        /// Delete any existing Device ID access credentials for the current user profile on the local device. <br />
+        /// On Android and iOS devices, uninstalling the application will automatically delete any local Device ID credentials.<br />
+        /// This doesn't means delete User on EOS. We can't delete users from EOS.
+        /// </summary>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        public static async UniTask<(bool isSuccess, Result detail)> DeleteDeviceID(CancellationToken token = default(CancellationToken)){
+            bool needTryCatch = token == default;
+            token = needTryCatch ? new CancellationTokenSource().Token : token;
+
+            var connectInterface = EOSManager.Instance.GetEOSPlatformInterface().GetConnectInterface();
+            DeleteDeviceIdOptions options = new DeleteDeviceIdOptions();
+            Result resultS = Result.Canceled;
+            bool finishDeleted = false;
+            connectInterface.DeleteDeviceId(ref options, null, (ref DeleteDeviceIdCallbackInfo data) => {
+                resultS = (Result)data.ResultCode;
+                if(data.ResultCode != ResultE.Success){
+                    Debug.Log("DeleteDeviceID: Failuer " + data.ResultCode);
+                }
+                finishDeleted = true;
+            });
+
+            if(needTryCatch){ 
+                try{
+                    await UniTask.WaitUntil(() => finishDeleted, cancellationToken: token);
+                }catch(OperationCanceledException){
+                    Debug.Log("DeleteDeviceID: Canceled.");
+                    return (false, resultS);
+                }
+            }else{
+                await UniTask.WaitUntil(() => finishDeleted, cancellationToken: token);
+            }
+            
+            return (resultS == Result.Success, resultS);
         }
     }
 }
