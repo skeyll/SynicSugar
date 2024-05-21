@@ -317,6 +317,7 @@ namespace SynicSugar.MatchMake {
                 PermissionLevel = lobbyCondition.PermissionLevel,
                 BucketId = lobbyCondition.BucketId,
                 PresenceEnabled = false,
+                RejoinAfterKickRequiresInvite = lobbyCondition.RejoinAfterKickRequiresInvite,
                 AllowInvites = lobbyCondition.bAllowInvites,
                 EnableRTCRoom = lobbyCondition.bEnableRTCRoom
             };

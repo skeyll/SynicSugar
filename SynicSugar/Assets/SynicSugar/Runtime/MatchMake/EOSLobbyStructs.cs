@@ -31,6 +31,10 @@ namespace SynicSugar.MatchMake {
         internal bool bAllowInvites = false;
         internal bool bDisableHostMigration = true;
         internal bool bEnableRTCRoom = false;
+        /// <summary>
+        /// If true, the pleyer who was kicked need Invite to join the same Lobby.
+        /// </summary>
+        public bool RejoinAfterKickRequiresInvite = true;
         public List<AttributeData> Attributes = new List<AttributeData>();
         internal uint AvailableSlots = 0;
         internal void SetBucketID(string[] conditions){
