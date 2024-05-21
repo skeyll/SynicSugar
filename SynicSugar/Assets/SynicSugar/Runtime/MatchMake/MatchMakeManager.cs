@@ -425,7 +425,7 @@ namespace SynicSugar.MatchMake {
         }
         /// <summary>
         /// If Host, destroy lobby and cancels MatchMake.<br />
-        /// IF Guest, just leave lobby and cancels MatchMake.<br />
+        /// If Guest, just leave lobby and cancels MatchMake.<br />
         /// We use ConnectHub.Instance.ExitSession and ConnectHub.Instance.CloseSession after matchmaking.
         /// </summary>
         /// <param name="token">token for this task</param>

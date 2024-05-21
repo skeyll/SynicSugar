@@ -792,7 +792,17 @@ namespace SynicSugar.MatchMake {
                     info.CurrentStatus == LobbyMemberStatus.Kicked ||
                     info.CurrentStatus == LobbyMemberStatus.Disconnected){
                     OnKickedFromLobby(info.LobbyId);
-                    MatchMakeManager.Instance.LastResultCode = info.CurrentStatus == LobbyMemberStatus.Kicked ? Result.UserKicked : Result.None;
+                    switch(info.CurrentStatus){
+                        case LobbyMemberStatus.Closed:
+                            MatchMakeManager.Instance.LastResultCode = Result.LobbyClosed;
+                        break;
+                        case LobbyMemberStatus.Kicked:
+                            MatchMakeManager.Instance.LastResultCode = Result.UserKicked;
+                        break;
+                        case LobbyMemberStatus.Disconnected:
+                            MatchMakeManager.Instance.LastResultCode = Result.NetworkDisconnected;
+                        break;
+                    }
                     //Fail to MatchMake.
                     waitingMatch = false;
                     return;
@@ -1209,10 +1219,10 @@ namespace SynicSugar.MatchMake {
         }
         void OnKickedFromLobby(string lobbyId){
             if (CurrentLobby.isValid() && CurrentLobby.LobbyId.Equals(lobbyId, StringComparison.OrdinalIgnoreCase)){
-                CurrentLobby.Clear();
                 LobbyMemberStatusNotification.Dispose();
                 LobbyMemberUpdateNotification.Dispose();
             }
+            CurrentLobby.Clear();
         }
 #endregion
 #region Destroy
@@ -1245,8 +1255,6 @@ namespace SynicSugar.MatchMake {
             await MatchMakeManager.Instance.OnDeleteLobbyID();
             LobbyMemberStatusNotification.Dispose();
             LobbyMemberUpdateNotification.Dispose();
-            CurrentLobby.Clear();
-
             return canLeave;
         }
         void OnDestroyLobbyCompleted(ref DestroyLobbyCallbackInfo info){
@@ -1261,6 +1269,7 @@ namespace SynicSugar.MatchMake {
                 //To delete member object.
                 MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(UserId.GetUserId(EOSManager.Instance.GetProductUserId()), false);
             }
+            CurrentLobby.Clear();
             canLeave = true;
             waitLeave = false;
         }
