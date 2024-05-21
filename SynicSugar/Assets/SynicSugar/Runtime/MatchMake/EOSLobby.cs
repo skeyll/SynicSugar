@@ -1395,11 +1395,20 @@ namespace SynicSugar.MatchMake {
         async UniTask OpenConnection(CancellationToken token){
             p2pConnectorForOtherAssembly.Instance.OpenConnection(true);
             var getNatType = p2pInfo.Instance.infoMethod.Init();
+        #if SYNICSUGAR_LOG
+            Debug.Log("OpenConnection: Open Connection.");
+        #endif
             await p2pInfoMethod.WaitConnectPreparation(token);
             //Host sends AllUserIds list, Guest Receives AllUserIds.
             if(p2pInfo.Instance.IsHost()){
+        #if SYNICSUGAR_LOG
+            Debug.Log("OpenConnection: Sends UserList as Host.");
+        #endif
                 await BasicInfoExtensions.SendUserListToAll(token);
             }else{
+        #if SYNICSUGAR_LOG
+            Debug.Log("OpenConnection: Wait for UserList as Guest.");
+        #endif
                 BasicInfoExtensions basicInfo = new();
                 await basicInfo.ReciveUserIdsPacket(token);
             }
