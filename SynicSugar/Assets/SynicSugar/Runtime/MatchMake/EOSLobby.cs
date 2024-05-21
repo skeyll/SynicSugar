@@ -453,9 +453,9 @@ namespace SynicSugar.MatchMake {
             isMatchSuccess = false;
             
             lobbyInterface.UpdateLobby(ref updateOptions, null, OnAddSearchAttribute);
-            lobbyHandle.Release();
 
             await UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token);
+            lobbyHandle.Release();
 
             return isMatchSuccess; //"isMatchSuccess" is changed in async and callback method with result.
         }
@@ -469,9 +469,6 @@ namespace SynicSugar.MatchMake {
 
             OnLobbyUpdated(info.LobbyId);
             CurrentLobby._BeingCreated = false;
-
-            //Get more performance to add user attribute in AddSerachAttribute, but that becomes difficult about event timing.
-            // AddUserAttributes();
 
             isMatchSuccess = true;
             waitingMatch = false;
@@ -806,6 +803,9 @@ namespace SynicSugar.MatchMake {
             //For MatchMaking
             if(waitingMatch){ //This flag is shared by both host and guest, and is false after getting SocketName.
                 if(info.TargetUserId == productUserId && info.CurrentStatus == LobbyMemberStatus.Promoted){
+            #if SYNICSUGAR_LOG
+                Debug.Log("OnLobbyMemberStatusReceived: This local user becomes new Host.");
+            #endif
                     //This local player manage lobby, So dosen't need update notify.
                     LobbyUpdateNotification.Dispose();
                 }

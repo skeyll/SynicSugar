@@ -222,6 +222,9 @@ namespace SynicSugar.MatchMake {
                 enabledManualConclude = meetMinCondition;
                 
                 if(meetMinCondition){
+                #if SYNICSUGAR_LOG
+                    Debug.Log("LobbyMemberCountChanged: Matchmaking meets min member conditions. Host can close Lobby from now.");
+                #endif
                     EnableHostConclude?.Invoke();
                 }else{
                     DisableHostConclude?.Invoke();
