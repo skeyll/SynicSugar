@@ -78,7 +78,6 @@ namespace SynicSugar.Login {
             }else{
                 await UniTask.WaitUntil(() => !waitingAuth, cancellationToken: token);
             }
-            await DeleteDeviceID();
             return (isSuccess, resultS);
         }
         /// <summary>
@@ -149,7 +148,6 @@ namespace SynicSugar.Login {
             }else{
                 await UniTask.WaitUntil(() => !waitingAuth, cancellationToken: token);
             }
-            await DeleteDeviceID();
             return (isSuccess, resultS);
         }
         /// <summary>
