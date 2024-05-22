@@ -17,8 +17,9 @@ In other word, the game has crashed or something problem.<br>
 If a connection is temporarily lost, OnTargetEarlyDisconnected is fired (Need to check UseDisconnectedEarlyNotify in p2pConfig). Then, EOS will automatically try to reconnect. (If success on attempt, Restored is invoked.) <br>
 When the game go to the back screen, the game keeps connection. Even if a user loses p2p for some reason, EOS will switch to the connection via Relay.<br>
 If the connection cannot be re-established after such attempts, SynicSugar determines the user is **OnTargetDisconnected**. This is made in about **5 seconds**.<br>
-**OnTargetLeaved** is invoked when target leave lobby with SynicSugar API.
-
+**OnTargetLeaved** is invoked when target leave lobby with SynicSugar API.<br><br>
+When UseDisconnectedEarlyNotify is true, SynicSugar sends HeartBeat to Lobby and disconnected peer in EarlyNotify to get notify faster.<br>
+SynicSugar uses RefleshPing for this heartbeat, so I recommends that we make AutoRefleshPing false when use EarlyNotify.
 
 ### Event
 | API | description |

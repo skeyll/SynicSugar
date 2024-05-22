@@ -8,6 +8,7 @@ weight = 1
 *Class: EOSConnect* </small>
 
 public static async UniTask&lt;(bool isSuccess, Result detail)&gt;  LoginWithDeviceID(CancellationToken token = default(CancellationToken))
+public static async UniTask&lt;(bool isSuccess, Result detail)&gt;  LoginWithDeviceID(string displayName, CancellationToken token = default(CancellationToken))
 
 
 ### Description

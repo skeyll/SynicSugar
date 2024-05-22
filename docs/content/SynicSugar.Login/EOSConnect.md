@@ -12,6 +12,7 @@ Sign in EOS. This Authentication is via Connect interface instead of Auth Interf
 | --- | --- |
 | [HasLoggedinEOS](../EOSConnect/hasloggedineos) | User has logged in or not. |
 | [LoginWithDeviceID](../EOSConnect/loginwithdeviceid) | Sign in EOS with DeviceID |
+| [DeleteDeviceID](../EOSConnect/deletedeviceid) | Delete DeviceID from local |
 
 
 ```cs

@@ -16,3 +16,4 @@ This is created by *[GenerateLobbyObject(string[] bucket, uint MaxPlayers = 2, b
 | [MaxLobbyMembers](../Lobby/maxlobbymembers)  | The Max amount of lobby members |
 | [BucketId](../Lobby/bucketid) | Important attributes for matchmaking |
 | [Attributes](../Lobby/attributes) | Attributes for matchmaking conditions |
+| RejoinAfterKickRequiresInvite | Kicked User needs invite to re-join same lobby |
