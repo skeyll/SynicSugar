@@ -7,7 +7,6 @@ namespace  SynicSugar.Samples {
         [SerializeField] GameObject modeSelectCanvas;
         [SerializeField] bool needResultDetail;
         void Start(){
-            
             bool hasLogin = EOSConnect.HasLoggedinEOS();
         #if SYNICSUGAR_FPSTEST
             if(!hasLogin){
@@ -29,7 +28,7 @@ namespace  SynicSugar.Samples {
             this.gameObject.SetActive(false);
             EOSDebug.Instance.Log("Trt to connect EOS with deviceID.");
             //(bool, Result)
-            var result = await EOSConnect.LoginWithDeviceID();
+            var result = await EOSConnect.LoginWithDeviceID("TestPlayer");
     
             if(result.isSuccess){
                 modeSelectCanvas.SetActive(true);
@@ -40,6 +39,20 @@ namespace  SynicSugar.Samples {
             //False
             this.gameObject.SetActive(true);
             EOSDebug.Instance.Log($"Fault EOS authentication. {result.detail}");
+        }
+        /// <summary>
+        /// For button event
+        /// </summary>
+        public void DeleteDeviceID(){
+            DeleteDeviceIDRequest().Forget();
+        }
+        public async UniTask DeleteDeviceIDRequest(){
+            var result = await EOSConnect.DeleteDeviceID();
+            if(result.isSuccess){
+                EOSDebug.Instance.Log("Delete DeviceID: Success.");
+                return;
+            }
+            EOSDebug.Instance.Log("Delete DeviceID: Failare.");
         }
         /// <summary>
         /// For button event

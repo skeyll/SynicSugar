@@ -52,15 +52,19 @@ namespace  SynicSugar.Samples {
             if(!p2pInfo.Instance.IsHost()){
                 Destroy(ConnectHub.Instance.GetUserInstance<TankPlayer>(id).gameObject);
             }
+            Debug.Log(id + "Disconencted");
         }
         void OnLeaved(UserId id){
             Destroy(ConnectHub.Instance.GetUserInstance<TankPlayer>(id).gameObject);
+            Debug.Log(id + "Leaved");
         }
         void OnEarlyDisconnected(UserId id){
             ConnectHub.Instance.GetUserInstance<TankPlayer>(id).gameObject.SetActive(false);
+            Debug.Log(id + "EarlyDisconnected");
         }
         void OnRestored(UserId id){
             ConnectHub.Instance.GetUserInstance<TankPlayer>(id).gameObject.SetActive(true);
+            Debug.Log(id + "Restored");
         }
         public void ReturnToTitle(){
             AsyncReturnToTitle().Forget();
