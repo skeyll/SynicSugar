@@ -426,7 +426,6 @@ namespace SynicSugar.P2P {
         }
         //Users with young index send Heartbeat.
         if(p2pInfo.Instance.GetUserIndex(p2pInfo.Instance.LocalUserId) <= 2){
-            Debug.Log("Geat");
             //+100 is second's symbol.
             int disconnectedUserIndex = 100 + p2pInfo.Instance.GetUserIndex(UserId.GetUserId(data.RemoteUserId));
             MatchMakeManager.Instance.UpdateMemberAttributeAsHeartBeat(disconnectedUserIndex);
