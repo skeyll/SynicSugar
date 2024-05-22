@@ -854,12 +854,12 @@ namespace SynicSugar.MatchMake {
                 p2pInfo.Instance.ConnectionNotifier.Disconnected(UserId.GetUserId(info.TargetUserId), Reason.Disconnected);
                 p2pInfo.Instance.userIds.MoveTargetUserIdToLefts(info.TargetUserId);
             }else if(info.CurrentStatus == LobbyMemberStatus.Joined){
+                p2pInfo.Instance.userIds.MoveTargetUserIdToRemoteUsersFromLeft(info.TargetUserId);
+                p2pInfo.Instance.ConnectionNotifier.Connected(UserId.GetUserId(info.TargetUserId));
                 // Send Id list.
                 if(p2pInfo.Instance.IsHost()){
                     BasicInfoExtensions.SendUserList(UserId.GetUserId(info.TargetUserId));
                 }
-                p2pInfo.Instance.userIds.MoveTargetUserIdToRemoteUsersFromLeft(info.TargetUserId);
-                p2pInfo.Instance.ConnectionNotifier.Connected(UserId.GetUserId(info.TargetUserId));
             }
         }
         /// <summary>
