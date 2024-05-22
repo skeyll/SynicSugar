@@ -249,7 +249,7 @@ namespace SynicSugar.P2P {
                 RequestNotifyId = P2PHandle.AddNotifyPeerConnectionRequest(ref options, null, OnIncomingConnectionRequest);
                 
                 if (RequestNotifyId == 0){
-                    Debug.Log("Connection Request: could not subscribe, bad notification id returned.");
+                    Debug.LogError("Connection Request: could not subscribe, bad notification id returned.");
                 }
             }
         }
@@ -338,7 +338,7 @@ namespace SynicSugar.P2P {
             InterruptedNotify = P2PHandle.AddNotifyPeerConnectionInterrupted(ref options, null, OnPeerConnectionInterruptedCallback);
             
             if (InterruptedNotify == 0){
-                Debug.Log("Connection Request: could not subscribe, bad notification id returned.");
+                Debug.LogError("Connection Request: could not subscribe, bad notification id returned.");
             }
         }
     }
@@ -351,12 +351,13 @@ namespace SynicSugar.P2P {
         }
         //Users with young index send Heartbeat.
         if(p2pInfo.Instance.GetUserIndex(p2pInfo.Instance.LocalUserId) <= 2){
+            p2pInfo.Instance.RefreshPing(UserId.GetUserId(data.RemoteUserId)).Forget();
             MatchMakeManager.Instance.UpdateMemberAttributeAsHeartBeat(p2pInfo.Instance.GetUserIndex(UserId.GetUserId(data.RemoteUserId)));
         }
 
         p2pInfo.Instance.ConnectionNotifier.EarlyDisconnected(UserId.GetUserId(data.RemoteUserId), Reason.Interrupted);
     #if SYNICSUGAR_LOG
-        Debug.Log("PeerConnectionInterrupted: Connection lost now.");
+        Debug.Log("PeerConnectionInterrupted: Connection lost now. with " +  data.RemoteUserId);
     #endif
     }
     void RemoveNotifyPeerConnectionInterrupted(){
@@ -373,7 +374,7 @@ namespace SynicSugar.P2P {
             EstablishedNotify = P2PHandle.AddNotifyPeerConnectionEstablished(ref options, null, OnPeerConnectionEstablishedCallback);
             
             if (EstablishedNotify == 0){
-                Debug.Log("Connection Request: could not subscribe, bad notification id returned.");
+                Debug.LogError("Connection Request: could not subscribe, bad notification id returned.");
             }
         }
     }
@@ -412,7 +413,7 @@ namespace SynicSugar.P2P {
             ClosedNotify = P2PHandle.AddNotifyPeerConnectionClosed(ref options, null, OnPeerConnectionClosedCallback);
             
             if (ClosedNotify == 0){
-                Debug.Log("Connection Request: could not subscribe, bad notification id returned.");
+                Debug.LogError("Connection Request: could not subscribe, bad notification id returned.");
             }
         }
     }
@@ -425,12 +426,13 @@ namespace SynicSugar.P2P {
         }
         //Users with young index send Heartbeat.
         if(p2pInfo.Instance.GetUserIndex(p2pInfo.Instance.LocalUserId) <= 2){
+            Debug.Log("Geat");
             //+100 is second's symbol.
             int disconnectedUserIndex = 100 + p2pInfo.Instance.GetUserIndex(UserId.GetUserId(data.RemoteUserId));
             MatchMakeManager.Instance.UpdateMemberAttributeAsHeartBeat(disconnectedUserIndex);
         }
     #if SYNICSUGAR_LOG
-        Debug.Log("PeerConnectionClosedCallback: Connection lost now.");
+        Debug.Log("PeerConnectionClosedCallback: Connection lost now. with " +  data.RemoteUserId);
     #endif
     }
     internal void RemoveNotifyPeerConnectionnClosed(){

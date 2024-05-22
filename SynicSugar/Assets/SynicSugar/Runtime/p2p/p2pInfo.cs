@@ -182,11 +182,19 @@ namespace SynicSugar.P2P {
         public int GetPing(UserId id){
             return pings.pingInfo[id.ToString()].Ping;
         }
+
         /// <summary>
-        /// Manually update Ping data to latest with RPC.
+        /// Manually update Ping data with Target to latest.
         /// </summary>
         /// <returns></returns>
-        public async UniTask RefreshPing(){
+        public async UniTask RefreshPing(UserId target){
+            await pings.RefreshPing(target, p2pConnectorForOtherAssembly.Instance.p2pToken.Token);
+        }
+        /// <summary>
+        /// Manually update Pings data to latest.
+        /// </summary>
+        /// <returns></returns>
+        public async UniTask RefreshPings(){
             await pings.RefreshPings(p2pConnectorForOtherAssembly.Instance.p2pToken.Token);
         }
     #endregion
