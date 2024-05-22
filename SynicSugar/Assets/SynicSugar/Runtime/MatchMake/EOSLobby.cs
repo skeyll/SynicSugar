@@ -906,7 +906,7 @@ namespace SynicSugar.MatchMake {
             }
 
             OnLobbyUpdated(info.LobbyId);
-            
+                 
             MatchMakeManager.Instance.MemberUpdatedNotifier.MemberAttributesUpdated(UserId.GetUserId(info.TargetUserId));
         }
 #endregion
@@ -1065,9 +1065,6 @@ namespace SynicSugar.MatchMake {
                 Debug.LogErrorFormat("Modify Lobby: error code: {0}", info.ResultCode);
                 return;
             }
-
-            OnLobbyUpdated(info.LobbyId);
-
         #if SYNICSUGAR_LOG
             Debug.Log("OnAddedUserAttributes: added User attributes.");
         #endif
@@ -1079,6 +1076,39 @@ namespace SynicSugar.MatchMake {
                 Debug.Log($"OnLobbyUpdated: Update Lobby with {lobbyId}");
             #endif
             }
+        }
+        /// <summary>
+        /// To check disconencted user's conenction state after p2p.
+        /// </summary>
+        /// <param name="id"></param>
+        internal void UpdateMemberAttributeAsHeartBeat(int index){
+            LobbyInterface lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();
+            UpdateLobbyModificationOptions options = new UpdateLobbyModificationOptions(){
+                LobbyId = CurrentLobby.LobbyId,
+                LocalUserId = EOSManager.Instance.GetProductUserId()
+            };
+            ResultE result = lobbyInterface.UpdateLobbyModification(ref options, out LobbyModification lobbyHandle);
+            if(result != ResultE.Success){
+                Debug.LogError("UpdateMemberAttributeAsHeartBeat: can't get modify handle.");
+                return;
+            }
+            var attrOptions = new LobbyModificationAddMemberAttributeOptions(){
+                Attribute = new Epic.OnlineServices.Lobby.AttributeData() { Key = "HeartBeat", Value = index },
+                Visibility = LobbyAttributeVisibility.Public
+            };
+            result = lobbyHandle.AddMemberAttribute(ref attrOptions);
+
+            if (result != ResultE.Success){
+                MatchMakeManager.Instance.LastResultCode = (Result)result;
+                Debug.LogErrorFormat("UpdateMemberAttributeAsHeartBeat: could not add member attribute. Error code: {0}", result);
+                return;
+            }
+            UpdateLobbyOptions updateOptions = new UpdateLobbyOptions(){
+                LobbyModificationHandle = lobbyHandle
+            };
+
+            lobbyInterface.UpdateLobby(ref updateOptions, null, OnAddedUserAttributes);
+            lobbyHandle.Release();
         }
 #endregion
 #region Cancel MatchMake
@@ -1403,6 +1433,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="token"></param>
         /// <returns></returns>
         async UniTask OpenConnection(CancellationToken token){
+            LobbyMemberUpdateNotification.Dispose();
             p2pConnectorForOtherAssembly.Instance.OpenConnection(true);
             var getNatType = p2pInfo.Instance.infoMethod.Init();
         #if SYNICSUGAR_LOG

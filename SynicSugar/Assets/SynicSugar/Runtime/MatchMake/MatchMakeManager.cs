@@ -618,7 +618,13 @@ namespace SynicSugar.MatchMake {
         public List<AttributeData> GetTargetAttributeData(UserId target){
             return eosLobby.CurrentLobby.Members[target.ToString()]?.Attributes;
         }
-
+        /// <summary>
+        /// To check disconencted user's conenction state after p2p.
+        /// </summary>
+        /// <param name="disconenctedUserIndex"> UserIndex. For second Heart beat, +100</param>
+        internal void UpdateMemberAttributeAsHeartBeat(int disconenctedUserIndex){
+            eosLobby.UpdateMemberAttributeAsHeartBeat(disconenctedUserIndex);
+        }
         #region OBSOLETE
         /// <summary>
         /// Exit lobby and cancel MatchMake.

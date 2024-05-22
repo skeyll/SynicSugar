@@ -40,7 +40,7 @@ namespace SynicSugar.P2P {
             }}
         public SocketId SocketId { get; private set; }
 
-        ulong RequestNotifyId, InterruptedNotify, EstablishedNotify;
+        ulong RequestNotifyId, InterruptedNotify, EstablishedNotify, ClosedNotify;
         public CancellationTokenSource p2pToken;
         
         /// <summary>
@@ -291,8 +291,9 @@ namespace SynicSugar.P2P {
         if(checkInitConnect || p2pConfig.Instance.UseDisconnectedEarlyNotify){
             AddNotifyPeerConnectionEstablished();
         }
-        if(p2pConfig.Instance.UseDisconnectedEarlyNotify){     
+        if(p2pConfig.Instance.UseDisconnectedEarlyNotify){
             AddNotifyPeerConnectionInterrupted();
+            AddNotifyPeerConnectionClosed();
         }
     }
     //Reason: This order(Receiver, Connection, Que) is that if the RPC includes Rpc to reply, the connections are automatically re-started.
@@ -348,6 +349,11 @@ namespace SynicSugar.P2P {
             Debug.LogError("InterruptedCallback: unknown socket id. This peer should be no lobby member.");
             return;
         }
+        //Users with young index send Heartbeat.
+        if(p2pInfo.Instance.GetUserIndex(p2pInfo.Instance.LocalUserId) <= 2){
+            MatchMakeManager.Instance.UpdateMemberAttributeAsHeartBeat(p2pInfo.Instance.GetUserIndex(UserId.GetUserId(data.RemoteUserId)));
+        }
+
         p2pInfo.Instance.ConnectionNotifier.EarlyDisconnected(UserId.GetUserId(data.RemoteUserId), Reason.Interrupted);
     #if SYNICSUGAR_LOG
         Debug.Log("PeerConnectionInterrupted: Connection lost now.");
@@ -396,6 +402,41 @@ namespace SynicSugar.P2P {
         P2PHandle.RemoveNotifyPeerConnectionEstablished(EstablishedNotify);
         EstablishedNotify = 0;
     }
+    void AddNotifyPeerConnectionClosed(){
+        if (ClosedNotify == 0){
+            AddNotifyPeerConnectionClosedOptions options = new AddNotifyPeerConnectionClosedOptions(){
+                LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
+                SocketId = SocketId
+            };
+
+            ClosedNotify = P2PHandle.AddNotifyPeerConnectionClosed(ref options, null, OnPeerConnectionClosedCallback);
+            
+            if (ClosedNotify == 0){
+                Debug.Log("Connection Request: could not subscribe, bad notification id returned.");
+            }
+        }
+    }
+    // Call from SubscribeToConnectionRequest.
+    // This function will only be called if the connection has not been accepted yet.
+    void OnPeerConnectionClosedCallback(ref OnRemoteConnectionClosedInfo data){
+        if (!(bool)data.SocketId?.SocketName.Equals(ScoketName)){
+            Debug.LogError("ClosedCallback: unknown socket id. This peer should be no lobby member.");
+            return;
+        }
+        //Users with young index send Heartbeat.
+        if(p2pInfo.Instance.GetUserIndex(p2pInfo.Instance.LocalUserId) <= 2){
+            //+100 is second's symbol.
+            int disconnectedUserIndex = 100 + p2pInfo.Instance.GetUserIndex(UserId.GetUserId(data.RemoteUserId));
+            MatchMakeManager.Instance.UpdateMemberAttributeAsHeartBeat(disconnectedUserIndex);
+        }
+    #if SYNICSUGAR_LOG
+        Debug.Log("PeerConnectionClosedCallback: Connection lost now.");
+    #endif
+    }
+    internal void RemoveNotifyPeerConnectionnClosed(){
+        P2PHandle.RemoveNotifyPeerConnectionClosed(ClosedNotify);
+        ClosedNotify = 0;
+    }
 #endregion
 #region Disconnect
         void CloseConnection (){
@@ -403,6 +444,7 @@ namespace SynicSugar.P2P {
             if(p2pConfig.Instance.UseDisconnectedEarlyNotify){
                 RemoveNotifyPeerConnectionInterrupted();
                 RemoveNotifyPeerConnectionnEstablished();
+                RemoveNotifyPeerConnectionnClosed();
             }
 
             var closeOptions = new CloseConnectionsOptions(){
