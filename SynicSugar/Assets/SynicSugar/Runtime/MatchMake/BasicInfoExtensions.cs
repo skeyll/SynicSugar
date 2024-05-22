@@ -49,9 +49,9 @@ namespace SynicSugar.MatchMake {
             MemoryPackSerializer.Serialize(compressor, basicInfo);
             
             int count = p2pConfig.Instance.RPCBatchSize;
-
+            var compressorArray = compressor.ToArray();
             foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
-                SendPacket(USERLISTCH, compressor.ToArray(), id);
+                SendPacket(USERLISTCH, compressorArray, id);
 
                 count--;
                 if(count <= 0){

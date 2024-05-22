@@ -20,11 +20,37 @@ namespace SynicSugar.P2P {
             }
         }
         /// <summary>
+        /// Reflesh Ping with Target<br />
+        /// Use also this for heartbeat.
+        /// </summary>
+        /// <param name="targetId"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        internal async UniTask<bool> RefreshPing(UserId targetId, CancellationToken token){
+            if(isRefreshing){
+                UnityEngine.Debug.LogError("RefreshPing: is Refreshing now.");
+                return false;
+            }
+            isRefreshing = true;
+            refreshMembers = 0;
+            for(int i = 0; i < p2pConfig.Instance.SamplesPerPing; i++){
+                DateTime utc = DateTime.UtcNow;
+                byte[] utc_b = MemoryPackSerializer.Serialize(utc);
+                EOSp2p.SendPacket((byte)CHANNELLIST.ObtainPing, utc_b, targetId);
+            }
+
+            await UniTask.WhenAny(UniTask.WaitUntil(() => refreshMembers == 1, cancellationToken: token), UniTask.Delay(5000, cancellationToken: token));
+
+            isRefreshing = false;
+            return true;
+        }
+        /// <summary>
         /// Send 0 + Utc. Measure ping at the time of return 1 + UTC.
         /// </summary> 
         // MEMO: Replace SendPacketToAll when it can be made more efficient.
         internal async UniTask<bool> RefreshPings(CancellationToken token){
             if(isRefreshing){
+                UnityEngine.Debug.LogError("RefreshPings: is Refreshing now.");
                 return false;
             }
             isRefreshing = true;

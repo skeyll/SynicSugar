@@ -2,7 +2,10 @@
 //To relay Result
 namespace SynicSugar {
  	public enum Result : int {
-		Timeout = -3,
+		/// <summary>
+		/// Lobby Closed by Host and kicked out from the current lobby.
+		/// </summary>
+		LobbyClosed = -3,
 		/// <summary>
 		/// Failed due to call SynicSugar API with lack conditions
 		/// </summary>

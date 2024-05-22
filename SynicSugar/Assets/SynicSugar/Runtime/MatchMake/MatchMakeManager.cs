@@ -425,7 +425,7 @@ namespace SynicSugar.MatchMake {
         }
         /// <summary>
         /// If Host, destroy lobby and cancels MatchMake.<br />
-        /// IF Guest, just leave lobby and cancels MatchMake.<br />
+        /// If Guest, just leave lobby and cancels MatchMake.<br />
         /// We use ConnectHub.Instance.ExitSession and ConnectHub.Instance.CloseSession after matchmaking.
         /// </summary>
         /// <param name="token">token for this task</param>
@@ -618,7 +618,13 @@ namespace SynicSugar.MatchMake {
         public List<AttributeData> GetTargetAttributeData(UserId target){
             return eosLobby.CurrentLobby.Members[target.ToString()]?.Attributes;
         }
-
+        /// <summary>
+        /// To check disconencted user's conenction state after p2p.
+        /// </summary>
+        /// <param name="disconenctedUserIndex"> UserIndex. For second Heart beat, +100</param>
+        internal void UpdateMemberAttributeAsHeartBeat(int disconenctedUserIndex){
+            eosLobby.UpdateMemberAttributeAsHeartBeat(disconenctedUserIndex);
+        }
         #region OBSOLETE
         /// <summary>
         /// Exit lobby and cancel MatchMake.
