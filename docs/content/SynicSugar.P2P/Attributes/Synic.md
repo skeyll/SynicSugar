@@ -60,15 +60,52 @@ public class NetworkSample {
     }
 }
 
-[System.Serializable]
+[MemoryPackable, System.Serializable]
 public class DataStruct{
     public int npcDeathCount;
     public string currentBossName;
 }
 
-[System.Serializable]
+[MemoryPackable, System.Serializable]
 public class BaddyInfo {
     public string Name;
     public int HP;
+}
+```
+
+//Sample for Synic Data class
+```cs
+using System;
+using MemoryPack;
+using UnityEngine;
+[MemoryPackable, Serializable]
+public partial class SynicSampleClass {
+    public enum TYPE {
+        A, B, C
+    }
+    [MemoryPackConstructor]
+    public SynicSampleClass(TYPE type, string stringvalue, int[] intarray){
+        Type = type;
+        stringValue = stringvalue;
+        intArray = intarray;
+    }
+    //For Json serialize
+    [SerializeField] TYPE _Type = TYPE.Choice;
+    [SerializeField] string _stringValue;
+    [SerializeField] int[] _intArray = new int[4];
+
+    //For memory pack
+    public TYPE Type {
+        get { return _Type; }
+        private set { _Type = value; }
+    }
+    public string stringValue { 
+        get { return _stringValue; }
+        private set { _stringValue = value; }
+    }
+    public int[] intArray { 
+        get { return _intArray; }
+        private set { _intArray = value; }
+    } 
 }
 ```
