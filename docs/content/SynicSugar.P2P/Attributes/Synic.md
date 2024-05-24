@@ -90,7 +90,7 @@ public partial class SynicSampleClass {
         intArray = intarray;
     }
     //For Json serialize
-    [SerializeField] TYPE _Type = TYPE.Choice;
+    [SerializeField] TYPE _Type = TYPE.A;
     [SerializeField] string _stringValue;
     [SerializeField] int[] _intArray = new int[4];
 
