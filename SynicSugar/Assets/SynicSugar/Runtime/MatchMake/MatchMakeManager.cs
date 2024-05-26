@@ -128,7 +128,7 @@ namespace SynicSugar.MatchMake {
             //Match at Lobby
             if(needTryCatch){
                 try{
-                    canMatch = await eosLobby.StartMatching(lobbyCondition, matchingToken.Token, null, 0);
+                    canMatch = await eosLobby.StartMatching(lobbyCondition, matchingToken.Token, new(), 0);
                 }catch(OperationCanceledException){
                 #if SYNICSUGAR_LOG
                     Debug.Log("MatchMaking is canceled");
@@ -137,7 +137,7 @@ namespace SynicSugar.MatchMake {
                     return false;
                 }
             }else{
-                canMatch = await eosLobby.StartMatching(lobbyCondition, matchingToken.Token, null, 0);
+                canMatch = await eosLobby.StartMatching(lobbyCondition, matchingToken.Token, new(), 0);
             }
 
             if(!canMatch){
@@ -176,7 +176,7 @@ namespace SynicSugar.MatchMake {
             //Match at Lobby
             if(needTryCatch){
                 try{
-                    canMatch = await eosLobby.StartMatching(lobbyCondition, matchingToken.Token, userAttributes, minLobbyMember);
+                    canMatch = await eosLobby.StartMatching(lobbyCondition, matchingToken.Token, userAttributes ?? new(), minLobbyMember);
                 }catch(OperationCanceledException){
                 #if SYNICSUGAR_LOG
                     Debug.Log("MatchMaking is canceled");
@@ -185,7 +185,7 @@ namespace SynicSugar.MatchMake {
                     return false;
                 }
             }else{
-                canMatch = await eosLobby.StartMatching(lobbyCondition, matchingToken.Token, userAttributes, minLobbyMember);
+                canMatch = await eosLobby.StartMatching(lobbyCondition, matchingToken.Token, userAttributes ?? new(), minLobbyMember);
             }
 
             if(!canMatch){
@@ -213,7 +213,7 @@ namespace SynicSugar.MatchMake {
             //Match at Lobby
             if(needTryCatch){
                 try{
-                    canMatch = await eosLobby.StartJustSearch(lobbyCondition, matchingToken.Token, null, 0);
+                    canMatch = await eosLobby.StartJustSearch(lobbyCondition, matchingToken.Token, new(), 0);
                 }catch(OperationCanceledException){
                 #if SYNICSUGAR_LOG
                     Debug.Log("MatchMaking is canceled");
@@ -260,7 +260,7 @@ namespace SynicSugar.MatchMake {
             //Match at Lobby
             if(needTryCatch){
                 try{
-                    canMatch = await eosLobby.StartJustSearch(lobbyCondition, matchingToken.Token, userAttributes, minLobbyMember);
+                    canMatch = await eosLobby.StartJustSearch(lobbyCondition, matchingToken.Token, userAttributes ?? new(), minLobbyMember);
                 }catch(OperationCanceledException){
                 #if SYNICSUGAR_LOG
                     Debug.Log("MatchMaking is canceled");
@@ -269,7 +269,7 @@ namespace SynicSugar.MatchMake {
                     return false;
                 }
             }else{
-                canMatch = await eosLobby.StartJustSearch(lobbyCondition, matchingToken.Token, userAttributes, minLobbyMember);
+                canMatch = await eosLobby.StartJustSearch(lobbyCondition, matchingToken.Token, userAttributes ?? new(), minLobbyMember);
             }
             
 
@@ -299,7 +299,7 @@ namespace SynicSugar.MatchMake {
             //Match at Lobby
             if(needTryCatch){
                 try{
-                    canMatch = await eosLobby.StartJustCreate(lobbyCondition, matchingToken.Token, null, 0);
+                    canMatch = await eosLobby.StartJustCreate(lobbyCondition, matchingToken.Token, new(), 0);
                 }catch(OperationCanceledException){
                 #if SYNICSUGAR_LOG
                     Debug.Log("MatchMaking is canceled");
@@ -308,7 +308,7 @@ namespace SynicSugar.MatchMake {
                     return false;
                 }
             }else{
-                canMatch = await eosLobby.StartJustCreate(lobbyCondition, matchingToken.Token, null, 0);
+                canMatch = await eosLobby.StartJustCreate(lobbyCondition, matchingToken.Token, new(), 0);
             }
             
             if(!canMatch){
@@ -345,7 +345,7 @@ namespace SynicSugar.MatchMake {
             //Match at Lobby
             if(needTryCatch){
                 try{
-                    canMatch = await eosLobby.StartJustCreate(lobbyCondition, matchingToken.Token, userAttributes, minLobbyMember);
+                    canMatch = await eosLobby.StartJustCreate(lobbyCondition, matchingToken.Token, userAttributes ?? new(), minLobbyMember);
                 }catch(OperationCanceledException){
                 #if SYNICSUGAR_LOG
                     Debug.Log("MatchMaking is canceled");
@@ -354,7 +354,7 @@ namespace SynicSugar.MatchMake {
                     return false;
                 }
             }else{
-                canMatch = await eosLobby.StartJustCreate(lobbyCondition, matchingToken.Token, userAttributes, minLobbyMember);
+                canMatch = await eosLobby.StartJustCreate(lobbyCondition, matchingToken.Token, userAttributes ?? new(), minLobbyMember);
             }
             
             if(!canMatch){
@@ -492,7 +492,7 @@ namespace SynicSugar.MatchMake {
 
             if(needTryCatch){
                 try{
-                    await eosLobby.CreateOfflineLobby(lobbyCondition, delay, userAttributes, matchingToken.Token);
+                    await eosLobby.CreateOfflineLobby(lobbyCondition, delay, userAttributes ?? new(), matchingToken.Token);
                 }catch(OperationCanceledException){
                 #if SYNICSUGAR_LOG
                     Debug.Log("MatchMaking is canceled");
@@ -501,7 +501,7 @@ namespace SynicSugar.MatchMake {
                     return false;
                 }
             }else{
-                await eosLobby.CreateOfflineLobby(lobbyCondition, delay, userAttributes, matchingToken.Token);
+                await eosLobby.CreateOfflineLobby(lobbyCondition, delay, userAttributes ?? new(), matchingToken.Token);
             }
             return true;
         }
