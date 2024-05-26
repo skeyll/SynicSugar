@@ -35,7 +35,7 @@ namespace SynicSugar.P2P {
         public enum GetPacketFrequency {
             PerSecondBurstFPS, PerSecondFPS, PerSecond100, PerSecond50, PerSecond25
         }
-        [Space(10)] 
+        [HideInInspector, Obsolete("This will soon be obsolete. This is managed from PacketReciveTiming that is in PacketReceiver's args now.")] 
         /// <summary>
         /// PacketReceiver's Frequency/per seconds.<br />
         /// Cannot exceed the recive's fps of the app's. <br />
@@ -44,9 +44,9 @@ namespace SynicSugar.P2P {
         /// <summary>
         /// Frequency of BurstFPS's GetPacket in a frame. Recommend: 2-5
         /// </summary>
-        [Range(2, 16)]
+        [HideInInspector, Obsolete("This will soon be obsolete. This is managed from PacketReciveTiming that is in PacketReceiver's args now.")]
         public int BurstReceiveBatchSize = 5;
-        [Range(1, 16)]
+        [Space(10), Range(1, 16)]
         /// <summary>
         /// The number of target users to be sent packet of RPC in a frame. Wait for a frame after a set. <br />
         /// The sending buffer is probably around 64 KB, so it should not exceed this. If we set 0 from the script, it will cause crash.
