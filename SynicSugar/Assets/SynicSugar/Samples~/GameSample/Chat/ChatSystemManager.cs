@@ -37,7 +37,7 @@ namespace SynicSugar.Samples {
             }
             
             //To get AllPacket.
-            ConnectHub.Instance.StartPacketReceiver();
+            ConnectHub.Instance.StartPacketReceiver(PacketReceiveTiming.FixedUpdate, 5);
             if(p2pInfo.Instance.AllUserIds.Count > 1){ //VC setting for Online mode.
                 RTCManager.Instance.StartVoiceSending();
                 // VC actions with No args

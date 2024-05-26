@@ -6,10 +6,15 @@ using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using SynicSugar.MatchMake;
+using SynicSugar.RTC;
 using ResultE = Epic.OnlineServices.Result;
 //We can't call the main-Assembly from own-assemblies.
 //So, use such processes through this assembly.
+//TODO: Change it so that this class can only be used from ConnectHub.
 namespace SynicSugar.P2P {
+    [RequireComponent(typeof(PacketReceiveOnUpdate))]
+    [RequireComponent(typeof(PacketReceiveOnLateUpdate))]
+    [RequireComponent(typeof(PacketReceiveOnFixedUpdate))]
     public class p2pConnectorForOtherAssembly : MonoBehaviour {
 #region Singleton
         public static p2pConnectorForOtherAssembly Instance { get; private set; }
@@ -19,6 +24,14 @@ namespace SynicSugar.P2P {
                 return;
             }
             Instance = this;
+            //Packet Receiver
+            FixedUpdateReceiver = this.GetComponent<PacketReceiveOnFixedUpdate>();
+            UpdateReceiver = this.GetComponent<PacketReceiveOnUpdate>();
+            LateUpdateReceiver = this.GetComponent<PacketReceiveOnLateUpdate>();
+            
+            FixedUpdateReceiver.enabled = false;
+            UpdateReceiver.enabled = false;
+            LateUpdateReceiver.enabled = false;
         }
         void OnDestroy() {
             if( Instance == this ) {
@@ -42,28 +55,15 @@ namespace SynicSugar.P2P {
 
         ulong RequestNotifyId, InterruptedNotify, EstablishedNotify, ClosedNotify;
         public CancellationTokenSource p2pToken;
+
+        //Packet Receiver
+        PacketReceiveTiming currentTiming;
+        bool isReceiving;
+        PacketReceiveOnFixedUpdate FixedUpdateReceiver;
+        PacketReceiveOnUpdate UpdateReceiver;
+        PacketReceiveOnLateUpdate LateUpdateReceiver;
+
         
-        /// <summary>
-        /// For internal process Use this 
-        /// </summary>
-        /// <value></value>
-        public int receiverInterval { get; private set; } = 20;
-        void SetIntervalSeconds(){
-            switch(p2pConfig.Instance.getPacketFrequency){
-                case p2pConfig.GetPacketFrequency.PerSecondFPS:
-                receiverInterval = 0;
-                break;
-                case p2pConfig.GetPacketFrequency.PerSecond100:
-                receiverInterval = 10;
-                break;
-                case p2pConfig.GetPacketFrequency.PerSecond50:
-                receiverInterval = 20;
-                break;
-                case p2pConfig.GetPacketFrequency.PerSecond25:
-                receiverInterval = 40;
-                break;
-            }
-        }
 
     #region Pause Session
         /// <summary>
@@ -89,6 +89,7 @@ namespace SynicSugar.P2P {
                 P2PHandle.GetPacketQueueInfo(ref options, out info);
             }
 
+            StopPacketReceiving();
             p2pToken.Cancel();
         }
         /// <summary>
@@ -137,7 +138,60 @@ namespace SynicSugar.P2P {
             }
             return canLeave;
         }
+        /// <summary>
+        /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll. <br />
+        /// TODO: Change it so that this class can only be used from ConnectHub.
+        /// </summary>
+        public void StartPacketReceiver(IPacketReciver hubInstance, PacketReceiveTiming timing, int maxBatchSize){
+            if(isReceiving){
+                //Delete in future.
+                //Want to avoid using UniTask for packet receive.
+                p2pToken.Cancel();
+                StopPacketReceiving();
+            }
 
+            p2pToken = new CancellationTokenSource();
+
+            if(p2pConfig.Instance.AutoRefreshPing){
+                AutoRefreshPings(p2pToken.Token).Forget();
+            }
+            
+            switch(timing){
+                case PacketReceiveTiming.FixedUpdate:
+                    FixedUpdateReceiver.StartPacketReceiving(hubInstance, maxBatchSize);
+                break;
+                case PacketReceiveTiming.Update:
+                    UpdateReceiver.StartPacketReceiving(hubInstance, maxBatchSize);
+                break;
+                case PacketReceiveTiming.LateUpdate:
+                    LateUpdateReceiver.StartPacketReceiving(hubInstance, maxBatchSize);
+                break;
+            }
+            
+            if(IsEnableRTC){
+                RTCManager.Instance.ToggleReceiveingFromTarget(null, true);
+            }
+            currentTiming = timing;
+            isReceiving = true;
+        }
+        public void StopPacketReceiving(){
+            if(!isReceiving){
+                Debug.Log("StopPacketReceiving: PacketReciver is not working now.");
+                return;
+            }
+            switch(currentTiming){
+                case PacketReceiveTiming.FixedUpdate:
+                    FixedUpdateReceiver.StopPacketReceiving();
+                break;
+                case PacketReceiveTiming.Update:
+                    UpdateReceiver.StopPacketReceiving();
+                break;
+                case PacketReceiveTiming.LateUpdate:
+                    LateUpdateReceiver.StopPacketReceiving();
+                break;
+            }
+            isReceiving = false;
+        }
         /// <summary>
         /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll.
         /// </summary>
@@ -301,6 +355,7 @@ namespace SynicSugar.P2P {
     /// Stop packet reciver, clse connections, then clear PacketQueue(incoming and outgoing).
     /// </summary>
     void ResetConnections(){
+        StopPacketReceiving();
         p2pToken?.Cancel();
         CloseConnection();
         ClearPacketQueue();
@@ -486,5 +541,30 @@ namespace SynicSugar.P2P {
             p2pInfo.Instance.pings.GetPong(id, utc);
         }
         public bool IsEnableRTC => MatchMakeManager.Instance.eosLobby.CurrentLobby.hasConnectedRTCRoom;
+
+    #region Obsolete
+        /// <summary>
+        /// For internal process Use this 
+        /// </summary>
+        /// <value></value>
+        public int receiverInterval { get; private set; } = 20;
+        void SetIntervalSeconds(){
+            switch(p2pConfig.Instance.getPacketFrequency){
+                case p2pConfig.GetPacketFrequency.PerSecondFPS:
+                receiverInterval = 0;
+                break;
+                case p2pConfig.GetPacketFrequency.PerSecond100:
+                receiverInterval = 10;
+                break;
+                case p2pConfig.GetPacketFrequency.PerSecond50:
+                receiverInterval = 20;
+                break;
+                case p2pConfig.GetPacketFrequency.PerSecond25:
+                receiverInterval = 40;
+                break;
+            }
+        }
+
+    #endregion
     }
 }

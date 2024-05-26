@@ -192,7 +192,7 @@ namespace SynicSugar.Samples {
         }
         public void StopReceiver(){
             EOSDebug.Instance.Log("Chat Mode: StopReceiver");
-            ConnectHub.Instance.PausetPacketReceiver();
+            ConnectHub.Instance.PausePacketReceiver();
         }
 
         public void RestartReceiver(){
