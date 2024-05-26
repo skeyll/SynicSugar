@@ -27,15 +27,15 @@ namespace SynicSugar.MatchMake {
         /// <summary>
         /// Join, Leave, Kicked, Promote or so on...
         /// </summary>
-        NotifyEventHandle LobbyMemberStatusNotification;
+        ulong LobbyMemberStatusNotifyId;
         /// <summary>
         /// Lobby attributes
         /// </summary>
-        NotifyEventHandle LobbyUpdateNotification;
+        ulong LobbyUpdateNotififyId;
         /// <summary>
         /// Member attributes.
         /// </summary>
-        NotifyEventHandle LobbyMemberUpdateNotification;
+        ulong LobbyMemberUpdateNotifyId;
 
         bool isMatchSuccess;
         string socketName = string.Empty;
@@ -256,10 +256,7 @@ namespace SynicSugar.MatchMake {
                 return false; //The lobby was already closed.
             }
             //For the host migration
-            LobbyInterface lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();
-            LobbyMemberStatusNotification = new NotifyEventHandle(AddNotifyLobbyMemberStatusReceived(lobbyInterface, OnLobbyMemberStatusReceived), (ulong handle) =>{
-                EOSManager.Instance.GetEOSLobbyInterface().RemoveNotifyLobbyMemberStatusReceived(handle);
-            });
+            AddNotifyLobbyMemberStatusReceived();
             //Create new instance with Reconnecter flag.
             p2pInfo.Instance.userIds = new UserIds(true);
             //Prep Connection
@@ -341,13 +338,9 @@ namespace SynicSugar.MatchMake {
                 return false;
             }
             // For the host migration
-            LobbyMemberStatusNotification = new NotifyEventHandle(AddNotifyLobbyMemberStatusReceived(lobbyInterface, OnLobbyMemberStatusReceived), (ulong handle) =>{
-                EOSManager.Instance.GetEOSLobbyInterface().RemoveNotifyLobbyMemberStatusReceived(handle);
-            });
+            AddNotifyLobbyMemberStatusReceived();
             // To get Member attributes
-            LobbyMemberUpdateNotification = new NotifyEventHandle(AddNotifyLobbyMemberUpdateReceived(lobbyInterface, OnLobbyMemberUpdate), (ulong handle) =>{
-                EOSManager.Instance.GetEOSLobbyInterface().RemoveNotifyLobbyMemberUpdateReceived(handle);
-            });
+            AddNotifyLobbyMemberUpdateReceived();
             //Need add condition for serach
             bool canModify = await AddSerachLobbyAttribute(lobbyCondition, token);
             if(!canModify){
@@ -371,8 +364,6 @@ namespace SynicSugar.MatchMake {
             }
             CurrentLobby.LobbyId = info.LobbyId;
 
-            //RTC
-            RTCManager.Instance.AddNotifyParticipantStatusChanged();
             //For self
             MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(UserId.GetUserId(EOSManager.Instance.GetProductUserId()), true);
 
@@ -470,6 +461,8 @@ namespace SynicSugar.MatchMake {
 
             OnLobbyUpdated(info.LobbyId);
             CurrentLobby._BeingCreated = false;
+            //RTC
+            RTCManager.Instance.AddNotifyParticipantStatusChanged();
 
             isMatchSuccess = true;
             waitingMatch = false;
@@ -497,20 +490,12 @@ namespace SynicSugar.MatchMake {
             if(!canJoin){
                 return false;  //Need to create own session
             }
-            //Register Notification
-            LobbyInterface lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();
             // To get SocketName safety
-            LobbyUpdateNotification = new NotifyEventHandle(AddNotifyLobbyUpdateReceived(lobbyInterface, OnLobbyUpdateReceived), (ulong handle) => {
-                EOSManager.Instance.GetEOSLobbyInterface().RemoveNotifyLobbyUpdateReceived(handle);
-            });
+            AddNotifyLobbyUpdateReceived();
             // For the host migration
-            LobbyMemberStatusNotification = new NotifyEventHandle(AddNotifyLobbyMemberStatusReceived(lobbyInterface, OnLobbyMemberStatusReceived), (ulong handle) =>{
-                EOSManager.Instance.GetEOSLobbyInterface().RemoveNotifyLobbyMemberStatusReceived(handle);
-            });
+            AddNotifyLobbyMemberStatusReceived();
             // To get Member attributes
-            LobbyMemberUpdateNotification = new NotifyEventHandle(AddNotifyLobbyMemberUpdateReceived(lobbyInterface, OnLobbyMemberUpdate), (ulong handle) =>{
-                EOSManager.Instance.GetEOSLobbyInterface().RemoveNotifyLobbyMemberUpdateReceived(handle);
-            });
+            AddNotifyLobbyMemberUpdateReceived();
 
             return true;
         }
@@ -774,12 +759,20 @@ namespace SynicSugar.MatchMake {
         /// <summary>
         /// For Host and Guest. To get the notification for a user to join and disconnect.
         /// </summary>
-        /// <param name="lobbyInterface"></param>
-        /// <param name="callback"></param>
         /// <returns></returns>
-        ulong AddNotifyLobbyMemberStatusReceived(LobbyInterface lobbyInterface, OnLobbyMemberStatusReceivedCallback callback){
-            var options = new AddNotifyLobbyMemberStatusReceivedOptions();
-            return lobbyInterface.AddNotifyLobbyMemberStatusReceived(ref options, null, callback);
+        void AddNotifyLobbyMemberStatusReceived(){
+            if(LobbyMemberStatusNotifyId == 0){
+                var options = new AddNotifyLobbyMemberStatusReceivedOptions();
+                LobbyMemberStatusNotifyId = EOSManager.Instance.GetEOSLobbyInterface().AddNotifyLobbyMemberStatusReceived(ref options, null, OnLobbyMemberStatusReceived);
+
+                if (LobbyMemberStatusNotifyId == 0){
+                    Debug.LogError("LobbyMemberStatusReceived: could not subscribe, bad notification id returned.");
+                }
+            }
+        }
+        void RemoveNotifyLobbyMemberStatusReceived(){
+            EOSManager.Instance.GetEOSLobbyInterface().RemoveNotifyLobbyMemberStatusReceived(LobbyMemberStatusNotifyId);
+            LobbyMemberStatusNotifyId = 0;
         }
         void OnLobbyMemberStatusReceived(ref LobbyMemberStatusReceivedCallbackInfo info){
             if (!info.TargetUserId.IsValid()){
@@ -818,7 +811,7 @@ namespace SynicSugar.MatchMake {
                 Debug.Log("OnLobbyMemberStatusReceived: This local user becomes new Host.");
             #endif
                     //This local player manage lobby, So dosen't need update notify.
-                    LobbyUpdateNotification.Dispose();
+                    RemoveNotifyLobbyUpdateReceived();
                 }
                 if(useManualFinishMatchMake){
                     MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(UserId.GetUserId(info.TargetUserId), info.CurrentStatus == LobbyMemberStatus.Joined, CurrentLobby.Members.Count == requiredMembers);
@@ -866,13 +859,22 @@ namespace SynicSugar.MatchMake {
         /// For Guest to retrive the SoketName just after joining lobby.
         /// On getting the ScoketName, discard this event.
         /// </summary>
-        /// <param name="lobbyInterface"></param>
-        /// <param name="callback"></param>
         /// <returns></returns>
-        ulong AddNotifyLobbyUpdateReceived(LobbyInterface lobbyInterface, OnLobbyUpdateReceivedCallback callback){
-            var options = new AddNotifyLobbyUpdateReceivedOptions();
-            return lobbyInterface.AddNotifyLobbyUpdateReceived(ref options, null, callback);
+        void AddNotifyLobbyUpdateReceived(){
+            if(LobbyUpdateNotififyId == 0){
+                var options = new AddNotifyLobbyUpdateReceivedOptions();
+                LobbyUpdateNotififyId = EOSManager.Instance.GetEOSLobbyInterface().AddNotifyLobbyUpdateReceived(ref options, null, OnLobbyUpdateReceived);
+            
+                if (LobbyUpdateNotififyId == 0){
+                    Debug.LogError("LobbyUpdateReceived: could not subscribe, bad notification id returned.");
+                }
+            }
         }
+        void RemoveNotifyLobbyUpdateReceived(){
+            EOSManager.Instance.GetEOSLobbyInterface().RemoveNotifyLobbyUpdateReceived(LobbyUpdateNotififyId);
+            LobbyUpdateNotififyId = 0;
+        }
+
         void OnLobbyUpdateReceived(ref LobbyUpdateReceivedCallbackInfo info){
             if(info.LobbyId != CurrentLobby.LobbyId){
                 Debug.LogError("Lobby Updated: this is other lobby data.");
@@ -883,7 +885,7 @@ namespace SynicSugar.MatchMake {
 
             if(CurrentLobby.PermissionLevel == LobbyPermissionLevel.Joinviapresence){
                 //No need to get lobby update info (to get socket name)
-                LobbyUpdateNotification.Dispose();
+                RemoveNotifyLobbyUpdateReceived();
                 
                 isMatchSuccess = true;
                 waitingMatch = false;
@@ -892,12 +894,20 @@ namespace SynicSugar.MatchMake {
         /// <summary>
         /// To get info to be updated on Member attributes.
         /// </summary>
-        /// <param name="lobbyInterface"></param>
-        /// <param name="callback"></param>
         /// <returns></returns>
-        ulong AddNotifyLobbyMemberUpdateReceived(LobbyInterface lobbyInterface, OnLobbyMemberUpdateReceivedCallback callback){
-            var options = new AddNotifyLobbyMemberUpdateReceivedOptions();
-            return lobbyInterface.AddNotifyLobbyMemberUpdateReceived(ref options, null, callback);
+        void AddNotifyLobbyMemberUpdateReceived(){
+            if(LobbyMemberUpdateNotifyId == 0){
+                var options = new AddNotifyLobbyMemberUpdateReceivedOptions();
+                LobbyMemberUpdateNotifyId = EOSManager.Instance.GetEOSLobbyInterface().AddNotifyLobbyMemberUpdateReceived(ref options, null, OnLobbyMemberUpdate);
+            
+                if (LobbyMemberUpdateNotifyId == 0){
+                    Debug.LogError("LobbyMemberUpdateReceived: could not subscribe, bad notification id returned.");
+                }
+            }
+        }
+        void RemoveNotifyLobbyMemberUpdateReceived(){
+            EOSManager.Instance.GetEOSLobbyInterface().RemoveNotifyLobbyMemberUpdateReceived(LobbyMemberUpdateNotifyId);
+            LobbyMemberUpdateNotifyId = 0;
         }
         void OnLobbyMemberUpdate(ref LobbyMemberUpdateReceivedCallbackInfo info){
             if(info.LobbyId != CurrentLobby.LobbyId){
@@ -1126,10 +1136,10 @@ namespace SynicSugar.MatchMake {
         }
         //Remove notify
         if(!CurrentLobby.isHost()){
-            LobbyUpdateNotification.Dispose();
+            RemoveNotifyLobbyUpdateReceived();
         }
-        LobbyMemberStatusNotification.Dispose();
-        LobbyMemberUpdateNotification.Dispose();
+        RemoveNotifyLobbyMemberStatusReceived();
+        RemoveNotifyLobbyMemberUpdateReceived();
 
         //Destroy or Leave the current lobby.
         if(CurrentLobby.isHost()){
@@ -1166,10 +1176,10 @@ namespace SynicSugar.MatchMake {
         }
         //Remove notify
         if(!CurrentLobby.isHost()){
-            LobbyUpdateNotification.Dispose();
+            RemoveNotifyLobbyUpdateReceived();
         }
-        LobbyMemberStatusNotification.Dispose();
-        LobbyMemberUpdateNotification.Dispose();
+        RemoveNotifyLobbyMemberStatusReceived();
+        RemoveNotifyLobbyMemberUpdateReceived();
 
         //Destroy or Leave the current lobby.
         if(CurrentLobby.isHost()){
@@ -1250,8 +1260,8 @@ namespace SynicSugar.MatchMake {
         }
         void OnKickedFromLobby(string lobbyId){
             if (CurrentLobby.isValid() && CurrentLobby.LobbyId.Equals(lobbyId, StringComparison.OrdinalIgnoreCase)){
-                LobbyMemberStatusNotification.Dispose();
-                LobbyMemberUpdateNotification.Dispose();
+                RemoveNotifyLobbyMemberStatusReceived();
+                RemoveNotifyLobbyMemberUpdateReceived();
             }
             CurrentLobby.Clear();
         }
@@ -1261,7 +1271,6 @@ namespace SynicSugar.MatchMake {
         /// When a game is over, call this. Guest leaves Lobby by update notify.
         /// </summary>
         /// <param name="token"></param>
-        /// <param name="deleteFn">Delete LobbyID for re-connect</param>
         /// <returns>On destroy success, return true.</returns>
         internal async UniTask<bool> DestroyLobby(CancellationToken token){
             if(!CurrentLobby.isHost()){
@@ -1284,8 +1293,8 @@ namespace SynicSugar.MatchMake {
             await UniTask.WaitUntil(() => !waitLeave, cancellationToken: token);
 
             await MatchMakeManager.Instance.OnDeleteLobbyID();
-            LobbyMemberStatusNotification.Dispose();
-            LobbyMemberUpdateNotification.Dispose();
+            RemoveNotifyLobbyMemberStatusReceived();
+            RemoveNotifyLobbyMemberUpdateReceived();
             return canLeave;
         }
         void OnDestroyLobbyCompleted(ref DestroyLobbyCallbackInfo info){
@@ -1433,7 +1442,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="token"></param>
         /// <returns></returns>
         async UniTask OpenConnection(CancellationToken token){
-            LobbyMemberUpdateNotification.Dispose();
+            RemoveNotifyLobbyMemberUpdateReceived();
             p2pConnectorForOtherAssembly.Instance.OpenConnection(true);
             var getNatType = p2pInfo.Instance.infoMethod.Init();
         #if SYNICSUGAR_LOG
