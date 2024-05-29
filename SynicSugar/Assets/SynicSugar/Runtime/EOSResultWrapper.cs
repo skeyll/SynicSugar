@@ -2,6 +2,7 @@
 //To relay Result
 namespace SynicSugar {
  	public enum Result : int {
+		ConnectEstablishFailed = -4,
 		/// <summary>
 		/// Lobby Closed by Host and kicked out from the current lobby.
 		/// </summary>

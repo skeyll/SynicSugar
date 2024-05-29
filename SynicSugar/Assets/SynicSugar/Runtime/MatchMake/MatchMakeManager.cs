@@ -48,12 +48,11 @@ namespace SynicSugar.MatchMake {
 
         /// <summary>
         /// This time is from the start of matchmaking until the the end of matchmaking(= just before preparation for p2p connect).<br />
-        /// If that time passes before users start p2p, then the matchmaking APIs return false as Timeout.<br />
+        /// If that time passes before users start p2p setup, the matchmaking APIs return false as Timeout.<br />
         /// When we need the more time than 10 minutes for timeout, we can set TimeoutSec directly.
         /// </summary>
         [Range(20, 600)]
         public ushort TimeoutSec = 180;
-        // public ushort TimeoutSecAfter = 180;
     #region TODO: Change this to Enum and display only one field for the selected way on UnityEditor.
         public enum RecconectLobbyIdSaveType {
             NoReconnection, Playerprefs, CustomMethod, AsyncCustomMethod

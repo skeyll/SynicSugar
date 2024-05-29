@@ -17,11 +17,11 @@ namespace SynicSugar.P2P {
         bool gettingNATType;
         // MEMO: Maybe, this has bug now. In fact, the packets are discarded until about 2 secs after this.
         /// <summary>
-        /// For initial connection. But, after 10 sec, always end.
+        /// For initial connection. But, after 30 sec, always end.
         /// </summary>
         /// <returns></returns>
-        static async internal UniTask WaitConnectPreparation(CancellationToken token){
-            await UniTask.WhenAny(UniTask.WaitUntil(() => p2pInfo.Instance.ConnectionNotifier.completeConnectPreparetion, cancellationToken: token), UniTask.Delay(10000, cancellationToken: token));
+        static async internal UniTask<bool> WaitConnectPreparation(CancellationToken token){
+            await UniTask.WhenAny(UniTask.WaitUntil(() => p2pInfo.Instance.ConnectionNotifier.completeConnectPreparetion, cancellationToken: token), UniTask.Delay(30000, cancellationToken: token));
 
             #if SYNICSUGAR_LOG
                 Debug.Log("SynicSugar: All connections is ready.");
@@ -29,6 +29,11 @@ namespace SynicSugar.P2P {
             if(!p2pConfig.Instance.UseDisconnectedEarlyNotify){
                 p2pConnectorForOtherAssembly.Instance.RemoveNotifyPeerConnectionnEstablished();
             }
+            if(!p2pInfo.Instance.ConnectionNotifier.completeConnectPreparetion){
+                await p2pConnectorForOtherAssembly.Instance.CloseSession(false, token);
+                return false;
+            }
+            return true;
         }
         // /// <summary>
         // /// For initial connection. After 10 sec, make it false.

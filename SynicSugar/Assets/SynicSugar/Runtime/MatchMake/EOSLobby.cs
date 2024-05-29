@@ -94,7 +94,10 @@ namespace SynicSugar.MatchMake {
                         return false;
                     }
 
-                    await OpenConnection(token);
+                    bool canConnect = await OpenConnection(token);
+                    if(!canConnect){
+                        return false;
+                    }
 
                     await MatchMakeManager.Instance.OnSaveLobbyID();
                 }
@@ -129,7 +132,10 @@ namespace SynicSugar.MatchMake {
                         return false;
                     }
 
-                    await OpenConnection(token);
+                    bool canConnect = await OpenConnection(token);
+                    if(!canConnect){
+                        return false;
+                    }
 
                     await MatchMakeManager.Instance.OnSaveLobbyID();
 
@@ -184,7 +190,10 @@ namespace SynicSugar.MatchMake {
                         return false;
                     }
     
-                    await OpenConnection(token);
+                    bool canConnect = await OpenConnection(token);
+                    if(!canConnect){
+                        return false;
+                    }
                     
                     await MatchMakeManager.Instance.OnSaveLobbyID();
                 }
@@ -237,7 +246,10 @@ namespace SynicSugar.MatchMake {
                         return false;
                     }
 
-                    await OpenConnection(token);
+                    bool canConnect = await OpenConnection(token);
+                    if(!canConnect){
+                        return false;
+                    }
 
                     await MatchMakeManager.Instance.OnSaveLobbyID();
                     return true;
@@ -284,7 +296,10 @@ namespace SynicSugar.MatchMake {
                 return false;
             }
 
-            await OpenConnectionForReconnecter(token);
+            bool canConnect = await OpenConnectionForReconnecter(token);
+            if(!canConnect){
+                return false;
+            }
             
             return true;
         }
@@ -1494,14 +1509,18 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         /// <param name="token"></param>
         /// <returns></returns>
-        async UniTask OpenConnection(CancellationToken token){
+        async UniTask<bool> OpenConnection(CancellationToken token){
             RemoveNotifyLobbyMemberUpdateReceived();
             p2pConnectorForOtherAssembly.Instance.OpenConnection(true);
-            var getNatType = p2pInfo.Instance.infoMethod.Init();
+            await p2pInfo.Instance.infoMethod.Init();
         #if SYNICSUGAR_LOG
             Debug.Log("OpenConnection: Open Connection.");
         #endif
-            await p2pInfoMethod.WaitConnectPreparation(token);
+            bool canConnect = await p2pInfoMethod.WaitConnectPreparation(token);
+            if(!canConnect){
+                MatchMakeManager.Instance.LastResultCode = Result.ConnectEstablishFailed;
+                return false;
+            }
             //Host sends AllUserIds list, Guest Receives AllUserIds.
             if(p2pInfo.Instance.IsHost()){
         #if SYNICSUGAR_LOG
@@ -1515,24 +1534,28 @@ namespace SynicSugar.MatchMake {
                 BasicInfoExtensions basicInfo = new();
                 await basicInfo.ReciveUserIdsPacket(token);
             }
-            await getNatType;
             p2pInfo.Instance.pings.Init();
+            return true;
         }
         /// <summary>
         /// Open connection in strict and wait for AllUserLists(that has the same order in all local) from Host.
         /// </summary>
         /// <param name="token"></param>
         /// <returns></returns>
-        async UniTask OpenConnectionForReconnecter(CancellationToken token){
+        async UniTask<bool> OpenConnectionForReconnecter(CancellationToken token){
             p2pConnectorForOtherAssembly.Instance.OpenConnection(true);
-            var getNatType = p2pInfo.Instance.infoMethod.Init();
-            await p2pInfoMethod.WaitConnectPreparation(token);
+            await p2pInfo.Instance.infoMethod.Init();
+            bool canConnect = await p2pInfoMethod.WaitConnectPreparation(token);
+            if(!canConnect){
+                MatchMakeManager.Instance.LastResultCode = Result.ConnectEstablishFailed;
+                return false;
+            }
             //Wait for user ids list from host.
             BasicInfoExtensions basicInfo = new();
             await basicInfo.ReciveUserIdsPacket(token);
 
-            await getNatType;
             p2pInfo.Instance.pings.Init();
+            return true;
         }
         /// <summary>
         /// For library user to save ID.
