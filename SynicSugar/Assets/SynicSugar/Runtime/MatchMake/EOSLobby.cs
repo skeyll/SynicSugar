@@ -39,11 +39,13 @@ namespace SynicSugar.MatchMake {
 
         bool isMatchSuccess;
         string socketName = string.Empty;
+        CancellationTokenSource timerCTS;
 
         internal EOSLobby(uint maxSearch, int timeout){
             MAX_SEARCH_RESULT = maxSearch;
             //For Unitask
             timeoutMS = timeout * 1000;
+            timerCTS = new CancellationTokenSource();
         }
         /// <summary>
         /// Search for lobbies in backend and join in one to meet conditions.<br />
@@ -61,7 +63,7 @@ namespace SynicSugar.MatchMake {
             requiredMembers = minLobbyMember;
 
             //Start timer 
-            var timer = TimeoutTimer(token);
+            var timer = TimeoutTimer();
             //Serach
             MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Start);
             bool canJoin = await JoinExistingLobby(lobbyCondition, token);
@@ -75,8 +77,12 @@ namespace SynicSugar.MatchMake {
 
                 await UniTask.WhenAny(UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token), timer);
 
+                if(timerCTS.IsCancellationRequested){
+                    MatchMakeManager.Instance.LastResultCode = Result.TimedOut;
+                    throw new OperationCanceledException();
+                }
                 if(token.IsCancellationRequested){
-                    MatchMakeManager.Instance.LastResultCode = Result.None;
+                    MatchMakeManager.Instance.LastResultCode = Result.Canceled;
                     throw new OperationCanceledException();
                 }
 
@@ -106,8 +112,12 @@ namespace SynicSugar.MatchMake {
 
                 await UniTask.WhenAny(UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token), timer);
                 
-                //Matching cancel
+                if(timerCTS.IsCancellationRequested){
+                    MatchMakeManager.Instance.LastResultCode = Result.TimedOut;
+                    throw new OperationCanceledException();
+                }
                 if(token.IsCancellationRequested){
+                    MatchMakeManager.Instance.LastResultCode = Result.Canceled;
                     throw new OperationCanceledException();
                 }
                 
@@ -145,7 +155,7 @@ namespace SynicSugar.MatchMake {
             useManualFinishMatchMake = minLobbyMember > 0;
             requiredMembers = minLobbyMember;
 
-            var timer = TimeoutTimer(token);
+            var timer = TimeoutTimer();
             //Serach
             MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Start);
             bool canJoin = await JoinExistingLobby(lobbyCondition, token);
@@ -156,9 +166,13 @@ namespace SynicSugar.MatchMake {
                 waitingMatch = true;
                 MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Wait);
                 await UniTask.WhenAny(UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token), timer);
-
-                //Matching cancel
+                
+                if(timerCTS.IsCancellationRequested){
+                    MatchMakeManager.Instance.LastResultCode = Result.TimedOut;
+                    throw new OperationCanceledException();
+                }
                 if(token.IsCancellationRequested){
+                    MatchMakeManager.Instance.LastResultCode = Result.Canceled;
                     throw new OperationCanceledException();
                 }
 
@@ -194,7 +208,7 @@ namespace SynicSugar.MatchMake {
             useManualFinishMatchMake = minLobbyMember > 0;
             requiredMembers = minLobbyMember;
             
-            var timer = TimeoutTimer(token);
+            var timer = TimeoutTimer();
 
             MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Start);
             bool canCreate = await CreateLobby(lobbyCondition, token);
@@ -206,8 +220,12 @@ namespace SynicSugar.MatchMake {
                 MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Wait);
                 await UniTask.WhenAny(UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token), timer);
 
-                //Matching cancel
+                if(timerCTS.IsCancellationRequested){
+                    MatchMakeManager.Instance.LastResultCode = Result.TimedOut;
+                    throw new OperationCanceledException();
+                }
                 if(token.IsCancellationRequested){
+                    MatchMakeManager.Instance.LastResultCode = Result.Canceled;
                     throw new OperationCanceledException();
                 }
 
@@ -270,15 +288,19 @@ namespace SynicSugar.MatchMake {
             
             return true;
         }
+        public
         /// <summary>
         /// Wait for timeout. Leave Lobby, then the end of this task stop main task.
         /// </summary>
-        /// <param name="token"></param>
         /// <returns></returns>
-        async UniTask TimeoutTimer(CancellationToken token){
-            await UniTask.Delay(timeoutMS, cancellationToken: token);
+        async UniTask TimeoutTimer(){
+            if(timerCTS.Token.CanBeCanceled){
+                timerCTS.Cancel();
+            }
+            timerCTS = new CancellationTokenSource();
+            await UniTask.Delay(timeoutMS, cancellationToken: timerCTS.Token);
             if(waitingMatch && !waitLeave){
-                bool canLeave = await LeaveLobby(true, token);
+                bool canLeave = await LeaveLobby(true, timerCTS.Token);
         #if SYNICSUGAR_LOG
                 Debug.Log("Cancel matching by timeout");
         #endif
