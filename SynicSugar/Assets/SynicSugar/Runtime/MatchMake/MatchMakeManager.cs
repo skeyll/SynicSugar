@@ -43,11 +43,16 @@ namespace SynicSugar.MatchMake {
         }
 #endregion
         //Option
+        [Range(1, 100)]
         public uint maxSearchResult = 5;
 
-        [HideInInspector] public int hostsTimeoutSec = 180;
-        [Range(20f, 600f)]
-        public int TimeoutSec = 180;
+        /// <summary>
+        /// This time is from the start of matchmaking until the the end of matchmaking(= just before preparation for p2p connect).<br />
+        /// If that time passes before users start p2p setup, the matchmaking APIs return false as Timeout.<br />
+        /// When we need the more time than 10 minutes for timeout, we can set TimeoutSec directly.
+        /// </summary>
+        [Range(20, 600)]
+        public ushort TimeoutSec = 180;
     #region TODO: Change this to Enum and display only one field for the selected way on UnityEditor.
         public enum RecconectLobbyIdSaveType {
             NoReconnection, Playerprefs, CustomMethod, AsyncCustomMethod
@@ -87,7 +92,7 @@ namespace SynicSugar.MatchMake {
         /// <summary>
         /// Is this id is LocalUser's id?
         /// </summary>
-        /// <param name="target"></param>
+        /// <param name="id"></param>
         /// <returns></returns>
         public bool isLocalUserId(UserId id){
             return id == localUserId;

@@ -39,11 +39,13 @@ namespace SynicSugar.MatchMake {
 
         bool isMatchSuccess;
         string socketName = string.Empty;
+        CancellationTokenSource timerCTS;
 
         internal EOSLobby(uint maxSearch, int timeout){
             MAX_SEARCH_RESULT = maxSearch;
             //For Unitask
             timeoutMS = timeout * 1000;
+            timerCTS = new CancellationTokenSource();
         }
         /// <summary>
         /// Search for lobbies in backend and join in one to meet conditions.<br />
@@ -61,7 +63,7 @@ namespace SynicSugar.MatchMake {
             requiredMembers = minLobbyMember;
 
             //Start timer 
-            var timer = TimeoutTimer(token);
+            var timer = TimeoutTimer();
             //Serach
             MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Start);
             bool canJoin = await JoinExistingLobby(lobbyCondition, token);
@@ -75,8 +77,12 @@ namespace SynicSugar.MatchMake {
 
                 await UniTask.WhenAny(UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token), timer);
 
+                if(timerCTS.IsCancellationRequested){
+                    MatchMakeManager.Instance.LastResultCode = Result.TimedOut;
+                    throw new OperationCanceledException();
+                }
                 if(token.IsCancellationRequested){
-                    MatchMakeManager.Instance.LastResultCode = Result.None;
+                    MatchMakeManager.Instance.LastResultCode = Result.Canceled;
                     throw new OperationCanceledException();
                 }
 
@@ -88,7 +94,10 @@ namespace SynicSugar.MatchMake {
                         return false;
                     }
 
-                    await OpenConnection(token);
+                    bool canConnect = await OpenConnection(token);
+                    if(!canConnect){
+                        return false;
+                    }
 
                     await MatchMakeManager.Instance.OnSaveLobbyID();
                 }
@@ -106,8 +115,12 @@ namespace SynicSugar.MatchMake {
 
                 await UniTask.WhenAny(UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token), timer);
                 
-                //Matching cancel
+                if(timerCTS.IsCancellationRequested){
+                    MatchMakeManager.Instance.LastResultCode = Result.TimedOut;
+                    throw new OperationCanceledException();
+                }
                 if(token.IsCancellationRequested){
+                    MatchMakeManager.Instance.LastResultCode = Result.Canceled;
                     throw new OperationCanceledException();
                 }
                 
@@ -119,7 +132,10 @@ namespace SynicSugar.MatchMake {
                         return false;
                     }
 
-                    await OpenConnection(token);
+                    bool canConnect = await OpenConnection(token);
+                    if(!canConnect){
+                        return false;
+                    }
 
                     await MatchMakeManager.Instance.OnSaveLobbyID();
 
@@ -145,7 +161,7 @@ namespace SynicSugar.MatchMake {
             useManualFinishMatchMake = minLobbyMember > 0;
             requiredMembers = minLobbyMember;
 
-            var timer = TimeoutTimer(token);
+            var timer = TimeoutTimer();
             //Serach
             MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Start);
             bool canJoin = await JoinExistingLobby(lobbyCondition, token);
@@ -156,9 +172,13 @@ namespace SynicSugar.MatchMake {
                 waitingMatch = true;
                 MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Wait);
                 await UniTask.WhenAny(UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token), timer);
-
-                //Matching cancel
+                
+                if(timerCTS.IsCancellationRequested){
+                    MatchMakeManager.Instance.LastResultCode = Result.TimedOut;
+                    throw new OperationCanceledException();
+                }
                 if(token.IsCancellationRequested){
+                    MatchMakeManager.Instance.LastResultCode = Result.Canceled;
                     throw new OperationCanceledException();
                 }
 
@@ -170,7 +190,10 @@ namespace SynicSugar.MatchMake {
                         return false;
                     }
     
-                    await OpenConnection(token);
+                    bool canConnect = await OpenConnection(token);
+                    if(!canConnect){
+                        return false;
+                    }
                     
                     await MatchMakeManager.Instance.OnSaveLobbyID();
                 }
@@ -194,7 +217,7 @@ namespace SynicSugar.MatchMake {
             useManualFinishMatchMake = minLobbyMember > 0;
             requiredMembers = minLobbyMember;
             
-            var timer = TimeoutTimer(token);
+            var timer = TimeoutTimer();
 
             MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Start);
             bool canCreate = await CreateLobby(lobbyCondition, token);
@@ -206,8 +229,12 @@ namespace SynicSugar.MatchMake {
                 MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Wait);
                 await UniTask.WhenAny(UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token), timer);
 
-                //Matching cancel
+                if(timerCTS.IsCancellationRequested){
+                    MatchMakeManager.Instance.LastResultCode = Result.TimedOut;
+                    throw new OperationCanceledException();
+                }
                 if(token.IsCancellationRequested){
+                    MatchMakeManager.Instance.LastResultCode = Result.Canceled;
                     throw new OperationCanceledException();
                 }
 
@@ -219,7 +246,10 @@ namespace SynicSugar.MatchMake {
                         return false;
                     }
 
-                    await OpenConnection(token);
+                    bool canConnect = await OpenConnection(token);
+                    if(!canConnect){
+                        return false;
+                    }
 
                     await MatchMakeManager.Instance.OnSaveLobbyID();
                     return true;
@@ -239,15 +269,15 @@ namespace SynicSugar.MatchMake {
             MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Recconect);
             bool canSerch = await RetriveLobbyByLobbyId(LobbyID, token);
 
-        #if SYNICSUGAR_LOG
-            Debug.LogFormat("JoinLobbyBySavedLobbyId: RetriveLobbyByLobbyId is '{0}'.", canSerch ? "Success" : "Failure");
-        #endif
             if(!canSerch){
+                #if SYNICSUGAR_LOG
+                    Debug.LogFormat("JoinLobbyBySavedLobbyId: RetriveLobbyByLobbyId is '{0}'.", canSerch ? "Success" : "Failure");
+                #endif
                 await MatchMakeManager.Instance.OnDeleteLobbyID();
-                return false; //The lobby was already closed.
+                return false; //Can't retrive Lobby data from EOS.
             }
-            //Join
-            bool canJoin = await TryJoinSearchResults(token);
+            //Join when lobby has members than more one.
+            bool canJoin = await TryJoinSearchResults(token, true);
         #if SYNICSUGAR_LOG
             Debug.LogFormat("JoinLobbyBySavedLobbyId: TryJoinSearchResults is '{0}'.", canJoin ? "Success" : "Failure");
         #endif
@@ -266,19 +296,25 @@ namespace SynicSugar.MatchMake {
                 return false;
             }
 
-            await OpenConnectionForReconnecter(token);
+            bool canConnect = await OpenConnectionForReconnecter(token);
+            if(!canConnect){
+                return false;
+            }
             
             return true;
         }
         /// <summary>
         /// Wait for timeout. Leave Lobby, then the end of this task stop main task.
         /// </summary>
-        /// <param name="token"></param>
         /// <returns></returns>
-        async UniTask TimeoutTimer(CancellationToken token){
-            await UniTask.Delay(timeoutMS, cancellationToken: token);
+        async UniTask TimeoutTimer(){
+            if(timerCTS.Token.CanBeCanceled){
+                timerCTS.Cancel();
+            }
+            timerCTS = new CancellationTokenSource();
+            await UniTask.Delay(timeoutMS, cancellationToken: timerCTS.Token);
             if(waitingMatch && !waitLeave){
-                bool canLeave = await LeaveLobby(true, token);
+                bool canLeave = await LeaveLobby(true, timerCTS.Token);
         #if SYNICSUGAR_LOG
                 Debug.Log("Cancel matching by timeout");
         #endif
@@ -569,7 +605,7 @@ namespace SynicSugar.MatchMake {
         }
         /// <summary>
         /// Get Lobby from EOS by LobbyID<br />
-        /// Can get closed-lobby.
+        /// Can search closed-lobby.
         /// </summary>
         /// <param name="lobbyId">Id to get</param>
         /// <param name="token"></param>
@@ -628,10 +664,11 @@ namespace SynicSugar.MatchMake {
         /// Check result amounts, then if it has 1 or more, try join the lobby.
         /// </summary>
         /// <param name="token"></param>
+        /// <param name="needCheckMemberCount">For Reconenction process. If member is 0, it means ClosedLobby.</param>
         /// <returns></returns>
-        async UniTask<bool> TryJoinSearchResults(CancellationToken token){ 
+        async UniTask<bool> TryJoinSearchResults(CancellationToken token, bool needCheckMemberCount = false){ 
             if (CurrentSearch == null){
-                Debug.LogError("Exmaine Lobby: CurrentSearch is null");
+                Debug.LogError("TryJoinSearchResults: Failure on creating CurrentSearch data.");
                 return false;
             }
 
@@ -639,6 +676,10 @@ namespace SynicSugar.MatchMake {
             uint searchResultCount = CurrentSearch.GetSearchResultCount(ref lobbySearchGetSearchResultCountOptions);
             
             if(searchResultCount == 0){
+                return false;
+            }
+            //For reconnecter
+            if(needCheckMemberCount && !HasMembers()){
                 return false;
             }
             SearchResults.Clear();
@@ -662,10 +703,38 @@ namespace SynicSugar.MatchMake {
                         break;
                     }
                     if(token.IsCancellationRequested){
+                        MatchMakeManager.Instance.LastResultCode = Result.Canceled;
                         throw new OperationCanceledException();
                     }
                 }
             }
+            return true;
+        }
+        /// <summary>
+        /// For Reconnection. <br />
+        /// The lobby to try to reconnect has members? <br />
+        /// Can't go back to the empty lobby.
+        /// </summary>
+        /// <returns></returns>
+        bool HasMembers(){
+            LobbySearchCopySearchResultByIndexOptions indexOptions = new LobbySearchCopySearchResultByIndexOptions(){ LobbyIndex = 0 };
+            ResultE result = CurrentSearch.CopySearchResultByIndex(ref indexOptions, out LobbyDetails lobbyDetails);
+
+            if (result != ResultE.Success){
+                Debug.LogError("TryJoinSearchResults: Reconnecter can't create lobby handle to check member count.");
+                MatchMakeManager.Instance.LastResultCode = (Result)result;
+                return false;
+            }
+            LobbyDetailsGetMemberCountOptions countOptions = new LobbyDetailsGetMemberCountOptions();
+            uint MemberCount = lobbyDetails.GetMemberCount(ref countOptions);
+            lobbyDetails.Release();
+
+            if(MemberCount == 0){
+                Debug.LogError("TryJoinSearchResults: The lobby had been closed. There is no one.");
+                MatchMakeManager.Instance.LastResultCode = Result.LobbyClosed;
+                return false;
+            }
+
             return true;
         }
         
@@ -1441,14 +1510,18 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         /// <param name="token"></param>
         /// <returns></returns>
-        async UniTask OpenConnection(CancellationToken token){
+        async UniTask<bool> OpenConnection(CancellationToken token){
             RemoveNotifyLobbyMemberUpdateReceived();
             p2pConnectorForOtherAssembly.Instance.OpenConnection(true);
-            var getNatType = p2pInfo.Instance.infoMethod.Init();
+            await p2pInfo.Instance.infoMethod.Init();
         #if SYNICSUGAR_LOG
             Debug.Log("OpenConnection: Open Connection.");
         #endif
-            await p2pInfoMethod.WaitConnectPreparation(token);
+            bool canConnect = await p2pInfoMethod.WaitConnectPreparation(token);
+            if(!canConnect){
+                MatchMakeManager.Instance.LastResultCode = Result.ConnectEstablishFailed;
+                return false;
+            }
             //Host sends AllUserIds list, Guest Receives AllUserIds.
             if(p2pInfo.Instance.IsHost()){
         #if SYNICSUGAR_LOG
@@ -1462,24 +1535,28 @@ namespace SynicSugar.MatchMake {
                 BasicInfoExtensions basicInfo = new();
                 await basicInfo.ReciveUserIdsPacket(token);
             }
-            await getNatType;
             p2pInfo.Instance.pings.Init();
+            return true;
         }
         /// <summary>
         /// Open connection in strict and wait for AllUserLists(that has the same order in all local) from Host.
         /// </summary>
         /// <param name="token"></param>
         /// <returns></returns>
-        async UniTask OpenConnectionForReconnecter(CancellationToken token){
+        async UniTask<bool> OpenConnectionForReconnecter(CancellationToken token){
             p2pConnectorForOtherAssembly.Instance.OpenConnection(true);
-            var getNatType = p2pInfo.Instance.infoMethod.Init();
-            await p2pInfoMethod.WaitConnectPreparation(token);
+            await p2pInfo.Instance.infoMethod.Init();
+            bool canConnect = await p2pInfoMethod.WaitConnectPreparation(token);
+            if(!canConnect){
+                MatchMakeManager.Instance.LastResultCode = Result.ConnectEstablishFailed;
+                return false;
+            }
             //Wait for user ids list from host.
             BasicInfoExtensions basicInfo = new();
             await basicInfo.ReciveUserIdsPacket(token);
 
-            await getNatType;
             p2pInfo.Instance.pings.Init();
+            return true;
         }
         /// <summary>
         /// For library user to save ID.
