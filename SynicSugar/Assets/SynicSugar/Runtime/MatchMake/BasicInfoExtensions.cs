@@ -107,12 +107,6 @@ namespace SynicSugar.MatchMake {
         /// <param name="payload"></param>
         /// <returns></returns>
         bool GetPacketFromBuffer(ref byte ch, ref string id, ref ArraySegment<byte> payload){
-            //Set options
-            ReceivePacketOptions options = new ReceivePacketOptions(){
-                LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
-                MaxDataSizeBytes = 1170,
-                RequestedChannel = USERLISTCH
-            };
             //Next packet size
             var getNextReceivedPacketSizeOptions = new GetNextReceivedPacketSizeOptions {
                 LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
@@ -120,7 +114,18 @@ namespace SynicSugar.MatchMake {
             };
 
             P2PInterface P2PHandle = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface();
+
             P2PHandle.GetNextReceivedPacketSize(ref getNextReceivedPacketSizeOptions, out uint nextPacketSizeBytes);
+            if(nextPacketSizeBytes == 0){
+                return false;
+            }
+
+            //Set options
+            ReceivePacketOptions options = new ReceivePacketOptions(){
+                LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
+                MaxDataSizeBytes = nextPacketSizeBytes,
+                RequestedChannel = USERLISTCH
+            };
 
             byte[] data = new byte[nextPacketSizeBytes];
             var dataSegment = new ArraySegment<byte>(data);
