@@ -257,15 +257,15 @@ namespace SynicSugar.MatchMake {
             MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Recconect);
             bool canSerch = await RetriveLobbyByLobbyId(LobbyID, token);
 
-        #if SYNICSUGAR_LOG
-            Debug.LogFormat("JoinLobbyBySavedLobbyId: RetriveLobbyByLobbyId is '{0}'.", canSerch ? "Success" : "Failure");
-        #endif
             if(!canSerch){
+                #if SYNICSUGAR_LOG
+                    Debug.LogFormat("JoinLobbyBySavedLobbyId: RetriveLobbyByLobbyId is '{0}'.", canSerch ? "Success" : "Failure");
+                #endif
                 await MatchMakeManager.Instance.OnDeleteLobbyID();
-                return false; //The lobby was already closed.
+                return false; //Can't retrive Lobby data from EOS.
             }
-            //Join
-            bool canJoin = await TryJoinSearchResults(token);
+            //Join when lobby has members than more one.
+            bool canJoin = await TryJoinSearchResults(token, true);
         #if SYNICSUGAR_LOG
             Debug.LogFormat("JoinLobbyBySavedLobbyId: TryJoinSearchResults is '{0}'.", canJoin ? "Success" : "Failure");
         #endif
@@ -288,7 +288,6 @@ namespace SynicSugar.MatchMake {
             
             return true;
         }
-        public
         /// <summary>
         /// Wait for timeout. Leave Lobby, then the end of this task stop main task.
         /// </summary>
@@ -591,7 +590,7 @@ namespace SynicSugar.MatchMake {
         }
         /// <summary>
         /// Get Lobby from EOS by LobbyID<br />
-        /// Can get closed-lobby.
+        /// Can search closed-lobby.
         /// </summary>
         /// <param name="lobbyId">Id to get</param>
         /// <param name="token"></param>
@@ -650,10 +649,11 @@ namespace SynicSugar.MatchMake {
         /// Check result amounts, then if it has 1 or more, try join the lobby.
         /// </summary>
         /// <param name="token"></param>
+        /// <param name="needCheckMemberCount">For Reconenction process. If member is 0, it means ClosedLobby.</param>
         /// <returns></returns>
-        async UniTask<bool> TryJoinSearchResults(CancellationToken token){ 
+        async UniTask<bool> TryJoinSearchResults(CancellationToken token, bool needCheckMemberCount = false){ 
             if (CurrentSearch == null){
-                Debug.LogError("Exmaine Lobby: CurrentSearch is null");
+                Debug.LogError("TryJoinSearchResults: Failure on creating CurrentSearch data.");
                 return false;
             }
 
@@ -661,6 +661,10 @@ namespace SynicSugar.MatchMake {
             uint searchResultCount = CurrentSearch.GetSearchResultCount(ref lobbySearchGetSearchResultCountOptions);
             
             if(searchResultCount == 0){
+                return false;
+            }
+            //For reconnecter
+            if(needCheckMemberCount && !HasMembers()){
                 return false;
             }
             SearchResults.Clear();
@@ -684,10 +688,37 @@ namespace SynicSugar.MatchMake {
                         break;
                     }
                     if(token.IsCancellationRequested){
+                        MatchMakeManager.Instance.LastResultCode = Result.Canceled;
                         throw new OperationCanceledException();
                     }
                 }
             }
+            return true;
+        }
+        /// <summary>
+        /// For Reconnection. <br />
+        /// The lobby to try to reconnect has members? <br />
+        /// Can't go back to the empty lobby.
+        /// </summary>
+        /// <returns></returns>
+        bool HasMembers(){
+            LobbySearchCopySearchResultByIndexOptions indexOptions = new LobbySearchCopySearchResultByIndexOptions(){ LobbyIndex = 0 };
+            ResultE result = CurrentSearch.CopySearchResultByIndex(ref indexOptions, out LobbyDetails lobbyDetails);
+
+            if (result != ResultE.Success || lobbyDetails != null){
+                Debug.LogError("TryJoinSearchResults: Reconnecter can't create lobby handle to check member count.");
+                MatchMakeManager.Instance.LastResultCode = (Result)result;
+                return false;
+            }
+            LobbyDetailsGetMemberCountOptions countOptions = new LobbyDetailsGetMemberCountOptions();
+            uint MemberCount = lobbyDetails.GetMemberCount(ref countOptions);
+
+            if(MemberCount == 0){
+                Debug.LogError("TryJoinSearchResults: The lobby had been closed. There is no one.");
+                MatchMakeManager.Instance.LastResultCode = Result.LobbyClosed;
+                return false;
+            }
+
             return true;
         }
         
