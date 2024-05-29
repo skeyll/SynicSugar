@@ -720,13 +720,14 @@ namespace SynicSugar.MatchMake {
             LobbySearchCopySearchResultByIndexOptions indexOptions = new LobbySearchCopySearchResultByIndexOptions(){ LobbyIndex = 0 };
             ResultE result = CurrentSearch.CopySearchResultByIndex(ref indexOptions, out LobbyDetails lobbyDetails);
 
-            if (result != ResultE.Success || lobbyDetails != null){
+            if (result != ResultE.Success){
                 Debug.LogError("TryJoinSearchResults: Reconnecter can't create lobby handle to check member count.");
                 MatchMakeManager.Instance.LastResultCode = (Result)result;
                 return false;
             }
             LobbyDetailsGetMemberCountOptions countOptions = new LobbyDetailsGetMemberCountOptions();
             uint MemberCount = lobbyDetails.GetMemberCount(ref countOptions);
+            lobbyDetails.Release();
 
             if(MemberCount == 0){
                 Debug.LogError("TryJoinSearchResults: The lobby had been closed. There is no one.");
