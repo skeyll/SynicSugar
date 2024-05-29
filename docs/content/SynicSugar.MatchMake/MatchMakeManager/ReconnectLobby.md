@@ -10,7 +10,8 @@ public async UniTask&lt;bool&gt; ReconnectLobby(string LobbyID,  CancellationTok
 
 
 ### Description
-Back to disconnected lobby. If user can't find or can't join the lobby, return false.<br>
+Back to disconnected lobby. If user can't find or can't join the lobby, return false.<br> 
+The User can't also go back to an empty Lobby. They can join to living one.<br>
 LobbyID is saved after finishing matchmake and deleted after leaving lobby by SynicSugar.<br>
 So, after starting game or moving to main manu, should get lobbyID. Then, if LobbyID exists, call this. <br>
 
