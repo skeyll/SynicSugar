@@ -485,6 +485,9 @@ namespace SynicSugar.P2P {
     /// <param name="byteArray"></param>
     /// <returns></returns>
     internal static string ByteArrayToHexString(byte[] byteArray) {
+        if(byteArray == null){
+            return string.Empty;
+        }
         System.Text.StringBuilder hex = new System.Text.StringBuilder(byteArray.Length * 2);
         foreach (byte b in byteArray) {
             hex.AppendFormat("{0:x2}", b);
@@ -497,6 +500,9 @@ namespace SynicSugar.P2P {
     /// <param name="byteArray"></param>
     /// <returns></returns>
     internal static string ByteArrayToHexString(ArraySegment<byte> byteArray){
+        if(byteArray.Count == 0){
+            return string.Empty;
+        }
         System.Text.StringBuilder hex = new System.Text.StringBuilder(byteArray.Count * 2);
         for (int i = byteArray.Offset; i < byteArray.Offset + byteArray.Count; i++){
             hex.AppendFormat("{0:x2}", byteArray.Array[i]);
