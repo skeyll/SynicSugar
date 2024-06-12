@@ -212,7 +212,6 @@ namespace SynicSugar.P2P {
         /// </summary>
         public bool GetPacketFromBuffer(ref byte ch, ref string id, ref ArraySegment<byte> payload){
             P2PHandle.GetNextReceivedPacketSize(ref standardPacketSizeOptions, out nextPacketSizeBytes);
-
             if(nextPacketSizeBytes == 0){
                 return false;
             }
@@ -236,6 +235,9 @@ namespace SynicSugar.P2P {
                 return false; //No packet
             }
             id = peerId.ToString();
+        #if SYNICSUGAR_PACKETINFO
+            Debug.Log($"PacketInfo: ch {ch} / user {id} / length {bytesWritten} / payload {System.Text.Encoding.UTF8.GetString(data)}");
+        #endif
 
             return true;
         }
@@ -244,8 +246,6 @@ namespace SynicSugar.P2P {
         /// Use this from ConenctHub not to call some methods in Main-Assembly from SynicSugar.dll.
         /// </summary>
         public bool GetSynicPacketFromBuffer(ref byte ch, ref string id, ref ArraySegment<byte> payload){
-            //Next packet size
-
             P2PHandle.GetNextReceivedPacketSize(ref synicPacketSizeOptions, out nextPacketSizeBytes);
             if(nextPacketSizeBytes == 0){
                 return false;
@@ -270,6 +270,9 @@ namespace SynicSugar.P2P {
                 return false; //No packet
             }
             id = peerId.ToString();
+        #if SYNICSUGAR_PACKETINFO
+            Debug.Log($"SynicPacketInfo: ch {ch} / user {id} / length {bytesWritten} / payload {System.Text.Encoding.UTF8.GetString(data)}");
+        #endif
 
             return true;
         }
