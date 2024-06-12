@@ -14,3 +14,4 @@ These symbols can be set from ProjectSetting > Player > OtherSetting > Scripting
 | SYNICSUGAR_TMP | To use TextMeshPro for MatchMake GUI event |
 | SYNICSUGAR_ADDRESSABLE | To use Addreddables for TitleStorage |
 | SYNICSUGAR_FPSTEST | For Sample. Fixed to 60FPS, to try burst FPS |
+| SYNICSUGAR_PACKETINFO | Display packet info of sending and receiving on log |

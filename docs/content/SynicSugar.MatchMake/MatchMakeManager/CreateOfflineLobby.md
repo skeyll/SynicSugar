@@ -16,6 +16,7 @@ This Lobby features
 - Follow the same step as actual matchmaking to create offline-lobby and complete preparations for p2p
 - Only single user in the lobby
 - No VC
+- LobbyID is "OFFLINEMODE"
 
 This API instantiate RemoteUserIds, but that is empty. So, cannot specified by Index. <br>
 If we use RemoteUserId with FOREACE, or FOR and RemoteUserId.Count, can completely share the online projects as offline projects.<br><br>
