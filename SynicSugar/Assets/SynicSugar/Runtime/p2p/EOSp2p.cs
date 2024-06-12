@@ -20,6 +20,9 @@ namespace SynicSugar.P2P {
             ResultE result;
             int count = p2pConfig.Instance.RPCBatchSize;
             
+        #if SYNICSUGAR_PACKETINFO
+            Debug.Log($"SendPacketToAll: ch {ch} / payload {ByteArrayToHexString(value)}");
+        #endif
             foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
                 SendPacketOptions options = new SendPacketOptions(){
                     LocalUserId = EOSManager.Instance.GetProductUserId(),
@@ -74,6 +77,10 @@ namespace SynicSugar.P2P {
             }
             ResultE result;
             int count = p2pConfig.Instance.RPCBatchSize;
+
+        #if SYNICSUGAR_PACKETINFO
+            Debug.Log($"SendPacketToAll: ch {ch} / payload {ByteArrayToHexString(value)}");
+        #endif
             foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
                 SendPacketOptions options = new SendPacketOptions(){
                     LocalUserId = EOSManager.Instance.GetProductUserId(),
@@ -114,6 +121,10 @@ namespace SynicSugar.P2P {
         public static async UniTaskVoid SendPacketToAll(byte ch, ArraySegment<byte> value){
             ResultE result;
             int count = p2pConfig.Instance.RPCBatchSize;
+
+        #if SYNICSUGAR_PACKETINFO
+            Debug.Log($"SendPacketToAll: ch {ch} / payload {ByteArrayToHexString(value)}");
+        #endif
             foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
                 SendPacketOptions options = new SendPacketOptions(){
                     LocalUserId = EOSManager.Instance.GetProductUserId(),
@@ -159,7 +170,9 @@ namespace SynicSugar.P2P {
                 Reliability = p2pConfig.Instance.packetReliability,
                 Data = new ArraySegment<byte>(value != null ? value : Array.Empty<byte>())
             };
-
+        #if SYNICSUGAR_PACKETINFO
+            Debug.Log($"SendPacket: ch {ch} / payload {ByteArrayToHexString(value)}");
+        #endif
             ResultE result = p2pConnectorForOtherAssembly.Instance.P2PHandle.SendPacket(ref options);
 
             if(result != ResultE.Success){
@@ -190,7 +203,9 @@ namespace SynicSugar.P2P {
                 Reliability = p2pConfig.Instance.packetReliability,
                 Data = new ArraySegment<byte>(value != null ? value : Array.Empty<byte>())
             };
-
+        #if SYNICSUGAR_PACKETINFO
+            Debug.Log($"SendPacket: ch {ch} / payload {ByteArrayToHexString(value)}");
+        #endif
             ResultE result = p2pConnectorForOtherAssembly.Instance.P2PHandle.SendPacket(ref options);
 
             if(result != ResultE.Success){
@@ -215,7 +230,9 @@ namespace SynicSugar.P2P {
                 Reliability = p2pConfig.Instance.packetReliability,
                 Data = value
             };
-
+        #if SYNICSUGAR_PACKETINFO
+            Debug.Log($"SendPacket: ch {ch} / payload {ByteArrayToHexString(value)}");
+        #endif
             ResultE result = p2pConnectorForOtherAssembly.Instance.P2PHandle.SendPacket(ref options);
 
             if(result != ResultE.Success){
@@ -243,39 +260,13 @@ namespace SynicSugar.P2P {
             //Max payload is 1170 but we need some header.
             for(int startIndex = 0; startIndex < value.Length; startIndex += 1160){
                 length = startIndex + 1160 < value.Length ? 1160 : value.Length - startIndex;
-                SendPacket();
+                SendPacket(value, startIndex, length, header, targetId, ch);
+                header[0]++;
                 //For sending buffer and main thread fps.
                 if(header[0] % p2pConfig.Instance.LargePacketBatchSize == 0){
                     await UniTask.Yield();
                 }
 
-                //To use Span. However, this process generates Garbage by each loop.
-                void SendPacket(){
-                    Span<byte> _payload = new Span<byte>(value, startIndex, length); 
-                    //Add header
-                    Span<byte> payload = new byte[header.Length + length];
-                    header.CopyTo(payload);
-                    _payload.CopyTo(payload.Slice(2));
-
-                    SendPacketOptions options = new SendPacketOptions(){
-                        LocalUserId = EOSManager.Instance.GetProductUserId(),
-                        RemoteUserId = targetId.AsEpic,
-                        SocketId = p2pConnectorForOtherAssembly.Instance.SocketId,
-                        Channel = ch,
-                        AllowDelayedDelivery = true,
-                        Reliability = p2pConfig.Instance.packetReliability,
-                        Data = new ArraySegment<byte>(payload.ToArray())
-                    };
-
-                    ResultE result = p2pConnectorForOtherAssembly.Instance.P2PHandle.SendPacket(ref options);
-
-                    if(result != ResultE.Success){
-                        Debug.LogErrorFormat("Send Large Packet: can't send packet, code: {0}", result);
-                        return;
-                    }
-                    //add index
-                    header[0]++;
-                }
             }
         #if SYNICSUGAR_LOG
             Debug.Log($"SendLargePackets: Finish to Send to {targetId}!");
@@ -307,43 +298,44 @@ namespace SynicSugar.P2P {
             //Max payload is 1170 but we need some header.
             for(int startIndex = 0; startIndex < value.Length; startIndex += 1160){
                 length = startIndex + 1160 < value.Length ? 1160 : value.Length - startIndex;
-                SendPacket();
+                SendPacket(value, startIndex, length, header, targetId, ch);
+                header[0]++;
                 //For sending buffer and main thread fps.
                 if(header[0] % p2pConfig.Instance.LargePacketBatchSize == 0){
                     await UniTask.Yield();
                 }
 
-                //To use Span. However, this process generates Garbage by each loop.
-                void SendPacket(){
-                    Span<byte> _payload = new Span<byte>(value, startIndex, length); 
-                    //Add header
-                    Span<byte> payload = new byte[header.Length + length];
-                    header.CopyTo(payload);
-                    _payload.CopyTo(payload.Slice(2));
-
-                    SendPacketOptions options = new SendPacketOptions(){
-                        LocalUserId = EOSManager.Instance.GetProductUserId(),
-                        RemoteUserId = targetId.AsEpic,
-                        SocketId = p2pConnectorForOtherAssembly.Instance.SocketId,
-                        Channel = ch,
-                        AllowDelayedDelivery = true,
-                        Reliability = p2pConfig.Instance.packetReliability,
-                        Data = new ArraySegment<byte>(payload.ToArray())
-                    };
-
-                    ResultE result = p2pConnectorForOtherAssembly.Instance.P2PHandle.SendPacket(ref options);
-
-                    if(result != ResultE.Success){
-                        Debug.LogErrorFormat("Send Large Packet: can't send packet, code: {0}", result);
-                        return;
-                    }
-                    //add index
-                    header[0]++;
-                }
             }
         #if SYNICSUGAR_LOG
             Debug.Log($"SendLargePackets: Finish to Send to {targetId}!");
         #endif
+        }
+        //To use Span. However, this process generates Garbage by each loop.
+        static void SendPacket(byte[] value, int startIndex, int length, byte[] header, UserId targetId, byte ch){
+            Span<byte> _payload = new Span<byte>(value, startIndex, length); 
+            //Add header
+            Span<byte> payload = new byte[header.Length + length];
+            header.CopyTo(payload);
+            _payload.CopyTo(payload.Slice(2));
+
+            //LargePackt is probably used for important data. 
+            //And to release memory as soon as possible, we should ensure that the data is delivered. So, we set ReliableOrdered as default.
+            SendPacketOptions options = new SendPacketOptions(){
+                LocalUserId = EOSManager.Instance.GetProductUserId(),
+                RemoteUserId = targetId.AsEpic,
+                SocketId = p2pConnectorForOtherAssembly.Instance.SocketId,
+                Channel = ch,
+                AllowDelayedDelivery = true,
+                Reliability = PacketReliability.ReliableOrdered,
+                Data = new ArraySegment<byte>(payload.ToArray())
+            };
+
+            ResultE result = p2pConnectorForOtherAssembly.Instance.P2PHandle.SendPacket(ref options);
+
+            if(result != ResultE.Success){
+                Debug.LogErrorFormat("Send Large Packet: can't send packet, code: {0}", result);
+                return;
+            }
         }
         /// <summary>
         /// index, chunk, sycned phase, is Specific sync, self or not
@@ -438,13 +430,15 @@ namespace SynicSugar.P2P {
                 header.CopyTo(payload);
                 _payload.CopyTo(payload.Slice(6));
 
+                //LargePackt is probably used for important data. 
+                //And to release memory as soon as possible, we should ensure that the data is delivered. So, we set ReliableOrdered as default.
                 SendPacketOptions options = new SendPacketOptions(){
                     LocalUserId = EOSManager.Instance.GetProductUserId(),
                     RemoteUserId = targetId.AsEpic,
                     SocketId = p2pConnectorForOtherAssembly.Instance.SocketId,
                     Channel = ch,
                     AllowDelayedDelivery = true,
-                    Reliability = p2pConfig.Instance.packetReliability,
+                    Reliability = PacketReliability.ReliableOrdered,
                     Data = new ArraySegment<byte>(payload.ToArray())
                 };
 
@@ -484,7 +478,32 @@ namespace SynicSugar.P2P {
             return result;
         }
     #endregion
-
+#if SYNICSUGAR_PACKETINFO
+    /// <summary>
+    /// Convert byte to String.
+    /// </summary>
+    /// <param name="byteArray"></param>
+    /// <returns></returns>
+    internal static string ByteArrayToHexString(byte[] byteArray) {
+        System.Text.StringBuilder hex = new System.Text.StringBuilder(byteArray.Length * 2);
+        foreach (byte b in byteArray) {
+            hex.AppendFormat("{0:x2}", b);
+        }
+        return hex.ToString();
+    }
+    /// <summary>
+    /// Convert byte to String.
+    /// </summary>
+    /// <param name="byteArray"></param>
+    /// <returns></returns>
+    internal static string ByteArrayToHexString(ArraySegment<byte> byteArray){
+        System.Text.StringBuilder hex = new System.Text.StringBuilder(byteArray.Count * 2);
+        for (int i = byteArray.Offset; i < byteArray.Offset + byteArray.Count; i++){
+            hex.AppendFormat("{0:x2}", byteArray.Array[i]);
+        }
+        return hex.ToString();
+    }
+#endif
     #region OBSOLETE
         public static void SendLargePacket(byte ch, byte[] value, UserId targetId, byte syncedPhase = 9, bool syncSpecificPhase = false, bool isSelfData = true){
             int length = 1100;

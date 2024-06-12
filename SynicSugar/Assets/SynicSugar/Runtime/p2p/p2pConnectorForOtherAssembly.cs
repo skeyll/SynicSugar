@@ -41,6 +41,17 @@ namespace SynicSugar.P2P {
         void Start(){
             SetIntervalSeconds();
             P2PHandle = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface();
+
+            //Next packet size
+            standardPacketSizeOptions = new GetNextReceivedPacketSizeOptions {
+                LocalUserId = EOSManager.Instance.GetProductUserId(),
+                RequestedChannel = null
+            };
+
+            synicPacketSizeOptions = new GetNextReceivedPacketSizeOptions {
+                LocalUserId = EOSManager.Instance.GetProductUserId(),
+                RequestedChannel = 255
+            };
         }
 #endregion
         internal P2PInterface P2PHandle;
@@ -62,7 +73,11 @@ namespace SynicSugar.P2P {
         PacketReceiveOnFixedUpdate FixedUpdateReceiver;
         PacketReceiveOnUpdate UpdateReceiver;
         PacketReceiveOnLateUpdate LateUpdateReceiver;
-
+        /// <summary>
+        /// To get packets
+        /// </summary>
+        GetNextReceivedPacketSizeOptions standardPacketSizeOptions, synicPacketSizeOptions;
+        uint nextPacketSizeBytes = 0;
         
 
     #region Pause Session
@@ -196,14 +211,7 @@ namespace SynicSugar.P2P {
         /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll.
         /// </summary>
         public bool GetPacketFromBuffer(ref byte ch, ref string id, ref ArraySegment<byte> payload){
-            //Next packet size
-            var getNextReceivedPacketSizeOptions = new GetNextReceivedPacketSizeOptions {
-                LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
-                RequestedChannel = null
-            };
-
-            P2PHandle.GetNextReceivedPacketSize(ref getNextReceivedPacketSizeOptions, out uint nextPacketSizeBytes);
-
+            P2PHandle.GetNextReceivedPacketSize(ref standardPacketSizeOptions, out nextPacketSizeBytes);
             if(nextPacketSizeBytes == 0){
                 return false;
             }
@@ -215,8 +223,8 @@ namespace SynicSugar.P2P {
             };
 
             byte[] data = new byte[nextPacketSizeBytes];
-            var dataSegment = new ArraySegment<byte>(data);
-            ResultE result = P2PHandle.ReceivePacket(ref options, out ProductUserId peerId, out SocketId socketId, out byte outChannel, dataSegment, out uint bytesWritten);
+            payload = new ArraySegment<byte>(data);
+            ResultE result = P2PHandle.ReceivePacket(ref options, out ProductUserId peerId, out SocketId socketId, out ch, payload, out uint bytesWritten);
             
             if (result != ResultE.Success){
 #if SYNICSUGAR_LOG //This range is for performance since this is called every frame.
@@ -226,9 +234,10 @@ namespace SynicSugar.P2P {
 #endif
                 return false; //No packet
             }
-            ch = outChannel;
-            id = peerId.ToString();
-            payload = new ArraySegment<byte>(dataSegment.Array, dataSegment.Offset, (int)bytesWritten);
+            id = UserId.GetUserId(peerId).ToString();
+        #if SYNICSUGAR_PACKETINFO
+            Debug.Log($"PacketInfo: ch {ch} / user {id} / length {bytesWritten} / payload {EOSp2p.ByteArrayToHexString(data)}");
+        #endif
 
             return true;
         }
@@ -237,13 +246,7 @@ namespace SynicSugar.P2P {
         /// Use this from ConenctHub not to call some methods in Main-Assembly from SynicSugar.dll.
         /// </summary>
         public bool GetSynicPacketFromBuffer(ref byte ch, ref string id, ref ArraySegment<byte> payload){
-            //Next packet size
-            var getNextReceivedPacketSizeOptions = new GetNextReceivedPacketSizeOptions {
-                LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
-                RequestedChannel = 255
-            };
-
-            P2PHandle.GetNextReceivedPacketSize(ref getNextReceivedPacketSizeOptions, out uint nextPacketSizeBytes);
+            P2PHandle.GetNextReceivedPacketSize(ref synicPacketSizeOptions, out nextPacketSizeBytes);
             if(nextPacketSizeBytes == 0){
                 return false;
             }
@@ -255,8 +258,8 @@ namespace SynicSugar.P2P {
             };
 
             byte[] data = new byte[nextPacketSizeBytes];
-            var dataSegment = new ArraySegment<byte>(data);
-            ResultE result = P2PHandle.ReceivePacket(ref options, out ProductUserId peerId, out SocketId socketId, out byte outChannel, dataSegment, out uint bytesWritten);
+            payload = new ArraySegment<byte>(data);
+            ResultE result = P2PHandle.ReceivePacket(ref options, out ProductUserId peerId, out SocketId socketId, out ch, payload, out uint bytesWritten);
             
             if (result != ResultE.Success){
 #if SYNICSUGAR_LOG //This range is for performance since this is called every frame.
@@ -266,9 +269,10 @@ namespace SynicSugar.P2P {
 #endif
                 return false; //No packet
             }
-            ch = outChannel;
-            id = peerId.ToString();
-            payload = new ArraySegment<byte>(dataSegment.Array, dataSegment.Offset, (int)bytesWritten);;
+            id = UserId.GetUserId(peerId).ToString();
+        #if SYNICSUGAR_PACKETINFO
+            Debug.Log($"SynicPacketInfo: ch {ch} / user {id} / length {bytesWritten} / payload {EOSp2p.ByteArrayToHexString(data)}");
+        #endif
 
             return true;
         }
