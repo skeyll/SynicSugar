@@ -20,6 +20,9 @@ namespace SynicSugar.P2P {
             ResultE result;
             int count = p2pConfig.Instance.RPCBatchSize;
             
+        #if SYNICSUGAR_PACKETINFO
+            Debug.Log($"SendPacketToAll: ch {ch} / payload {System.Text.Encoding.UTF8.GetString(value)}");
+        #endif
             foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
                 SendPacketOptions options = new SendPacketOptions(){
                     LocalUserId = EOSManager.Instance.GetProductUserId(),
@@ -74,6 +77,10 @@ namespace SynicSugar.P2P {
             }
             ResultE result;
             int count = p2pConfig.Instance.RPCBatchSize;
+
+        #if SYNICSUGAR_PACKETINFO
+            Debug.Log($"SendPacketToAll: ch {ch} / payload {System.Text.Encoding.UTF8.GetString(value)}");
+        #endif
             foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
                 SendPacketOptions options = new SendPacketOptions(){
                     LocalUserId = EOSManager.Instance.GetProductUserId(),
@@ -114,6 +121,10 @@ namespace SynicSugar.P2P {
         public static async UniTaskVoid SendPacketToAll(byte ch, ArraySegment<byte> value){
             ResultE result;
             int count = p2pConfig.Instance.RPCBatchSize;
+
+        #if SYNICSUGAR_PACKETINFO
+            Debug.Log($"SendPacketToAll: ch {ch} / payload {System.Text.Encoding.UTF8.GetString(value)}");
+        #endif
             foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
                 SendPacketOptions options = new SendPacketOptions(){
                     LocalUserId = EOSManager.Instance.GetProductUserId(),
@@ -159,7 +170,9 @@ namespace SynicSugar.P2P {
                 Reliability = p2pConfig.Instance.packetReliability,
                 Data = new ArraySegment<byte>(value != null ? value : Array.Empty<byte>())
             };
-
+        #if SYNICSUGAR_PACKETINFO
+            Debug.Log($"SendPacket: ch {ch} / payload {System.Text.Encoding.UTF8.GetString(value)}");
+        #endif
             ResultE result = p2pConnectorForOtherAssembly.Instance.P2PHandle.SendPacket(ref options);
 
             if(result != ResultE.Success){
@@ -190,7 +203,9 @@ namespace SynicSugar.P2P {
                 Reliability = p2pConfig.Instance.packetReliability,
                 Data = new ArraySegment<byte>(value != null ? value : Array.Empty<byte>())
             };
-
+        #if SYNICSUGAR_PACKETINFO
+            Debug.Log($"SendPacket: ch {ch} / payload {System.Text.Encoding.UTF8.GetString(value)}");
+        #endif
             ResultE result = p2pConnectorForOtherAssembly.Instance.P2PHandle.SendPacket(ref options);
 
             if(result != ResultE.Success){
@@ -215,7 +230,9 @@ namespace SynicSugar.P2P {
                 Reliability = p2pConfig.Instance.packetReliability,
                 Data = value
             };
-
+        #if SYNICSUGAR_PACKETINFO
+            Debug.Log($"SendPacket: ch {ch} / payload {System.Text.Encoding.UTF8.GetString(value)}");
+        #endif
             ResultE result = p2pConnectorForOtherAssembly.Instance.P2PHandle.SendPacket(ref options);
 
             if(result != ResultE.Success){
@@ -257,13 +274,15 @@ namespace SynicSugar.P2P {
                     header.CopyTo(payload);
                     _payload.CopyTo(payload.Slice(2));
 
+                    //LargePackt is probably used for important data. 
+                    //And to release memory as soon as possible, we should ensure that the data is delivered. So, we set ReliableOrdered as default.
                     SendPacketOptions options = new SendPacketOptions(){
                         LocalUserId = EOSManager.Instance.GetProductUserId(),
                         RemoteUserId = targetId.AsEpic,
                         SocketId = p2pConnectorForOtherAssembly.Instance.SocketId,
                         Channel = ch,
                         AllowDelayedDelivery = true,
-                        Reliability = p2pConfig.Instance.packetReliability,
+                        Reliability = PacketReliability.ReliableOrdered,
                         Data = new ArraySegment<byte>(payload.ToArray())
                     };
 
@@ -321,13 +340,15 @@ namespace SynicSugar.P2P {
                     header.CopyTo(payload);
                     _payload.CopyTo(payload.Slice(2));
 
+                    //LargePackt is probably used for important data. 
+                    //And to release memory as soon as possible, we should ensure that the data is delivered. So, we set ReliableOrdered as default.
                     SendPacketOptions options = new SendPacketOptions(){
                         LocalUserId = EOSManager.Instance.GetProductUserId(),
                         RemoteUserId = targetId.AsEpic,
                         SocketId = p2pConnectorForOtherAssembly.Instance.SocketId,
                         Channel = ch,
                         AllowDelayedDelivery = true,
-                        Reliability = p2pConfig.Instance.packetReliability,
+                        Reliability =  PacketReliability.ReliableOrdered,
                         Data = new ArraySegment<byte>(payload.ToArray())
                     };
 
@@ -438,13 +459,15 @@ namespace SynicSugar.P2P {
                 header.CopyTo(payload);
                 _payload.CopyTo(payload.Slice(6));
 
+                //LargePackt is probably used for important data. 
+                //And to release memory as soon as possible, we should ensure that the data is delivered. So, we set ReliableOrdered as default.
                 SendPacketOptions options = new SendPacketOptions(){
                     LocalUserId = EOSManager.Instance.GetProductUserId(),
                     RemoteUserId = targetId.AsEpic,
                     SocketId = p2pConnectorForOtherAssembly.Instance.SocketId,
                     Channel = ch,
                     AllowDelayedDelivery = true,
-                    Reliability = p2pConfig.Instance.packetReliability,
+                    Reliability = PacketReliability.ReliableOrdered,
                     Data = new ArraySegment<byte>(payload.ToArray())
                 };
 
