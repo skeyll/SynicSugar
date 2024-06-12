@@ -234,7 +234,7 @@ namespace SynicSugar.P2P {
 #endif
                 return false; //No packet
             }
-            id = peerId.ToString();
+            id = UserId.GetUserId(peerId).ToString();
         #if SYNICSUGAR_PACKETINFO
             Debug.Log($"PacketInfo: ch {ch} / user {id} / length {bytesWritten} / payload {EOSp2p.ByteArrayToHexString(data)}");
         #endif
@@ -269,7 +269,7 @@ namespace SynicSugar.P2P {
 #endif
                 return false; //No packet
             }
-            id = peerId.ToString();
+            id = UserId.GetUserId(peerId).ToString();
         #if SYNICSUGAR_PACKETINFO
             Debug.Log($"SynicPacketInfo: ch {ch} / user {id} / length {bytesWritten} / payload {EOSp2p.ByteArrayToHexString(data)}");
         #endif
