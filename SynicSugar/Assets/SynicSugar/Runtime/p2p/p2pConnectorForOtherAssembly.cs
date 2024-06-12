@@ -77,7 +77,6 @@ namespace SynicSugar.P2P {
         /// To get packets
         /// </summary>
         GetNextReceivedPacketSizeOptions standardPacketSizeOptions, synicPacketSizeOptions;
-        uint nextPacketSizeBytes = 0;
         
 
     #region Pause Session
@@ -211,8 +210,8 @@ namespace SynicSugar.P2P {
         /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll.
         /// </summary>
         public bool GetPacketFromBuffer(ref byte ch, ref string id, ref ArraySegment<byte> payload){
-            P2PHandle.GetNextReceivedPacketSize(ref standardPacketSizeOptions, out nextPacketSizeBytes);
-            if(nextPacketSizeBytes == 0){
+            ResultE existPacket = P2PHandle.GetNextReceivedPacketSize(ref standardPacketSizeOptions, out uint nextPacketSizeBytes);
+            if(existPacket != ResultE.Success){
                 return false;
             }
             //Set options
@@ -246,8 +245,8 @@ namespace SynicSugar.P2P {
         /// Use this from ConenctHub not to call some methods in Main-Assembly from SynicSugar.dll.
         /// </summary>
         public bool GetSynicPacketFromBuffer(ref byte ch, ref string id, ref ArraySegment<byte> payload){
-            P2PHandle.GetNextReceivedPacketSize(ref synicPacketSizeOptions, out nextPacketSizeBytes);
-            if(nextPacketSizeBytes == 0){
+            ResultE existPacket = P2PHandle.GetNextReceivedPacketSize(ref synicPacketSizeOptions, out uint nextPacketSizeBytes);
+            if(existPacket != ResultE.Success){
                 return false;
             }
             //Set options
