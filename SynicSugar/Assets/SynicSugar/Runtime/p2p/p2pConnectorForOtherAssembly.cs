@@ -211,7 +211,7 @@ namespace SynicSugar.P2P {
         /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll.
         /// </summary>
         public bool GetPacketFromBuffer(ref byte ch, ref string id, ref ArraySegment<byte> payload){
-            P2PHandle.GetNextReceivedPacketSize(ref synicPacketSizeOptions, out nextPacketSizeBytes);
+            P2PHandle.GetNextReceivedPacketSize(ref standardPacketSizeOptions, out nextPacketSizeBytes);
 
             if(nextPacketSizeBytes == 0){
                 return false;
