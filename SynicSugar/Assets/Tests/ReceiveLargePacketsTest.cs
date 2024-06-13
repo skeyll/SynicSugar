@@ -43,7 +43,7 @@ namespace SynicSugar.P2P{
             using var compressor  = new BrotliCompressor();
             MemoryPackSerializer.Serialize(compressor , synicContainer);
 
-            EOSp2p.SendLargePacket(255, compressor.ToArray(), targetId, syncedHierarchy, syncSingleHierarchy);
+            // EOSp2p.SendLargePacket(255, compressor.ToArray(), targetId, syncedHierarchy, syncSingleHierarchy);
         }
     //     public void ConvertFormPacket(SugarPacket packet){
     //         switch((CHANNELLIST)packet.ch){
