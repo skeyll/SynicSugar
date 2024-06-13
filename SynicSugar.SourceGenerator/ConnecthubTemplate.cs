@@ -324,43 +324,18 @@ namespace SynicSugarGenerator {
             
             #line 302 ""
             this.Write("\n                default:\n                goto case 9;\n            }\n            " +
-                    "return synicContainer;\n        }\n        \n        #region Obsolete\n        [Obso" +
-                    "lete(\"This is old. SyncSynic(UserId targetId, SynicType type, byte syncedPhase =" +
-                    " 9, bool syncSinglePhase = false) is new one.\")]\n        /// <summary>\n        /" +
-                    "// Sync all Synic variables. This is very heavy because it handles multiple data" +
-                    " and repeats compression and serialization.\n        /// </summary>\n        /// <" +
-                    "param name=\"targetId\">Target to be synced by this local user.</param>\n        //" +
-                    "/ <param name=\"syncedPhase\">Phase to be synced. If syncSinglePhase is false, syn" +
-                    "c all variables in the phase up to this point.</param>\n        /// <param name=\"" +
-                    "syncSinglePhase\">If true, send only variables in syncedPhase.</param>\n        //" +
-                    "/ <param name=\"syncTargetsData\">If true, sync target\'s data in Host local. When " +
-                    "the target AllowHostsSynic, can overwrite the target\'s data in that local only o" +
-                    "nce.</param>\n        public void SyncSynic(UserId targetId, byte syncedPhase = 9" +
-                    ", bool syncSinglePhase = false, bool syncTargetsData = true){\n            //Sync" +
-                    " local data to target local\n            SynicContainer synicContainer = Generate" +
-                    "SynicContainer(p2pInfo.Instance.LocalUserId, syncedPhase, syncSinglePhase);\n\n   " +
-                    "         using var selfCompressor  = new BrotliCompressor();\n            MemoryP" +
-                    "ackSerializer.Serialize(selfCompressor, synicContainer);\n\n            EOSp2p.Sen" +
-                    "dSynicPackets((byte)CHANNELLIST.Synic, selfCompressor.ToArray(), targetId, synce" +
-                    "dPhase, syncSinglePhase);\n\n            if(!syncTargetsData || !p2pInfo.Instance." +
-                    "IsHost()){\n                return;\n            }\n            //Sync target data " +
-                    "in local to target local\n\n            synicContainer = GenerateSynicContainer(ta" +
-                    "rgetId, syncedPhase, syncSinglePhase);\n\n            using var targetCompressor  " +
-                    "= new BrotliCompressor();\n            MemoryPackSerializer.Serialize(targetCompr" +
-                    "essor, synicContainer);\n\n            EOSp2p.SendSynicPackets((byte)CHANNELLIST.S" +
-                    "ynic, targetCompressor.ToArray(), targetId, syncedPhase, syncSinglePhase, false)" +
-                    ";\n        }\n        #endregion\n        ");
+                    "return synicContainer;\n        }\n        ");
             
             #line default
             #line hidden
             
-            #line 340 ""
+            #line 308 ""
  } 
             
             #line default
             #line hidden
             
-            #line 341 ""
+            #line 309 ""
             this.Write("        \n        //Synced 0 = index, 1 = chunk\n        bool RestoreLargePackets(r" +
                     "ef byte ch, ref string id, ref ArraySegment<byte> payload){\n            //Prep\n " +
                     "           if(!largeBuffer.ContainsKey(id)){\n                largePacketInfo.Add" +
@@ -419,26 +394,26 @@ namespace SynicSugarGenerator {
             #line default
             #line hidden
             
-            #line 429 ""
+            #line 397 ""
             this.Write(this.ToStringHelper.ToStringWithCulture( SyncedInvoker ));
             
             #line default
             #line hidden
             
-            #line 429 ""
+            #line 397 ""
             this.Write("\n                default:\n                goto case 9;\n            }\n        }\n  " +
                     "      ");
             
             #line default
             #line hidden
             
-            #line 434 ""
+            #line 402 ""
             this.Write(this.ToStringHelper.ToStringWithCulture( SyncedItems ));
             
             #line default
             #line hidden
             
-            #line 434 ""
+            #line 402 ""
             this.Write("\n    }\n}");
             
             #line default

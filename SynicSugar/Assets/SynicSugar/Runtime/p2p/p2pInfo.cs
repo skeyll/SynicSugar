@@ -220,41 +220,5 @@ namespace SynicSugar.P2P {
         public UserId LastTargetRPCUserId => lastTargetRPCInfo.target;
         public bool LastRPCIsLargePacket => lastRpcInfo.isLargePacket;
         public bool LastTargetRPCIsLargePacket => lastTargetRPCInfo.isLargePacket;
-
-        #region Obsolete
-        
-        /// <summary>
-        /// Get member count in just current match.
-        /// </summary>
-        /// <returns></returns>
-        [Obsolete("Can get this value p2pInfo.Instance.CurrentConnectedUserIds.Count")]
-        public int GetCurrentConnectionMemberCount(){
-            return userIds.CurrentConnectedUserIds.Count; 
-        }
-        /// <summary>
-        /// Get all member count .
-        /// </summary>
-        /// <returns></returns>
-        [Obsolete("Can get this value p2pInfo.Instance.AllUserIds.Count")]
-        public int GetAllConnectionMemberCount(){
-            return userIds.AllUserIds.Count; 
-        }
-        /// <summary>
-        /// All UserIds (include Local user) currently connected.
-        /// </summary>
-        [Obsolete("This is old. CurrentConnectedUserIds is new one.")]
-        public List<UserId> AllCurrentUserIds => userIds.CurrentConnectedUserIds;
-        /// <summary>
-        /// UserIds of current session.
-        /// </summary>
-        [Obsolete("This is old. CurrentRemoteUserIds is new one.")]
-        public List<UserId> RemoteUserIds => userIds.RemoteUserIds;
-        
-        /// <summary>
-        /// Always return false. Just on reconnect, returns true until getting SyncSynic for self data from Host.
-        /// </summary>
-        [Obsolete("This is old. IsReconnecter is new one.")]
-        public bool AcceptHostSynic => userIds.isJustReconnected;
-        #endregion
     }
 }
