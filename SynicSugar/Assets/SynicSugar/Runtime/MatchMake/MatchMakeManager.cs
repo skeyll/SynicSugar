@@ -575,7 +575,7 @@ namespace SynicSugar.MatchMake {
                     PlayerPrefs.DeleteKey(playerprefsSaveKey);
                 return;
                 case RecconectLobbyIdSaveType.CustomMethod:
-                    lobbyIDMethod.OnSave();
+                    lobbyIDMethod.OnDelete();
                 return;
                 case RecconectLobbyIdSaveType.AsyncCustomMethod:
                     await asyncLobbyIDMethod.OnDelete();
@@ -630,28 +630,5 @@ namespace SynicSugar.MatchMake {
         internal void UpdateMemberAttributeAsHeartBeat(int disconenctedUserIndex){
             eosLobby.UpdateMemberAttributeAsHeartBeat(disconenctedUserIndex);
         }
-        #region OBSOLETE
-        /// <summary>
-        /// Exit lobby and cancel MatchMake.
-        /// </summary>
-        /// <param name="token">token for this task</param>
-        /// <param name="destroyManager">If true, destroy ConnectManager. When we move to the other scene (where we don't need ConnectManager) after this, we should pass true.</param>
-        /// <returns></returns>
-        [Obsolete("This is old one. New one is ExitCurrentMatchMake.")]
-        public async UniTask<bool> CancelCurrentMatchMake(bool destroyManager = true, CancellationToken token = default(CancellationToken)){
-            if(matchingToken == null || !matchingToken.Token.CanBeCanceled){
-            #if SYNICSUGAR_LOG
-                Debug.Log("CancelCurrentMatchMake: Is this user currently in matchmaking?");
-            #endif
-                return false;
-            }
-            bool canCancel = await eosLobby.CancelMatchMaking(matchingToken, token);
-            
-            if(destroyManager && canCancel){
-                Destroy(this.gameObject);
-            }
-            return canCancel;
-        }
-        #endregion
     }
 }
