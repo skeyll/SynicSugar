@@ -119,6 +119,9 @@ namespace SynicSugar.RTC {
                 Debug.LogError("OnParticipantStatusChanged: this room is invalid");
                 return;
             }
+            if(data.ParticipantStatus == RTCParticipantStatus.Left){
+                return;
+            }
             MemberState member = CurrentLobby.Members[UserId.GetUserId(data.ParticipantId).ToString()];
 
             if (data.ParticipantStatus == RTCParticipantStatus.Joined){
