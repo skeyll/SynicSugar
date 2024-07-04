@@ -255,6 +255,41 @@ namespace SynicSugar.MatchMake {
             STRING = value;
             ValueType = AttributeType.String;
         }
+        /// <summary>
+        /// Get the value based on the ValueType.
+        /// </summary>
+        /// <typeparam name="T">The expected return type.</typeparam>
+        /// <returns>Return T value, if the match Attribute Type and T. If not, throw Exception.</returns>
+        public T GetValue<T>() {
+            switch (ValueType) {
+                case AttributeType.Boolean:
+                    if (typeof(T) == typeof(bool)) {
+                        return (T)(object)BOOLEAN.Value;
+                    }
+                    break;
+                case AttributeType.Int64:
+                    if (typeof(T) == typeof(int)) {
+                        return (T)(object)INT64.Value;
+                    }
+                    break;
+                case AttributeType.Double:
+                    if (typeof(T) == typeof(double)) {
+                        return (T)(object)DOUBLE.Value;
+                    }
+                    break;
+                case AttributeType.String:
+                    if (typeof(T) == typeof(string)) {
+                        return (T)(object)STRING;
+                    }
+                    break;
+            }
+            throw new InvalidOperationException("AttributeData: This data is null or ValueType and T do not match.");
+        }
+
+        /// <summary>
+        /// Get type as string.
+        /// </summary>
+        /// <returns>Return string even if that ValueType is not String. If no data, return empty.</returns>
         public string GetValueAsString(){
             switch(ValueType){
                 case AttributeType.Boolean:
@@ -266,21 +301,21 @@ namespace SynicSugar.MatchMake {
                 case AttributeType.String:
                 return STRING;
             }
-            return System.String.Empty;
+            return string.Empty;
         }
         /// <summary>
         /// Get specific value from user attributes.
         /// </summary>
         /// <param name="list">User attributes </param>
         /// <param name="Key">Target attribute key(The key from server becomes Upper case)</param>
-        /// <returns></returns>
+        /// <returns>Return string even if that ValueType is not String. If no data, return empty.</returns>
         public static string GetValueAsString(List<AttributeData> list, string Key){
             foreach(var attr in list){
                 if(string.Compare(attr.Key, Key, true) <= 0){
                     return attr.GetValueAsString();
                 }
             }
-            return System.String.Empty;
+            return string.Empty;
         }
         public override int GetHashCode(){
             return base.GetHashCode();
