@@ -34,6 +34,7 @@ Max 100 attributes can be set.
 | API | description |
 |---|---|
 | [GetValueAsString](../AttributeData/getvalueasstring) | Get specific key value as string from attribute list |
+| [GetValue](../AttributeData/getvalue) | Get specific data from attribute data or list |
 
 
 ```cs

@@ -6,11 +6,11 @@ weight = 1
 <small>*Namespace: SynicSugar.MatchMake* <br>
 *Class: AttributeData* </small>
 
-public static string GetValueAsString(List&lt;AttributeData&gt; list, string Key))<br>
+public static string GetValueAsString(List&lt;AttributeData&gt; list, string Key)<br>
 
 ### Description
-Get specific value from user attributes.
-
+Get specific value from user attributes for GUI.<br>
+Convert AttributeData to string and return the value even if the type of AttributeData is not a string.
 
 ```cs
 using System.Collections.Generic;
