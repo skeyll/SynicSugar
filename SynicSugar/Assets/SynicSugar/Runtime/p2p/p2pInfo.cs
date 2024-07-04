@@ -154,7 +154,7 @@ namespace SynicSugar.P2P {
         /// </summary>
         /// <returns></returns>
         public bool IsHost (string targetId){
-            return targetId == userIds.HostUserId.ToString();
+            return UserId.GetUserId(targetId) == userIds.HostUserId;
         }
     #endregion
     #region IsLocalUser
@@ -170,7 +170,7 @@ namespace SynicSugar.P2P {
         /// </summary>
         /// <returns></returns>
         public bool IsLoaclUser (string targetId){
-            return targetId == userIds.LocalUserId.ToString();
+            return UserId.GetUserId(targetId) == userIds.LocalUserId;
         }
     #endregion
     #region Ping
