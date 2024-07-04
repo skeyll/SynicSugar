@@ -74,7 +74,7 @@ namespace SynicSugar.Samples {
             List<AttributeData> data = MatchMakeManager.Instance.GetTargetAttributeData(target);
             LobbyMemberState state = LobbyMemberStatus[target.ToString()];
             
-            state.SetData(target, AttributeData.GetValueAsString(data, "NAME"), AttributeData.GetValueAsString(data, "LEVEL"));
+            state.SetData(target, data.GetValue<string>("NAME"), AttributeData.GetValueAsString(data, "LEVEL"));
         }
         void OnDisableCancelKickFinish(){
             SwitchCancelButtonActive(false);
