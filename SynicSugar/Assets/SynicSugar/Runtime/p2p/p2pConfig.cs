@@ -11,6 +11,7 @@ namespace SynicSugar.P2P {
                 return;
             }
             Instance = this;
+            natRelay = new NatRelayManager();
         }
         void OnDestroy() {
             if( Instance == this ) {
@@ -18,6 +19,14 @@ namespace SynicSugar.P2P {
             }
         }
 #endregion
+        NatRelayManager natRelay;
+        /// <summary>
+        /// Users with settings NoRelay and ForceRelays cannot connect.<br />
+        /// So, we should use only AllowRelays and one of the other settings.<br /?
+        /// AllowRelay is default. In default, if the connection can be made via p2p, users connect directly; if it fails NAT Punch through, users use Relay(AWS) for the connection.<br />
+        /// If we set this 
+        /// </summary>
+        public RelayControl relayControl = RelayControl.AllowRelays;
         ///Options 
         /// <summary>
         /// Quality of connection
@@ -80,5 +89,15 @@ namespace SynicSugar.P2P {
         public byte SamplesPerPing;
         [Range(1, 60)]
         public int PingAutoRefreshRateSec = 10;
+
+        /// <summary>
+        /// Set how relay servers are to be used. This setting does not immediately apply to existing connections, but may apply to existing connections if the connection requires renegotiation.<br /> 
+        /// AllowRelay is default. In default, if the connection can be made via p2p, users connect directly; if it fails NAT Punch through, users use Relay(AWS) for the connection.<br />
+        /// If it is set to anything other than AllowRelays, SetRelayControl is automatically called before the first connection. If SetRelayControl() is called after the connection, connection will switch between via Relay and p2p when the connect is not stable, so it is better to change this value in the editor or just before or after matching starts.
+        /// </summary>
+        /// <param name="relay">AllowRelay is Default</param>
+        public void SetRelayControl(RelayControl relay){
+            natRelay.SetRelayControl(relay);
+        }
     }
 }

@@ -1511,9 +1511,12 @@ namespace SynicSugar.MatchMake {
         /// <param name="token"></param>
         /// <returns></returns>
         async UniTask<bool> OpenConnection(CancellationToken token){
+            if(p2pConfig.Instance.relayControl != RelayControl.AllowRelays){
+                p2pConfig.Instance.SetRelayControl(p2pConfig.Instance.relayControl);
+            }
+            await p2pInfo.Instance.natRelay.Init();
             RemoveNotifyLobbyMemberUpdateReceived();
             p2pConnectorForOtherAssembly.Instance.OpenConnection(true);
-            await p2pInfo.Instance.natRelay.Init();
         #if SYNICSUGAR_LOG
             Debug.Log("OpenConnection: Open Connection.");
         #endif
@@ -1544,8 +1547,11 @@ namespace SynicSugar.MatchMake {
         /// <param name="token"></param>
         /// <returns></returns>
         async UniTask<bool> OpenConnectionForReconnecter(CancellationToken token){
-            p2pConnectorForOtherAssembly.Instance.OpenConnection(true);
+            if(p2pConfig.Instance.relayControl != RelayControl.AllowRelays){
+                p2pConfig.Instance.SetRelayControl(p2pConfig.Instance.relayControl);
+            }
             await p2pInfo.Instance.natRelay.Init();
+            p2pConnectorForOtherAssembly.Instance.OpenConnection(true);
             bool canConnect = await ConnectPreparation.WaitConnectPreparation(token);
             if(!canConnect){
                 MatchMakeManager.Instance.LastResultCode = Result.ConnectEstablishFailed;

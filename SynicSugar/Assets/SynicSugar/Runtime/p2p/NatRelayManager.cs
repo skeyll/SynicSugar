@@ -14,7 +14,8 @@ namespace SynicSugar.P2P {
         }
         /// <summary>
         /// Set how relay servers are to be used. This setting does not immediately apply to existing connections, but may apply to existing connections if the connection requires renegotiation.<br /> 
-        /// AllowRelay is default. In default, if the connection can be made via p2p, users connect directly; if it fails NAT Punch through, users use Relay(AWS) for the connection.
+        /// AllowRelay is default. In default, if the connection can be made via p2p, users connect directly; if it fails NAT Punch through, users use Relay(AWS) for the connection.<br />
+        /// If it is set to anything other than AllowRelays, SetRelayControl is automatically called before the first connection. If SetRelayControl() is called after the connection, connection will switch between via Relay and p2p when the connect is not stable, so it is better to change this value in the editor or just before or after matching starts.
         /// </summary>
         /// <param name="relay">Default is AllowRelay</param>
         internal void SetRelayControl(RelayControl relay){
@@ -24,7 +25,7 @@ namespace SynicSugar.P2P {
                 Debug.LogErrorFormat("SetRelayControl: Set Relay Control is failed. error: {0}", result);
                 return;
             }
-
+            p2pConfig.Instance.relayControl = relay;
             #if SYNICSUGAR_LOG
                 Debug.Log($"SetRelayControl: SetRelayControl is Success. {result}");
             #endif

@@ -1,6 +1,6 @@
 namespace SynicSugar.P2P {
     /// <summary>
-    /// Users with settings A and B cannot connect.
+    /// Users with settings NoRelay and ForceRelays cannot connect.
     /// So, we should use only AllowRelays and one of the other settings.
     /// </summary>
     public enum RelayControl {
