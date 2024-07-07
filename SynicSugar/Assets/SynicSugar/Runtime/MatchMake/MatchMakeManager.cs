@@ -19,7 +19,7 @@ namespace SynicSugar.MatchMake {
             Instance = this;
             DontDestroyOnLoad(this);
 
-            eosLobby = new EOSLobby(maxSearchResult, TimeoutSec);
+            eosLobby = new EOSLobby(maxSearchResult, TimeoutSec, P2PSetupTimeoutSec);
             MemberUpdatedNotifier = new();
 
             if(lobbyIdSaveType == RecconectLobbyIdSaveType.CustomMethod){
@@ -49,10 +49,20 @@ namespace SynicSugar.MatchMake {
         /// <summary>
         /// This time is from the start of matchmaking until the the end of matchmaking(= just before preparation for p2p connect).<br />
         /// If that time passes before users start p2p setup, the matchmaking APIs return false as Timeout.<br />
-        /// When we need the more time than 10 minutes for timeout, we can set TimeoutSec directly.
+        /// When we need the more time than 10 minutes for timeout, we can set TimeoutSec directly.<br />
+        /// If call SetTimeoutSec after matchmaking has started could cause bugs, so set this in the Editor or call SetTimeoutSec before matchmaking.
         /// </summary>
         [Range(20, 600)]
         public ushort TimeoutSec = 180;
+        /// <summary>This time is from the start of preparation for p2p until the the end of the preparetion.<br />
+        // If that time passes before matchmaking APIs return result, the matchmaking APIs return false as Timeout.<br />
+        // When we need the more time than 1 minutes for timeout, we can set TimeoutSec directly.<br />
+        /// If call SetTimeoutSec after matchmaking has started could cause bugs, so set this in the Editor or call SetTimeoutSec before matchmaking.
+        /// </summary>
+        [Range(5, 60)]
+        public ushort P2PSetupTimeoutSec = 15;
+
+
     #region TODO: Change this to Enum and display only one field for the selected way on UnityEditor.
         public enum RecconectLobbyIdSaveType {
             NoReconnection, Playerprefs, CustomMethod, AsyncCustomMethod
@@ -112,7 +122,18 @@ namespace SynicSugar.MatchMake {
         public int GetMaxLobbyMemberCount(){
            return eosLobby.GetLobbyMemberLimit();
         }
-
+        
+        /// <summary>
+        /// Set Timeout sec. Should call this before start matchmake. <br />
+        /// If use this, need call this before start matchmaking.
+        /// </summary>
+        /// <param name="MatchmakingTimeout">Timeout sec from the start of matchmaking until the the end of matchmaking(= just before preparation for p2p connect).<br/>
+        /// If nothing is passed, pass the value set in Editor.　Recommend:30-300</param>
+        /// <param name="InitialConnectionTimeout">Timeout sec from the start of preparation for p2p until the the end of the preparetion. <br />
+        /// If nothing is passed, pass the value set in Editor.　Recommend:5-20</param>
+        public void SetTimeoutSec(ushort MatchmakingTimeout = 180, ushort InitialConnectionTimeout = 15){
+            eosLobby.SetTimeoutSec(MatchmakingTimeout == 180 ? TimeoutSec : MatchmakingTimeout, InitialConnectionTimeout == 15 ? P2PSetupTimeoutSec : InitialConnectionTimeout);
+        }
         /// <summary>
         /// MatchMake player with conditions and get the data for p2p connect. <br />
         /// Search a lobby, then if can't join, create a lobby as host. When lobby filled with max members, the lobby is closed automatically.

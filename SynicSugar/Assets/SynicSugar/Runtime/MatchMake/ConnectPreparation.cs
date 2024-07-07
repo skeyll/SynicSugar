@@ -16,8 +16,8 @@ namespace SynicSugar.MatchMake {
         /// To open and request initial connection.
         /// </summary>
         /// <returns>Return true, after end the conenction. If pass time before finish prepartion, return false/</returns>
-        internal static async UniTask<bool> WaitConnectPreparation(CancellationToken token){
-            await UniTask.WhenAny(UniTask.WaitUntil(() => p2pInfo.Instance.ConnectionNotifier.completeConnectPreparetion, cancellationToken: token), UniTask.Delay(30000, cancellationToken: token));
+        internal static async UniTask<bool> WaitConnectPreparation(CancellationToken token, int timeoutMS){
+            await UniTask.WhenAny(UniTask.WaitUntil(() => p2pInfo.Instance.ConnectionNotifier.completeConnectPreparetion, cancellationToken: token), UniTask.Delay(timeoutMS, cancellationToken: token));
 
             #if SYNICSUGAR_LOG
                 Debug.Log("SynicSugar: All connections is ready.");
