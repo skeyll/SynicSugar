@@ -1,52 +1,40 @@
 using PlayEveryWare.EpicOnlineServices;
 using Epic.OnlineServices.P2P;
-using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using ResultE = Epic.OnlineServices.Result;
 using NATTypeE = Epic.OnlineServices.P2P.NATType;
 namespace SynicSugar.P2P {
-    internal class p2pInfoMethod {
+    internal sealed class NatRelayManager {
         internal P2PInterface P2PHandle;
 
         internal async UniTask Init(){
             P2PHandle = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface();
             await QueryNATType();
         }
-
-        bool gettingNATType;
-        // MEMO: Maybe, this has bug now. In fact, the packets are discarded until about 2 secs after this.
         /// <summary>
-        /// For initial connection. But, after 30 sec, always end.
+        /// Set how relay servers are to be used. This setting does not immediately apply to existing connections, but may apply to existing connections if the connection requires renegotiation.<br /> 
+        /// AllowRelay is default. In default, if the connection can be made via p2p, users connect directly; if it fails NAT Punch through, users use Relay(AWS) for the connection.<br />
+        /// If it is set to anything other than AllowRelays, SetRelayControl is automatically called before the first connection. If SetRelayControl() is called after the connection, connection will switch between via Relay and p2p when the connect is not stable, so it is better to change this value in the editor or just before or after matching starts.
         /// </summary>
-        /// <returns></returns>
-        static async internal UniTask<bool> WaitConnectPreparation(CancellationToken token){
-            await UniTask.WhenAny(UniTask.WaitUntil(() => p2pInfo.Instance.ConnectionNotifier.completeConnectPreparetion, cancellationToken: token), UniTask.Delay(30000, cancellationToken: token));
-
+        /// <param name="relay">Default is AllowRelay</param>
+        internal void SetRelayControl(RelayControl relay){
+            SetRelayControlOptions options = new SetRelayControlOptions() { RelayControl = (Epic.OnlineServices.P2P.RelayControl)relay };
+            var result = P2PHandle.SetRelayControl(ref options);
+            if (result != ResultE.Success) {
+                Debug.LogErrorFormat("SetRelayControl: Set Relay Control is failed. error: {0}", result);
+                return;
+            }
+            p2pConfig.Instance.relayControl = relay;
             #if SYNICSUGAR_LOG
-                Debug.Log("SynicSugar: All connections is ready.");
+                Debug.Log($"SetRelayControl: SetRelayControl is Success. {result}");
             #endif
-            if(!p2pConfig.Instance.UseDisconnectedEarlyNotify){
-                p2pConnectorForOtherAssembly.Instance.RemoveNotifyPeerConnectionnEstablished();
-            }
-            if(!p2pInfo.Instance.ConnectionNotifier.completeConnectPreparetion){
-                await p2pConnectorForOtherAssembly.Instance.CloseSession(false, token);
-                return false;
-            }
-            return true;
         }
-        // /// <summary>
-        // /// For initial connection. After 10 sec, make it false.
-        // /// </summary>
-        // /// <returns></returns>
-        // static async internal UniTask DisableDelayedDeliveryAfterElapsed(){
-        //     await UniTask.Delay(10000);
-        //     p2pConfig.Instance.AllowDelayedDelivery = false;
-        // }
+        bool gettingNATType;
         /// <summary>
         /// Query the current NAT-type of our connection.
         /// </summary>
-        async internal UniTask QueryNATType(){
+        internal async UniTask QueryNATType(){
             if(gettingNATType){
                 return;
             }
@@ -77,6 +65,5 @@ namespace SynicSugar.P2P {
 
             return result is ResultE.NotFound ?  NATType.Unknown : (NATType)natType;
         }
-
     }   
 }
