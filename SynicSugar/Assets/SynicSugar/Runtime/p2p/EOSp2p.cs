@@ -356,12 +356,9 @@ namespace SynicSugar.P2P {
         /// <param name="value"></param>
         /// <returns></returns>
         public async static UniTask SendLargePacketsToAll(byte ch, byte[] value){
-            await UniTask.SwitchToThreadPool();
-
             foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
                 await SendLargePackets(ch, value, id);
             }
-            await UniTask.SwitchToMainThread();
         #if SYNICSUGAR_LOG
             Debug.Log($"Finish SendLargePacketsToAll for {ch}");
         #endif
@@ -386,13 +383,9 @@ namespace SynicSugar.P2P {
                 // ... = new byte[value.Length];
                 // Array.Copy(value, p2pInfo.Instance.lastRpcInfo.payload, value.Length);
             }
-            
-            await UniTask.SwitchToThreadPool();
-
             foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
                 await SendLargePackets(ch, value, id);
             }
-            await UniTask.SwitchToMainThread();
         #if SYNICSUGAR_LOG
             Debug.Log($"Finish SendLargePacketsToAll for {ch}");
         #endif
