@@ -5,19 +5,35 @@ using UnityEngine;
 using ResultE = Epic.OnlineServices.Result;
 using NATTypeE = Epic.OnlineServices.P2P.NATType;
 namespace SynicSugar.P2P {
-    internal class NatRelayManager {
+    internal sealed class NatRelayManager {
         internal P2PInterface P2PHandle;
 
         internal async UniTask Init(){
             P2PHandle = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface();
             await QueryNATType();
         }
+        /// <summary>
+        /// Set how relay servers are to be used. This setting does not immediately apply to existing connections, but may apply to existing connections if the connection requires renegotiation.<br /> 
+        /// AllowRelay is default. In default, if the connection can be made via p2p, users connect directly; if it fails NAT Punch through, users use Relay(AWS) for the connection.
+        /// </summary>
+        /// <param name="relay">Default is AllowRelay</param>
+        internal void SetRelayControl(RelayControl relay){
+            SetRelayControlOptions options = new SetRelayControlOptions() { RelayControl = (Epic.OnlineServices.P2P.RelayControl)relay };
+            var result = P2PHandle.SetRelayControl(ref options);
+            if (result != ResultE.Success) {
+                Debug.LogErrorFormat("SetRelayControl: Set Relay Control is failed. error: {0}", result);
+                return;
+            }
 
+            #if SYNICSUGAR_LOG
+                Debug.Log($"SetRelayControl: SetRelayControl is Success. {result}");
+            #endif
+        }
         bool gettingNATType;
         /// <summary>
         /// Query the current NAT-type of our connection.
         /// </summary>
-        async internal UniTask QueryNATType(){
+        internal async UniTask QueryNATType(){
             if(gettingNATType){
                 return;
             }
@@ -48,6 +64,5 @@ namespace SynicSugar.P2P {
 
             return result is ResultE.NotFound ?  NATType.Unknown : (NATType)natType;
         }
-
     }   
 }
