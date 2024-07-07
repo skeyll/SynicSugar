@@ -11,7 +11,26 @@ using ResultE = Epic.OnlineServices.Result;
 using UnityEngine;
 
 namespace SynicSugar.MatchMake {
-    internal class BasicInfoExtensions {
+    internal class ConnectPreparation {
+        /// <summary>
+        /// To open and request initial connection.
+        /// </summary>
+        /// <returns>Return true, after end the conenction. If pass time before finish prepartion, return false/</returns>
+        internal static async UniTask<bool> WaitConnectPreparation(CancellationToken token){
+            await UniTask.WhenAny(UniTask.WaitUntil(() => p2pInfo.Instance.ConnectionNotifier.completeConnectPreparetion, cancellationToken: token), UniTask.Delay(30000, cancellationToken: token));
+
+            #if SYNICSUGAR_LOG
+                Debug.Log("SynicSugar: All connections is ready.");
+            #endif
+            if(!p2pConfig.Instance.UseDisconnectedEarlyNotify){
+                p2pConnectorForOtherAssembly.Instance.RemoveNotifyPeerConnectionnEstablished();
+            }
+            if(!p2pInfo.Instance.ConnectionNotifier.completeConnectPreparetion){
+                await p2pConnectorForOtherAssembly.Instance.CloseSession(false, token);
+                return false;
+            }
+            return true;
+        }
         /// <summary>
         /// Different Assembly can have same CH, but not sorted when receive packet. <br />
         /// So must not use the same ch for what SynicSugar may receive at the same time.

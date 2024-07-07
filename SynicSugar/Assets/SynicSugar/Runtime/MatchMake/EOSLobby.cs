@@ -920,7 +920,7 @@ namespace SynicSugar.MatchMake {
                 p2pInfo.Instance.ConnectionNotifier.Connected(UserId.GetUserId(info.TargetUserId));
                 // Send Id list.
                 if(p2pInfo.Instance.IsHost()){
-                    BasicInfoExtensions.SendUserList(UserId.GetUserId(info.TargetUserId));
+                    ConnectPreparation.SendUserList(UserId.GetUserId(info.TargetUserId));
                 }
             }
         }
@@ -1517,7 +1517,7 @@ namespace SynicSugar.MatchMake {
         #if SYNICSUGAR_LOG
             Debug.Log("OpenConnection: Open Connection.");
         #endif
-            bool canConnect = await p2pInfoMethod.WaitConnectPreparation(token);
+            bool canConnect = await ConnectPreparation.WaitConnectPreparation(token);
             if(!canConnect){
                 MatchMakeManager.Instance.LastResultCode = Result.ConnectEstablishFailed;
                 return false;
@@ -1527,12 +1527,12 @@ namespace SynicSugar.MatchMake {
         #if SYNICSUGAR_LOG
             Debug.Log("OpenConnection: Sends UserList as Host.");
         #endif
-                await BasicInfoExtensions.SendUserListToAll(token);
+                await ConnectPreparation.SendUserListToAll(token);
             }else{
         #if SYNICSUGAR_LOG
             Debug.Log("OpenConnection: Wait for UserList as Guest.");
         #endif
-                BasicInfoExtensions basicInfo = new();
+                ConnectPreparation basicInfo = new();
                 await basicInfo.ReciveUserIdsPacket(token);
             }
             p2pInfo.Instance.pings.Init();
@@ -1546,13 +1546,13 @@ namespace SynicSugar.MatchMake {
         async UniTask<bool> OpenConnectionForReconnecter(CancellationToken token){
             p2pConnectorForOtherAssembly.Instance.OpenConnection(true);
             await p2pInfo.Instance.infoMethod.Init();
-            bool canConnect = await p2pInfoMethod.WaitConnectPreparation(token);
+            bool canConnect = await ConnectPreparation.WaitConnectPreparation(token);
             if(!canConnect){
                 MatchMakeManager.Instance.LastResultCode = Result.ConnectEstablishFailed;
                 return false;
             }
             //Wait for user ids list from host.
-            BasicInfoExtensions basicInfo = new();
+            ConnectPreparation basicInfo = new();
             await basicInfo.ReciveUserIdsPacket(token);
 
             p2pInfo.Instance.pings.Init();
