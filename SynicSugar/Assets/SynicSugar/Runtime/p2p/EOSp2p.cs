@@ -326,7 +326,7 @@ namespace SynicSugar.P2P {
                 SocketId = p2pConnectorForOtherAssembly.Instance.SocketId,
                 Channel = ch,
                 AllowDelayedDelivery = true,
-                Reliability = PacketReliability.ReliableOrdered,
+                Reliability = PacketReliability.ReliableUnordered,
                 Data = new ArraySegment<byte>(payload.ToArray())
             };
 
@@ -431,7 +431,7 @@ namespace SynicSugar.P2P {
                     SocketId = p2pConnectorForOtherAssembly.Instance.SocketId,
                     Channel = ch,
                     AllowDelayedDelivery = true,
-                    Reliability = PacketReliability.ReliableOrdered,
+                    Reliability = PacketReliability.ReliableUnordered,
                     Data = new ArraySegment<byte>(payload.ToArray())
                 };
 
