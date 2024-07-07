@@ -333,7 +333,9 @@ namespace SynicSugar.P2P {
             Buffer.BlockCopy(packetPayload.ToArray(), 0, largeBuffer[id][ch], offset, packetPayload.Length);
 
             //Comming all?
-            return largePacketInfo[id][ch].currentSize + 1160 > largeBuffer[id][ch].Length ? true : false;
+            //We don't know real packet size. So we need + 1160.
+            //This first conditon for empty packet.
+            return largeBuffer[id][ch].Length == 1160 || largePacketInfo[id][ch].currentSize + 1160 > largeBuffer[id][ch].Length ? true : false;
         }
 
         //Synced 0 = index, 1 = chunk, 2 = phase, 3 = syncSinglePhase, 4 = whose data?(0: localUser, 1: sender, 2: other), 5 = targetIndex
@@ -352,7 +354,6 @@ namespace SynicSugar.P2P {
                     return false;
                 }
             }
-
 
             if(!synicBuffer.ContainsKey(id)){
                 synicPacketInfo.Add(id, new SynicPacketInfomation(){  basis = new (){ chunk = payload[1]}, 
@@ -373,7 +374,9 @@ namespace SynicSugar.P2P {
             //Copy Byte from what come in
             Buffer.BlockCopy(packetPayload.ToArray(), 0, synicBuffer[id], offset, packetPayload.Length);
             //Comming all?
-            return synicPacketInfo[id].basis.currentSize + 1160 > synicBuffer[id].Length ? true : false;
+            //We don't know real packet size. So we need + 1160.
+            //This first conditon for empty packet.
+            return synicBuffer[id].Length == 1160 || synicPacketInfo[id].basis.currentSize + 1160 > synicBuffer[id].Length ? true : false;
         }
 
         /// <summary>
