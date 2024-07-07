@@ -10,8 +10,10 @@ public ushort TimeoutSec
 
 
 ### Description
-This time is from the start of matchmaking until the the end of matchmaking(= just before preparation for p2p connect). If that time passes before users start p2p, User leave lobby and the matchmaking APIs return false as Timeout. <br>
-When we need the more time than 10 minutes for timeout, we can set TimeoutSec directly.
+This time is from the start of matchmaking until the the end of matchmaking(= just before preparation for p2p connect).<br>
+If that time passes before users start p2p setup, the matchmaking APIs return false as Timeout.<br>
+When we need the more time than 10 minutes for timeout, we can set TimeoutSec directly.<br>
+If call SetTimeoutSec after matchmaking has started could cause bugs, so set this in the Editor or call SetTimeoutSec before matchmaking.
 
 
 ```cs

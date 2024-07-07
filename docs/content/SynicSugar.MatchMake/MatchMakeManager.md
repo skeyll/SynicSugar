@@ -22,6 +22,7 @@ If this is no longer needed, we call *[CancelCurrentMatchMake](../MatchMakeManag
 |---|---|
 | [maxSearchResult](../MatchMakeManager/maxsearchresult)  | The amount of search results |
 | [TimeoutSec](../MatchMakeManager/timeoutsec) | Timeout seconds for user to exit no-filled lobby |
+| [P2PSetupTimeoutSec](../MatchMakeManager/p2psetuptimeoutsec) | Timeout sec for prep init connection |
 | [lobbyIdSaveType](../MatchMakeManager/lobbyidsavetype) | The way to return to the disconnected lobby |
 | [playerprefsSaveKey](../MatchMakeManager/playerprefssavekey) | The key to save LobbyID |
 | [customSaveLobbyID](../MatchMakeManager/customsavelobbyid) | UnityEvent to save LobbyID |
@@ -37,6 +38,7 @@ If this is no longer needed, we call *[CancelCurrentMatchMake](../MatchMakeManag
 ### Function 
 | API | description |
 |---|---|
+| [SetTimeoutSec](../MatchMakeManager/settimeoutsec) | Set timeout of matchmake and prep conenction |
 | [SearchAndCreateLobby](../MatchMakeManager/searchandcreatelobby) | Search lobby and, if can't join, create lobby |
 | [SearchLobby](../MatchMakeManager/searchlobby) | Search lobby and join it as Guest |
 | [CreateLobby](../MatchMakeManager/createlobby) | Create lobby as Host and wait for Guest |
