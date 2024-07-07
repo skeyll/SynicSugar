@@ -19,7 +19,7 @@ namespace SynicSugar.MatchMake {
         Dictionary<Lobby, LobbyDetails> SearchResults = new Dictionary<Lobby, LobbyDetails>();
         //User config
         uint MAX_SEARCH_RESULT;
-        int timeoutMS;
+        int timeoutMS, initconnectTimeoutMS;
         List<AttributeData> userAttributes;
         bool useManualFinishMatchMake;
         uint requiredMembers;
@@ -41,13 +41,24 @@ namespace SynicSugar.MatchMake {
         string socketName = string.Empty;
         CancellationTokenSource timerCTS;
 
-        internal EOSLobby(uint maxSearch, int timeout){
+        internal EOSLobby(uint maxSearch, int MatchmakingTimeout, int InitialConnectionTimeout){
             MAX_SEARCH_RESULT = maxSearch;
             //For Unitask
-            timeoutMS = timeout * 1000;
+            timeoutMS = MatchmakingTimeout * 1000;
+            initconnectTimeoutMS = InitialConnectionTimeout * 1000;
             timerCTS = new CancellationTokenSource();
         }
         /// <summary>
+        /// If call this in matchmaking, it could cause a bug.
+        /// </summary>
+        /// <param name="MatchmakingTimeout"></param>
+        /// <param name="InitialConnectionTimeout"></param>
+        internal void SetTimeoutSec(int MatchmakingTimeout, int InitialConnectionTimeout){
+            //For Unitask
+            timeoutMS = MatchmakingTimeout * 1000;
+            initconnectTimeoutMS = InitialConnectionTimeout * 1000;
+        }
+
         /// Search for lobbies in backend and join in one to meet conditions.<br />
         /// When player could not join, they create lobby as host and wait for other player.
         /// </summary>
@@ -1520,7 +1531,7 @@ namespace SynicSugar.MatchMake {
         #if SYNICSUGAR_LOG
             Debug.Log("OpenConnection: Open Connection.");
         #endif
-            bool canConnect = await ConnectPreparation.WaitConnectPreparation(token);
+            bool canConnect = await ConnectPreparation.WaitConnectPreparation(token, initconnectTimeoutMS);
             if(!canConnect){
                 MatchMakeManager.Instance.LastResultCode = Result.ConnectEstablishFailed;
                 return false;
@@ -1552,7 +1563,7 @@ namespace SynicSugar.MatchMake {
             }
             await p2pInfo.Instance.natRelay.Init();
             p2pConnectorForOtherAssembly.Instance.OpenConnection(true);
-            bool canConnect = await ConnectPreparation.WaitConnectPreparation(token);
+            bool canConnect = await ConnectPreparation.WaitConnectPreparation(token, initconnectTimeoutMS);
             if(!canConnect){
                 MatchMakeManager.Instance.LastResultCode = Result.ConnectEstablishFailed;
                 return false;
