@@ -13,7 +13,7 @@ namespace SynicSugar.P2P {
             }
             Instance = this;
             userIds = new ();
-            infoMethod = new();
+            natRelay = new();
             pings = new();
             lastRpcInfo = new();
             lastTargetRPCInfo = new();
@@ -28,7 +28,7 @@ namespace SynicSugar.P2P {
             }
         }
 #endregion
-        internal p2pInfoMethod infoMethod;
+        internal NatRelayManager natRelay;
         internal UserIds userIds;
         internal p2pPing pings;
         internal RPCInformation lastRpcInfo;
@@ -128,12 +128,12 @@ namespace SynicSugar.P2P {
         /// <summary>
         /// Update local user's NATType to the latest state.
         /// </summary>
-        public async UniTask QueryNATType() => await infoMethod.QueryNATType();
+        public async UniTask QueryNATType() => await natRelay.QueryNATType();
         /// <summary>
         /// Get last-queried NAT-type, if it has been successfully queried.
         /// </summary>
         /// <returns>Open means being able connect with direct p2p. Otherwise, the connection may be via Epic relay.</returns>
-        public NATType GetNATType() => infoMethod.GetNATType();
+        public NATType GetNATType() => natRelay.GetNATType();
     #region IsHost
         /// <summary>
         /// Is this local user Game Host?

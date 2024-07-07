@@ -1,12 +1,11 @@
 using PlayEveryWare.EpicOnlineServices;
 using Epic.OnlineServices.P2P;
-using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using ResultE = Epic.OnlineServices.Result;
 using NATTypeE = Epic.OnlineServices.P2P.NATType;
 namespace SynicSugar.P2P {
-    internal class p2pInfoMethod {
+    internal class NatRelayManager {
         internal P2PInterface P2PHandle;
 
         internal async UniTask Init(){
@@ -15,34 +14,6 @@ namespace SynicSugar.P2P {
         }
 
         bool gettingNATType;
-        // MEMO: Maybe, this has bug now. In fact, the packets are discarded until about 2 secs after this.
-        /// <summary>
-        /// For initial connection. But, after 30 sec, always end.
-        /// </summary>
-        /// <returns></returns>
-        static async internal UniTask<bool> WaitConnectPreparation(CancellationToken token){
-            await UniTask.WhenAny(UniTask.WaitUntil(() => p2pInfo.Instance.ConnectionNotifier.completeConnectPreparetion, cancellationToken: token), UniTask.Delay(30000, cancellationToken: token));
-
-            #if SYNICSUGAR_LOG
-                Debug.Log("SynicSugar: All connections is ready.");
-            #endif
-            if(!p2pConfig.Instance.UseDisconnectedEarlyNotify){
-                p2pConnectorForOtherAssembly.Instance.RemoveNotifyPeerConnectionnEstablished();
-            }
-            if(!p2pInfo.Instance.ConnectionNotifier.completeConnectPreparetion){
-                await p2pConnectorForOtherAssembly.Instance.CloseSession(false, token);
-                return false;
-            }
-            return true;
-        }
-        // /// <summary>
-        // /// For initial connection. After 10 sec, make it false.
-        // /// </summary>
-        // /// <returns></returns>
-        // static async internal UniTask DisableDelayedDeliveryAfterElapsed(){
-        //     await UniTask.Delay(10000);
-        //     p2pConfig.Instance.AllowDelayedDelivery = false;
-        // }
         /// <summary>
         /// Query the current NAT-type of our connection.
         /// </summary>
