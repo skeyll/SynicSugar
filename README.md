@@ -64,7 +64,7 @@ public partial class Player {
 - [eos_plugin_for_unity](https://github.com/PlayEveryWare/eos_plugin_for_unity)
 - [Mono.Cecil](https://github.com/jbevain/cecil)
 
-SynicSugar generates sync processes using Roslyn SourceGenerator and inserts these codes into your project using Mono.Cecil. These operations are automatically performed at compile based on your network attributes. What we need to sync is just adding network attributes.<br><br>
+SynicSugar generates sync processes using Roslyn SourceGenerator and inserts these codes into your project using Mono.Cecil. These operations are automatically performed at compile based on your network attributes. What we need to sync game is just adding network attributes.<br><br>
 
 The dependencies are for easily and performance. [EOSSDK is not thread-safe](https://dev.epicgames.com/docs/epic-online-services/eos-get-started/working-with-the-eos-sdk/conventions-and-limitations#thread-safety), so cannot use async/await or task. However, UniTask runs everything on Unity's main thread and the perform of Unitask better than standard async/await. MemoryPack is the fastest serializer available in C#. Since SynicSugar is not synchronized with the server, we can freely choose a Serializer without having to consider compatibility.<br><br>
 
