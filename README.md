@@ -91,9 +91,11 @@ You can get SynicSugar from OpenUPM or [SynicSugar/Release](https://github.com/s
  
  URL: https://package.openupm.com
 
- Scope(s):
-* net.skeyll.synicsugar  (Skip if downloading as unitypackage)
-If you use unitypackage, need register to import  dependecies the following three instead of SynicSugar.
+ Scope(s):<br>
+ For OpenUPM<br>
+* net.skeyll.synicsugar <br>
+
+ For unitypackage<br>
 * com.cysharp.unitask 
 * com.playeveryware.eos
 * com.cysharp.memorypack
@@ -103,7 +105,8 @@ If you use unitypackage, need register to import  dependecies the following thre
 
 
 2. Install SynicSugar and dependecies <br>
-　These packages can be imported from **Window/PackageManager/MyRegistries**. Importing SynicSugar will automatically import the other required librarys. If you are using another version in your project, that one will probably work. However, SynicSugar has been developed using the following:  
+　These packages can be imported from **Window/PackageManager/MyRegistries**. Importing SynicSugar will automatically import the other required librarys. If uses synicsugar.unitypackage, import other three packages.<br>
+ If you are using another version in your project, that one will probably work. However, SynicSugar has been developed using the following:  
  * Epic Online Services Plugin for Unity: 3.0.3 
  * UniTask: 2.3.3 
  * MemoryPack: 1.9.14
