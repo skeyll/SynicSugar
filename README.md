@@ -114,10 +114,10 @@ Import what is not in OpenUPM.
 - Mono.Cecil  
 Enter **com.unity.nuget.mono-cecil** in **Edit/ProjectSetting/PackageManager/+/Add package from git URL**.  
 
-![image](https://user-images.githubusercontent.com/50002207/231324146-292634b7-3d42-420d-a20c-37f5fc0ad688.png width="40%">)
+![image](https://user-images.githubusercontent.com/50002207/231324146-292634b7-3d42-420d-a20c-37f5fc0ad688.png)
 
 - System.Runtime.CompilerServices.Unsafe  
-MemoryPack need System.Runtime.CompilerServices.Unsafe.dll. You can get this dll from Download package in https://www.nuget.org/packages/System.Runtime.CompilerServices.Unsafe/6.0.0 . Since this contains DLLs for multiple environments, only import packages for Unity. Unzip the downloaded file and drag and drop **lib/netstandard2.0/System.Runtime.CompilerServices.Unsafe.dll** into your project.  You can get this DLL from this [repo](https://github.com/skeyll/SynicSugar/tree/main/SynicSugar/Assets/Plugins/Runtime.CompilerServices.Unsafe)
+MemoryPack need System.Runtime.CompilerServices.Unsafe.dll. You can get this dll from Download package in https://www.nuget.org/packages/System.Runtime.CompilerServices.Unsafe/6.0.0 . Since this contains DLLs for multiple environments, only import packages for Unity. Unzip the downloaded file and drag and drop **lib/netstandard2.0/System.Runtime.CompilerServices.Unsafe.dll** into your project.  You can also get this DLL from this [repo](https://github.com/skeyll/SynicSugar/tree/main/SynicSugar/Assets/Plugins/Runtime.CompilerServices.Unsafe)
 
 
 ### 2.Get some tokens for EOS.
