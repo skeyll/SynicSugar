@@ -3,8 +3,8 @@
 ![https://github.com/skeyll/SynicSugar/blob/main/LICENSE](https://img.shields.io/github/license/skeyll/SynicSugar) ![Unity](https://img.shields.io/badge/Unity-2021.3%2B-blue) [![openupm](https://img.shields.io/npm/v/net.skeyll.synicsugar?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/net.skeyll.synicsugar/) 
 
 SynicSugar is Unity High-Level Network Library with EpicOnlineServices.<br>
-The concept is the syntax sugar of netcode. You can implement matchmaking, host migration, RPC and other required function for online game with SynicSugar.<br>
-There is no charge for use and no CCU limits or server management required thanks to EpicGames.<br>
+The concept is the syntax sugar of netcode. You can implement matchmaking, host migration, RPC and other basic functions for online game with SynicSugar.<br>
+There is no charge for use and no CCU limits or server management thanks to EpicGames.<br>
 Almost SynicSugar APIs are zero-allocation in Runtime, so the process is sonic. SynicSugar will be optimized for small-party game not covered by [Mirror](https://github.com/MirrorNetworking/Mirror).
 
 For more details, visit [https://skeyll.github.io/SynicSugar/](https://skeyll.github.io/SynicSugar/).
@@ -13,9 +13,10 @@ For more details, visit [https://skeyll.github.io/SynicSugar/](https://skeyll.gi
 ## Features:
  - Mesh topology with max 64 peers
  - No Use Cost and No CCU Limit
- - High-level APIs for mobile and small-party games (MatchMaking, Host-Migration, Large-packet, PushToTalk, Offlinemode and Re-connection...)
+ - High-level APIs for mobile and small-party games (MatchMaking, Large-packet, PushToTalk, and Offlinemode...)
+ - Full support for Host-migration and Re-connection by library
  - Almost all RPC processes are zero-allocation
- - Free VoiceChat(Max16)
+ - Free VoiceChat (Max16peers)
  - Cross-platform connection <br>
     (Windows / Linux / macOS <br>
     Android / iOS <br>
