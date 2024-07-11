@@ -318,15 +318,15 @@ namespace SynicSugar.P2P {
             header.CopyTo(payload);
             _payload.CopyTo(payload.Slice(2));
 
-            //LargePackt is probably used for important data. 
-            //And to release memory as soon as possible, we should ensure that the data is delivered. So, we set ReliableOrdered as default.
+            //LargePacket has Dictionary for each Ch and restores the packets when all packets are received and deserialize packet as one packet.
+            //So, that must be ReliableOrdered to avoid mixing packets.
             SendPacketOptions options = new SendPacketOptions(){
                 LocalUserId = EOSManager.Instance.GetProductUserId(),
                 RemoteUserId = targetId.AsEpic,
                 SocketId = p2pConnectorForOtherAssembly.Instance.SocketId,
                 Channel = ch,
                 AllowDelayedDelivery = true,
-                Reliability = PacketReliability.ReliableUnordered,
+                Reliability = PacketReliability.ReliableOrdered, //Fixed
                 Data = new ArraySegment<byte>(payload.ToArray())
             };
 
@@ -423,15 +423,15 @@ namespace SynicSugar.P2P {
                 header.CopyTo(payload);
                 _payload.CopyTo(payload.Slice(6));
 
-                //LargePackt is probably used for important data. 
-                //And to release memory as soon as possible, we should ensure that the data is delivered. So, we set ReliableOrdered as default.
+                //LargePacket has Dictionary for each Ch and restores the packets when all packets are received and deserialize packet as one packet.
+                //So, that must be ReliableOrdered to avoid mixing packets.
                 SendPacketOptions options = new SendPacketOptions(){
                     LocalUserId = EOSManager.Instance.GetProductUserId(),
                     RemoteUserId = targetId.AsEpic,
                     SocketId = p2pConnectorForOtherAssembly.Instance.SocketId,
                     Channel = ch,
                     AllowDelayedDelivery = true,
-                    Reliability = PacketReliability.ReliableUnordered,
+                    Reliability = PacketReliability.ReliableOrdered, //Fixed
                     Data = new ArraySegment<byte>(payload.ToArray())
                 };
 
