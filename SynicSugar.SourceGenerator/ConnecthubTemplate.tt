@@ -95,11 +95,11 @@ namespace SynicSugar.P2P {
         /// <param name="destroyManager">Destroy NetworkManager after exit lobby.</param>
         /// <param name="cancelToken">Cancel token for this task</param>
         /// </summary>
-        public async UniTask<bool> ExitSession(bool destroyManager = true, CancellationToken cancelToken = default(CancellationToken)){
+        public async UniTask<Result> ExitSession(bool destroyManager = true, CancellationToken cancelToken = default(CancellationToken)){
             if(cancelToken == default(CancellationToken)){
                 cancelToken = p2pConnectorForOtherAssembly.Instance.gameObject.GetCancellationTokenOnDestroy();
             }
-            bool isSuccess = await p2pConnectorForOtherAssembly.Instance.ExitSession(destroyManager, cancelToken);
+            Result isSuccess = await p2pConnectorForOtherAssembly.Instance.ExitSession(destroyManager, cancelToken);
             ClearReferenceDictionaries();
             return isSuccess;
         }
@@ -110,14 +110,15 @@ namespace SynicSugar.P2P {
         /// <param name="destroyManager">Destroy NetworkManager after exit lobby.</param>
         /// <param name="cancelToken">Cancel token for this task</param>
         /// </summary>
-        public async UniTask<bool> CloseSession(bool destroyManager = true, CancellationToken cancelToken = default(CancellationToken)){
+        public async UniTask<Result> CloseSession(bool destroyManager = true, CancellationToken cancelToken = default(CancellationToken)){
             if(cancelToken == default(CancellationToken)){
                 cancelToken = p2pConnectorForOtherAssembly.Instance.gameObject.GetCancellationTokenOnDestroy();
             }
-            bool isSuccess = await p2pConnectorForOtherAssembly.Instance.CloseSession(destroyManager, cancelToken);
+            Result isSuccess = await p2pConnectorForOtherAssembly.Instance.CloseSession(destroyManager, cancelToken);
             ClearReferenceDictionaries();
             return isSuccess;
-        }
+        } 
+
 
         async UniTask ReciveSynicPackets(CancellationToken token){
             int count = p2pConfig.Instance.SynicReceiverBatchSize;

@@ -118,9 +118,9 @@ namespace SynicSugar.P2P {
         /// Stop connections, exit current lobby.<br />
         /// The Last user closes lobby.
         /// </summary>
-        public async UniTask<bool> ExitSession(bool destroyManager, CancellationToken token){
+        public async UniTask<Result> ExitSession(bool destroyManager, CancellationToken token){
             ResetConnections();
-            bool canExit = true;
+            Result canExit;
             //The last user
             if (p2pInfo.Instance.IsHost() && p2pInfo.Instance.AllUserIds.Count == 1){
                 canExit = await MatchMakeManager.Instance.CloseCurrentLobby(token);
@@ -128,7 +128,7 @@ namespace SynicSugar.P2P {
                 canExit = await MatchMakeManager.Instance.ExitCurrentLobby(token);
             }
             
-            if(destroyManager){
+            if(destroyManager && canExit == Result.Success){
                 Destroy(this.gameObject);
             }
             return canExit;
@@ -139,15 +139,15 @@ namespace SynicSugar.P2P {
         /// Host closes lobby. Guest leaves lobby. <br />
         /// If host call this after the lobby has other users, Guests in this lobby are kicked out from the lobby.
         /// </summary>
-        public async UniTask<bool> CloseSession(bool destroyManager, CancellationToken token){
+        public async UniTask<Result> CloseSession(bool destroyManager, CancellationToken token){
             ResetConnections();
-            bool canLeave = true;
+            Result canLeave;
             if(p2pInfo.Instance.IsHost()){
                 canLeave = await MatchMakeManager.Instance.CloseCurrentLobby(token);
             }else{
                 canLeave = await MatchMakeManager.Instance.ExitCurrentLobby(token);
             }
-            if(destroyManager){
+            if(destroyManager && canLeave == Result.Success){
                 Destroy(this.gameObject);
             }
             return canLeave;
