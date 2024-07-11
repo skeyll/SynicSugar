@@ -282,7 +282,7 @@ namespace SynicSugar.MatchMake {
 
             if(canSearch != Result.Success){
                 #if SYNICSUGAR_LOG
-                    Debug.LogErrorFormat("JoinLobbyBySavedLobbyId: RetriveLobbyByLobbyId is failer.: {0}.", canSerch);
+                    Debug.LogErrorFormat("JoinLobbyBySavedLobbyId: RetriveLobbyByLobbyId is failer.: {0}.", canSearch);
                 #endif
                 await MatchMakeManager.Instance.OnDeleteLobbyID();
                 return canSearch; //Can't retrive Lobby data from EOS.
@@ -290,7 +290,7 @@ namespace SynicSugar.MatchMake {
             //Join when lobby has members than more one.
             Result canJoin = await TryJoinSearchResults(token, true);
         #if SYNICSUGAR_LOG
-            Debug.LogFormat("JoinLobbyBySavedLobbyId: TryJoinSearchResults is '{0}'.", canJoin ? "Success" : "Failure");
+            Debug.LogFormat("JoinLobbyBySavedLobbyId: TryJoinSearchResults is '{0}'.", canJoin);
         #endif
             if(canJoin != Result.Success){
                 await MatchMakeManager.Instance.OnDeleteLobbyID();
