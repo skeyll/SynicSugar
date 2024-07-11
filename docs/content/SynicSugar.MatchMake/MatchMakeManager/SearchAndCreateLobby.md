@@ -39,20 +39,20 @@ using SynicSugar.MatchMake;
 public class MatchMake : MonoBehaviour {
     Lobby condition; //Create a Lobby as a condition before matchmake.
     async UniTask StartMatching(){
-        bool isSuccess = await MatchMakeManager.Instance.SearchAndCreateLobby(condition);
+        Result result = await MatchMakeManager.Instance.SearchAndCreateLobby(condition);
 
         // //try catch
-        // bool isSuccess = false;
+        // Result result;
         // try{
         //     CancellationTokenSource cts = new CancellationTokenSource();
         //     //Get Success or Failuer
-        //     isSuccess = await MatchMakeManager.Instance.SearchAndCreateLobby(condition, cts);
+        //     result = await MatchMakeManager.Instance.SearchAndCreateLobby(condition, cts);
         // }catch(OperationCanceledException){
         //     //Cancel matchmaking
-        //     isSuccess = false;
+        //     result = Result.Canceled;
         // }
         
-        if(!isSuccess){
+        if(result != Result.Success){
             //Failuer
             return;
         }

@@ -69,9 +69,9 @@ namespace  SynicSugar.Samples {
             startMatchMake.gameObject.SetActive(false);
             CancellationTokenSource token = new CancellationTokenSource();
 
-            bool canReconnect = await MatchMakeManager.Instance.ReconnectLobby(LobbyID, token);
+            Result result = await MatchMakeManager.Instance.ReconnectLobby(LobbyID, token);
 
-            if(canReconnect){
+            if(result == Result.Success){
                 EOSDebug.Instance.Log($"Success Recconect! LobbyID:{MatchMakeManager.Instance.GetCurrentLobbyID()}");
                 SwitchGUIState(SceneState.ToGame);
                 return;

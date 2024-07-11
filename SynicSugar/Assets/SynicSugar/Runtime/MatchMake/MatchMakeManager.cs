@@ -91,10 +91,6 @@ namespace SynicSugar.MatchMake {
         // Events
         public MemberUpdatedNotifier MemberUpdatedNotifier;
         /// <summary>
-        /// If having error, this value is changed. If Success, this remains Result.None.
-        /// </summary>
-        public Result LastResultCode { get; internal set; } = Result.None;
-        /// <summary>
         /// Is this user Host?
         /// </summary>
         public bool isHost { get { return eosLobby.CurrentLobby.isHost(); }}
@@ -143,13 +139,13 @@ namespace SynicSugar.MatchMake {
         /// If pass, we implement OperationCanceledException by ourself.
         /// If not pass, such processe are done internally and return false when we cancel matchmake.</param>
         /// <returns></returns>
-        public async UniTask<bool> SearchAndCreateLobby(Lobby lobbyCondition, CancellationTokenSource token = default(CancellationTokenSource)){
+        public async UniTask<Result> SearchAndCreateLobby(Lobby lobbyCondition, CancellationTokenSource token = default(CancellationTokenSource)){
             //This task can be canceled from outside even if pass no token.
             //So need try-catch
             bool needTryCatch = token == default;
             matchingToken = needTryCatch ? new CancellationTokenSource() : token;
             
-            bool canMatch = false;
+            Result canMatch = Result.None;
 
             //Match at Lobby
             if(needTryCatch){
@@ -160,19 +156,19 @@ namespace SynicSugar.MatchMake {
                     Debug.Log("MatchMaking is canceled");
                 #endif
                     MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
-                    return false;
+                    return Result.Canceled;
                 }
             }else{
                 canMatch = await eosLobby.StartMatching(lobbyCondition, matchingToken.Token, new(), 0);
             }
 
-            if(!canMatch){
+            if(canMatch != Result.Success){
                 MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
-                return false;
+                return canMatch;
             }
             
             MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Ready);
-            return true;
+            return Result.Success;
         }
         /// <summary>
         /// MatchMake player with conditions and get the data for p2p connect. <br />
@@ -188,7 +184,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="userAttributes">The user attributes of names, job and so on that is needed before P2P. <br />
         /// These should be used just for matchmaking and the kick, the data for actual game should be exchanged via p2p for the lag and server bandwidth .</param>
         /// <returns></returns>
-        public async UniTask<bool> SearchAndCreateLobby(Lobby lobbyCondition, uint minLobbyMember, List<AttributeData> userAttributes = null, CancellationTokenSource token = default(CancellationTokenSource)){  
+        public async UniTask<Result> SearchAndCreateLobby(Lobby lobbyCondition, uint minLobbyMember, List<AttributeData> userAttributes = null, CancellationTokenSource token = default(CancellationTokenSource)){  
             //This task can be canceled from outside even if pass no token.
             //So need try-catch
             bool needTryCatch = token == default;
@@ -198,7 +194,7 @@ namespace SynicSugar.MatchMake {
                 minLobbyMember = 0;
             }
             
-            bool canMatch = false;
+            Result canMatch = Result.None;
             //Match at Lobby
             if(needTryCatch){
                 try{
@@ -208,19 +204,19 @@ namespace SynicSugar.MatchMake {
                     Debug.Log("MatchMaking is canceled");
                 #endif
                     MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
-                    return false;
+                    return Result.Canceled;
                 }
             }else{
                 canMatch = await eosLobby.StartMatching(lobbyCondition, matchingToken.Token, userAttributes ?? new(), minLobbyMember);
             }
 
-            if(!canMatch){
+            if(canMatch != Result.Success){
                 MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
-                return false;
+                return canMatch;
             }
             
             MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Ready);
-            return true;
+            return Result.Success;
         }
         /// <summary>
         /// Search lobby to join, then get the data for p2p connect. <br />
@@ -231,11 +227,11 @@ namespace SynicSugar.MatchMake {
         /// If pass, we implement OperationCanceledException by ourself.
         /// If not pass, such processe are done internally and return false when we cancel matchmake.</param>
         /// <returns></returns>
-        public async UniTask<bool> SearchLobby(Lobby lobbyCondition, CancellationTokenSource token = default(CancellationTokenSource)){
+        public async UniTask<Result> SearchLobby(Lobby lobbyCondition, CancellationTokenSource token = default(CancellationTokenSource)){
             bool needTryCatch = token == default;
             matchingToken = needTryCatch ? new CancellationTokenSource() : token;
             
-            bool canMatch = false;
+            Result canMatch = Result.None;
             //Match at Lobby
             if(needTryCatch){
                 try{
@@ -245,20 +241,20 @@ namespace SynicSugar.MatchMake {
                     Debug.Log("MatchMaking is canceled");
                 #endif
                     MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
-                    return false;
+                    return Result.Canceled;
                 }
             }else{
                 canMatch = await eosLobby.StartJustSearch(lobbyCondition, matchingToken.Token, null, 0);
             }
             
 
-            if(!canMatch){
+            if(canMatch != Result.Success){
                 MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
-                return false;
+                return canMatch;
             }
             
             MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Ready);
-            return true;
+            return Result.Success;
         }
         /// <summary>
         /// Search lobby to join, then get the data for p2p connect. <br />
@@ -274,7 +270,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="userAttributes">The user attributes of names, job and so on that is needed before P2P. <br />
         /// These should be used just for matchmaking and the kick, the data for actual game should be exchanged via p2p for the lag and server bandwidth .</param>
         /// <returns></returns>
-        public async UniTask<bool> SearchLobby(Lobby lobbyCondition, uint minLobbyMember, List<AttributeData> userAttributes = null, CancellationTokenSource token = default(CancellationTokenSource)){
+        public async UniTask<Result> SearchLobby(Lobby lobbyCondition, uint minLobbyMember, List<AttributeData> userAttributes = null, CancellationTokenSource token = default(CancellationTokenSource)){
             bool needTryCatch = token == default;
             matchingToken = needTryCatch ? new CancellationTokenSource() : token;
 
@@ -282,7 +278,7 @@ namespace SynicSugar.MatchMake {
                 minLobbyMember = 0;
             }
             
-            bool canMatch = false;
+            Result canMatch = Result.None;
             //Match at Lobby
             if(needTryCatch){
                 try{
@@ -292,20 +288,20 @@ namespace SynicSugar.MatchMake {
                     Debug.Log("MatchMaking is canceled");
                 #endif
                     MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
-                    return false;
+                    return Result.Canceled;
                 }
             }else{
                 canMatch = await eosLobby.StartJustSearch(lobbyCondition, matchingToken.Token, userAttributes ?? new(), minLobbyMember);
             }
             
 
-            if(!canMatch){
+            if(canMatch != Result.Success){
                 MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
-                return false;
+                return canMatch;
             }
             
             MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Ready);
-            return true;
+            return Result.Success;
         }
         
         /// <summary>
@@ -317,11 +313,11 @@ namespace SynicSugar.MatchMake {
         /// If pass, we implement OperationCanceledException by ourself.
         /// If not pass, such processe are done internally and return false when we cancel matchmake.</param>
         /// <returns></returns>
-        public async UniTask<bool> CreateLobby(Lobby lobbyCondition, CancellationTokenSource token = default(CancellationTokenSource)){
+        public async UniTask<Result> CreateLobby(Lobby lobbyCondition, CancellationTokenSource token = default(CancellationTokenSource)){
             bool needTryCatch = token == default;
             matchingToken = needTryCatch ? new CancellationTokenSource() : token;
             
-            bool canMatch = false;
+            Result canMatch = Result.None;
             //Match at Lobby
             if(needTryCatch){
                 try{
@@ -331,19 +327,19 @@ namespace SynicSugar.MatchMake {
                     Debug.Log("MatchMaking is canceled");
                 #endif
                     MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
-                    return false;
+                    return Result.Canceled;
                 }
             }else{
                 canMatch = await eosLobby.StartJustCreate(lobbyCondition, matchingToken.Token, new(), 0);
             }
             
-            if(!canMatch){
+            if(canMatch != Result.Success){
                 MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
-                return false;
+                return canMatch;
             }
             
             MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Ready);
-            return true;
+            return Result.Success;
         }
         /// <summary>
         /// Create lobby and wait for other users, then get the data for p2p connect. <br />
@@ -359,7 +355,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="userAttributes">The user attributes of names, job and so on that is needed before P2P. <br />
         /// These should be used just for matchmaking and the kick, the data for actual game should be exchanged via p2p for the lag and server bandwidth .</param>
         /// <returns></returns>
-        public async UniTask<bool> CreateLobby(Lobby lobbyCondition, uint minLobbyMember, List<AttributeData> userAttributes = null, CancellationTokenSource token = default(CancellationTokenSource)){
+        public async UniTask<Result> CreateLobby(Lobby lobbyCondition, uint minLobbyMember, List<AttributeData> userAttributes = null, CancellationTokenSource token = default(CancellationTokenSource)){
             bool needTryCatch = token == default;
             matchingToken = needTryCatch ? new CancellationTokenSource() : token;
             
@@ -367,7 +363,7 @@ namespace SynicSugar.MatchMake {
                 minLobbyMember = 0;
             }
             
-            bool canMatch = false;
+            Result canMatch = Result.Success;
             //Match at Lobby
             if(needTryCatch){
                 try{
@@ -377,19 +373,19 @@ namespace SynicSugar.MatchMake {
                     Debug.Log("MatchMaking is canceled");
                 #endif
                     MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
-                    return false;
+                    return Result.Canceled;
                 }
             }else{
                 canMatch = await eosLobby.StartJustCreate(lobbyCondition, matchingToken.Token, userAttributes ?? new(), minLobbyMember);
             }
             
-            if(!canMatch){
+            if(canMatch != Result.Success){
                 MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
-                return false;
+                return canMatch;
             }
 
             MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Ready);
-            return true;
+            return Result.Success;
         }
         bool isConcluding;
         /// <summary>
@@ -408,24 +404,24 @@ namespace SynicSugar.MatchMake {
         /// Call this at the start of game or match-make.
         /// </summary>
         /// <param name="LobbyID">Lobby ID to <c>re</c>-connect</param>
-        public async UniTask<bool> ReconnectLobby(string LobbyID, CancellationTokenSource token = default(CancellationTokenSource)){
+        public async UniTask<Result> ReconnectLobby(string LobbyID, CancellationTokenSource token = default(CancellationTokenSource)){
             if(string.IsNullOrEmpty(LobbyID)){
-                return false;
+                return Result.InvalidParameters;
             }
     #if SYNICSUGAR_LOG
             Debug.Log($"Try Recconect with {LobbyID}");
     #endif
             matchingToken = token == default ? new CancellationTokenSource() : token;
             
-            bool canJoin =  await eosLobby.JoinLobbyBySavedLobbyId(LobbyID, matchingToken.Token);
+            Result canJoin = await eosLobby.JoinLobbyBySavedLobbyId(LobbyID, matchingToken.Token);
 
-            if(!canJoin){
+            if(canJoin != Result.Success){
                 MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
-                return false;
+                return canJoin;
             }
 
             MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Ready);
-            return true;
+            return Result.Success;
         }
         
         /// <summary>
@@ -435,16 +431,16 @@ namespace SynicSugar.MatchMake {
         /// <param name="token">token for this task</param>
         /// <param name="destroyManager">If true, destroy NetworkManager after cancel matchmake.</param>
         /// <returns></returns>
-        public async UniTask<bool> ExitCurrentMatchMake(bool destroyManager = true, CancellationToken token = default(CancellationToken)){
+        public async UniTask<Result> ExitCurrentMatchMake(bool destroyManager = true, CancellationToken token = default(CancellationToken)){
             if(matchingToken == null || !matchingToken.Token.CanBeCanceled){
             #if SYNICSUGAR_LOG
                 Debug.Log("ExitCurrentMatchMake: Is this user currently in matchmaking?");
             #endif
-                return false;
+                return Result.InvalidAPICall;
             }
-            bool canCancel = await eosLobby.CancelMatchMaking(matchingToken, token);
+            Result canCancel = await eosLobby.CancelMatchMaking(matchingToken, token);
             
-            if(destroyManager && canCancel){
+            if(destroyManager && canCancel == Result.Success){
                 Destroy(this.gameObject);
             }
             return canCancel;
@@ -457,16 +453,16 @@ namespace SynicSugar.MatchMake {
         /// <param name="token">token for this task</param>
         /// <param name="destroyManager">If true, destroy NetworkManager after cancel matchmake.</param>
         /// <returns></returns>
-        public async UniTask<bool> CloseCurrentMatchMake(bool destroyManager = true, CancellationToken token = default(CancellationToken)){
+        public async UniTask<Result> CloseCurrentMatchMake(bool destroyManager = true, CancellationToken token = default(CancellationToken)){
             if(matchingToken == null || !matchingToken.Token.CanBeCanceled){
             #if SYNICSUGAR_LOG
                 Debug.Log("CloseCurrentMatchMake: Is this user currently in matchmaking?");
             #endif
-                return false;
+                return Result.InvalidAPICall;
             }
-            bool canCancel = await eosLobby.CloseMatchMaking(matchingToken, token);
+            Result canCancel = await eosLobby.CloseMatchMaking(matchingToken, token);
             
-            if(destroyManager && canCancel){
+            if(destroyManager && canCancel == Result.Success){
                 Destroy(this.gameObject);
             }
             return canCancel;
@@ -478,7 +474,6 @@ namespace SynicSugar.MatchMake {
         /// <param name="token">token for this task</param>
         /// <returns></returns>
         public async UniTask<bool> KickTargetFromLobby(UserId targetId, CancellationToken token = default(CancellationToken)){
-            LastResultCode = Result.None;
             token = token == default ? this.GetCancellationTokenOnDestroy() : token;
             bool canKick = await eosLobby.KickTargetMember(targetId, token);
 
@@ -488,9 +483,8 @@ namespace SynicSugar.MatchMake {
         /// Leave the current lobby in Game.
         /// </summary>
         /// <param name="token"></param>
-        internal async UniTask<bool> ExitCurrentLobby(CancellationToken token){
-            LastResultCode = Result.None;
-            bool canDestroy = await eosLobby.LeaveLobby(false, token);
+        internal async UniTask<Result> ExitCurrentLobby(CancellationToken token){
+            Result canDestroy = await eosLobby.LeaveLobby(false, token);
 
             return canDestroy;
         }
@@ -499,8 +493,8 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         /// <param name="token"></param>
         /// <returns>True on success. If user isn't host, return false.</returns>
-        internal async UniTask<bool> CloseCurrentLobby(CancellationToken token){
-            bool canDestroy = await eosLobby.DestroyLobby(token);
+        internal async UniTask<Result> CloseCurrentLobby(CancellationToken token){
+            Result canDestroy = await eosLobby.DestroyLobby(token);
 
             return canDestroy;
         }
@@ -512,7 +506,7 @@ namespace SynicSugar.MatchMake {
         /// *No Timeout and failure
         /// </summary>
         /// <returns>Always return true. the LastResultCode becomes Success after return true.</returns>
-        public async UniTask<bool> CreateOfflineLobby(Lobby lobbyCondition, OfflineMatchmakingDelay delay, List<AttributeData> userAttributes = null, CancellationTokenSource token = default(CancellationTokenSource)){
+        public async UniTask<Result> CreateOfflineLobby(Lobby lobbyCondition, OfflineMatchmakingDelay delay, List<AttributeData> userAttributes = null, CancellationTokenSource token = default(CancellationTokenSource)){
             bool needTryCatch = token == default;
             matchingToken = needTryCatch ? new CancellationTokenSource() : token;
 
@@ -524,34 +518,27 @@ namespace SynicSugar.MatchMake {
                     Debug.Log("MatchMaking is canceled");
                 #endif
                     MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
-                    return false;
+                    return Result.Canceled;
                 }
             }else{
                 await eosLobby.CreateOfflineLobby(lobbyCondition, delay, userAttributes ?? new(), matchingToken.Token);
             }
-            return true;
+            return Result.Success;
         }
         /// <summary>
         /// Just for solo mode like as tutorial. <br />
         /// Destory Lobby Instance. We can use just Destory(MatchMakeManager.Instance)　and delete LobbyID method without calling this.<br />
         /// </summary>
         /// <returns>Always return true. the LastResultCode becomes Success after return true.</returns>
-        public async UniTask<bool> DestoryOfflineLobby(bool destroyManager = true){
+        public async UniTask<Result> DestoryOfflineLobby(bool destroyManager = true){
             p2pConnectorForOtherAssembly.Instance.p2pToken?.Cancel();
             await eosLobby.DestroyOfflineLobby();
             if(destroyManager){
                 Destroy(this.gameObject);
             }
-            return true;
+            return Result.Success;
         }
     #endregion
-        /// <summary>
-        /// Get Last ERROR Result code. None means init state. 
-        /// </summary>
-        /// <returns>-3 - -1 is unique code of SynicSugar. Others is same with Epic's result code.</returns>
-        public Result GetLastErrorCode(){
-            return LastResultCode;
-        }
     #region LobbyID
         /// <summary>
         /// Get ID of the current lobby that a user's participating

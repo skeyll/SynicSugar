@@ -25,9 +25,9 @@ namespace SynicSugar.Samples {
         }
         internal override async UniTask StartMatchMakeEntity(){
             SwitchGUIState(SceneState.inMatchMake);
-            bool isSuccess = await MatchMakeManager.Instance.SearchAndCreateLobby(matchConditions.GetLobbyCondition(2));
+            Result result = await MatchMakeManager.Instance.SearchAndCreateLobby(matchConditions.GetLobbyCondition(2));
                 
-            if(!isSuccess){
+            if(result != Result.Success){
                 EOSDebug.Instance.Log("MatchMaking Failed.");
                 SwitchGUIState(SceneState.Standby);
                 return;
@@ -47,7 +47,7 @@ namespace SynicSugar.Samples {
             // OfflineMatchmakingDelay delay = new OfflineMatchmakingDelay(2000, 1000, 1000, 1000);
             OfflineMatchmakingDelay delay = OfflineMatchmakingDelay.NoDelay;
             //This is always true.
-            bool isSuccess = await MatchMakeManager.Instance.CreateOfflineLobby(matchConditions.GetLobbyCondition(2), delay);
+            Result result = await MatchMakeManager.Instance.CreateOfflineLobby(matchConditions.GetLobbyCondition(2), delay);
 
             startGame.gameObject.SetActive(true);
         }

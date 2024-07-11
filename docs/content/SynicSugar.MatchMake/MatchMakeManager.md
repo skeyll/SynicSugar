@@ -31,7 +31,6 @@ If this is no longer needed, we call *[CancelCurrentMatchMake](../MatchMakeManag
 | [asyncLobbyIDMethod](../../SynicSugar.MatchMake/asynclobbyidmethod) | Func&lt;UniTask&gt; to recconect Lobby |
 | [MatchMakingGUIEvents](../../SynicSugar.MatchMake/matchmakingguievents) | To manage GUI in matchmaking |
 | [MemberUpdatedNotifier](../MatchMakeManager/memberupdatednotifier) | Notify when a user attributes is updated |
-| [LastResultCode](../MatchMakeManager/lastresultcode) | ResultCode if get error |
 | [isHost](../MatchMakeManager/ishost) | Whether this local user is the owner of current Lobby |
 
 
@@ -49,14 +48,12 @@ If this is no longer needed, we call *[CancelCurrentMatchMake](../MatchMakeManag
 | [KickTargetFromLobby](../MatchMakeManager/kicktargetfromlobby) | (Host) kicks target from Lobby |
 | [CreateOfflineLobby](../MatchMakeManager/createofflinelobby) | Create fake-lobby as Host for tutorial |
 | DestoryOfflineLobby | Destory offline-lobby and stop offline mode |
-| [GetLastErrorCode](../MatchMakeManager/getlasterrorcode) | Get Last ERROR Result code |
 | [GetCurrentLobbyID](../MatchMakeManager/getcurrentlobbyid) | Get LobbyID that a user participating |
 | [GetReconnectLobbyID](../MatchMakeManager/getreconnectlobbyid) | Get LobbyID by Playerprefs |
 | [GetCurrentLobbyMemberCount](../MatchMakeManager/getcurrentlobbymembercount) | Get the current member count in Lobby |
 | [GetMaxLobbyMemberCount](../MatchMakeManager/getmaxlobbymembercount) | Get the current lobby's member limit |
 | [GenerateLobbyObject](../MatchMakeManager/generatelobbyobject) | Generate a lobby object for conditions |
 | [GetTargetAttributeData](../MatchMakeManager/gettargetattributedata) | Get attribute(s) of a member |
-| [GetLastErrorCode](../MatchMakeManager/getlasterrorcode) | Get Last ERROR Result code of Matchmaking |
 | [isLocalUserId](../MatchMakeManager/islocaluserid) | Whether the argument is the id of local user or not |
 
 

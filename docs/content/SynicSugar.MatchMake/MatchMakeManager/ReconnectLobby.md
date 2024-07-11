@@ -6,7 +6,7 @@ weight = 13
 <small>*Namespace: SynicSugar.MatchMake* <br>
 *Class: MatchMakeManager* </small>
 
-public async UniTask&lt;bool&gt; ReconnectLobby(string LobbyID,  CancellationTokenSource token = default(CancellationTokenSource))
+public async UniTask&lt;Result&gt; ReconnectLobby(string LobbyID,  CancellationTokenSource token = default(CancellationTokenSource))
 
 
 ### Description
@@ -33,9 +33,9 @@ public class MatchMake : MonoBehaviour {
             return;
         }
 
-        bool isSuccess = await MatchMakeManager.Instance.ReconnectLobby(LobbyID);
+        result result = await MatchMakeManager.Instance.ReconnectLobby(LobbyID);
         
-        if(isSuccess){
+        if(result == Result.Success){
             //Success
             return;
         }

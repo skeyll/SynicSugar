@@ -7,7 +7,7 @@ weight = 2
 <small>*Namespace: SynicSugar.Login* <br>
 *Class: EOSConnect* </small>
 
-public static async UniTask&lt;(bool isSuccess, Result detail)&gt;  DeleteDeviceID(CancellationToken token = default(CancellationToken))
+public static async UniTask&lt;Result&gt;  DeleteDeviceID(CancellationToken token = default(CancellationToken))
 
 ### Description
 This doesn't mean Delete an account from EOS. Just delete data from local. We can call this after calling LoginWithDeviceID.<br>
@@ -20,14 +20,13 @@ using SynicSugar.Login;
 
 public class Login : MonoBehaviour {     
     async UniTaskVoid Start(){
-        //(bool isSuccess, Result detail)
-        var result = await EOSConnect.DeleteDeviceID();
+        Result result = await EOSConnect.DeleteDeviceID();
 
-        if(result.isSuccess){
+        if(result == Result.Success){
             // success
             return;
         }
-        Debug.Log($"Fault on delete. {result.detail}");
+        Debug.Log($"Fault on delete. {result}");
     }
 }
 ```
@@ -43,14 +42,13 @@ public class Login : MonoBehaviour {
     async UniTaskVoid Start(){
         CancellationTokenSource cts = new CancellationTokenSource();
         try{
-            //(bool isSuccess, Result detail)
-            var result = await EOSConnect.DeleteDeviceID(cts.Token);
+            Result result = await EOSConnect.DeleteDeviceID(cts.Token);
 
-            if(result.isSuccess){
+            if(result == Result.Success){
                 // success
                 return;
             }
-            Debug.Log($"Fault on delete. {result.detail}");
+            Debug.Log($"Fault on delete. {result}");
         }catch(OperationCanceledException){
             Debug.Log("Canceled by user");
         }

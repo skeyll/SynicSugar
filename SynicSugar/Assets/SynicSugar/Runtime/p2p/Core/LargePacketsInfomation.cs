@@ -6,7 +6,7 @@ namespace SynicSugar.P2P {
         /// <summary>
         /// How many packets are sent in a packet?
         /// </summary>
-        public byte chunk;
+        public byte additionalPacketsAmount;
         /// <summary>
         /// Current packet size received
         /// </summary>

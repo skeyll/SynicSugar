@@ -7,8 +7,8 @@ weight = 1
 <small>*Namespace: SynicSugar.Login* <br>
 *Class: EOSConnect* </small>
 
-public static async UniTask&lt;(bool isSuccess, Result detail)&gt;  LoginWithDeviceID(CancellationToken token = default(CancellationToken))
-public static async UniTask&lt;(bool isSuccess, Result detail)&gt;  LoginWithDeviceID(string displayName, CancellationToken token = default(CancellationToken))
+public static async UniTask&lt;Result&gt;  LoginWithDeviceID(CancellationToken token = default(CancellationToken))
+public static async UniTask&lt;Result&gt;  LoginWithDeviceID(string displayName, CancellationToken token = default(CancellationToken))
 
 
 ### Description
@@ -21,10 +21,9 @@ using SynicSugar.Login;
 
 public class Login : MonoBehaviour {     
     async UniTaskVoid Start(){
-        //(bool isSuccess, Result detail)
-        var result = await EOSConnect.LoginWithDeviceID();
+        Result result = await EOSConnect.LoginWithDeviceID();
 
-        if(result.isSuccess){
+        if(result == Result.Success){
             // success
             return;
         }
@@ -44,14 +43,13 @@ public class Login : MonoBehaviour {
     async UniTaskVoid Start(){
         CancellationTokenSource cts = new CancellationTokenSource();
         try{
-            //(bool isSuccess, Result detail)
-            var result = await EOSConnect.LoginWithDeviceID(cts.Token);
+            Result result = await EOSConnect.LoginWithDeviceID(cts.Token);
 
-            if(result.isSuccess){
+            if(result == Result.Success){
                 // success
                 return;
             }
-            Debug.Log($"Fault EOS authentication. {result.detail}");
+            Debug.Log($"Fault EOS authentication. {result}");
         }catch(OperationCanceledException){
             Debug.Log("Canceled by user");
         }
