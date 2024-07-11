@@ -7,6 +7,11 @@ using ResultE = Epic.OnlineServices.Result;
 
 namespace SynicSugar.P2P {
     public static class EOSp2p {
+        /// <summary>
+        /// Add the header to this payload.
+        /// </summary>
+        const int MAX_LARGEPACKET_PAYLOADSIZE = 1166;
+        const int MAX_LARGEPACKET_SIZE = 298496;
     #region Basic
         /// <summary>
         /// Send a packet to all remote peers. <br />
@@ -250,6 +255,9 @@ namespace SynicSugar.P2P {
         /// <param name="value"></param>
         /// <param name="targetId"></param>
         public async static UniTask SendLargePackets(byte ch, byte[] value, UserId targetId){
+            if(value.Length > MAX_LARGEPACKET_SIZE){
+                throw new ArgumentException("SendPacket: Data size exceeds maximum large packet size");
+            }
             int length = 1160;
             byte[] header = GenerateHeader(value.Length);
 
@@ -281,6 +289,9 @@ namespace SynicSugar.P2P {
         /// <param name="value"></param>
         /// <param name="targetId"></param>
         public async static UniTask SendLargePackets(byte ch, byte[] value, UserId targetId, bool recordPacketInfo){
+            if(value.Length > MAX_LARGEPACKET_SIZE){
+                throw new ArgumentException("SendPacket: Data size exceeds maximum large packet size");
+            }
             if(recordPacketInfo){
                 p2pInfo.Instance.lastTargetRPCInfo.ch = ch;
                 p2pInfo.Instance.lastTargetRPCInfo.payload = value;
@@ -338,17 +349,6 @@ namespace SynicSugar.P2P {
             }
         }
         /// <summary>
-        /// index, chunk, sycned phase, is Specific sync, self or not
-        /// </summary>
-        static byte[] GenerateHeader(int valueLength){
-            byte[] result = new byte[2];
-
-            result[0] = 0; 
-            result[1] = (byte)Math.Ceiling(valueLength / 1160f);
-
-            return result;
-        }
-        /// <summary>
         /// Send RPC as LargePacket. <br />
         /// Max packet size is 296960byte.(1160byte * 256)
         /// </summary>
@@ -356,6 +356,9 @@ namespace SynicSugar.P2P {
         /// <param name="value"></param>
         /// <returns></returns>
         public async static UniTask SendLargePacketsToAll(byte ch, byte[] value){
+            if(value.Length > MAX_LARGEPACKET_SIZE){
+                throw new ArgumentException("SendPacket: Data size exceeds maximum large packet size");
+            }
             foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
                 await SendLargePackets(ch, value, id);
             }
@@ -372,6 +375,9 @@ namespace SynicSugar.P2P {
         /// <param name="value"></param>
         /// <returns></returns>
         public async static UniTask SendLargePacketsToAll(byte ch, byte[] value, bool recordPacketInfo){
+            if(value.Length > MAX_LARGEPACKET_SIZE){
+                throw new ArgumentException("SendPacket: Data size exceeds maximum large packet size");
+            }
             if(recordPacketInfo){
                 p2pInfo.Instance.lastRpcInfo.ch = ch;
                 p2pInfo.Instance.lastRpcInfo.payload = value;
@@ -406,6 +412,9 @@ namespace SynicSugar.P2P {
         /// <param name="syncedPhase">Sync from 0 to hierarchy</param>
         /// <param name="syncSpecificPhase">If false, synchronize an only specific hierarchy</param>
         public static void SendSynicPackets(byte ch, byte[] value, UserId targetId, UserId dataOwner, byte syncedPhase = 9, bool syncSpecificPhase = false){
+            if(value.Length > MAX_LARGEPACKET_SIZE){
+                throw new ArgumentException("SendPacket: Data size exceeds maximum large packet size");
+            }
             int length = 1160;
             byte[] header = GenerateHeader(value.Length, syncedPhase, syncSpecificPhase, targetId, dataOwner);
 
@@ -448,27 +457,47 @@ namespace SynicSugar.P2P {
             Debug.Log($"Send Large Packet: Success to {targetId}!");
         #endif
         }
+    #endregion
+    #region Large-packet header
         /// <summary>
-        /// index, chunk, sycned phase, is Specific sync, self or not
+        /// 0-packet index, 1-additional packet count
+        /// </summary>
+        static byte[] GenerateHeader(int valueLength){
+            byte[] header = new byte[2];
+            //packet index
+            header[0] = 0;
+            //additional packet count
+            header[1] = (byte)((valueLength -1) / MAX_LARGEPACKET_PAYLOADSIZE); 
+            return header;
+        }
+        /// <summary>
+        /// 0-packet index, 1-additional packet count, 3-complex data[1bit-isOnly, 4bits-phase, 3bits userType], 4-target user index
         /// </summary>
         static byte[] GenerateHeader(int valueLength, byte phase, bool isOnly, UserId target, UserId dataOwner){
-            byte[] result = new byte[6];
-
-            result[0] = 0; 
-            result[1] = (byte)Math.Ceiling(valueLength / 1160f);
-            result[2] = phase;
-            result[3] = isOnly ? (byte)1 : (byte)0;
+            byte[] header = new byte[6];
+            //packet index
+            header[0] = 0;
+            //additional packet count
+            header[1] = (byte)((valueLength -1) / MAX_LARGEPACKET_PAYLOADSIZE);
+            //complex data
+            int userType;
             if(p2pInfo.Instance.IsLoaclUser(dataOwner)){
-                result[4] = 1; //Local
-            }else if(target.ToString() == dataOwner.ToString()){
-                result[4] = 0; //Target self
+                userType = 1; //Local
+            }else if(target == dataOwner){
+                userType = 0; //Target self
             }else{
-                result[4] = 2; //Others
+                userType = 2; //Others
             }
-            
-            result[5] = result[4] == 2 ? (byte)p2pInfo.Instance.AllUserIds.IndexOf(dataOwner) : (byte)0;
 
-            return result;
+            header[2] = (byte)(
+                ((isOnly ? 1 : 0) << 7) |  // 1bit (0-1)
+                ((phase & 0x0F) << 3) |    // 4bit (0-15)
+                (userType & 0x07)          // 3bit (0-7)
+            );
+            //target user index
+            header[3] = userType == 2 ? (byte)p2pInfo.Instance.AllUserIds.IndexOf(dataOwner) : (byte)0;
+
+            return header;
         }
     #endregion
 #if SYNICSUGAR_PACKETINFO
