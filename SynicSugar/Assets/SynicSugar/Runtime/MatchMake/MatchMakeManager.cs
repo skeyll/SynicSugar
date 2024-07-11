@@ -91,10 +91,6 @@ namespace SynicSugar.MatchMake {
         // Events
         public MemberUpdatedNotifier MemberUpdatedNotifier;
         /// <summary>
-        /// If having error, this value is changed. If Success, this remains Result.None.
-        /// </summary>
-        public Result LastResultCode { get; internal set; } = Result.None;
-        /// <summary>
         /// Is this user Host?
         /// </summary>
         public bool isHost { get { return eosLobby.CurrentLobby.isHost(); }}
@@ -510,7 +506,7 @@ namespace SynicSugar.MatchMake {
         /// *No Timeout and failure
         /// </summary>
         /// <returns>Always return true. the LastResultCode becomes Success after return true.</returns>
-        public async UniTask<bool> CreateOfflineLobby(Lobby lobbyCondition, OfflineMatchmakingDelay delay, List<AttributeData> userAttributes = null, CancellationTokenSource token = default(CancellationTokenSource)){
+        public async UniTask<Result> CreateOfflineLobby(Lobby lobbyCondition, OfflineMatchmakingDelay delay, List<AttributeData> userAttributes = null, CancellationTokenSource token = default(CancellationTokenSource)){
             bool needTryCatch = token == default;
             matchingToken = needTryCatch ? new CancellationTokenSource() : token;
 
@@ -522,34 +518,27 @@ namespace SynicSugar.MatchMake {
                     Debug.Log("MatchMaking is canceled");
                 #endif
                     MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
-                    return false;
+                    return Result.Canceled;
                 }
             }else{
                 await eosLobby.CreateOfflineLobby(lobbyCondition, delay, userAttributes ?? new(), matchingToken.Token);
             }
-            return true;
+            return Result.Success;
         }
         /// <summary>
         /// Just for solo mode like as tutorial. <br />
         /// Destory Lobby Instance. We can use just Destory(MatchMakeManager.Instance)　and delete LobbyID method without calling this.<br />
         /// </summary>
         /// <returns>Always return true. the LastResultCode becomes Success after return true.</returns>
-        public async UniTask<bool> DestoryOfflineLobby(bool destroyManager = true){
+        public async UniTask<Result> DestoryOfflineLobby(bool destroyManager = true){
             p2pConnectorForOtherAssembly.Instance.p2pToken?.Cancel();
             await eosLobby.DestroyOfflineLobby();
             if(destroyManager){
                 Destroy(this.gameObject);
             }
-            return true;
+            return Result.Success;
         }
     #endregion
-        /// <summary>
-        /// Get Last ERROR Result code. None means init state. 
-        /// </summary>
-        /// <returns>-3 - -1 is unique code of SynicSugar. Others is same with Epic's result code.</returns>
-        public Result GetLastErrorCode(){
-            return LastResultCode;
-        }
     #region LobbyID
         /// <summary>
         /// Get ID of the current lobby that a user's participating
