@@ -16,7 +16,7 @@ namespace SynicSugar.Login {
         /// </summary>
         /// <param name="token"></param>
         /// <returns></returns>
-        public static async UniTask<(bool isSuccess, Result detail)> LoginWithDeviceID(CancellationToken token = default(CancellationToken)){
+        public static async UniTask<Result> LoginWithDeviceID(CancellationToken token = default(CancellationToken)){
             bool needTryCatch = token == default;
             token = needTryCatch ? new CancellationTokenSource().Token : token;
 
@@ -48,7 +48,7 @@ namespace SynicSugar.Login {
                     await UniTask.WaitUntil(() => !waitingAuth, cancellationToken: token);
                 }catch(OperationCanceledException){  
                     Debug.Log("LoginWithDeviceID: Cancel CreateDeviceId.");
-                    return (false, resultS);
+                    return resultS;
                 }
             }else{
                 await UniTask.WaitUntil(() => !waitingAuth, cancellationToken: token);
@@ -56,14 +56,13 @@ namespace SynicSugar.Login {
 
             if(!isSuccess){
                 Debug.Log("LoginWithDeviceID: can't get device id");
-                return (false, resultS);
+                return resultS;
             }
             //Login
             waitingAuth = true;
             resultS = Result.Canceled;
             //Pass UserID on each Game.
             EOSManager.Instance.StartConnectLoginWithDeviceToken("Guest", info => {
-                    isSuccess = (info.ResultCode == ResultE.Success);
                     resultS = (Result)info.ResultCode;
                     waitingAuth = false;
                 });
@@ -73,12 +72,12 @@ namespace SynicSugar.Login {
                     await UniTask.WaitUntil(() => !waitingAuth, cancellationToken: token);
                 }catch(OperationCanceledException){
                     Debug.Log("LoginWithDeviceID: Cancel StartConnectLoginWithDeviceToken.");
-                    return (false, resultS);
+                    return resultS;
                 }
             }else{
                 await UniTask.WaitUntil(() => !waitingAuth, cancellationToken: token);
             }
-            return (isSuccess, resultS);
+            return resultS;
         }
         /// <summary>
         /// Login with DeviceID. If success, return true.
@@ -86,7 +85,7 @@ namespace SynicSugar.Login {
         /// <param name="displayName"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        public static async UniTask<(bool isSuccess, Result detail)> LoginWithDeviceID(string displayName, CancellationToken token = default(CancellationToken)){
+        public static async UniTask<Result> LoginWithDeviceID(string displayName, CancellationToken token = default(CancellationToken)){
             bool needTryCatch = token == default;
             token = needTryCatch ? new CancellationTokenSource().Token : token;
 
@@ -118,7 +117,7 @@ namespace SynicSugar.Login {
                     await UniTask.WaitUntil(() => !waitingAuth, cancellationToken: token);
                 }catch(OperationCanceledException){  
                     Debug.Log("LoginWithDeviceID: Cancel CreateDeviceId.");
-                    return (false, resultS);
+                    return resultS;
                 }
             }else{
                 await UniTask.WaitUntil(() => !waitingAuth, cancellationToken: token);
@@ -126,14 +125,13 @@ namespace SynicSugar.Login {
 
             if(!isSuccess){
                 Debug.Log("LoginWithDeviceID: can't get device id");
-                return (false, resultS);
+                return resultS;
             }
             //Login
             waitingAuth = true;
             resultS = Result.Canceled;
             //Pass UserID on each Game.
             EOSManager.Instance.StartConnectLoginWithDeviceToken(displayName, info => {
-                    isSuccess = (info.ResultCode == ResultE.Success);
                     resultS = (Result)info.ResultCode;
                     waitingAuth = false;
                 });
@@ -143,12 +141,12 @@ namespace SynicSugar.Login {
                     await UniTask.WaitUntil(() => !waitingAuth, cancellationToken: token);
                 }catch(OperationCanceledException){
                     Debug.Log("LoginWithDeviceID: Cancel StartConnectLoginWithDeviceToken.");
-                    return (false, resultS);
+                    return resultS;
                 }
             }else{
                 await UniTask.WaitUntil(() => !waitingAuth, cancellationToken: token);
             }
-            return (isSuccess, resultS);
+            return resultS;
         }
         /// <summary>
         /// Delete any existing Device ID access credentials for the current user profile on the local device. <br />
@@ -157,7 +155,7 @@ namespace SynicSugar.Login {
         /// </summary>
         /// <param name="token"></param>
         /// <returns></returns>
-        public static async UniTask<(bool isSuccess, Result detail)> DeleteDeviceID(CancellationToken token = default(CancellationToken)){
+        public static async UniTask<Result> DeleteDeviceID(CancellationToken token = default(CancellationToken)){
             bool needTryCatch = token == default;
             token = needTryCatch ? new CancellationTokenSource().Token : token;
 
@@ -178,13 +176,13 @@ namespace SynicSugar.Login {
                     await UniTask.WaitUntil(() => finishDeleted, cancellationToken: token);
                 }catch(OperationCanceledException){
                     Debug.Log("DeleteDeviceID: Canceled.");
-                    return (false, resultS);
+                    return resultS;
                 }
             }else{
                 await UniTask.WaitUntil(() => finishDeleted, cancellationToken: token);
             }
             
-            return (resultS == Result.Success, resultS);
+            return resultS;
         }
     }
 }

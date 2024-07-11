@@ -30,7 +30,7 @@ namespace  SynicSugar.Samples {
             //(bool, Result)
             var result = await EOSConnect.LoginWithDeviceID("TestPlayer");
     
-            if(result.isSuccess){
+            if(result == Result.Success){
                 modeSelectCanvas.SetActive(true);
                 EOSDebug.Instance.Log("SUCCESS EOS AUTHENTHICATION!.");
                 return;
@@ -38,7 +38,7 @@ namespace  SynicSugar.Samples {
 
             //False
             this.gameObject.SetActive(true);
-            EOSDebug.Instance.Log($"Fault EOS authentication. {result.detail}");
+            EOSDebug.Instance.Log($"Fault EOS authentication. {result}");
         }
         /// <summary>
         /// For button event
@@ -48,7 +48,7 @@ namespace  SynicSugar.Samples {
         }
         public async UniTask DeleteDeviceIDRequest(){
             var result = await EOSConnect.DeleteDeviceID();
-            if(result.isSuccess){
+            if(result == Result.Success){
                 EOSDebug.Instance.Log("Delete DeviceID: Success.");
                 return;
             }
@@ -64,9 +64,9 @@ namespace  SynicSugar.Samples {
             this.gameObject.SetActive(false);
             CancellationTokenSource cancellationToken = new CancellationTokenSource();
             EOSDebug.Instance.Log("Trt to connect EOS with DevTool");
-            bool isSuccess = await DevLogin.Instance.LoginWithDevelopperLogin(cancellationToken);
+            Result result = await DevLogin.Instance.LoginWithDevelopperLogin(cancellationToken);
 
-            if(isSuccess){
+            if(result == Result.Success){
                 modeSelectCanvas.SetActive(true);
                 EOSDebug.Instance.Log("SUCCESS EOS AUTHENTHICATION!.");
                 return;
