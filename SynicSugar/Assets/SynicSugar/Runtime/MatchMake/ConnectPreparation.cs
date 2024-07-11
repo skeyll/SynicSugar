@@ -16,7 +16,7 @@ namespace SynicSugar.MatchMake {
         /// To open and request initial connection.
         /// </summary>
         /// <returns>Return true, after end the conenction. If pass time before finish prepartion, return false/</returns>
-        internal static async UniTask<bool> WaitConnectPreparation(CancellationToken token, int timeoutMS){
+        internal static async UniTask<Result> WaitConnectPreparation(CancellationToken token, int timeoutMS){
             await UniTask.WhenAny(UniTask.WaitUntil(() => p2pInfo.Instance.ConnectionNotifier.completeConnectPreparetion, cancellationToken: token), UniTask.Delay(timeoutMS, cancellationToken: token));
 
             #if SYNICSUGAR_LOG
@@ -27,9 +27,9 @@ namespace SynicSugar.MatchMake {
             }
             if(!p2pInfo.Instance.ConnectionNotifier.completeConnectPreparetion){
                 await p2pConnectorForOtherAssembly.Instance.CloseSession(false, token);
-                return false;
+                return Result.TimedOut;
             }
-            return true;
+            return Result.Success;
         }
         /// <summary>
         /// Different Assembly can have same CH, but not sorted when receive packet. <br />

@@ -95,11 +95,11 @@ namespace SynicSugar.P2P {
         /// <param name="destroyManager">Destroy NetworkManager after exit lobby.</param>
         /// <param name="cancelToken">Cancel token for this task</param>
         /// </summary>
-        public async UniTask<bool> ExitSession(bool destroyManager = true, CancellationToken cancelToken = default(CancellationToken)){
+        public async UniTask<Result> ExitSession(bool destroyManager = true, CancellationToken cancelToken = default(CancellationToken)){
             if(cancelToken == default(CancellationToken)){
                 cancelToken = p2pConnectorForOtherAssembly.Instance.gameObject.GetCancellationTokenOnDestroy();
             }
-            bool isSuccess = await p2pConnectorForOtherAssembly.Instance.ExitSession(destroyManager, cancelToken);
+            Result isSuccess = await p2pConnectorForOtherAssembly.Instance.ExitSession(destroyManager, cancelToken);
             ClearReferenceDictionaries();
             return isSuccess;
         }
@@ -110,11 +110,11 @@ namespace SynicSugar.P2P {
         /// <param name="destroyManager">Destroy NetworkManager after exit lobby.</param>
         /// <param name="cancelToken">Cancel token for this task</param>
         /// </summary>
-        public async UniTask<bool> CloseSession(bool destroyManager = true, CancellationToken cancelToken = default(CancellationToken)){
+        public async UniTask<Result> CloseSession(bool destroyManager = true, CancellationToken cancelToken = default(CancellationToken)){
             if(cancelToken == default(CancellationToken)){
                 cancelToken = p2pConnectorForOtherAssembly.Instance.gameObject.GetCancellationTokenOnDestroy();
             }
-            bool isSuccess = await p2pConnectorForOtherAssembly.Instance.CloseSession(destroyManager, cancelToken);
+            Result isSuccess = await p2pConnectorForOtherAssembly.Instance.CloseSession(destroyManager, cancelToken);
             ClearReferenceDictionaries();
             return isSuccess;
         }
@@ -307,7 +307,7 @@ namespace SynicSugar.P2P {
         }
         <# } #>
         
-        //Synced 0 = index, 1 = chunk
+        //Synced 0 = index, 1 = additional packet amount
         bool RestoreLargePackets(ref byte ch, ref string id, ref ArraySegment<byte> payload){
             //Prep
             if(!largeBuffer.ContainsKey(id)){
@@ -315,13 +315,13 @@ namespace SynicSugar.P2P {
                 largeBuffer.Add(id, new Dictionary<byte, byte[]>());
             }
             if(!largeBuffer[id].ContainsKey(ch)){
-                largePacketInfo[id].Add(ch, new LargePacketsInfomation(){ chunk = payload[1] });
+                largePacketInfo[id].Add(ch, new LargePacketsInfomation(){ additionalPacketsAmount = payload[1] });
                 //Prep enough byte[]
-                largeBuffer[id].Add(ch, new byte[payload[1] * 1160]);
+                largeBuffer[id].Add(ch, new byte[(payload[1] + 1) * EOSp2p.MAX_LARGEPACKET_PAYLOADSIZE]);
             }
 
             int packetIndex = payload[0];
-            int offset = packetIndex * 1160;
+            int offset = packetIndex * EOSp2p.MAX_LARGEPACKET_PAYLOADSIZE;
 
     #if SYNICSUGAR_LOG
             Debug.Log($"RestoreLargePackets: PacketInfo:: ch {ch} / index {payload[0]} / chunk {payload[1]}");
@@ -333,50 +333,51 @@ namespace SynicSugar.P2P {
             Buffer.BlockCopy(packetPayload.ToArray(), 0, largeBuffer[id][ch], offset, packetPayload.Length);
 
             //Comming all?
-            //We don't know real packet size. So we need + 1160.
+            //We don't know real packet size. So we need + 1166.
             //This first conditon for empty packet.
-            return largeBuffer[id][ch].Length == 1160 || largePacketInfo[id][ch].currentSize + 1160 > largeBuffer[id][ch].Length ? true : false;
+            return largePacketInfo[id][ch].additionalPacketsAmount == 0 || largePacketInfo[id][ch].currentSize + EOSp2p.MAX_LARGEPACKET_PAYLOADSIZE > largeBuffer[id][ch].Length ? true : false;
         }
 
-        //Synced 0 = index, 1 = chunk, 2 = phase, 3 = syncSinglePhase, 4 = whose data?(0: localUser, 1: sender, 2: other), 5 = targetIndex
+        // 0-packet index, 1-additional packet amount, 2-complex data[1bit-isOnly, 4bits-phase, 3bits userType], 3-data's user index
         bool RestoreSynicPackets(ref byte ch, ref string id, ref ArraySegment<byte> payload){
             //Set target id
-            if(payload[4] == 0){
+            int userDataType = (int)(payload[2] & 0x07);
+            if(userDataType == 0){
                 if(p2pInfo.Instance.IsHost(id) && p2pInfo.Instance.IsReconnecter){
                     id = p2pInfo.Instance.LocalUserId.ToString();
                 }else{
                     return false;
                 }
-            }else if(payload[4] == 2){
+            }else if(userDataType == 2){
                 if(p2pInfo.Instance.IsHost(id) && p2pInfo.Instance.IsReconnecter){
-                    id = p2pInfo.Instance.AllUserIds[payload[5]].ToString();
+                    id = p2pInfo.Instance.AllUserIds[payload[3]].ToString();
                 }else{
                     return false;
                 }
             }
 
             if(!synicBuffer.ContainsKey(id)){
-                synicPacketInfo.Add(id, new SynicPacketInfomation(){  basis = new (){ chunk = payload[1]}, 
-                                                                            phase = payload[2], 
-                                                                            syncSinglePhase = payload[3] == 1 ? true : false });
+                synicPacketInfo.Add(id, new SynicPacketInfomation(){  basis = new (){ additionalPacketsAmount = payload[1]}, 
+                                                                            phase = (byte)((payload[2] >> 3) & 0x0F), 
+                                                                            isSinglePhase = (payload[2] & 0x80) != 0 });
                 //Prep enough byte[]
-                synicBuffer.Add(id, new byte[payload[1] * 1160]);
+                synicBuffer.Add(id, new byte[(payload[1] + 1) * EOSp2p.MAX_LARGEPACKET_PAYLOADSIZE]);
             }
             int packetIndex = payload[0];
-            int offset = packetIndex * 1160;
+            int offset = packetIndex * EOSp2p.MAX_LARGEPACKET_PAYLOADSIZE;
 
     #if SYNICSUGAR_LOG
-            Debug.Log($"RestoreSynicPackets: PacketInfo:: index {payload[0]} / chunk {payload[1]} / phase {payload[2]} / syncSinglePhase {payload[3]}");
+            Debug.Log($"RestoreSynicPackets: PacketInfo:: index {payload[0]} / chunk {payload[1]} / Data's userID {id}");
     #endif
             //Remove header
-            Span<byte> packetPayload = payload.Slice(6);
+            Span<byte> packetPayload = payload.Slice(4);
             synicPacketInfo[id].basis.currentSize += packetPayload.Length;
             //Copy Byte from what come in
             Buffer.BlockCopy(packetPayload.ToArray(), 0, synicBuffer[id], offset, packetPayload.Length);
             //Comming all?
-            //We don't know real packet size. So we need + 1160.
+            //We don't know real packet size. So we need + 1166.
             //This first conditon for empty packet.
-            return synicBuffer[id].Length == 1160 || synicPacketInfo[id].basis.currentSize + 1160 > synicBuffer[id].Length ? true : false;
+            return synicPacketInfo[id].basis.additionalPacketsAmount == 0 || synicPacketInfo[id].basis.currentSize + EOSp2p.MAX_LARGEPACKET_PAYLOADSIZE > synicBuffer[id].Length ? true : false;
         }
 
         /// <summary>
@@ -395,7 +396,7 @@ namespace SynicSugar.P2P {
 
             //Packet data
             int phase = synicPacketInfo[overwriterUserId].phase;
-            bool syncSinglePhase = synicPacketInfo[overwriterUserId].syncSinglePhase;
+            bool syncSinglePhase = synicPacketInfo[overwriterUserId].isSinglePhase;
 
             switch(phase){<#= SyncedInvoker #>
                 default:

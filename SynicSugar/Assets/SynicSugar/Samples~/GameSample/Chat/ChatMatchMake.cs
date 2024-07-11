@@ -25,9 +25,9 @@ namespace SynicSugar.Samples {
         }
         internal override async UniTask StartMatchMakeEntity(){
             SwitchGUIState(SceneState.inMatchMake);
-            bool isSuccess = await MatchMakeManager.Instance.SearchAndCreateLobby(matchConditions.GetLobbyCondition(2));
+            Result result = await MatchMakeManager.Instance.SearchAndCreateLobby(matchConditions.GetLobbyCondition(2));
                 
-            if(!isSuccess){
+            if(result != Result.Success){
                 EOSDebug.Instance.Log("MatchMaking Failed.");
                 SwitchGUIState(SceneState.Standby);
                 return;

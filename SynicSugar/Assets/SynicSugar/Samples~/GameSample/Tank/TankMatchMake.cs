@@ -100,9 +100,9 @@ namespace SynicSugar.Samples {
         }
         internal override async UniTask StartMatchMakeEntity(){
             SwitchGUIState(SceneState.inMatchMake);
-            bool isSuccess = await MatchMakeManager.Instance.SearchAndCreateLobby(matchConditions.GetLobbyCondition(16), minLobbyMember: 2, userAttributes: MatchMakeConfig.GenerateUserAttribute());
+            Result result = await MatchMakeManager.Instance.SearchAndCreateLobby(matchConditions.GetLobbyCondition(16), minLobbyMember: 2, userAttributes: MatchMakeConfig.GenerateUserAttribute());
                 
-            if(!isSuccess){
+            if(result != Result.Success){
                 EOSDebug.Instance.Log("MatchMaking Failed.");
                 SwitchGUIState(SceneState.Standby);
                 return;
@@ -129,9 +129,9 @@ namespace SynicSugar.Samples {
             playerName.text = $"PlayerName: {nameField.text}";
         }
         async UniTask CreateMatchMakeEntity(){
-            bool isSuccess = await MatchMakeManager.Instance.CreateLobby(matchConditions.GetLobbyCondition(16), minLobbyMember: 2, userAttributes: MatchMakeConfig.GenerateUserAttribute());
+            Result result = await MatchMakeManager.Instance.CreateLobby(matchConditions.GetLobbyCondition(16), minLobbyMember: 2, userAttributes: MatchMakeConfig.GenerateUserAttribute());
                 
-            if(!isSuccess){
+            if(result != Result.Success){
                 EOSDebug.Instance.Log("MatchMaking Failed.");
                 SwitchGUIState(SceneState.Standby);
                 return;
@@ -157,9 +157,9 @@ namespace SynicSugar.Samples {
             playerName.text = $"PlayerName: {nameField.text}";
         }
         async UniTask SearchMatchMakeEntity(){
-            bool isSuccess = await MatchMakeManager.Instance.SearchLobby(matchConditions.GetLobbyCondition(16), minLobbyMember: 2, userAttributes: MatchMakeConfig.GenerateUserAttribute());
+            Result result = await MatchMakeManager.Instance.SearchLobby(matchConditions.GetLobbyCondition(16), minLobbyMember: 2, userAttributes: MatchMakeConfig.GenerateUserAttribute());
                 
-            if(!isSuccess){
+            if(result != Result.Success){
                 EOSDebug.Instance.Log("MatchMaking Failed.");
                 SwitchGUIState(SceneState.Standby);
                 return;

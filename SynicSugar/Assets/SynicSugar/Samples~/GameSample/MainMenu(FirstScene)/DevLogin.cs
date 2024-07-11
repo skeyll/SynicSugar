@@ -8,7 +8,6 @@ using UnityEngine;
 namespace  SynicSugar.Samples {
     public class DevLogin : MonoBehaviour {
     #region Singleton Instance
-        private DevLogin(){}
         public static DevLogin Instance { get; private set; }
         void Awake() {
             if( Instance != null ) {
@@ -25,21 +24,22 @@ namespace  SynicSugar.Samples {
         }
     #endregion
         [SerializeField] InputField portI, nameI;
-        public async UniTask<bool> LoginWithDevelopperLogin(CancellationTokenSource token){
+        public async UniTask<Result> LoginWithDevelopperLogin(CancellationTokenSource token){
             if(string.IsNullOrEmpty(portI.text) || string.IsNullOrEmpty(nameI.text)){
-                return false;
+                Debug.Log("LoginWithDevelopperLogin: PortID or Name is empty.");
+                return Result.InvalidParameters;
             }
 
-            bool isSuccess = false;
+            Result resultS = Result.Canceled;
             bool waitingAuth = true;
             EOSManager.Instance.StartLoginWithLoginTypeAndToken(LoginCredentialType.Developer, $"localhost:{portI.text}", nameI.text, info =>{
                     Debug.Log(info.ResultCode);
                     Debug.Log(info.LocalUserId);
-                    isSuccess = (info.ResultCode == Epic.OnlineServices.Result.Success);
+                    resultS = (Result)info.ResultCode;
                     waitingAuth = false;
             });
             await UniTask.WaitUntil(() => !waitingAuth, cancellationToken: token.Token);
-            return isSuccess;
+            return resultS;
         }
     }
 }

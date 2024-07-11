@@ -90,9 +90,9 @@ namespace  SynicSugar.Samples {
             startMatchMake.gameObject.SetActive(false);
             CancellationTokenSource token = new CancellationTokenSource();
 
-            bool canReconnect = await MatchMakeManager.Instance.ReconnectLobby(LobbyID, token);
+            Result result = await MatchMakeManager.Instance.ReconnectLobby(LobbyID, token);
 
-            if(canReconnect){
+            if(result != Result.Success){
                 EOSDebug.Instance.Log($"Success Recconect! LobbyID:{MatchMakeManager.Instance.GetCurrentLobbyID()}");
                 SwitchGUIState(SceneState.ToGame);
                 return;
@@ -128,15 +128,15 @@ namespace  SynicSugar.Samples {
             bool selfTryCatch = false;
 
             if(!selfTryCatch){ //Recommend
-                bool isSuccess = false;
+                Result result;
                 
                 if(SceneManager.GetActiveScene().name == "TankMatchMake"){ //To set max members and min members
-                    isSuccess = await MatchMakeManager.Instance.SearchAndCreateLobby(matchConditions.GetLobbyCondition(16), minLobbyMember: 2, userAttributes: MatchMakeConfig.GenerateUserAttribute());
+                    result = await MatchMakeManager.Instance.SearchAndCreateLobby(matchConditions.GetLobbyCondition(16), minLobbyMember: 2, userAttributes: MatchMakeConfig.GenerateUserAttribute());
                 }else{ //MaxLobbyMember is just 2.
-                    isSuccess = await MatchMakeManager.Instance.SearchAndCreateLobby(matchConditions.GetLobbyCondition(2));
+                    result = await MatchMakeManager.Instance.SearchAndCreateLobby(matchConditions.GetLobbyCondition(2));
                 }
                     
-                if(!isSuccess){
+                if(result != Result.Success){
                     EOSDebug.Instance.Log("MatchMaking Failed.");
                     SwitchGUIState(SceneState.Standby);
                     return;
@@ -144,9 +144,9 @@ namespace  SynicSugar.Samples {
             }else{ //Sample for another way. To cancel via token in manual.
                 try{
                     CancellationTokenSource matchCTS = new CancellationTokenSource();
-                    bool isSuccess = await MatchMakeManager.Instance.SearchAndCreateLobby(matchConditions.GetLobbyCondition(), token: matchCTS);
+                    Result result = await MatchMakeManager.Instance.SearchAndCreateLobby(matchConditions.GetLobbyCondition(), token: matchCTS);
 
-                    if(!isSuccess){
+                    if(result != Result.Success){
                         EOSDebug.Instance.Log("Backend may have something problem.");
                         SwitchGUIState(SceneState.Standby);
                         return;
