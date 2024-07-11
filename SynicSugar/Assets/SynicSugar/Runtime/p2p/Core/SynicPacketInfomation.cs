@@ -11,6 +11,6 @@ namespace SynicSugar.P2P {
         /// <summary>
         /// For just a one phase?
         /// </summary>
-        public bool syncSinglePhase;
+        public bool isSinglePhase;
     }
 }
