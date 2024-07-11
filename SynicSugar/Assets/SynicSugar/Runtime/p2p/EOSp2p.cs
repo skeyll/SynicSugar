@@ -10,8 +10,8 @@ namespace SynicSugar.P2P {
         /// <summary>
         /// Add the header to this payload.
         /// </summary>
-        const int MAX_LARGEPACKET_PAYLOADSIZE = 1166;
-        const int MAX_LARGEPACKET_SIZE = 298496;
+        public const int MAX_LARGEPACKET_PAYLOADSIZE = 1166;
+        public const int MAX_LARGEPACKET_SIZE = 298496;
     #region Basic
         /// <summary>
         /// Send a packet to all remote peers. <br />
@@ -249,7 +249,6 @@ namespace SynicSugar.P2P {
     #region LargePacket
         /// <summary>
         /// Send TargetRPC as LargePacket. <br />
-        /// Max packet size is 296960byte.(1160byte * 256)
         /// </summary>
         /// <param name="ch"></param>
         /// <param name="value"></param>
@@ -258,7 +257,7 @@ namespace SynicSugar.P2P {
             if(value.Length > MAX_LARGEPACKET_SIZE){
                 throw new ArgumentException("SendPacket: Data size exceeds maximum large packet size");
             }
-            int length = 1160;
+            int length = MAX_LARGEPACKET_PAYLOADSIZE;
             byte[] header = GenerateHeader(value.Length);
 
         #if SYNICSUGAR_LOG
@@ -266,8 +265,8 @@ namespace SynicSugar.P2P {
         #endif
 
             //Max payload is 1170 but we need some header.
-            for(int startIndex = 0; startIndex < value.Length; startIndex += 1160){
-                length = startIndex + 1160 < value.Length ? 1160 : value.Length - startIndex;
+            for(int startIndex = 0; startIndex < value.Length; startIndex += MAX_LARGEPACKET_PAYLOADSIZE){
+                length = startIndex + MAX_LARGEPACKET_PAYLOADSIZE < value.Length ? MAX_LARGEPACKET_PAYLOADSIZE : value.Length - startIndex;
                 SendPacket(value, startIndex, length, header, targetId, ch);
                 header[0]++;
                 //For sending buffer and main thread fps.
@@ -283,7 +282,6 @@ namespace SynicSugar.P2P {
         
         /// <summary>
         /// Send TargetRPC as LargePacket. <br />
-        /// Max packet size is 296960byte.(1160byte * 256)
         /// </summary>
         /// <param name="ch"></param>
         /// <param name="value"></param>
@@ -299,7 +297,7 @@ namespace SynicSugar.P2P {
                 p2pInfo.Instance.lastTargetRPCInfo.isLargePacket = true;
             }
 
-            int length = 1160;
+            int length = MAX_LARGEPACKET_PAYLOADSIZE;
             byte[] header = GenerateHeader(value.Length);
 
         #if SYNICSUGAR_LOG
@@ -307,8 +305,8 @@ namespace SynicSugar.P2P {
         #endif
 
             //Max payload is 1170 but we need some header.
-            for(int startIndex = 0; startIndex < value.Length; startIndex += 1160){
-                length = startIndex + 1160 < value.Length ? 1160 : value.Length - startIndex;
+            for(int startIndex = 0; startIndex < value.Length; startIndex += MAX_LARGEPACKET_PAYLOADSIZE){
+                length = startIndex + MAX_LARGEPACKET_PAYLOADSIZE < value.Length ? MAX_LARGEPACKET_PAYLOADSIZE : value.Length - startIndex;
                 SendPacket(value, startIndex, length, header, targetId, ch);
                 header[0]++;
                 //For sending buffer and main thread fps.
@@ -349,8 +347,7 @@ namespace SynicSugar.P2P {
             }
         }
         /// <summary>
-        /// Send RPC as LargePacket. <br />
-        /// Max packet size is 296960byte.(1160byte * 256)
+        /// Send RPC as LargePacket. 
         /// </summary>
         /// <param name="ch"></param>
         /// <param name="value"></param>
@@ -369,7 +366,6 @@ namespace SynicSugar.P2P {
         
         /// <summary>
         /// Send RPC as LargePacket. <br />
-        /// Max packet size is 296960byte.(1160byte * 256)
         /// </summary>
         /// <param name="ch"></param>
         /// <param name="value"></param>
@@ -415,7 +411,7 @@ namespace SynicSugar.P2P {
             if(value.Length > MAX_LARGEPACKET_SIZE){
                 throw new ArgumentException("SendPacket: Data size exceeds maximum large packet size");
             }
-            int length = 1160;
+            int length = MAX_LARGEPACKET_PAYLOADSIZE;
             byte[] header = GenerateHeader(value.Length, syncedPhase, syncSpecificPhase, targetId, dataOwner);
 
         #if SYNICSUGAR_LOG
@@ -423,14 +419,14 @@ namespace SynicSugar.P2P {
         #endif
 
             //Max payload is 1170 but we need some header.
-            for(int startIndex = 0; startIndex < value.Length; startIndex += 1160){
-                length = startIndex + 1160 < value.Length ? 1160 : value.Length - startIndex;
+            for(int startIndex = 0; startIndex < value.Length; startIndex += MAX_LARGEPACKET_PAYLOADSIZE){
+                length = startIndex + MAX_LARGEPACKET_PAYLOADSIZE < value.Length ? MAX_LARGEPACKET_PAYLOADSIZE : value.Length - startIndex;
 
                 Span<byte> _payload = new Span<byte>(value, startIndex, length); 
                 //Add header
                 Span<byte> payload = new byte[header.Length + length];
                 header.CopyTo(payload);
-                _payload.CopyTo(payload.Slice(6));
+                _payload.CopyTo(payload.Slice(4));
 
                 //LargePacket has Dictionary for each Ch and restores the packets when all packets are received and deserialize packet as one packet.
                 //So, that must be ReliableOrdered to avoid mixing packets.
@@ -460,24 +456,24 @@ namespace SynicSugar.P2P {
     #endregion
     #region Large-packet header
         /// <summary>
-        /// 0-packet index, 1-additional packet count
+        /// 0-packet index, 1-additional packet amount
         /// </summary>
         static byte[] GenerateHeader(int valueLength){
             byte[] header = new byte[2];
             //packet index
             header[0] = 0;
-            //additional packet count
+            //additional packet amount
             header[1] = (byte)((valueLength -1) / MAX_LARGEPACKET_PAYLOADSIZE); 
             return header;
         }
         /// <summary>
-        /// 0-packet index, 1-additional packet count, 3-complex data[1bit-isOnly, 4bits-phase, 3bits userType], 4-target user index
+        /// 0-packet index, 1-additional packet amount, 2-complex data[1bit-isOnly, 4bits-phase, 3bits userType], 3-Data's user index
         /// </summary>
         static byte[] GenerateHeader(int valueLength, byte phase, bool isOnly, UserId target, UserId dataOwner){
-            byte[] header = new byte[6];
+            byte[] header = new byte[4];
             //packet index
             header[0] = 0;
-            //additional packet count
+            //additional packet amount
             header[1] = (byte)((valueLength -1) / MAX_LARGEPACKET_PAYLOADSIZE);
             //complex data
             int userType;
@@ -494,7 +490,7 @@ namespace SynicSugar.P2P {
                 ((phase & 0x0F) << 3) |    // 4bit (0-15)
                 (userType & 0x07)          // 3bit (0-7)
             );
-            //target user index
+            //Data's user index
             header[3] = userType == 2 ? (byte)p2pInfo.Instance.AllUserIds.IndexOf(dataOwner) : (byte)0;
 
             return header;
