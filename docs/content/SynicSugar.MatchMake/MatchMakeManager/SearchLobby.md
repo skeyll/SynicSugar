@@ -7,9 +7,9 @@ weight = 11
 *Class: MatchMakeManager* </small>
 
 ##### Auto matchmaking
-public async UniTask&lt;bool&gt; SearchLobby(Lobby lobbyCondition, CancellationTokenSource token = default(CancellationTokenSource))
+public async UniTask&lt;Result&gt; SearchLobby(Lobby lobbyCondition, CancellationTokenSource token = default(CancellationTokenSource))
 ##### Manual matchmaking
-public async UniTask&lt;bool&gt; SearchLobby(Lobby lobbyCondition, uint minLobbyMember, List&lt;AttributeData&gt; userAttributes = null, CancellationTokenSource token = default(CancellationTokenSource))
+public async UniTask&lt;Result&gt; SearchLobby(Lobby lobbyCondition, uint minLobbyMember, List&lt;AttributeData&gt; userAttributes = null, CancellationTokenSource token = default(CancellationTokenSource))
 
 ### Description
 Search lobby to join. If can join and exchange the data for p2p connect, return true. 
@@ -38,20 +38,20 @@ public class MatchMake : MonoBehaviour {
     Lobby condition; //Create a Lobby as a condition before matchmake.
     async UniTask StartMatching(){
         
-        bool isSuccess = await MatchMakeManager.Instance.SearchLobby(condition);
+        Result result = await MatchMakeManager.Instance.SearchLobby(condition);
 
         // //try catch
-        // bool isSuccess = false;
+        // Result result;
         // try{
         //     CancellationTokenSource cts = new CancellationTokenSource();
         //     //Get Success or Failuer
-        //     isSuccess = await MatchMakeManager.Instance.SearchLobby(condition, cts);
+        //     result = await MatchMakeManager.Instance.SearchLobby(condition, cts);
         // }catch(OperationCanceledException){
         //     //Cancel matchmaking
-        //     isSuccess = false;
+        //     result = Result.Canceled;
         // }
         
-        if(!isSuccess){
+        if(result != Result.Success){
             //Failuer
             return;
         }

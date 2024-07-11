@@ -47,7 +47,7 @@ namespace SynicSugar.Samples {
             // OfflineMatchmakingDelay delay = new OfflineMatchmakingDelay(2000, 1000, 1000, 1000);
             OfflineMatchmakingDelay delay = OfflineMatchmakingDelay.NoDelay;
             //This is always true.
-            bool isSuccess = await MatchMakeManager.Instance.CreateOfflineLobby(matchConditions.GetLobbyCondition(2), delay);
+            Result result = await MatchMakeManager.Instance.CreateOfflineLobby(matchConditions.GetLobbyCondition(2), delay);
 
             startGame.gameObject.SetActive(true);
         }

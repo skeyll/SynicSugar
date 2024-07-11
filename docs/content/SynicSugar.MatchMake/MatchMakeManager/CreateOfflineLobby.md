@@ -6,7 +6,7 @@ weight = 20
 <small>*Namespace: SynicSugar.MatchMake* <br>
 *Class: MatchMakeManager* </small>
 
-public async UniTask&lt;bool&gt; CreateOfflineLobby(Lobby lobbyCondition, OfflineMatchmakingDelay delay, ListList&lt;AttributeData&gt; userAttributes = null, CancellationTokenSource token = default(CancellationTokenSource))
+public async UniTask&lt;Result&gt; CreateOfflineLobby(Lobby lobbyCondition, OfflineMatchmakingDelay delay, ListList&lt;AttributeData&gt; userAttributes = null, CancellationTokenSource token = default(CancellationTokenSource))
 
 ### Description
 Create lobby just in Local to use scripts in tutorial and offline mode. This lobby is not connected to the network. <br>
@@ -37,10 +37,10 @@ public class MatchMake : MonoBehaviour {
         // this immediately create lobby and returns true without async process and calling MatchMakingGUIEvents. 
         // OfflineMatchmakingDelay delay = new OfflineMatchmakingDelay(2000, 1000, 1000, 1000);
 
-        //This always return true.
-        bool isSuccess = await MatchMakeManager.Instance.CreateOfflineLobby(matchConditions.GetLobbyCondition(2), delay);
+        //This always return success.
+        Result result = await MatchMakeManager.Instance.CreateOfflineLobby(matchConditions.GetLobbyCondition(2), delay);
 
-        if(!isSuccess){
+        if(result != Result.Success){
             //Failuer
             return;
         }

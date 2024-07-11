@@ -31,7 +31,7 @@ public class Login : MonoBehaviour {
         //(bool isSuccess, Result detail)
         var result = await EOSConnect.LoginWithDeviceID();
 
-        if(result.isSuccess){
+        if(result == Result.Success){
             // success
             // Transition to MainMenu or so on...
             return;

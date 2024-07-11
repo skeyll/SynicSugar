@@ -6,7 +6,7 @@ weight = 14
 <small>*Namespace: SynicSugar.MatchMake* <br>
 *Class: MatchMakeManager* </small>
 
-public async UniTask&lt;bool&gt; CancelCurrentMatchMake(bool destroyManager = true, CancellationToken token = default(CancellationToken))
+public async UniTask&lt;Result&gt; CancelCurrentMatchMake(bool destroyManager = true, CancellationToken token = default(CancellationToken))
 
 
 ### Description
@@ -28,9 +28,9 @@ public class MatchMake : MonoBehaviour {
         CancellationTokenSource cts = new CancellationTokenSource();
         CancellationToken cancelToken = matchCancellToken.Token;
 
-        bool isSuccess = await MatchMakeManager.Instance.CancelCurrentMatchMake(true, cancelToken);
+        Result result = await MatchMakeManager.Instance.CancelCurrentMatchMake(true, cancelToken);
         
-        if(isSuccess){
+        if(result == Result.Success){
             //Success
             return;
         }

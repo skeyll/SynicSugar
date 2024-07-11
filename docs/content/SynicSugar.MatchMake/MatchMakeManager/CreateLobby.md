@@ -7,9 +7,9 @@ weight = 12
 *Class: MatchMakeManager* </small>
 
 ##### Auto matchmaking
-public async UniTask&lt;bool&gt; CreateLobby(Lobby lobbyCondition, CancellationTokenSource token = default(CancellationTokenSource))
+public async UniTask&lt;Result&gt; CreateLobby(Lobby lobbyCondition, CancellationTokenSource token = default(CancellationTokenSource))
 ##### Manual matchmaking
-public async UniTask&lt;bool&gt; CreateLobby(Lobby lobbyCondition, uint minLobbyMember, List&lt;AttributeData&gt; userAttributes = null, CancellationTokenSource token = default(CancellationTokenSource))
+public async UniTask&lt;Result&gt; CreateLobby(Lobby lobbyCondition, uint minLobbyMember, List&lt;AttributeData&gt; userAttributes = null, CancellationTokenSource token = default(CancellationTokenSource))
 
 
 ### Description
@@ -37,20 +37,19 @@ using SynicSugar.MatchMake;
 public class MatchMake : MonoBehaviour {
     Lobby condition; //Create a Lobby as a condition before matchmake.
     async UniTask StartMatching(){
-        bool isSuccess = await MatchMakeManager.Instance.CreateLobby(condition);
+        Result result = await MatchMakeManager.Instance.CreateLobby(condition);
 
         // //try catch
-        // bool isSuccess = false;
+        // Result result;
         // try{
         //     CancellationTokenSource cts = new CancellationTokenSource();
         //     //Get Success or Failuer
-        //     isSuccess = await MatchMakeManager.Instance.CreateLobby(condition, cts);
+        //     result = await MatchMakeManager.Instance.CreateLobby(condition, cts);
         // }catch(OperationCanceledException){
         //     //Cancel matchmaking
-        //     isSuccess = false;
         // }
         
-        if(!isSuccess){
+        if(result != Result.Success){
             //Failuer
             return;
         }
