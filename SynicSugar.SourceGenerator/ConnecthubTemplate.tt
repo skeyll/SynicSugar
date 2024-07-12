@@ -38,6 +38,14 @@ namespace SynicSugar.P2P {
         /// <param name="receiveTiming">The timing that packet receiver gets packet from buffer.</param>
         /// <param name="maxBatchSize">How many times during 1 FPS are received</param>
         public void StartPacketReceiver(PacketReceiveTiming receiveTiming = PacketReceiveTiming.Update, byte maxBatchSize = 1){
+        #if SYNICSUGAR_PACKETINFO
+            string chs = string.Empty;
+            string[] chList = Enum.GetNames(typeof(ConnectHub.CHANNELLIST));
+            foreach(var l in chList){
+                chs += l.ToString() + ", ";
+            }
+            Debug.Log($"ch info: amount {chList.Length} / {chs}");
+        #endif
             p2pConnectorForOtherAssembly.Instance.StartPacketReceiver(this, receiveTiming, maxBatchSize);
         }
         
@@ -324,8 +332,8 @@ namespace SynicSugar.P2P {
             int packetIndex = payload[0];
             int offset = packetIndex * EOSp2p.MAX_LARGEPACKET_PAYLOADSIZE;
 
-    #if SYNICSUGAR_LOG
-            Debug.Log($"RestoreLargePackets: PacketInfo:: ch {ch} / index {payload[0]} / chunk {payload[1]}");
+    #if SYNICSUGAR_PACKETINFO
+            Debug.Log($"RestoreLargePackets: ch {ch}({(CHANNELLIST)ch}) from {id} / packet index {payload[0]}/{payload[1]}");
     #endif
             //Remove header
             Span<byte> packetPayload = payload.Slice(2);
@@ -367,8 +375,8 @@ namespace SynicSugar.P2P {
             int packetIndex = payload[0];
             int offset = packetIndex * EOSp2p.MAX_LARGEPACKET_PAYLOADSIZE;
 
-    #if SYNICSUGAR_LOG
-            Debug.Log($"RestoreSynicPackets: PacketInfo:: index {payload[0]} / chunk {payload[1]} / Data's userID {id}");
+    #if SYNICSUGAR_PACKETINFO
+            Debug.Log($"RestoreSynicPacket(Synic): ch {ch}({(CHANNELLIST)ch}) / Data's userID {id} / packet index {payload[0]}/{payload[1]}");
     #endif
             //Remove header
             Span<byte> packetPayload = payload.Slice(4);
