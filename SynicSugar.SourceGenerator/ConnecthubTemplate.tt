@@ -38,6 +38,14 @@ namespace SynicSugar.P2P {
         /// <param name="receiveTiming">The timing that packet receiver gets packet from buffer.</param>
         /// <param name="maxBatchSize">How many times during 1 FPS are received</param>
         public void StartPacketReceiver(PacketReceiveTiming receiveTiming = PacketReceiveTiming.Update, byte maxBatchSize = 1){
+        #if SYNICSUGAR_PACKETINFO
+            string chs = string.Empty;
+            string[] chList = Enum.GetNames(typeof(ConnectHub.CHANNELLIST));
+            foreach(var l in chList){
+                chs += l.ToString() + ", ";
+            }
+            Debug.Log($"ch info: amount {chList.Length} / {chs}");
+        #endif
             p2pConnectorForOtherAssembly.Instance.StartPacketReceiver(this, receiveTiming, maxBatchSize);
         }
         
