@@ -351,58 +351,58 @@ namespace SynicSugarGenerator {
                     "\n                //Prep enough byte[]\n                largeBuffer[id].Add(ch, ne" +
                     "w byte[(payload[1] + 1) * EOSp2p.MAX_LARGEPACKET_PAYLOADSIZE]);\n            }\n\n " +
                     "           int packetIndex = payload[0];\n            int offset = packetIndex * " +
-                    "EOSp2p.MAX_LARGEPACKET_PAYLOADSIZE;\n\n    #if SYNICSUGAR_LOG\n            Debug.Lo" +
-                    "g($\"RestoreLargePackets: PacketInfo:: ch {ch} / index {payload[0]} / chunk {payl" +
-                    "oad[1]}\");\n    #endif\n            //Remove header\n            Span<byte> packetP" +
-                    "ayload = payload.Slice(2);\n            largePacketInfo[id][ch].currentSize += pa" +
-                    "cketPayload.Length;\n            //Copy Byte from what come in\n            Buffer" +
-                    ".BlockCopy(packetPayload.ToArray(), 0, largeBuffer[id][ch], offset, packetPayloa" +
-                    "d.Length);\n\n            //Comming all?\n            //We don\'t know real packet s" +
-                    "ize. So we need + 1166.\n            //This first conditon for empty packet.\n    " +
-                    "        return largePacketInfo[id][ch].additionalPacketsAmount == 0 || largePack" +
-                    "etInfo[id][ch].currentSize + EOSp2p.MAX_LARGEPACKET_PAYLOADSIZE > largeBuffer[id" +
-                    "][ch].Length ? true : false;\n        }\n\n        // 0-packet index, 1-additional " +
-                    "packet amount, 2-complex data[1bit-isOnly, 4bits-phase, 3bits userType], 3-data\'" +
-                    "s user index\n        bool RestoreSynicPackets(ref byte ch, ref string id, ref Ar" +
-                    "raySegment<byte> payload){\n            //Set target id\n            int userDataT" +
-                    "ype = (int)(payload[2] & 0x07);\n            if(userDataType == 0){\n             " +
-                    "   if(p2pInfo.Instance.IsHost(id) && p2pInfo.Instance.IsReconnecter){\n          " +
-                    "          id = p2pInfo.Instance.LocalUserId.ToString();\n                }else{\n " +
-                    "                   return false;\n                }\n            }else if(userData" +
-                    "Type == 2){\n                if(p2pInfo.Instance.IsHost(id) && p2pInfo.Instance.I" +
-                    "sReconnecter){\n                    id = p2pInfo.Instance.AllUserIds[payload[3]]." +
-                    "ToString();\n                }else{\n                    return false;\n           " +
-                    "     }\n            }\n\n            if(!synicBuffer.ContainsKey(id)){\n            " +
-                    "    synicPacketInfo.Add(id, new SynicPacketInfomation(){  basis = new (){ additi" +
-                    "onalPacketsAmount = payload[1]}, \n                                              " +
-                    "                              phase = (byte)((payload[2] >> 3) & 0x0F), \n       " +
-                    "                                                                     isSinglePha" +
-                    "se = (payload[2] & 0x80) != 0 });\n                //Prep enough byte[]\n         " +
-                    "       synicBuffer.Add(id, new byte[(payload[1] + 1) * EOSp2p.MAX_LARGEPACKET_PA" +
-                    "YLOADSIZE]);\n            }\n            int packetIndex = payload[0];\n           " +
-                    " int offset = packetIndex * EOSp2p.MAX_LARGEPACKET_PAYLOADSIZE;\n\n    #if SYNICSU" +
-                    "GAR_LOG\n            Debug.Log($\"RestoreSynicPackets: PacketInfo:: index {payload" +
-                    "[0]} / chunk {payload[1]} / Data\'s userID {id}\");\n    #endif\n            //Remov" +
-                    "e header\n            Span<byte> packetPayload = payload.Slice(4);\n            sy" +
-                    "nicPacketInfo[id].basis.currentSize += packetPayload.Length;\n            //Copy " +
-                    "Byte from what come in\n            Buffer.BlockCopy(packetPayload.ToArray(), 0, " +
-                    "synicBuffer[id], offset, packetPayload.Length);\n            //Comming all?\n     " +
-                    "       //We don\'t know real packet size. So we need + 1166.\n            //This f" +
-                    "irst conditon for empty packet.\n            return synicPacketInfo[id].basis.add" +
-                    "itionalPacketsAmount == 0 || synicPacketInfo[id].basis.currentSize + EOSp2p.MAX_" +
-                    "LARGEPACKET_PAYLOADSIZE > synicBuffer[id].Length ? true : false;\n        }\n\n    " +
-                    "    /// <summary>\n        /// Call from ConvertFormPacket.\n        /// </summary" +
-                    ">\n        void SyncedSynic(string overwriterUserId){\n            //Deserialize p" +
-                    "acket\n            using var decompressor = new BrotliDecompressor();\n           " +
-                    " Span<byte> transmittedPaylaod = new Span<byte>(synicBuffer[overwriterUserId]);\n" +
-                    "\n            var decompressedBuffer = decompressor.Decompress(transmittedPaylaod" +
-                    ".Slice(0, synicPacketInfo[overwriterUserId].basis.currentSize));\n            Syn" +
-                    "icContainer container = MemoryPackSerializer.Deserialize<SynicContainer>(decompr" +
-                    "essedBuffer);\n#if SYNICSUGAR_LOG\n            Debug.Log($\"SyncedSynic: Deserializ" +
-                    "e is Success for {overwriterUserId}\");\n    #endif\n\n            //Packet data\n   " +
-                    "         int phase = synicPacketInfo[overwriterUserId].phase;\n            bool s" +
-                    "yncSinglePhase = synicPacketInfo[overwriterUserId].isSinglePhase;\n\n            s" +
-                    "witch(phase){");
+                    "EOSp2p.MAX_LARGEPACKET_PAYLOADSIZE;\n\n    #if SYNICSUGAR_PACKETINFO\n            D" +
+                    "ebug.Log($\"RestoreLargePackets: ch {ch}({(CHANNELLIST)ch}) from {id} / packet in" +
+                    "dex {payload[0]}/{payload[1]}\");\n    #endif\n            //Remove header\n        " +
+                    "    Span<byte> packetPayload = payload.Slice(2);\n            largePacketInfo[id]" +
+                    "[ch].currentSize += packetPayload.Length;\n            //Copy Byte from what come" +
+                    " in\n            Buffer.BlockCopy(packetPayload.ToArray(), 0, largeBuffer[id][ch]" +
+                    ", offset, packetPayload.Length);\n\n            //Comming all?\n            //We do" +
+                    "n\'t know real packet size. So we need + 1166.\n            //This first conditon " +
+                    "for empty packet.\n            return largePacketInfo[id][ch].additionalPacketsAm" +
+                    "ount == 0 || largePacketInfo[id][ch].currentSize + EOSp2p.MAX_LARGEPACKET_PAYLOA" +
+                    "DSIZE > largeBuffer[id][ch].Length ? true : false;\n        }\n\n        // 0-packe" +
+                    "t index, 1-additional packet amount, 2-complex data[1bit-isOnly, 4bits-phase, 3b" +
+                    "its userType], 3-data\'s user index\n        bool RestoreSynicPackets(ref byte ch," +
+                    " ref string id, ref ArraySegment<byte> payload){\n            //Set target id\n   " +
+                    "         int userDataType = (int)(payload[2] & 0x07);\n            if(userDataTyp" +
+                    "e == 0){\n                if(p2pInfo.Instance.IsHost(id) && p2pInfo.Instance.IsRe" +
+                    "connecter){\n                    id = p2pInfo.Instance.LocalUserId.ToString();\n  " +
+                    "              }else{\n                    return false;\n                }\n       " +
+                    "     }else if(userDataType == 2){\n                if(p2pInfo.Instance.IsHost(id)" +
+                    " && p2pInfo.Instance.IsReconnecter){\n                    id = p2pInfo.Instance.A" +
+                    "llUserIds[payload[3]].ToString();\n                }else{\n                    ret" +
+                    "urn false;\n                }\n            }\n\n            if(!synicBuffer.Contains" +
+                    "Key(id)){\n                synicPacketInfo.Add(id, new SynicPacketInfomation(){  " +
+                    "basis = new (){ additionalPacketsAmount = payload[1]}, \n                        " +
+                    "                                                    phase = (byte)((payload[2] >" +
+                    "> 3) & 0x0F), \n                                                                 " +
+                    "           isSinglePhase = (payload[2] & 0x80) != 0 });\n                //Prep e" +
+                    "nough byte[]\n                synicBuffer.Add(id, new byte[(payload[1] + 1) * EOS" +
+                    "p2p.MAX_LARGEPACKET_PAYLOADSIZE]);\n            }\n            int packetIndex = p" +
+                    "ayload[0];\n            int offset = packetIndex * EOSp2p.MAX_LARGEPACKET_PAYLOAD" +
+                    "SIZE;\n\n    #if SYNICSUGAR_PACKETINFO\n            Debug.Log($\"RestoreSynicPacket(" +
+                    "Synic): ch {ch}({(CHANNELLIST)ch}) / Data\'s userID {id} / packet index {payload[" +
+                    "0]}/{payload[1]}\");\n    #endif\n            //Remove header\n            Span<byte" +
+                    "> packetPayload = payload.Slice(4);\n            synicPacketInfo[id].basis.curren" +
+                    "tSize += packetPayload.Length;\n            //Copy Byte from what come in\n       " +
+                    "     Buffer.BlockCopy(packetPayload.ToArray(), 0, synicBuffer[id], offset, packe" +
+                    "tPayload.Length);\n            //Comming all?\n            //We don\'t know real pa" +
+                    "cket size. So we need + 1166.\n            //This first conditon for empty packet" +
+                    ".\n            return synicPacketInfo[id].basis.additionalPacketsAmount == 0 || s" +
+                    "ynicPacketInfo[id].basis.currentSize + EOSp2p.MAX_LARGEPACKET_PAYLOADSIZE > syni" +
+                    "cBuffer[id].Length ? true : false;\n        }\n\n        /// <summary>\n        /// " +
+                    "Call from ConvertFormPacket.\n        /// </summary>\n        void SyncedSynic(str" +
+                    "ing overwriterUserId){\n            //Deserialize packet\n            using var de" +
+                    "compressor = new BrotliDecompressor();\n            Span<byte> transmittedPaylaod" +
+                    " = new Span<byte>(synicBuffer[overwriterUserId]);\n\n            var decompressedB" +
+                    "uffer = decompressor.Decompress(transmittedPaylaod.Slice(0, synicPacketInfo[over" +
+                    "writerUserId].basis.currentSize));\n            SynicContainer container = Memory" +
+                    "PackSerializer.Deserialize<SynicContainer>(decompressedBuffer);\n#if SYNICSUGAR_L" +
+                    "OG\n            Debug.Log($\"SyncedSynic: Deserialize is Success for {overwriterUs" +
+                    "erId}\");\n    #endif\n\n            //Packet data\n            int phase = synicPack" +
+                    "etInfo[overwriterUserId].phase;\n            bool syncSinglePhase = synicPacketIn" +
+                    "fo[overwriterUserId].isSinglePhase;\n\n            switch(phase){");
             
             #line default
             #line hidden
