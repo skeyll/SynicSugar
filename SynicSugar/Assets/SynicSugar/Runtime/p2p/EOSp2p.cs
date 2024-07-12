@@ -26,7 +26,7 @@ namespace SynicSugar.P2P {
             int count = p2pConfig.Instance.RPCBatchSize;
             
         #if SYNICSUGAR_PACKETINFO
-            Debug.Log($"SendPacketToAll: ch {ch} / payload {ByteArrayToHexString(value)}");
+            Debug.Log($"SendPacket(All): {ch.ToString()}({ch}) / payload {ByteArrayToHexString(value)}");
         #endif
             foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
                 SendPacketOptions options = new SendPacketOptions(){
@@ -84,7 +84,7 @@ namespace SynicSugar.P2P {
             int count = p2pConfig.Instance.RPCBatchSize;
 
         #if SYNICSUGAR_PACKETINFO
-            Debug.Log($"SendPacketToAll: ch {ch} / payload {ByteArrayToHexString(value)}");
+            Debug.Log($"SendPacket(All): {ch.ToString()}({ch})/ payload {ByteArrayToHexString(value)}");
         #endif
             foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
                 SendPacketOptions options = new SendPacketOptions(){
@@ -128,7 +128,7 @@ namespace SynicSugar.P2P {
             int count = p2pConfig.Instance.RPCBatchSize;
 
         #if SYNICSUGAR_PACKETINFO
-            Debug.Log($"SendPacketToAll: ch {ch} / payload {ByteArrayToHexString(value)}");
+            Debug.Log($"SendPacket(ToAll): {ch.ToString()}({ch}) / payload {ByteArrayToHexString(value)}");
         #endif
             foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
                 SendPacketOptions options = new SendPacketOptions(){
@@ -176,7 +176,7 @@ namespace SynicSugar.P2P {
                 Data = new ArraySegment<byte>(value != null ? value : Array.Empty<byte>())
             };
         #if SYNICSUGAR_PACKETINFO
-            Debug.Log($"SendPacket: ch {ch} / payload {ByteArrayToHexString(value)}");
+            Debug.Log($"SendPacket: {ch.ToString()}({ch}) / payload {ByteArrayToHexString(value)}");
         #endif
             ResultE result = p2pConnectorForOtherAssembly.Instance.P2PHandle.SendPacket(ref options);
 
@@ -209,7 +209,7 @@ namespace SynicSugar.P2P {
                 Data = new ArraySegment<byte>(value != null ? value : Array.Empty<byte>())
             };
         #if SYNICSUGAR_PACKETINFO
-            Debug.Log($"SendPacket: ch {ch} / payload {ByteArrayToHexString(value)}");
+            Debug.Log($"SendPacket: {ch.ToString()}({ch}) / payload {ByteArrayToHexString(value)}");
         #endif
             ResultE result = p2pConnectorForOtherAssembly.Instance.P2PHandle.SendPacket(ref options);
 
@@ -261,7 +261,7 @@ namespace SynicSugar.P2P {
             byte[] header = GenerateHeader(value.Length);
 
         #if SYNICSUGAR_LOG
-            Debug.Log($"SendLargePackets: PacketInfo:: size {value.Length} / chunk {header[1]}");
+            Debug.Log($"SendPacket(Large): {ch.ToString()}({ch}) / payload size {value.Length} / additional packets {header[1]}");
         #endif
 
             //Max payload is 1170 but we need some header.
@@ -288,7 +288,7 @@ namespace SynicSugar.P2P {
         /// <param name="targetId"></param>
         public async static UniTask SendLargePackets(byte ch, byte[] value, UserId targetId, bool recordPacketInfo){
             if(value.Length > MAX_LARGEPACKET_SIZE){
-                throw new ArgumentException("SendPacket: Data size exceeds maximum large packet size");
+                throw new ArgumentException("SendPacket(Large): Data size exceeds maximum large packet size");
             }
             if(recordPacketInfo){
                 p2pInfo.Instance.lastTargetRPCInfo.ch = ch;
@@ -301,7 +301,7 @@ namespace SynicSugar.P2P {
             byte[] header = GenerateHeader(value.Length);
 
         #if SYNICSUGAR_LOG
-            Debug.Log($"SendLargePackets: PacketInfo:: size {value.Length} / chunk {header[1]}");
+            Debug.Log($"SendPacket(Large): {ch.ToString()}({ch}) / payload size {value.Length} / additional packets {header[1]}");
         #endif
 
             //Max payload is 1170 but we need some header.
@@ -354,7 +354,7 @@ namespace SynicSugar.P2P {
         /// <returns></returns>
         public async static UniTask SendLargePacketsToAll(byte ch, byte[] value){
             if(value.Length > MAX_LARGEPACKET_SIZE){
-                throw new ArgumentException("SendPacket: Data size exceeds maximum large packet size");
+                throw new ArgumentException("SendPacket(Large/All): Data size exceeds maximum large packet size");
             }
             foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
                 await SendLargePackets(ch, value, id);
@@ -372,7 +372,7 @@ namespace SynicSugar.P2P {
         /// <returns></returns>
         public async static UniTask SendLargePacketsToAll(byte ch, byte[] value, bool recordPacketInfo){
             if(value.Length > MAX_LARGEPACKET_SIZE){
-                throw new ArgumentException("SendPacket: Data size exceeds maximum large packet size");
+                throw new ArgumentException("SendPacket(Large/ALL): Data size exceeds maximum large packet size");
             }
             if(recordPacketInfo){
                 p2pInfo.Instance.lastRpcInfo.ch = ch;
@@ -409,13 +409,13 @@ namespace SynicSugar.P2P {
         /// <param name="syncSpecificPhase">If false, synchronize an only specific hierarchy</param>
         public static void SendSynicPackets(byte ch, byte[] value, UserId targetId, UserId dataOwner, byte syncedPhase = 9, bool syncSpecificPhase = false){
             if(value.Length > MAX_LARGEPACKET_SIZE){
-                throw new ArgumentException("SendPacket: Data size exceeds maximum large packet size");
+                throw new ArgumentException("SendPacket(Synic): Data size exceeds maximum large packet size");
             }
             int length = MAX_LARGEPACKET_PAYLOADSIZE;
             byte[] header = GenerateHeader(value.Length, syncedPhase, syncSpecificPhase, targetId, dataOwner);
 
         #if SYNICSUGAR_LOG
-            Debug.Log($"SendSynicPackets: PacketInfo:: size {value.Length} / chunk {header[1]} / hierarchy {header[2]} / syncSpecificPhase {header[3]}");
+            Debug.Log($"SendPacket(Synic): payload size {value.Length} / chunk {header[1]} / hierarchy {header[2]} / syncSpecificPhase {header[3]}");
         #endif
 
             //Max payload is 1170 but we need some header.
