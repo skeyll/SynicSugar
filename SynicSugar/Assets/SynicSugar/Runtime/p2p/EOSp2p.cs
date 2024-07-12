@@ -26,7 +26,7 @@ namespace SynicSugar.P2P {
             int count = p2pConfig.Instance.RPCBatchSize;
             
         #if SYNICSUGAR_PACKETINFO
-            Debug.Log($"SendPacket(All): {ch.ToString()}({ch}) / payload {ByteArrayToHexString(value)}");
+            Debug.Log($"SendPacket(All): ch {ch} / payload {ByteArrayToHexString(value)}");
         #endif
             foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
                 SendPacketOptions options = new SendPacketOptions(){
@@ -84,7 +84,7 @@ namespace SynicSugar.P2P {
             int count = p2pConfig.Instance.RPCBatchSize;
 
         #if SYNICSUGAR_PACKETINFO
-            Debug.Log($"SendPacket(All): {ch.ToString()}({ch})/ payload {ByteArrayToHexString(value)}");
+            Debug.Log($"SendPacket(All): ch {ch} / payload {ByteArrayToHexString(value)}");
         #endif
             foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
                 SendPacketOptions options = new SendPacketOptions(){
@@ -128,7 +128,7 @@ namespace SynicSugar.P2P {
             int count = p2pConfig.Instance.RPCBatchSize;
 
         #if SYNICSUGAR_PACKETINFO
-            Debug.Log($"SendPacket(ToAll): {ch.ToString()}({ch}) / payload {ByteArrayToHexString(value)}");
+            Debug.Log($"SendPacket(ToAll): ch {ch} / payload {ByteArrayToHexString(value)}");
         #endif
             foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
                 SendPacketOptions options = new SendPacketOptions(){
@@ -176,7 +176,7 @@ namespace SynicSugar.P2P {
                 Data = new ArraySegment<byte>(value != null ? value : Array.Empty<byte>())
             };
         #if SYNICSUGAR_PACKETINFO
-            Debug.Log($"SendPacket: {ch.ToString()}({ch}) / payload {ByteArrayToHexString(value)}");
+            Debug.Log($"SendPacket: ch {ch} / payload {ByteArrayToHexString(value)}");
         #endif
             ResultE result = p2pConnectorForOtherAssembly.Instance.P2PHandle.SendPacket(ref options);
 
@@ -209,7 +209,7 @@ namespace SynicSugar.P2P {
                 Data = new ArraySegment<byte>(value != null ? value : Array.Empty<byte>())
             };
         #if SYNICSUGAR_PACKETINFO
-            Debug.Log($"SendPacket: {ch.ToString()}({ch}) / payload {ByteArrayToHexString(value)}");
+            Debug.Log($"SendPacket: ch {ch} / payload {ByteArrayToHexString(value)}");
         #endif
             ResultE result = p2pConnectorForOtherAssembly.Instance.P2PHandle.SendPacket(ref options);
 
@@ -260,8 +260,8 @@ namespace SynicSugar.P2P {
             int length = MAX_LARGEPACKET_PAYLOADSIZE;
             byte[] header = GenerateHeader(value.Length);
 
-        #if SYNICSUGAR_LOG
-            Debug.Log($"SendPacket(Large): {ch.ToString()}({ch}) / payload size {value.Length} / additional packets {header[1]}");
+        #if SYNICSUGAR_PACKETINFO
+            Debug.Log($"SendPacket(Large): ch {ch} / payload size {value.Length} / additional packets {header[1]}");
         #endif
 
             //Max payload is 1170 but we need some header.
@@ -300,8 +300,8 @@ namespace SynicSugar.P2P {
             int length = MAX_LARGEPACKET_PAYLOADSIZE;
             byte[] header = GenerateHeader(value.Length);
 
-        #if SYNICSUGAR_LOG
-            Debug.Log($"SendPacket(Large): {ch.ToString()}({ch}) / payload size {value.Length} / additional packets {header[1]}");
+        #if SYNICSUGAR_PACKETINFO
+            Debug.Log($"SendPacket(Large): ch {ch} / payload size {value.Length} / additional packets {header[1]}");
         #endif
 
             //Max payload is 1170 but we need some header.
@@ -414,7 +414,7 @@ namespace SynicSugar.P2P {
             int length = MAX_LARGEPACKET_PAYLOADSIZE;
             byte[] header = GenerateHeader(value.Length, syncedPhase, syncSpecificPhase, targetId, dataOwner);
 
-        #if SYNICSUGAR_LOG
+        #if SYNICSUGAR_PACKETINFO
             Debug.Log($"SendPacket(Synic): payload size {value.Length} / chunk {header[1]} / hierarchy {header[2]} / syncSpecificPhase {header[3]}");
         #endif
 
