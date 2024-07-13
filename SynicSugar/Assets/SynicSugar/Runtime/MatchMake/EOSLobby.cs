@@ -184,6 +184,7 @@ namespace SynicSugar.MatchMake {
                 isMatchSuccess = false;
                 waitingMatch = true;
                 MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Wait);
+                //Wait for closing lobby or timeout
                 await UniTask.WhenAny(UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token), timer);
                 
                 if(timerCTS.IsCancellationRequested){
@@ -209,10 +210,11 @@ namespace SynicSugar.MatchMake {
                     
                     await MatchMakeManager.Instance.OnSaveLobbyID();
                 }
+                // Failure is Result.LobbyClosed or Result.UserKicked or Result.NetworkDisconnected from OnLobbyMemberStatusReceived();
                 return isMatchSuccess ? Result.Success : matchmakingResultCode;
             }
-            //Failed due to no-playing-user or server problems.
-            return matchmakingResultCode;
+            //This is NOT Success. Failed due to no-playing-user or server problems.
+            return canJoin;
         }
         /// <summary>
         /// Create lobby as host<br />
@@ -263,11 +265,12 @@ namespace SynicSugar.MatchMake {
                     }
 
                     await MatchMakeManager.Instance.OnSaveLobbyID();
-                    return Result.Success;
                 }
+                // Failure is Result.LobbyClosed or Result.UserKicked or Result.NetworkDisconnected from OnLobbyMemberStatusReceived();
+                return isMatchSuccess ? Result.Success : matchmakingResultCode;
             }
-            //Failed due to no-playing-user or server problems.
-            return matchmakingResultCode;
+            //This is NOT Success. Failed due to no-playing-user or server problems.
+            return canCreate;
         }
         /// <summary>
         /// Join the Lobby with specific id to that lobby. <br />
@@ -285,7 +288,7 @@ namespace SynicSugar.MatchMake {
                     Debug.LogErrorFormat("JoinLobbyBySavedLobbyId: RetriveLobbyByLobbyId is failer.: {0}.", canSearch);
                 #endif
                 await MatchMakeManager.Instance.OnDeleteLobbyID();
-                return canSearch; //Can't retrive Lobby data from EOS.
+                return canSearch; //This is NOT Success. Can't retrive Lobby data from EOS.
             }
             //Join when lobby has members than more one.
             Result canJoin = await TryJoinSearchResults(token, true);
@@ -294,7 +297,7 @@ namespace SynicSugar.MatchMake {
         #endif
             if(canJoin != Result.Success){
                 await MatchMakeManager.Instance.OnDeleteLobbyID();
-                return canJoin; //The lobby was already closed.
+                return canJoin; //This is NOT Success. The lobby was already closed.
             }
             //For the host migration
             AddNotifyLobbyMemberStatusReceived();
@@ -304,12 +307,12 @@ namespace SynicSugar.MatchMake {
             Result canInit = InitConnectConfig(ref p2pInfo.Instance.userIds);
             if(canInit != Result.Success){
                 Debug.LogError("Fail InitConnectConfig");
-                return canInit;
+                return canInit; //This is NOT Success. 
             }
 
             Result canConnect = await OpenConnectionForReconnecter(token);
             if(canConnect != Result.Success){
-                return canConnect;
+                return canConnect; //This is NOT Success. 
             }
             
             return Result.Success;
