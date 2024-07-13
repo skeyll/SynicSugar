@@ -1,7 +1,7 @@
 {
   "dependencies": {
-    "com.cysharp.memorypack": "1.9.13",
-    "com.cysharp.unitask": "2.3.3",
+    "com.cysharp.memorypack": "1.10.0",
+    "com.cysharp.unitask": "2.5.5",
     "com.playeveryware.eos": "3.0.3",
     "com.unity.addressables": "1.21.19",
     "com.unity.ai.navigation": "1.1.5",
