@@ -17,7 +17,7 @@ There is no charge for use and no CCU limits or server management thanks to Epic
 Almost SynicSugar APIs are zero-allocation in Runtime, so the process is sonic. SynicSugar will be optimized for small-party game not covered by [Mirror](https://github.com/MirrorNetworking/Mirror). Can get it from [Github](https://github.com/skeyll/SynicSugar).
 
 
-```csharp
+```cs
 using SynicSugar.P2P;
 using UnityEngine;
 [NetworkPlayer(true)]

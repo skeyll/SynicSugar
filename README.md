@@ -109,8 +109,8 @@ You can get SynicSugar from OpenUPM or [SynicSugar/Release](https://github.com/s
 　These packages can be imported from **Window/PackageManager/MyRegistries**. Importing SynicSugar will automatically import the other required librarys. If uses synicsugar.unitypackage, import other three packages.<br>
  If you are using another version in your project, that one will probably work. However, SynicSugar has been developed using the following:  
  * Epic Online Services Plugin for Unity: 3.0.3 
- * UniTask: 2.3.3 
- * MemoryPack: 1.9.14
+ * UniTask: 2.5.5
+ * MemoryPack: 1.10.0
  
  
  3. Import the rest (Skip if downloading as unitypackage.)  <br>
