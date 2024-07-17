@@ -1,6 +1,6 @@
 +++
 title = "Symbols"
-weight = 3
+weight = 4
 +++
 ## Symbols
 
