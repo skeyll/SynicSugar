@@ -1,0 +1,280 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://skeyll.github.io/SynicSugar/main.css">
+    <link rel="icon" href="https://github.com/skeyll/SynicSugar/blob/main/Resources/favicon.ico?raw=true">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <title> SynicSugar | Q&amp;A </title>
+</head>
+<body>
+
+<script>
+        fetch('https://api.github.com/repos/skeyll/SynicSugar/releases/latest')
+            .then((response) => {
+                return response.json();
+            })
+            .then((data) => {
+                let release_name = data.name;
+                let html_url = data.html_url;
+                release.innerHTML = `<a href='${html_url}'>${release_name}</a>`;
+            });
+    </script>
+<main>
+    
+    <nav>
+            <a href="https:&#x2F;&#x2F;skeyll.github.io&#x2F;SynicSugar&#x2F;">
+                        <img src="https://github.com/skeyll/SynicSugar/blob/main/Resources/Logo_doc.png?raw=true" alt="logo"/>
+                    </a>
+                <div id="release"></div>
+            <a href="javascript:void(0);" onclick="burger()" id="mobile" class="ms-Icon--GlobalNavButton"></a>
+            <div id="trees">
+                <input class="tree-toggle" type="checkbox" id="aboutsynicsugar"
+                           checked/>
+                    <label class="tree-toggle-label"
+                           for="aboutsynicsugar">AboutSynicSugar</label>
+
+                    <ul class="subtree">
+                        <li >
+                                <a href="https://skeyll.github.io/SynicSugar/AboutSynicSugar/overview/">Overview</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/AboutSynicSugar/internaldesign/">InternalDesign</a>
+                            </li>
+
+                            <li class="active">
+                                <a href="https://skeyll.github.io/SynicSugar/AboutSynicSugar/qanda/">Q&amp;A</a>
+                            </li>
+
+                            
+                                    
+                                    
+                                        <li >
+                                <a href="https://skeyll.github.io/SynicSugar/AboutSynicSugar/symbols/">Symbols</a>
+                            </li>
+
+                            </ul>
+                <input class="tree-toggle" type="checkbox" id="gettingstarted"
+                           />
+                    <label class="tree-toggle-label"
+                           for="gettingstarted">GettingStarted</label>
+
+                    <ul class="subtree">
+                        <li >
+                                <a href="https://skeyll.github.io/SynicSugar/GettingStarted/import-setup/">Import and Set up</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/GettingStarted/helloworld/">Hello World</a>
+                            </li>
+
+                            </ul>
+                <input class="tree-toggle" type="checkbox" id="synicsugar-login"
+                           />
+                    <label class="tree-toggle-label"
+                           for="synicsugar-login">SynicSugar.Login</label>
+
+                    <ul class="subtree">
+                        <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.Login/eosconnect/">EOSConnect</a>
+                            </li>
+
+                            </ul>
+                <input class="tree-toggle" type="checkbox" id="synicsugar-matchmake"
+                           />
+                    <label class="tree-toggle-label"
+                           for="synicsugar-matchmake">SynicSugar.MatchMake</label>
+
+                    <ul class="subtree">
+                        <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.MatchMake/matchmakemanager/">MatchMakeManager</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.MatchMake/lobby/">Lobby</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.MatchMake/attributedata/">AttributeData</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.MatchMake/matchmakingguievents/">MatchMakingGUIEvents</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.MatchMake/lobbyidmethod/">LobbyIDMethod</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.MatchMake/asynclobbyidmethod/">AsyncLobbyIDMethod</a>
+                            </li>
+
+                            </ul>
+                <input class="tree-toggle" type="checkbox" id="synicsugar-p2p"
+                           />
+                    <label class="tree-toggle-label"
+                           for="synicsugar-p2p">SynicSugar.P2P</label>
+
+                    <ul class="subtree">
+                        <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/p2pconfig/">p2pConfig</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/attributes/">Attributes</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/synicobject/">SynicObject</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/userid/">UserId</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/connecthub/">ConnectHub</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/p2pinfo/">p2pInfo</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/p2pstrcut/">p2pStruct</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/p2pconnectorforotherassembly/">p2pConnectorForOtherAssembly</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/additionalclass/">AdditionalClass</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.P2P/eosp2p/">EOSp2p</a>
+                            </li>
+
+                            </ul>
+                <input class="tree-toggle" type="checkbox" id="synicsugar-rtc"
+                           />
+                    <label class="tree-toggle-label"
+                           for="synicsugar-rtc">SynicSugar.RTC</label>
+
+                    <ul class="subtree">
+                        <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.RTC/rtcconfig/">RTCConfig</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.RTC/rtcmanager/">RTCManager</a>
+                            </li>
+
+                            <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.RTC/rtcstruct/">RTCStruct</a>
+                            </li>
+
+                            </ul>
+                <input class="tree-toggle" type="checkbox" id="synicsugar-titlesorage"
+                           />
+                    <label class="tree-toggle-label"
+                           for="synicsugar-titlesorage">SynicSugar.TitleSorage</label>
+
+                    <ul class="subtree">
+                        <li >
+                                <a href="https://skeyll.github.io/SynicSugar/SynicSugar.TitleSorage/eostitlestorage/">EOSTitleStorage</a>
+                            </li>
+
+                            </ul>
+                </div>
+        </nav>
+    <article>
+
+        <div id="on_right">
+                <span id="search-ico" class="ms-Icon--Search"></span>
+            </div>
+            <div class="search-container">
+                <input id="search" type="search" placeholder="Search as you type...">
+                <div class="search-results">
+                    <div class="search-results__header"></div>
+                    <ul class="search-results__items"></ul>
+                </div>
+            </div>
+        <div id="wrap">
+            
+        <h1 id="q-a">Q&amp;A&nbsp;<a class="anchor" href="#q-a">&#xE732;</a></h1>
+<details>
+<summary><b>Is there a CCU (Concurrent User) limit?</b></summary>
+Probably not. As long as you're not using it in extreme use, it should be fine.<br>
+<p><a href="https://dev.epicgames.com/docs/epic-online-services/eos-get-started/working-with-the-eos-sdk/conventions-and-limitations#service-usage-limitations">Service Usage Limitations</a></p>
+</details>
+<details>
+<summary><b>Where can I find the DevTool for DebugLogin?</b></summary>
+It's included in the SDK, which can be downloaded from the "Download and configure EOS SDK" section after creating a product page in the Developer portal.<br>
+Register test accounts in the Organization section of the Devportal, then launch the Devtool. You need to log in with each account and keep the Tool open in the background during testing.<br>
+The DeviceID is the same for both the Editor and built versions, so use DebugDeviceID + DevLogin or similar for debugging.<br><br>
+</details>
+<details>
+<summary><b>What does SourceGenerator do?</b></summary>
+It adds classes based on attributes at compile time. The example is such this.
+<p><a href="https://github.com/skeyll/SynicSugar/blob/main/Resources/GenaratedSampleNetworkplayer.cs">GenaratedSampleNetworkplayer</a>.</p>
+</details>
+<details>
+<summary><b>About Transport of P2P.</b></summary>
+EOS uses DTLS (Datagram Transport Layer Security), which is an encrypted version of UDP packets. In addition to this, the EOS SDK has an internal mechanism to resend packets based on factors such as order and reliability. When reliability is enabled, packets are generally guaranteed to be delivered successfully.<br><br>
+</details>
+<details>
+<summary><b>Large Packets in SynicSugar</b></summary>
+While the EOS SDK can only send packets up to 1170 bytes, SynicSugar divides packets into 1166-byte segments and attaches its own unique header before transmission. On the receiving end, these segments are stored in Dictionary, organized by CH (Channel). Once all segments of a packet have been received, they are combined into a single byte array and executed as an RPC. The system can send up to 256 packets. If this limit is exceeded, an error is thrown.<br><br>
+</details>
+<details>
+<summary><b>About Mobile Store Reviews</b></summary>
+Mobile store reviews (for both Android and iOS) can be passed even using UDP alone. In the notes section of your review application, please mention that UDP is used and that online features may not function in the review environment. If you're concerned, it might be a good idea to add a tutorial using an SynicSugar Offline Mode.<br><br>
+</details>
+<details>
+<summary><b>What entitlement dose need for macOS notarization?</b></summary>
+When using VC (Voice Chat) and network features, add the following permissions and notarize the app:
+<pre data-lang="YOURGAME.entitlements" style="background-color:#1e1e1e;color:#dcdcdc;" class="language-YOURGAME.entitlements "><code class="language-YOURGAME.entitlements" data-lang="YOURGAME.entitlements"><span>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+</span><span>&lt;!DOCTYPE plist PUBLIC &quot;-//Apple//DTD PLIST 1.0//EN&quot; &quot;http://www.apple.com/DTDs/PropertyList-1.0.dtd&quot;&gt;
+</span><span>&lt;plist version=&quot;1.0&quot;&gt;
+</span><span>&lt;dict&gt;
+</span><span>    &lt;key&gt;com.apple.security.cs.disable-library-validation&lt;/key&gt;
+</span><span>    &lt;true/&gt;
+</span><span>    &lt;key&gt;com.apple.security.cs.disable-executable-page-protection&lt;/key&gt;
+</span><span>    &lt;true/&gt;
+</span><span>    &lt;key&gt;com.apple.security.app-sandbox&lt;/key&gt;
+</span><span>    &lt;true/&gt;
+</span><span>    &lt;key&gt;com.apple.security.files.user-selected.read-only&lt;/key&gt;
+</span><span>    &lt;true/&gt;
+</span><span>    &lt;key&gt;com.apple.security.cs.allow-unsigned-executable-memory&lt;/key&gt;
+</span><span>    &lt;true/&gt;
+</span><span>    &lt;key&gt;com.apple.security.device.audio-input&lt;/key&gt;
+</span><span>    &lt;true/&gt;
+</span><span>    &lt;key&gt;com.apple.security.device.microphone&lt;/key&gt;
+</span><span>    &lt;true/&gt;
+</span><span>    &lt;key&gt;com.apple.security.network.client&lt;/key&gt;
+</span><span>    &lt;true/&gt;
+</span><span>    &lt;key&gt;com.apple.security.network.server&lt;/key&gt;
+</span><span>    &lt;true/&gt;
+</span><span>&lt;/dict&gt;
+</span><span>&lt;/plist&gt;
+</span></code></pre>
+<p>Even if the app passes notarization with these permissions, there will be a one-time confirmation prompt when the app launches, asking for permission to access the DeviceID key from the Keychain.</p>
+</details>
+
+    
+        </div>
+
+    </article>
+</main>
+
+
+    <script type="text/javascript" src="https://skeyll.github.io/SynicSugar/elasticlunr.min.js" defer></script>
+    <script type="text/javascript" src="https://skeyll.github.io/SynicSugar/search_index.en.js" defer></script>
+<script type="text/javascript" src="https://skeyll.github.io/SynicSugar/js.js" defer></script>
+
+</body>
+</html>
