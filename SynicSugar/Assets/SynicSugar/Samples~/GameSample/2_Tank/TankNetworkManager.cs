@@ -5,7 +5,6 @@ using UnityEngine;
 using UnityEngine.UI;
 namespace  SynicSugar.Samples {
     public class TankNetworkManager : MonoBehaviour{
-        [SerializeField] GameModeSelect modeSelect;
         [SerializeField] GameObject playerPrefab;
         [SerializeField] Text pingText;
         void Start(){
@@ -72,7 +71,7 @@ namespace  SynicSugar.Samples {
         async UniTask AsyncReturnToTitle(){
             await ConnectHub.Instance.CloseSession();
             
-            modeSelect.ChangeGameScene(GameModeSelect.GameScene.MainMenu.ToString());
+            SceneChanger.ChangeGameScene(SCENELIST.MainMenu);
         }
     }
 }

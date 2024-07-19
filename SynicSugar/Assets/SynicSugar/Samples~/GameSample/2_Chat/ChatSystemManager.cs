@@ -7,7 +7,6 @@ using UnityEngine.UI;
 namespace SynicSugar.Samples {
     public class ChatSystemManager : MonoBehaviour {
         [SerializeField] GameObject matchmakeCanvas, chatCanvas;
-        public GameModeSelect modeSelect;
         public Text chatText, inputCount;
         public InputField contentField, nameField;
         public GameObject chatPlayerPrefab, uiSetsPrefabs;
@@ -81,7 +80,7 @@ namespace SynicSugar.Samples {
         //Use when Synic is used as just a large packet.
         void OnSyncedSynic(){
             if(p2pInfo.Instance.SyncedSynicPhase == 1){  
-                EOSDebug.Instance.Log("GetLargePacket");
+                SynicSugarDebug.Instance.Log("GetLargePacket");
                 chatText.text = ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.CurrentRemoteUserIds[0]).LargePacket;
             }
         }

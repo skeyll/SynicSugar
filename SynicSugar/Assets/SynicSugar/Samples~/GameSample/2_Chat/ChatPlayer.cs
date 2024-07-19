@@ -35,7 +35,7 @@ namespace SynicSugar.Samples {
                 //Instantiate GUI 
                 uiSets = Instantiate(systemManager.uiSetsPrefabs, chatCanvas.transform);
                 RegisterButtonEvent();
-                EOSDebug.Instance.Log("Chat Mode: Start");
+                SynicSugarDebug.Instance.Log("Chat Mode: Start");
             }
         }
         void RegisterButtonEvent(){
@@ -147,7 +147,7 @@ namespace SynicSugar.Samples {
                 }
             }
 
-            EOSDebug.Instance.Log($"New logo color: {colorName}");
+            SynicSugarDebug.Instance.Log($"New logo color: {colorName}");
             
             Texture2D texture = new Texture2D(256, 256, TextureFormat.RGBA4444, false);
             texture.SetPixels(pixels);
@@ -163,7 +163,7 @@ namespace SynicSugar.Samples {
         public void SendLargePacketViaRpc(byte[] png){
             Texture2D texture = new Texture2D(256, 256, TextureFormat.RGBA4444, false);
             texture.LoadImage(png);
-            EOSDebug.Instance.Log($"Change texture color");
+            SynicSugarDebug.Instance.Log($"Change texture color");
 
             systemManager.ForLargePacket.texture = texture;
         }
@@ -191,21 +191,21 @@ namespace SynicSugar.Samples {
             systemManager.chatText.text = System.String.Empty;
         }
         public void StopReceiver(){
-            EOSDebug.Instance.Log("Chat Mode: StopReceiver");
+            SynicSugarDebug.Instance.Log("Chat Mode: StopReceiver");
             ConnectHub.Instance.PausePacketReceiver();
         }
 
         public void RestartReceiver(){
-            EOSDebug.Instance.Log("Chat Mode: Restart");
+            SynicSugarDebug.Instance.Log("Chat Mode: Restart");
             ConnectHub.Instance.StartPacketReceiver();
         }
         public void PauseSession(bool isForced){
             isStressTesting = false;
-            EOSDebug.Instance.Log("Chat Mode: Pause");
+            SynicSugarDebug.Instance.Log("Chat Mode: Pause");
             ConnectHub.Instance.PauseConnections(isForced).Forget();
         }
         public void RestartSession(){
-            EOSDebug.Instance.Log("Chat Mode: Restart");
+            SynicSugarDebug.Instance.Log("Chat Mode: Restart");
             systemManager.chatText.text = System.String.Empty;
             ConnectHub.Instance.RestartConnections();
         }
@@ -219,25 +219,25 @@ namespace SynicSugar.Samples {
         }
         public async void LeaveSession(){
             isStressTesting = false;
-            EOSDebug.Instance.Log("Chat Mode: Leave");
+            SynicSugarDebug.Instance.Log("Chat Mode: Leave");
             if(p2pInfo.Instance.AllUserIds.Count > 1){
                 await ConnectHub.Instance.ExitSession();
             }else{
                 await MatchMakeManager.Instance.DestoryOfflineLobby();
             }
-            systemManager.modeSelect.ChangeGameScene("MainMenu");
+            SceneChanger.ChangeGameScene(SCENELIST.MainMenu);
 
         }
         public async void CloseSession(){
             isStressTesting = false;
-            EOSDebug.Instance.Log("Chat Mode: Close");
+            SynicSugarDebug.Instance.Log("Chat Mode: Close");
 
             if(p2pInfo.Instance.AllUserIds.Count > 1){
                 await ConnectHub.Instance.CloseSession();
             }else{
                 await MatchMakeManager.Instance.DestoryOfflineLobby();
             }
-            systemManager.modeSelect.ChangeGameScene("MainMenu");
+            SceneChanger.ChangeGameScene(SCENELIST.MainMenu);
         }
     }
 }

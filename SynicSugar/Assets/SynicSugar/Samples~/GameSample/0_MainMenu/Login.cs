@@ -26,19 +26,19 @@ namespace  SynicSugar.Samples {
         }
         public async UniTask LoginWithDeviceIDRequest(){
             this.gameObject.SetActive(false);
-            EOSDebug.Instance.Log("Trt to connect EOS with deviceID.");
+            SynicSugarDebug.Instance.Log("Trt to connect EOS with deviceID.");
             //(bool, Result)
             var result = await EOSConnect.LoginWithDeviceID("TestPlayer");
     
             if(result == Result.Success){
                 modeSelectCanvas.SetActive(true);
-                EOSDebug.Instance.Log("SUCCESS EOS AUTHENTHICATION!.");
+                SynicSugarDebug.Instance.Log("SUCCESS EOS AUTHENTHICATION!.");
                 return;
             }
 
             //False
             this.gameObject.SetActive(true);
-            EOSDebug.Instance.Log($"Fault EOS authentication. {result}");
+            SynicSugarDebug.Instance.Log($"Fault EOS authentication. {result}");
         }
         /// <summary>
         /// For button event
@@ -49,10 +49,10 @@ namespace  SynicSugar.Samples {
         public async UniTask DeleteDeviceIDRequest(){
             var result = await EOSConnect.DeleteDeviceID();
             if(result == Result.Success){
-                EOSDebug.Instance.Log("Delete DeviceID: Success.");
+                SynicSugarDebug.Instance.Log("Delete DeviceID: Success.");
                 return;
             }
-            EOSDebug.Instance.Log("Delete DeviceID: Failare.");
+            SynicSugarDebug.Instance.Log("Delete DeviceID: Failare.");
         }
         /// <summary>
         /// For button event
@@ -63,16 +63,16 @@ namespace  SynicSugar.Samples {
         public async UniTask LoginWithDevToolRequest(){
             this.gameObject.SetActive(false);
             CancellationTokenSource cancellationToken = new CancellationTokenSource();
-            EOSDebug.Instance.Log("Trt to connect EOS with DevTool");
+            SynicSugarDebug.Instance.Log("Trt to connect EOS with DevTool");
             Result result = await DevLogin.Instance.LoginWithDevelopperLogin(cancellationToken);
 
             if(result == Result.Success){
                 modeSelectCanvas.SetActive(true);
-                EOSDebug.Instance.Log("SUCCESS EOS AUTHENTHICATION!.");
+                SynicSugarDebug.Instance.Log("SUCCESS EOS AUTHENTHICATION!.");
                 return;
             }
             this.gameObject.SetActive(true);
-            EOSDebug.Instance.Log("Fault EOS authentication.");
+            SynicSugarDebug.Instance.Log("Fault EOS authentication.");
         }
     }
 }

@@ -133,8 +133,7 @@ namespace  SynicSugar.Samples {
         public async void ExitGame(){
             await ConnectHub.Instance.CloseSession();
             
-            SynicSugar.Samples.GameModeSelect modeSelect = new SynicSugar.Samples.GameModeSelect();
-            modeSelect.ChangeGameScene(GameModeSelect.GameScene.MainMenu.ToString()); //Retrun MainMenu
+            SceneChanger.ChangeGameScene(SCENELIST.MainMenu); 
         }
     }
 
