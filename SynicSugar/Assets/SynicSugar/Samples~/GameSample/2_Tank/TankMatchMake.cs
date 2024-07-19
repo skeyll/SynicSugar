@@ -157,6 +157,7 @@ namespace SynicSugar.Samples.Tank {
         /// For buttons.
         /// </summary>
         /// <param name="type">MATCHMAKEING_TYPE</param>
+        [EnumAction(typeof(MATCHMAKEING_TYPE))]
         public void StartMatchMake(int type){
             //To clear old objects.
             ClearLobbyMemberState();
