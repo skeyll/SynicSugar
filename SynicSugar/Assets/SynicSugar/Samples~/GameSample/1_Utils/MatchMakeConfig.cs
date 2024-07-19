@@ -46,7 +46,7 @@ namespace  SynicSugar.Samples {
             attribute.SetValue(Level);
             attributeData.Add(attribute);
             
-            EOSDebug.Instance.Log($"UserName: {Name.ToString()} / Level: {Level}");
+            SynicSugarDebug.Instance.Log($"UserName: {Name.ToString()} / Level: {Level}");
 
             return attributeData;
             

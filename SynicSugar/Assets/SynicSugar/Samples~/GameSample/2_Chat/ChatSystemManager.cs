@@ -80,7 +80,7 @@ namespace SynicSugar.Samples {
         //Use when Synic is used as just a large packet.
         void OnSyncedSynic(){
             if(p2pInfo.Instance.SyncedSynicPhase == 1){  
-                EOSDebug.Instance.Log("GetLargePacket");
+                SynicSugarDebug.Instance.Log("GetLargePacket");
                 chatText.text = ConnectHub.Instance.GetUserInstance<ChatPlayer>(p2pInfo.Instance.CurrentRemoteUserIds[0]).LargePacket;
             }
         }

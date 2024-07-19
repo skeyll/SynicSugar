@@ -161,7 +161,7 @@ namespace SynicSugar.Samples.Tank {
             //To clear old objects.
             ClearLobbyMemberState();
             SetName();
-            EOSDebug.Instance.Log($"Start MatchMake. TYPE: {(MATCHMAKEING_TYPE)type}");
+            SynicSugarDebug.Instance.Log($"Start MatchMake. TYPE: {(MATCHMAKEING_TYPE)type}");
 
             MatchMakeEntity((MATCHMAKEING_TYPE)type).Forget();
         }
@@ -181,12 +181,12 @@ namespace SynicSugar.Samples.Tank {
             }
                 
             if(result != Result.Success){
-                EOSDebug.Instance.Log("MatchMaking Failed.", result);
+                SynicSugarDebug.Instance.Log("MatchMaking Failed.", result);
                 SwitchButtonsActive(MATCHMAKEING_STATE.Standby);
                 return;
             }
 
-            EOSDebug.Instance.Log($"Success Matching! LobbyID:{MatchMakeManager.Instance.GetCurrentLobbyID()}");
+            SynicSugarDebug.Instance.Log($"Success Matching! LobbyID:{MatchMakeManager.Instance.GetCurrentLobbyID()}");
             SceneChanger.ChangeGameScene(SCENELIST.Tank);
         }
         /// <summary>

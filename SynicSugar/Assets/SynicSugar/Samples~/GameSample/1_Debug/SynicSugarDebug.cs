@@ -3,10 +3,9 @@ using UnityEngine;
 using System;
 
 namespace SynicSugar.Samples {
-    public class EOSDebug : MonoBehaviour {
+    public class SynicSugarDebug : MonoBehaviour {
     #region Singleton Instance
-        private EOSDebug(){}
-        public static EOSDebug Instance { get; private set; }
+        public static SynicSugarDebug Instance { get; private set; }
         void Awake() {
             if( Instance != null ) {
                 Destroy( this.gameObject );

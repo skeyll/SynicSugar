@@ -48,7 +48,7 @@ namespace  SynicSugar.Samples.ReadHearts {
     #endregion
         //Register MatchMaking button
         public void StartMatchMake(){
-            EOSDebug.Instance.Log("Start MatchMake.");
+            SynicSugarDebug.Instance.Log("Start MatchMake.");
             StartMatchMakeEntity().Forget();
         }
         //We can't set NOT void process to Unity Event.
@@ -65,7 +65,7 @@ namespace  SynicSugar.Samples.ReadHearts {
                 Result result = await MatchMakeManager.Instance.SearchAndCreateLobby(matchConditions.GetLobbyCondition(2));
                     
                 if(result != Result.Success){
-                    EOSDebug.Instance.Log("MatchMaking Failed.", result);
+                    SynicSugarDebug.Instance.Log("MatchMaking Failed.", result);
                     SwitchButtonsActive(MATCHMAKEING_STATE.Standby);
                     return;
                 }
@@ -75,18 +75,18 @@ namespace  SynicSugar.Samples.ReadHearts {
                     Result result = await MatchMakeManager.Instance.SearchAndCreateLobby(matchConditions.GetLobbyCondition(), token: matchCTS);
 
                     if(result != Result.Success){
-                        EOSDebug.Instance.Log("MatchMaking Failed.", result);
+                        SynicSugarDebug.Instance.Log("MatchMaking Failed.", result);
                         SwitchButtonsActive(MATCHMAKEING_STATE.Standby);
                         return;
                     }
                 }catch(OperationCanceledException){
-                    EOSDebug.Instance.Log("Cancel MatchMaking by CancelToken");
+                    SynicSugarDebug.Instance.Log("Cancel MatchMaking by CancelToken");
                     SwitchButtonsActive(MATCHMAKEING_STATE.Standby);
                     return;
                 }
             }
 
-            EOSDebug.Instance.Log($"Success Matching! LobbyID:{MatchMakeManager.Instance.GetCurrentLobbyID()}");
+            SynicSugarDebug.Instance.Log($"Success Matching! LobbyID:{MatchMakeManager.Instance.GetCurrentLobbyID()}");
             SwitchButtonsActive(MATCHMAKEING_STATE.ReadyToStartGame);
         }
         /// <summary>

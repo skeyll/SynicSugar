@@ -68,7 +68,7 @@ namespace SynicSugar.Samples.Chat {
         async UniTask TryToreconnect(string LobbyID){
             //On the default way, return Empty when there is no lobby data in local.
             if(string.IsNullOrEmpty(LobbyID)){
-                EOSDebug.Instance.Log($"This user is not Reconnecter.");
+                SynicSugarDebug.Instance.Log($"This user is not Reconnecter.");
                 SwitchButtonsActive(MATCHMAKEING_STATE.Standby);
                 return;
             }
@@ -76,11 +76,11 @@ namespace SynicSugar.Samples.Chat {
             Result result = await MatchMakeManager.Instance.ReconnectLobby(LobbyID);
 
             if(result != Result.Success){
-                EOSDebug.Instance.Log("Fail to Re-Connect Lobby.", result);
+                SynicSugarDebug.Instance.Log("Fail to Re-Connect Lobby.", result);
                 SwitchButtonsActive(MATCHMAKEING_STATE.Standby);
                 return;
             }
-            EOSDebug.Instance.Log($"Success Recconect! LobbyID:{MatchMakeManager.Instance.GetCurrentLobbyID()}");
+            SynicSugarDebug.Instance.Log($"Success Recconect! LobbyID:{MatchMakeManager.Instance.GetCurrentLobbyID()}");
             SwitchButtonsActive(MATCHMAKEING_STATE.ReadyToStartGame);
         }
     #endregion
@@ -103,7 +103,7 @@ namespace SynicSugar.Samples.Chat {
         /// Basis way to start matchmaking.
         /// </summary>
         public void StartMatchMake(){
-            EOSDebug.Instance.Log("Start MatchMake.");
+            SynicSugarDebug.Instance.Log("Start MatchMake.");
             StartMatchMakeEntity().Forget();
         }
         /// <summary>
@@ -115,12 +115,12 @@ namespace SynicSugar.Samples.Chat {
             Result result = await MatchMakeManager.Instance.SearchAndCreateLobby(matchConditions.GetLobbyCondition(2));
                 
             if(result != Result.Success){
-                EOSDebug.Instance.Log("MatchMaking Failed.", result);
+                SynicSugarDebug.Instance.Log("MatchMaking Failed.", result);
                 SwitchButtonsActive(MATCHMAKEING_STATE.Standby);
                 return;
             }
 
-            EOSDebug.Instance.Log($"Success Matching! LobbyID:{MatchMakeManager.Instance.GetCurrentLobbyID()}");
+            SynicSugarDebug.Instance.Log($"Success Matching! LobbyID:{MatchMakeManager.Instance.GetCurrentLobbyID()}");
             SwitchButtonsActive(MATCHMAKEING_STATE.ReadyToStartGame);
         }
         /// <summary>
@@ -128,7 +128,7 @@ namespace SynicSugar.Samples.Chat {
         /// I implement everything the same way as StartMatchMake in my-own project for the performance, though.
         /// </summary>
         public async void StartOfflineMode(){
-            EOSDebug.Instance.Log("Start Offline Mode.");
+            SynicSugarDebug.Instance.Log("Start Offline Mode.");
             //To　simulate matchmaking
             // OfflineMatchmakingDelay delay = new OfflineMatchmakingDelay(2000, 1000, 1000, 1000);
             OfflineMatchmakingDelay delay = OfflineMatchmakingDelay.NoDelay;
@@ -140,7 +140,7 @@ namespace SynicSugar.Samples.Chat {
                 return;
             }
 
-            EOSDebug.Instance.Log($"Success Matching! LobbyID:{MatchMakeManager.Instance.GetCurrentLobbyID()}");
+            SynicSugarDebug.Instance.Log($"Success Matching! LobbyID:{MatchMakeManager.Instance.GetCurrentLobbyID()}");
             SwitchButtonsActive(MATCHMAKEING_STATE.ReadyToStartGame);
         }
         /// <summary>

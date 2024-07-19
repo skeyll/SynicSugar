@@ -30,7 +30,7 @@ namespace SynicSugar.Samples{
             attribute.ComparisonOperator = ComparisonOp.Equal;
             lobbyCondition.Attributes.Add(attribute);
             
-            EOSDebug.Instance.Log(matchConditions.text);
+            SynicSugarDebug.Instance.Log(matchConditions.text);
             return lobbyCondition;
 
         }
