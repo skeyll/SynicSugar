@@ -3309,7 +3309,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 837676609}
         m_TargetAssemblyTypeName: SynicSugar.Samples.ChatMatchMake, SynicSugar.Sample
-        m_MethodName: CanelMatchMakingAndReturnToLobby
+        m_MethodName: CanelMatchMakingAndReturnToMenu
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -4258,7 +4258,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   matchmakeCanvas: {fileID: 837676601}
   chatCanvas: {fileID: 2119717545}
-  modeSelect: {fileID: 2119717551}
   chatText: {fileID: 9063154008829343597}
   inputCount: {fileID: 2022834940}
   contentField: {fileID: 3124046547690696351}
