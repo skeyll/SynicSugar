@@ -225,7 +225,7 @@ namespace SynicSugar.Samples {
             }else{
                 await MatchMakeManager.Instance.DestoryOfflineLobby();
             }
-            systemManager.modeSelect.ChangeGameScene("MainMenu");
+            SceneChanger.ChangeGameScene(SCENELIST.MainMenu);
 
         }
         public async void CloseSession(){
@@ -237,7 +237,7 @@ namespace SynicSugar.Samples {
             }else{
                 await MatchMakeManager.Instance.DestoryOfflineLobby();
             }
-            systemManager.modeSelect.ChangeGameScene("MainMenu");
+            SceneChanger.ChangeGameScene(SCENELIST.MainMenu);
         }
     }
 }
