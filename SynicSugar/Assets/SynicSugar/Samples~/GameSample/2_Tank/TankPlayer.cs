@@ -6,11 +6,8 @@ using System;
 using Epic.OnlineServices;
 namespace  SynicSugar.Samples {
     [NetworkPlayer(true)]
-    public partial class TankPlayer : MonoBehaviour {
-        public enum CurrentState{
-            Stay, Move
-        }
-        CurrentState currentState;
+    public partial class TankPlayerv : MonoBehaviour {
+        // CurrentState currentState;
         public enum Direction{
             Up, Left, Down, Right, Neutral
         }
@@ -44,45 +41,45 @@ namespace  SynicSugar.Samples {
 
             EventTrigger.Entry move = new EventTrigger.Entry();
             move.eventID = EventTriggerType.PointerDown;
-            move.callback.AddListener((d) => {Move((int)key);});
+            // move.callback.AddListener((d) => {Move((int)key);});
             trigger.triggers.Add(move);
 
             EventTrigger.Entry stop = new EventTrigger.Entry();
             stop.eventID = EventTriggerType.PointerUp;
-            stop.callback.AddListener((d) => {Stop();});
+            // stop.callback.AddListener((d) => {Stop();});
             trigger.triggers.Add(stop);
         }
         void Update(){
-            if(currentState == CurrentState.Move){
-                //Reflects current value
-                playerPos = this.transform.position;
+            // if(currentState == CurrentState.Move){
+            //     //Reflects current value
+            //     playerPos = this.transform.position;
 
-                float moveDelta = 5 * Time.deltaTime;
-                //+ or -?
-                moveDelta *= direction == Direction.Up || direction == Direction.Right ? 1 : -1;
+            //     float moveDelta = 5 * Time.deltaTime;
+            //     //+ or -?
+            //     moveDelta *= direction == Direction.Up || direction == Direction.Right ? 1 : -1;
 
-                if(direction == Direction.Up || direction == Direction.Down){
-                    playerPos += new Vector3(0f, 0f, moveDelta);
-                }else{
-                    playerPos += new Vector3(moveDelta, 0f, 0f);
-                }
+            //     if(direction == Direction.Up || direction == Direction.Down){
+            //         playerPos += new Vector3(0f, 0f, moveDelta);
+            //     }else{
+            //         playerPos += new Vector3(moveDelta, 0f, 0f);
+            //     }
 
-                this.transform.position = playerPos;
-            }
+            //     this.transform.position = playerPos;
+            // }
         }
 
-        [Rpc]
-        public void Move(int direction){
-            currentState = CurrentState.Move;
-            this.direction = (Direction)direction;
-        }
-        [Rpc]
-        public void Stop(){
-            currentState = CurrentState.Stay;
-            direction = Direction.Neutral;
-        }
-        public void SetNameText(string name){
-            playerName.text = name;
-        }
+        // [Rpc]
+        // public void Move(int direction){
+        //     currentState = CurrentState.Move;
+        //     this.direction = (Direction)direction;
+        // }
+        // [Rpc]
+        // public void Stop(){
+        //     currentState = CurrentState.Stay;
+        //     direction = Direction.Neutral;
+        // }
+        // public void SetNameText(string name){
+        //     playerName.text = name;
+        // }
     }
 }
