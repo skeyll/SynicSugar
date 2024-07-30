@@ -14,7 +14,10 @@ namespace SynicSugar.Samples.Tank {
         [Synic(0)] public Direction currentDirection;
         // Movement is managed by Move and Stop and calculated locally.
         // Periodically, this value is sent to correct the actual position.
-        [SyncVar(3000)] public Vector3 truePlayerPosition;
+        [SyncVar(2000)] public Vector3 truePlayerPosition;
+        // Movement is managed by Move and Stop and calculated locally.
+        // Periodically, this value is sent to correct the actual position.
+        [SyncVar(2000)] public Quaternion truePlayerQuaternion;
         /// Movement is managed by UniTask.
         /// </summary>
         CancellationTokenSource moveTokenSource;
@@ -38,78 +41,48 @@ namespace SynicSugar.Samples.Tank {
         /// <returns></returns>
         internal async UniTask Move(Direction newDirection){
             GenerateNewToken();
-            if(currentDirection != newDirection){
-                await Turn(currentDirection, newDirection, moveTokenSource.Token);
-            }
 
-            int orientation = newDirection == Direction.Up || newDirection == Direction.Right ? 1 : -1;
-            float moveRate = orientation * m_Speed;
+            int sign = newDirection is Direction.Up ? 1 : -1;
+            Vector3 movement = sign * m_Rigidbody.transform.forward * m_Speed;
 
             while(!moveTokenSource.Token.IsCancellationRequested){
-                //Calc move amount in this frame.
-                float moveDelta = moveRate * Time.deltaTime;
-
                 //Fix the pos by true pos.
                 //The actual pos data is sent every 3 seconds from each local.
                 if(!isLocal){
                     m_Rigidbody.MovePosition(truePlayerPosition);
                 }
 
-                Vector3 newPosition = m_Rigidbody.position;
-                //Add this frame movement
-                if(newDirection == Direction.Up || newDirection == Direction.Down){
-                    newPosition += new Vector3(0f, 0f, moveDelta);
-                }else{
-                    newPosition += new Vector3(moveDelta, 0f, 0f);
-                }
-                m_Rigidbody.MovePosition(newPosition);
+                m_Rigidbody.MovePosition(m_Rigidbody.position + movement * Time.deltaTime);
                 
-                truePlayerPosition = newPosition;
+                truePlayerPosition = m_Rigidbody.position;
                 await UniTask.Yield(moveTokenSource.Token);
             }
         }
         /// <summary>
         /// Turn toward the new direction.
         /// </summary>
-        /// <param name="currentAngle"></param>
         /// <param name="newAngle"></param>
-        /// <param name="token"></param>
         /// <returns></returns>
-        async UniTask Turn (Direction currentAngle, Direction newAngle, CancellationToken token){
-            float rotationAmount = CalculateRotationAngle(currentAngle, newAngle);
-            float currentRotation = 0f;
+        internal async UniTask Turn (Direction newAngle){
+            GenerateNewToken();
 
-            while (Mathf.Abs(currentRotation) < Mathf.Abs(rotationAmount)){
-                if (token.IsCancellationRequested) break;
+            float turnSpeed = newAngle is Direction.Right ? m_TurnSpeed : -m_TurnSpeed;
 
-                float turn = Mathf.Sign(rotationAmount) * m_TurnSpeed * Time.deltaTime;
-                currentRotation += turn;
-
-                if (Mathf.Abs(currentRotation) > Mathf.Abs(rotationAmount)){
-                    turn = rotationAmount - (currentRotation - turn);
-                    currentRotation = rotationAmount;
+            while (!moveTokenSource.Token.IsCancellationRequested){
+                 if(!isLocal){
+                    m_Rigidbody.MoveRotation(truePlayerQuaternion);
                 }
 
-                Quaternion inputRotation = Quaternion.Euler(0f, turn, 0f);
-                m_Rigidbody.MoveRotation(m_Rigidbody.rotation * inputRotation);
+                // Calculate rotation for this frame
+                float turn = turnSpeed * Time.deltaTime;
 
-                await UniTask.Yield(token);
+                // Apply rotation
+                Quaternion deltaRotation = Quaternion.Euler(0f, turn, 0f);
+                m_Rigidbody.MoveRotation(m_Rigidbody.rotation * deltaRotation);
+
+                truePlayerQuaternion = m_Rigidbody.rotation;
+                await UniTask.Yield(moveTokenSource.Token);
             }
-        }
-        /// <summary>
-        /// Calc the amount needed for rotation.
-        /// </summary>
-        /// <param name="currentAngle"></param>
-        /// <param name="newAngle"></param>
-        /// <returns></returns>
-        float CalculateRotationAngle(Direction currentAngle, Direction newAngle){
-            float angleDelta = DirectionAngles.GetValue(newAngle) - DirectionAngles.GetValue(currentAngle);
-
-            //Normalize the angle difference to be within the range [-180, 180]
-            if (angleDelta < -180) angleDelta += 360;
-            if (angleDelta > 180) angleDelta -= 360;
-            
-            return angleDelta;
         }
 
         /// <summary>
@@ -118,6 +91,8 @@ namespace SynicSugar.Samples.Tank {
         internal void Stop(){
             if(moveTokenSource != null && moveTokenSource.Token.CanBeCanceled){
                 moveTokenSource.Cancel();
+                m_Rigidbody.velocity = Vector3.zero;
+                m_Rigidbody.angularVelocity = Vector3.zero;
             }
         }
         void GenerateNewToken(){

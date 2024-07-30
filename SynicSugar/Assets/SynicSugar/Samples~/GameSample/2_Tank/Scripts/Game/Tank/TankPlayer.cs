@@ -17,7 +17,6 @@ namespace  SynicSugar.Samples.Tank {
         //data
         [Synic(0)] public TankPlayerStatus status = new();
 
-
         void Awake(){
             health = GetComponent<TankHealth>();
             actions = GetComponent<TankActions>();
@@ -52,14 +51,18 @@ namespace  SynicSugar.Samples.Tank {
         /// <summary>
         /// Called from move button and as RPC.
         /// </summary>
-        /// <param name="newDirection"></param>
+        /// <param name="newDirection">Up or Down</param>
         [Rpc]
         public void Move(Direction newDirection){
             //Simplified because it's hard work. Sound only locally.
             if(isLocal){
                 TankAudioManager.Instance.PlayTankClip(TankClips.Driving);
             }
-            movement.Move(newDirection).Forget();
+            if(newDirection is Direction.Up or Direction.Down){
+                movement.Move(newDirection).Forget();
+            }else{
+                movement.Turn(newDirection).Forget();
+            }
 
         }
         /// <summary>
