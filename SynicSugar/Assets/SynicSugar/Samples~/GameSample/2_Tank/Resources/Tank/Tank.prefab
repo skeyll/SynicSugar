@@ -10757,6 +10757,7 @@ GameObject:
   - component: {fileID: 6507708}
   - component: {fileID: 1231058339121839659}
   - component: {fileID: 4801995441263562672}
+  - component: {fileID: 523858881978945284}
   - component: {fileID: 217870112266564876}
   m_Layer: 9
   m_Name: Tank
@@ -10866,6 +10867,24 @@ MonoBehaviour:
   m_Slider: {fileID: 11482748}
   m_FillImage: {fileID: 11404512}
   m_ExplosionPrefab: {fileID: 151086, guid: 6bc6d0dd8b8428e4ca316513f2cf13c6, type: 3}
+--- !u!114 &523858881978945284
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 173472}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36ddca4461a6c43bf8856ce00e529a1e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Rigidbody: {fileID: 5489450}
+  m_LeftDustTrail: {fileID: 19821292}
+  m_RightDustTrail: {fileID: 19809832}
+  m_TurnSpeed: 180
+  currentDirection: 0
+  truePlayerPosition: {x: 0, y: 0, z: 0}
 --- !u!114 &217870112266564876
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -123,50 +123,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &160723432
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 160723433}
-  - component: {fileID: 160723434}
-  m_Layer: 0
-  m_Name: CameraRig
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &160723433
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 160723432}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0.2961981, y: 0.46984634, z: -0.17101005, w: 0.8137977}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 40, y: 60, z: 0}
---- !u!114 &160723434
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 160723432}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 56915e9c6f92541b38c35f239b36b669, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &169069994
 GameObject:
   m_ObjectHideFlags: 0
@@ -192,7 +148,7 @@ Transform:
   m_GameObject: {fileID: 169069994}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -42.2, y: 0.17, z: -41.7}
+  m_LocalPosition: {x: -40.64, y: 0.17, z: -37.67}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1294,9 +1250,9 @@ GameObject:
   m_Component:
   - component: {fileID: 1226152248}
   - component: {fileID: 1226152249}
+  - component: {fileID: 1226152252}
   - component: {fileID: 1226152250}
   - component: {fileID: 1226152251}
-  - component: {fileID: 1226152252}
   m_Layer: 0
   m_Name: Manager
   m_TagString: Untagged
@@ -2251,4 +2207,3 @@ SceneRoots:
   - {fileID: 1526793652}
   - {fileID: 1798058123}
   - {fileID: 1163719826}
-  - {fileID: 160723433}
