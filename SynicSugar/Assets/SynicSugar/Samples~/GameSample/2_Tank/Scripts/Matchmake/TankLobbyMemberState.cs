@@ -4,8 +4,8 @@ using SynicSugar.MatchMake;
 using SynicSugar.P2P;
 using Cysharp.Threading.Tasks;
 
-namespace SynicSugar.Samples{
-    public class LobbyMemberState : MonoBehaviour {
+namespace SynicSugar.Samples.Tank {
+    public class TankLobbyMemberState : MonoBehaviour {
         public string State { get; private set; }
         [SerializeField] Text text;
         public Button Kick;

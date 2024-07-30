@@ -10,39 +10,35 @@ using SynicSugar.P2P;
 /// </summary>
 namespace SynicSugar.Samples.Tank {
     public class TankMatchMake : MonoBehaviour {
-        enum MATCHMAKEING_STATE { 
+        enum MatchmakingState { 
             NoneAndAfterStart, Standby, InMatchmakingStandard, InMatchmakingAfterMeetingMinCondition
         }
-        enum MATCHMAKEING_TYPE { 
-            Standard, CreateAsHost, JoinAsGuest
+        enum MatchmakingType { 
+            Standard, CreateAsHost, JoinAsGuest, Offline
         }
-        [SerializeField] GameObject matchmakePrefab;
         /// <summary>
         /// Display matchmaking state on GUI.
         /// </summary>
         [SerializeField] Text matchmakeState;
-        [SerializeField] Button startMatchMake, createLobby, searchLobby, 
+        [SerializeField] Button startMatchMake, createLobby, searchLobby, offlineMode,
                         cancelMatchMake, manualStart;
-        [SerializeField] MatchMakeConditions matchConditions;
+        [SerializeField] TankMatchMakeConditions matchConditions;
+        MatchmakingLobbyMaker lobbyMaker;
 
 
-
+        [SerializeField] GameObject MembersPanel;
         [SerializeField] Transform memberContentParent;
         [SerializeField] GameObject memberStatePrefab;
         [SerializeField] Text lobbyMemberCount;
-        public InputField nameField;
-        [SerializeField] Text playerName;
 
         //Key is UserId
-        Dictionary<string, LobbyMemberState> LobbyMemberStatus = new();
+        Dictionary<string, TankLobbyMemberState> LobbyMemberStatus = new();
 
     #region Prep for matchmaking
         //At first, prep GUI events for matchmaking.
         void Awake(){
-            if(MatchMakeManager.Instance == null){
-                Instantiate(matchmakePrefab);
-            }
-            //Prep matchmaking
+            lobbyMaker = new MatchmakingLobbyMaker(matchConditions);
+            SwitchButtonsActive(MatchmakingState.Standby);
             SetGUIEvents();
         }
         /// <summary>
@@ -68,13 +64,13 @@ namespace SynicSugar.Samples.Tank {
         /// </summary>
         void OnDisableStart(){
             //Cancel action need be disable when creating or joining lobby.
-            SwitchButtonsActive(MATCHMAKEING_STATE.NoneAndAfterStart);
+            SwitchButtonsActive(MatchmakingState.NoneAndAfterStart);
         }
         /// <summary>
         /// Finish to create or join a lobby, and accept canceling process.
         /// </summary>
         void OnEnableCancelAndKick(){
-            SwitchButtonsActive(MATCHMAKEING_STATE.InMatchmakingStandard);
+            SwitchButtonsActive(MatchmakingState.InMatchmakingStandard);
             if(MatchMakeManager.Instance.isHost){
                 SwitchKickButtonsActive(true);
             }
@@ -83,19 +79,19 @@ namespace SynicSugar.Samples.Tank {
         /// Can close Lobby and start game after meets requested members. 
         /// </summary>
         void OnEnableHostConclude(){
-            SwitchButtonsActive(MATCHMAKEING_STATE.InMatchmakingAfterMeetingMinCondition);
+            SwitchButtonsActive(MatchmakingState.InMatchmakingAfterMeetingMinCondition);
         }
         /// <summary>
         /// Disactivate close button when doesn't meet requested members. 
         /// </summary>
         void OnDisableHostConclude(){
-            SwitchButtonsActive(MATCHMAKEING_STATE.InMatchmakingStandard);
+            SwitchButtonsActive(MatchmakingState.InMatchmakingStandard);
         }
         /// <summary>
         /// Unctivate all buttons when close or complete matchmaking.
         /// </summary>
         void DisableCancelKickConclude(){
-            SwitchButtonsActive(MATCHMAKEING_STATE.NoneAndAfterStart);
+            SwitchButtonsActive(MatchmakingState.NoneAndAfterStart);
             if(MatchMakeManager.Instance.isHost){
                 SwitchKickButtonsActive(false);
             }
@@ -104,15 +100,19 @@ namespace SynicSugar.Samples.Tank {
         /// Switch button active
         /// </summary>
         /// <param name="state"></param>
-        void SwitchButtonsActive(MATCHMAKEING_STATE state){
-            //To start matchmake
-            startMatchMake.gameObject.SetActive(state == MATCHMAKEING_STATE.Standby);
-            createLobby.gameObject.SetActive(state == MATCHMAKEING_STATE.Standby);
-            searchLobby.gameObject.SetActive(state == MATCHMAKEING_STATE.Standby);
+        void SwitchButtonsActive(MatchmakingState state){
+            //Before matchmake
+            startMatchMake.gameObject.SetActive(state == MatchmakingState.Standby);
+            createLobby.gameObject.SetActive(state == MatchmakingState.Standby);
+            searchLobby.gameObject.SetActive(state == MatchmakingState.Standby);
+            offlineMode.gameObject.SetActive(state == MatchmakingState.Standby);
+            matchConditions.SwitchInputfieldActive(state == MatchmakingState.Standby);
+            //In Matchmaking.
+            MembersPanel.SetActive(state != MatchmakingState.Standby);
             //To cancel matchmake
-            cancelMatchMake.gameObject.SetActive(state == MATCHMAKEING_STATE.InMatchmakingStandard || state == MATCHMAKEING_STATE.InMatchmakingAfterMeetingMinCondition);
+            cancelMatchMake.gameObject.SetActive(state == MatchmakingState.InMatchmakingStandard || state == MatchmakingState.InMatchmakingAfterMeetingMinCondition);
             //To start game by hand
-            manualStart.gameObject.SetActive(state == MATCHMAKEING_STATE.InMatchmakingAfterMeetingMinCondition);
+            manualStart.gameObject.SetActive(state == MatchmakingState.InMatchmakingAfterMeetingMinCondition);
         }
         /// <summary>
         /// For GUI. Just display current lobbu count.
@@ -122,7 +122,7 @@ namespace SynicSugar.Samples.Tank {
         void OnLobbyMemberCountChanged(UserId target, bool isParticipated){
             if(isParticipated){
                 GameObject stateObj = Instantiate(memberStatePrefab, memberContentParent);
-                LobbyMemberState state = stateObj.GetComponent<LobbyMemberState>();
+                TankLobbyMemberState state = stateObj.GetComponent<TankLobbyMemberState>();
                 LobbyMemberStatus.Add(target.ToString(), state);
             }else{
                 Destroy(LobbyMemberStatus[target.ToString()].gameObject);
@@ -136,7 +136,7 @@ namespace SynicSugar.Samples.Tank {
         /// <param name="target"></param>
         void OnUpdatedMemberAttribute(UserId target){
             List<AttributeData> data = MatchMakeManager.Instance.GetTargetAttributeData(target);
-            LobbyMemberState state = LobbyMemberStatus[target.ToString()];
+            TankLobbyMemberState state = LobbyMemberStatus[target.ToString()];
             
             state.SetData(target, data.GetValue<string>("NAME"), AttributeData.GetValueAsString(data, "LEVEL"));
         }
@@ -156,49 +156,47 @@ namespace SynicSugar.Samples.Tank {
         /// <summary>
         /// For buttons.
         /// </summary>
-        /// <param name="type">MATCHMAKEING_TYPE</param>
-        [EnumAction(typeof(MATCHMAKEING_TYPE))]
+        /// <param name="type">MatchmakingType</param>
+        [EnumAction(typeof(MatchmakingType))]
         public void StartMatchMake(int type){
             //To clear old objects.
             ClearLobbyMemberState();
-            SetName();
-            SynicSugarDebug.Instance.Log($"Start MatchMake. TYPE: {(MATCHMAKEING_TYPE)type}");
+            SynicSugarDebug.Instance.Log($"Start MatchMake. TYPE: {(MatchmakingType)type}");
 
-            MatchMakeEntity((MATCHMAKEING_TYPE)type).Forget();
+            MatchMakeEntity((MatchmakingType)type).Forget();
         }
-        async UniTask MatchMakeEntity(MATCHMAKEING_TYPE type){
-            SwitchButtonsActive(MATCHMAKEING_STATE.NoneAndAfterStart);
+        async UniTask MatchMakeEntity(MatchmakingType type){
+            SwitchButtonsActive(MatchmakingState.NoneAndAfterStart);
             Result result = Result.None;
+            Lobby conditionObject = lobbyMaker.GenerateConditionLobbyObject(8, false);
+            //User attributes
+            List<AttributeData> userAttributes = matchConditions.GenerateUserAttributes();
+            //To pass name to game scene
+            TankPassedData.PlayerName = AttributeData.GetValueAsString(userAttributes, "NAME");
+
             switch (type){
-                case MATCHMAKEING_TYPE.Standard:
-                    await MatchMakeManager.Instance.SearchAndCreateLobby(matchConditions.GetLobbyCondition(16), minLobbyMember: 2, userAttributes: MatchMakeConfig.GenerateUserAttribute());
+                case MatchmakingType.Standard:
+                    result = await MatchMakeManager.Instance.SearchAndCreateLobby(conditionObject, minLobbyMember: 2, userAttributes: userAttributes);
                 break;
-                case MATCHMAKEING_TYPE.CreateAsHost:
-                    await MatchMakeManager.Instance.CreateLobby(matchConditions.GetLobbyCondition(16), minLobbyMember: 2, userAttributes: MatchMakeConfig.GenerateUserAttribute());
+                case MatchmakingType.CreateAsHost:
+                    result = await MatchMakeManager.Instance.CreateLobby(conditionObject, minLobbyMember: 2, userAttributes: userAttributes);
                 break;
-                case MATCHMAKEING_TYPE.JoinAsGuest:
-                    await MatchMakeManager.Instance.SearchLobby(matchConditions.GetLobbyCondition(16), minLobbyMember: 2, userAttributes: MatchMakeConfig.GenerateUserAttribute());
+                case MatchmakingType.JoinAsGuest:
+                    result = await MatchMakeManager.Instance.SearchLobby(conditionObject, minLobbyMember: 2, userAttributes: userAttributes);
+                break;
+                case MatchmakingType.Offline:
+                    result = await MatchMakeManager.Instance.CreateOfflineLobby(conditionObject, OfflineMatchmakingDelay.NoDelay, userAttributes: userAttributes);
                 break;
             }
                 
             if(result != Result.Success){
                 SynicSugarDebug.Instance.Log("MatchMaking Failed.", result);
-                SwitchButtonsActive(MATCHMAKEING_STATE.Standby);
+                SwitchButtonsActive(MatchmakingState.Standby);
                 return;
             }
 
             SynicSugarDebug.Instance.Log($"Success Matching! LobbyID:{MatchMakeManager.Instance.GetCurrentLobbyID()}");
             SceneChanger.ChangeGameScene(SCENELIST.Tank);
-        }
-        /// <summary>
-        /// If input field is empty, set Random value.
-        /// </summary>
-        void SetName(){
-            nameField.gameObject.SetActive(false);
-            //To pass name to GameScene.
-            TankPassedData.PlayerName = string.IsNullOrEmpty(nameField.text) ? $"Player{UnityEngine.Random.Range(0, 100)}" : nameField.text;
-
-            playerName.text = $"PlayerName: {TankPassedData.PlayerName}";
         }
         /// <summary>
         /// Reset pre data.
@@ -226,7 +224,6 @@ namespace SynicSugar.Samples.Tank {
         }
         async UniTask AsyncCancelMatchMaking(){
             await MatchMakeManager.Instance.ExitCurrentMatchMake(true);
-            nameField.gameObject.SetActive(true);
         }
     }
 }
