@@ -20,7 +20,7 @@ namespace SynicSugar.Samples.Tank {
 
         private void Awake(){
             // Instantiate the explosion prefab and get a reference to the particle system on it.
-            m_ExplosionParticles = Instantiate(m_ExplosionPrefab).GetComponent<ParticleSystem>();
+            m_ExplosionParticles = Instantiate(m_ExplosionPrefab, this.transform).GetComponent<ParticleSystem>();
 
             // Get a reference to the audio source on the instantiated prefab.
             m_ExplosionAudio = m_ExplosionParticles.GetComponent<AudioSource>();
