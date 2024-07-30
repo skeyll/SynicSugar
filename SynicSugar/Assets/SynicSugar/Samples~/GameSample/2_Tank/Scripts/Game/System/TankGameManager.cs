@@ -9,7 +9,7 @@ using UnityEngine.EventSystems;
 namespace SynicSugar.Samples.Tank {
     [NetworkCommons(true)]
     public partial class TankGameManager : MonoBehaviour{
-        CameraControl cameraControl;
+        TankCameraControl cameraControl;
         TankConnectionNotify connectionNotify;
         [SerializeField] TankGameResult gameResult;
         [SerializeField] List<Transform> spawners;
@@ -21,7 +21,7 @@ namespace SynicSugar.Samples.Tank {
         TankPadGUI padGUI;
 
         void Start(){
-            cameraControl = GetComponent<CameraControl>();
+            cameraControl = GetComponent<TankCameraControl>();
             SwitchSystemUIsState(GameState.PreparationForObjects);
             CurrentGameState = GameState.PreparationForObjects;
             InvokeStateProcess(GameState.PreparationForObjects);
@@ -66,6 +66,7 @@ namespace SynicSugar.Samples.Tank {
         void PreparationForObjectsProcess(){
             GeneratePlayers();
             RegisterConnectionNotifies();
+            Debug.Log(ConnectHub.Instance.GetUserInstance<TankPlayer>(p2pInfo.Instance.LocalUserId) == null);
             cameraControl.SetFollowTarget(ConnectHub.Instance.GetUserInstance<TankPlayer>(p2pInfo.Instance.LocalUserId).transform);
             //Generate objects for pool with member count
             gameResult.GenerateResultsText(p2pInfo.Instance.AllUserIds.Count);
@@ -152,7 +153,6 @@ namespace SynicSugar.Samples.Tank {
         /// </summary>
         void StandbyProcess(){
             padGUI.SwitchGUISState(PadState.OnlyMove);
-            everyoneIsReady = false;
             MonitorGameState().Forget();
         }
         /// <summary>
@@ -186,6 +186,7 @@ namespace SynicSugar.Samples.Tank {
             foreach(var id in p2pInfo.Instance.CurrentAllUserIds){
                 ConnectHub.Instance.GetUserInstance<TankPlayer>(id).status.isReady = false;
             }
+            everyoneIsReady = false;
         }
     #endregion
     #region InGame

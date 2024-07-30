@@ -29,6 +29,7 @@ namespace SynicSugar.Samples.Tank {
         /// Create enough shells before the game.
         /// </summary>
         internal void GenerateShellPool(int MemberCount){
+            shellPool = new List<TankShell>();
             for(int i = 0; i < MemberCount * 2; i++) {
                 shellPool.Add(Instantiate(m_Shell).GetComponent<TankShell>());
                 shellPool[i].gameObject.SetActive(false);

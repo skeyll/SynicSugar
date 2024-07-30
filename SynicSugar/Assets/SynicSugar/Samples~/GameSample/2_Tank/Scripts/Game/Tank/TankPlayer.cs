@@ -18,7 +18,7 @@ namespace  SynicSugar.Samples.Tank {
         [Synic(0)] public TankPlayerStatus status = new();
 
 
-        void Start(){
+        void Awake(){
             health = GetComponent<TankHealth>();
             actions = GetComponent<TankActions>();
             movement = GetComponent<TankMovement>();

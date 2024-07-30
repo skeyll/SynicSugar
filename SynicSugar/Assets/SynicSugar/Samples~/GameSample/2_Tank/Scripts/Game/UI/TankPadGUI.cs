@@ -10,7 +10,7 @@ namespace SynicSugar.Samples.Tank {
     public class TankPadGUI : MonoBehaviour {
         [SerializeField] PadsForMovement movements;
         [SerializeField] PadsForAction actions;
-        void Start(){
+        void Awake(){
             SwitchGUISState(PadState.None);
         }
         /// <summary>
