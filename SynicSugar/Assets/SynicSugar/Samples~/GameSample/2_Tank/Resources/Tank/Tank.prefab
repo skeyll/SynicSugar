@@ -10885,6 +10885,7 @@ MonoBehaviour:
   m_TurnSpeed: 180
   currentDirection: 0
   truePlayerPosition: {x: 0, y: 0, z: 0}
+  truePlayerQuaternion: {x: 0, y: 0, z: 0, w: 0}
 --- !u!114 &217870112266564876
 MonoBehaviour:
   m_ObjectHideFlags: 0

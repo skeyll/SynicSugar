@@ -45,7 +45,7 @@ namespace SynicSugar.Samples.Tank {
         /// <param name="token"></param>
         /// <returns></returns>
         async UniTask ChargeFireForce(CancellationToken token){
-            if(!token.IsCancellationRequested){
+            while(!token.IsCancellationRequested){
                 m_CurrentLaunchForce += m_ChargeSpeed * Time.deltaTime;
 
                 m_AimSlider.value = m_CurrentLaunchForce;
