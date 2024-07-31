@@ -135,13 +135,14 @@ namespace SynicSugar.Samples.Tank {
         /// Set basis data via sync.
         /// </summary>
         void SetLocalPlayerBasicData(){
-            TankPlayerStatus status = new TankPlayerStatus();
-
-            status.Name = TankPassedData.PlayerName; //carring over from Matchmaking scene.
-            status.MaxHP = 100;
-            status.Speed = 12f; 
-            status.Attack = 20;
-            status.RespawnPos = spawners[p2pInfo.Instance.GetUserIndex()].transform.position;
+            TankPlayerStatus status = new TankPlayerStatus()
+            {
+                Name = TankPassedData.PlayerName, //carring over from Matchmaking scene.
+                MaxHP = 100,
+                Speed = 12f,
+                Attack = 20,
+                RespawnPos = spawners[p2pInfo.Instance.GetUserIndex()].transform.position
+            };
             //Call RPC process to sync status.
             ConnectHub.Instance.GetUserInstance<TankPlayer>(p2pInfo.Instance.LocalUserId).SetPlayerStatus(status);
         }
@@ -197,6 +198,8 @@ namespace SynicSugar.Samples.Tank {
             if(ConnectHub.Instance.GetInstance<TankRoundTimer>().RemainingIsMax()){
                 await GameStarting();
             }
+            padGUI.SwitchGUISState(PadState.ALL);
+            
             await ConnectHub.Instance.GetInstance<TankRoundTimer>().StartTimer();
             GameEnding();
             CurrentGameState = GameState.Result;
@@ -235,7 +238,6 @@ namespace SynicSugar.Samples.Tank {
             }
             //Then, start
             systemText.text = "Start";
-            padGUI.SwitchGUISState(PadState.ALL);
             ResetSystemText().Forget();
         }
         async UniTask ResetSystemText(){
@@ -266,6 +268,10 @@ namespace SynicSugar.Samples.Tank {
             gameResult.DisplayResult(results);
             await UniTask.Delay(2000);
 
+            //Activate all player.
+            foreach(var id in p2pInfo.Instance.CurrentAllUserIds){
+                ConnectHub.Instance.GetUserInstance<TankPlayer>(id).ActivatePlayer();
+            }
             //Switch Camera and GUI state
             cameraControl.SetFollowLocalTarget();
             SwitchSystemUIsState(GameState.Result);

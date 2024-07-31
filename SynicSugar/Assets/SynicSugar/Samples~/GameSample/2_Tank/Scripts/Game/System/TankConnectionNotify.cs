@@ -49,7 +49,18 @@ namespace SynicSugar.Samples.Tank {
         /// <param name="id"></param>
         void OnRestored(UserId id){
             Debug.Log($"{GetPlayerName(id)}: Restored");
-            ConnectHub.Instance.GetUserInstance<TankPlayer>(id).gameObject.SetActive(true);
+            TankPlayer player = ConnectHub.Instance.GetUserInstance<TankPlayer>(id);
+            if(ConnectHub.Instance.GetInstance<TankGameManager>().CurrentGameState != GameState.InGame){
+                player.ActivatePlayer();
+                return;
+            }
+
+            if(player.status.CurrentHP > 0){
+                player.ActivatePlayer();
+            }else{
+                //To switch camera to survivor.
+                ConnectHub.Instance.GetInstance<TankGameManager>().CheckReadyState();
+            }
         }
         /// <summary>
         /// Called when the target reconnects after Disconnected.

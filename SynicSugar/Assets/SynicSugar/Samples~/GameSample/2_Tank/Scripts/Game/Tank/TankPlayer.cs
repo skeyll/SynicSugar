@@ -1,7 +1,6 @@
 using UnityEngine;
 using SynicSugar.P2P;
 using Cysharp.Threading.Tasks;
-using System.Threading;
 using UnityEngine.UI;
 namespace  SynicSugar.Samples.Tank {
     [NetworkPlayer(true)]
@@ -100,6 +99,10 @@ namespace  SynicSugar.Samples.Tank {
             if(status.CurrentHP <= 0){
                 OnDeath();
             }
+        }
+
+        internal void ActivatePlayer(){
+            gameObject.SetActive(true);
         }
         void OnDeath(){
             ConnectHub.Instance.GetInstance<TankGameManager>().CheckRoundState(p2pInfo.Instance.GetUserIndex(OwnerUserID));

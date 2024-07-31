@@ -27,8 +27,6 @@ namespace SynicSugar.Samples.Tank {
                 results[i].text = $"{i}: {resultData[i].Name}({resultData[i].RemainHP})";
             }
 
-            //ここでクラウンアクティブとカメラ移動？
-
             gameObject.SetActive(true);
         }
         /// <summary>
