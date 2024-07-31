@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Linq;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using SynicSugar.P2P;
 using UnityEngine;
@@ -43,10 +44,9 @@ namespace SynicSugar.Samples.Tank {
 
         async UniTask EnableShell(TankShootingData data, CancellationToken token){
             ShellRigidbody.transform.position = CalculateAdjustedPosition(data);
-            Debug.Log($"{ShellRigidbody.transform.position.x} / {ShellRigidbody.transform.position.y} / {ShellRigidbody.transform.position.z}");
             ShellRigidbody.transform.rotation = data.shellTransform.rotation;
             gameObject.SetActive(true);
-            await UniTask.Yield(token); //To avoid effect to player-self.
+            await UniTask.Delay(100); //To avoid effect to player-self.
             ShellCollider.enabled = true;
         }
         /// <summary> 
@@ -78,7 +78,10 @@ namespace SynicSugar.Samples.Tank {
         void OnTriggerEnter(Collider other){
             // Collect all the colliders in a sphere from the shell's current position to a radius of the explosion radius.
             Collider[] colliders = Physics.OverlapSphere(transform.position, m_ExplosionRadius, m_TankMask);
-
+            Debug.Log(colliders.Length);
+            if(colliders.Length <= 0){
+                return;
+            }
             // Go through all the colliders...
             for (int i = 0; i < colliders.Length; i++){
                 // ... and find their rigidbody.
@@ -88,16 +91,20 @@ namespace SynicSugar.Samples.Tank {
                 if (!targetRigidbody)
                     continue;
 
+                targetRigidbody.AddExplosionForce(m_ExplosionForce, transform.position, m_ExplosionRadius);
+
                 // Find the Tank script associated with the rigidbody.
                 TankPlayer target = targetRigidbody.GetComponent<TankPlayer>();
 
                 // If there is no TankHealth script attached to the gameobject, go on to the next collider.
-                if (!target)
+                // Damage calculate is only done by Local Player.
+                if (target == null || !target.isLocal)
                     continue;
 
-                //Damage calculate is only done by Local Player.
-                if (!target.isLocal)
-                    continue;
+                // Finish this process if it is self-shell.
+                if(target.OwnerUserID == AttackerID){
+                    return;
+                }
 
                 float damage = CalculateDamage(targetRigidbody.position);
                 
@@ -105,7 +112,6 @@ namespace SynicSugar.Samples.Tank {
                 target.TakeDamage(new TankDamageData(AttackerID.ToString(), damage));
             }
 
-            
             ExplodeShell();
         }
 
