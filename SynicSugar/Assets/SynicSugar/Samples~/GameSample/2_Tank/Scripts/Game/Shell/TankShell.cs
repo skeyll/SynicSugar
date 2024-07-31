@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Threading;
+﻿using System.Threading;
 using Cysharp.Threading.Tasks;
 using SynicSugar.P2P;
 using UnityEngine;
@@ -16,17 +15,23 @@ namespace SynicSugar.Samples.Tank {
         public float m_ExplosionForce = 1000f;              // The amount of force added to a tank at the centre of the explosion.
         public int m_MaxLifeTime = 2000;                    // The time in seconds before the shell is removed.
         public float m_ExplosionRadius = 5f;                // The maximum distance away from the explosion tanks can be and are still affected.
+        int ExplosionDuration;  
         CancellationTokenSource shellTokenSource;
         ParticleSystem ExplosionEffect;
-
-        void Awake(){
+        /// <summary>
+        /// GetComponent and Instantiate need objects.
+        /// </summary>
+        internal void Init(Transform poolParent){
             ShellRigidbody = GetComponent<Rigidbody>(); 
             // Set the value of the layer mask based solely on the Players layer.
             m_TankMask = LayerMask.GetMask("Players");
             ShellCollider = GetComponent<Collider>();
             ShellCollider.enabled = false;
-            ExplosionEffect = Instantiate(m_ExplosionParticles, transform.position, transform.rotation);
             gameObject.SetActive(false);
+            ExplosionDuration = (int)Mathf.Ceil(m_ExplosionParticles.main.duration * 1000f);
+            //effect
+            ExplosionEffect = Instantiate(m_ExplosionParticles, poolParent);
+            ExplosionEffect.gameObject.SetActive(false);
         }
         /// <summary>
         /// Fire shell until lifetime.
@@ -46,7 +51,7 @@ namespace SynicSugar.Samples.Tank {
             ShellRigidbody.transform.position = CalculateAdjustedPosition(data);
             ShellRigidbody.transform.rotation = data.shellTransform.rotation;
             gameObject.SetActive(true);
-            await UniTask.Delay(100); //To avoid effect to player-self.
+            await UniTask.Delay(100, cancellationToken: token); //To avoid effect to player-self.
             ShellCollider.enabled = true;
         }
         /// <summary> 
@@ -135,14 +140,20 @@ namespace SynicSugar.Samples.Tank {
         }
 
         void ExplodeShell(){
+            PlayEffect().Forget();
+            DisableShell();
+        }
+        async UniTask PlayEffect(){
+            ExplosionEffect.transform.position = ShellRigidbody.transform.position;
+            ExplosionEffect.transform.rotation = ShellRigidbody.transform.rotation;
             ExplosionEffect.gameObject.SetActive(true);
             // Play the particle system.
             ExplosionEffect.Play();
-
             // Play the explosion sound effect.
             TankAudioManager.Instance.PlayShootingClipOneshot(ShootingClips.Explosion);
 
-            DisableShell();
+            await UniTask.Delay(ExplosionDuration);
+            ExplosionEffect.gameObject.SetActive(false);
         }
     }
 }

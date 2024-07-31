@@ -22,6 +22,7 @@ namespace SynicSugar.Samples.Tank {
             }
         }
     #endregion
+        [SerializeField] Transform poolParent;
         public Rigidbody m_Shell;                   // Prefab of the shell.
         List<TankShell> shellPool;                  //Reuse from the same pool for all users
         int currentShellIndex;
@@ -31,8 +32,8 @@ namespace SynicSugar.Samples.Tank {
         internal void GenerateShellPool(int MemberCount){
             shellPool = new List<TankShell>();
             for(int i = 0; i < MemberCount * 2; i++) {
-                shellPool.Add(Instantiate(m_Shell).GetComponent<TankShell>());
-                shellPool[i].gameObject.SetActive(false);
+                shellPool.Add(Instantiate(m_Shell, poolParent).GetComponent<TankShell>());
+                shellPool[i].Init(poolParent);
             }
             currentShellIndex = 0;
         }
