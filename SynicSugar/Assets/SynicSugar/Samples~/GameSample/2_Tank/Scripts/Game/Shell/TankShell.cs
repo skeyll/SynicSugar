@@ -43,6 +43,7 @@ namespace SynicSugar.Samples.Tank {
 
         async UniTask EnableShell(TankShootingData data, CancellationToken token){
             ShellRigidbody.transform.position = CalculateAdjustedPosition(data);
+            Debug.Log($"{ShellRigidbody.transform.position.x} / {ShellRigidbody.transform.position.y} / {ShellRigidbody.transform.position.z}");
             ShellRigidbody.transform.rotation = data.shellTransform.rotation;
             gameObject.SetActive(true);
             await UniTask.Yield(token); //To avoid effect to player-self.
@@ -54,6 +55,9 @@ namespace SynicSugar.Samples.Tank {
         /// <param name="data"></param>
         /// <returns></returns>
         Vector3 CalculateAdjustedPosition(TankShootingData data){
+            if(p2pInfo.Instance.IsLoaclUser(AttackerID)){  
+                return data.shellTransform.position;
+            }
             return data.shellTransform.position + (data.Power * data.shellTransform.forward * data.GetLatencyBetweenRemoteAndLocal());
         }
         void DisableShell(){
