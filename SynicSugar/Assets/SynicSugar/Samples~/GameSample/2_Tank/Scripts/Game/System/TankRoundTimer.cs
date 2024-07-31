@@ -16,6 +16,9 @@ namespace SynicSugar.Samples.Tank {
             MaxRoundTime = roundTime;
             timerText = text;
         }
+        internal void SetTimer(){
+            reamingTime = MaxRoundTime;
+        }
         /// <summary>
         /// Count Round time
         /// </summary>

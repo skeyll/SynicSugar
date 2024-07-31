@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using SynicSugar.P2P;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -62,7 +63,6 @@ namespace SynicSugar.Samples.Tank {
             // Interpolate the color of the bar between the choosen colours based on the current percentage of the starting health.
             m_FillImage.color = Color.Lerp(m_ZeroHealthColor, m_FullHealthColor, status.CurrentHP / m_StartingHealth);
         }
-
 
         private void OnDeath(){
             // Set the flag so that this function is only called once.

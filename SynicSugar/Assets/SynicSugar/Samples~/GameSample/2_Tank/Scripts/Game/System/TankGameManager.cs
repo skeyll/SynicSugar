@@ -66,8 +66,7 @@ namespace SynicSugar.Samples.Tank {
         void PreparationForObjectsProcess(){
             GeneratePlayers();
             RegisterConnectionNotifies();
-            Debug.Log(ConnectHub.Instance.GetUserInstance<TankPlayer>(p2pInfo.Instance.LocalUserId) == null);
-            cameraControl.SetFollowTarget(ConnectHub.Instance.GetUserInstance<TankPlayer>(p2pInfo.Instance.LocalUserId).transform);
+            cameraControl.SetFollowLocalTarget();
             //Generate objects for pool with member count
             gameResult.GenerateResultsText(p2pInfo.Instance.AllUserIds.Count);
             TankShellManager.Instance.GenerateShellPool(p2pInfo.Instance.AllUserIds.Count);
@@ -153,13 +152,15 @@ namespace SynicSugar.Samples.Tank {
         /// </summary>
         void StandbyProcess(){
             padGUI.SwitchGUISState(PadState.OnlyMove);
+            SwitchSystemUIsState(GameState.Standby);
+            ConnectHub.Instance.GetInstance<TankRoundTimer>().SetTimer();
             MonitorGameState().Forget();
         }
         /// <summary>
         /// From call system button
         /// </summary>
         public void ReadyToPlayBattle(){
-            ReadyGame.gameObject.SetActive(false);
+            SwitchSystemUIsState(GameState.InGame);
             ConnectHub.Instance.GetUserInstance<TankPlayer>(p2pInfo.Instance.LocalUserId).Ready();
         }
         /// <summary>
@@ -201,6 +202,30 @@ namespace SynicSugar.Samples.Tank {
             CurrentGameState = GameState.Result;
             InvokeStateProcess(CurrentGameState);
         }
+        /// <summary>
+        /// Change the camera target and if there is the one user in the field, stop the timer and finish the game.
+        /// </summary>
+        /// <param name="deadUserIndex">To switch camera target</param>
+        internal void CheckRoundState(int deadUserIndex){
+            cameraControl.SwitchTargetToNextSurvivor(deadUserIndex);
+
+            if(isHost && IsLastSurviver()){
+                ConnectHub.Instance.GetInstance<TankRoundTimer>().StopTimer();
+            }
+        }
+        bool IsLastSurviver(){
+            int surviverCount = 0;
+            foreach(var id in p2pInfo.Instance.CurrentAllUserIds){
+                //A player who has disconnected is also considered dead.
+                if(ConnectHub.Instance.GetUserInstance<TankPlayer>(id).gameObject.activeSelf){
+                    surviverCount++;
+                }
+                if(surviverCount > 1){
+                    break;
+                }
+            }
+            return surviverCount == 1;
+        }
         async UniTask GameStarting(){
             padGUI.SwitchGUISState(PadState.None);
             //Count 3
@@ -234,7 +259,7 @@ namespace SynicSugar.Samples.Tank {
             //Switch Camera
             TankPlayer winner = ConnectHub.Instance.GetUserInstance<TankPlayer>(results[0].UserId);
             winner.SwitchClownActive(true);
-            cameraControl.SetFollowTarget(winner.transform);
+            cameraControl.SetFollowTarget(winner.transform, p2pInfo.Instance.GetUserIndex(results[0].UserId));
             await UniTask.Delay(3000);
 
             //On GUI
@@ -242,7 +267,7 @@ namespace SynicSugar.Samples.Tank {
             await UniTask.Delay(2000);
 
             //Switch Camera and GUI state
-            cameraControl.SetFollowTarget(ConnectHub.Instance.GetUserInstance<TankPlayer>(p2pInfo.Instance.LocalUserId).transform);
+            cameraControl.SetFollowLocalTarget();
             SwitchSystemUIsState(GameState.Result);
             padGUI.SwitchGUISState(PadState.OnlyMove);
         }

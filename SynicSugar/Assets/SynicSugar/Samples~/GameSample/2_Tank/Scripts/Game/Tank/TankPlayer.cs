@@ -96,8 +96,15 @@ namespace  SynicSugar.Samples.Tank {
         [Rpc]
         public void TakeDamage(TankDamageData damage){
             health.Damage(damage.Damage);
+            
+            if(status.CurrentHP <= 0){
+                OnDeath();
+            }
         }
-        public void SwitchClownActive(bool isActivate){
+        void OnDeath(){
+            ConnectHub.Instance.GetInstance<TankGameManager>().CheckRoundState(p2pInfo.Instance.GetUserIndex(OwnerUserID));
+        }
+        internal void SwitchClownActive(bool isActivate){
             Crown.SetActive(isActivate);
         }
     }
