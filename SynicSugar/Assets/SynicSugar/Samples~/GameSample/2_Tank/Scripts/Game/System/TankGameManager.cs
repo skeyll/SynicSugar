@@ -171,6 +171,12 @@ namespace SynicSugar.Samples.Tank {
             await UniTask.WaitUntil(() => everyoneIsReady, cancellationToken: this.GetCancellationTokenOnDestroy());
             CurrentGameState = GameState.InGame;
             InvokeStateProcess(CurrentGameState);
+            
+            //reset flag
+            foreach(var id in p2pInfo.Instance.CurrentAllUserIds){
+                ConnectHub.Instance.GetUserInstance<TankPlayer>(id).status.isReady = false;
+            }
+            everyoneIsReady = false;
         }
         /// <summary>
         /// Go to InGame state after all users are ready. <br />
@@ -184,11 +190,6 @@ namespace SynicSugar.Samples.Tank {
                 }
             }
             everyoneIsReady = true;
-            //reset flag
-            foreach(var id in p2pInfo.Instance.CurrentAllUserIds){
-                ConnectHub.Instance.GetUserInstance<TankPlayer>(id).status.isReady = false;
-            }
-            everyoneIsReady = false;
         }
     #endregion
     #region InGame
@@ -199,7 +200,7 @@ namespace SynicSugar.Samples.Tank {
                 await GameStarting();
             }
             padGUI.SwitchGUISState(PadState.ALL);
-            
+
             await ConnectHub.Instance.GetInstance<TankRoundTimer>().StartTimer();
             GameEnding();
             CurrentGameState = GameState.Result;
