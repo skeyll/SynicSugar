@@ -31,7 +31,7 @@ namespace SynicSugar.Samples.Tank {
         /// </summary>
         internal void GenerateShellPool(int MemberCount){
             shellPool = new List<TankShell>();
-            for(int i = 0; i < MemberCount * 2; i++) {
+            for(int i = 0; i < MemberCount * 3; i++) {
                 shellPool.Add(Instantiate(m_Shell, poolParent).GetComponent<TankShell>());
                 shellPool[i].Init(poolParent);
             }
