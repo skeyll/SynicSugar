@@ -9,6 +9,7 @@ using UnityEngine.EventSystems;
 namespace SynicSugar.Samples.Tank {
     [NetworkCommons(true)]
     public partial class TankGameManager : MonoBehaviour{
+        [SerializeField] Transform tankParent;
         TankCameraControl cameraControl;
         TankConnectionNotify connectionNotify;
         [SerializeField] TankGameResult gameResult;
@@ -84,7 +85,7 @@ namespace SynicSugar.Samples.Tank {
             GameObject playerPrefab = (GameObject)Resources.Load("Tank/Tank");
             // SynicSugar sync data via each instance.
             // So, we need to instanctiate the object before send or receive packets.
-            SynicObject.AllSpawn(playerPrefab);
+            SynicObject.AllSpawn(playerPrefab, tankParent);
         }
         void RegisterConnectionNotifies(){
             // Register an event if we need to know connection information.

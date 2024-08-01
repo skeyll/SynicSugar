@@ -1,5 +1,4 @@
 using Cysharp.Threading.Tasks;
-using SynicSugar.P2P;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,7 +12,6 @@ namespace SynicSugar.Samples.Tank {
         public GameObject m_ExplosionPrefab;                // A prefab that will be instantiated in Awake, then used whenever the tank dies.
 
 
-        private AudioSource m_ExplosionAudio;               // The audio source to play when the tank explodes.
         private ParticleSystem m_ExplosionParticles;        // The particle system the will play when the tank is destroyed.
         TankPlayerStatus status;                            // How much health the tank currently has.
         private bool m_Dead;                                // Has the tank been reduced beyond zero health yet?
@@ -21,10 +19,7 @@ namespace SynicSugar.Samples.Tank {
 
         private void Awake(){
             // Instantiate the explosion prefab and get a reference to the particle system on it.
-            m_ExplosionParticles = Instantiate(m_ExplosionPrefab, this.transform).GetComponent<ParticleSystem>();
-
-            // Get a reference to the audio source on the instantiated prefab.
-            m_ExplosionAudio = m_ExplosionParticles.GetComponent<AudioSource>();
+            m_ExplosionParticles = Instantiate(m_ExplosionPrefab, transform).GetComponent<ParticleSystem>();
 
             // Disable the prefab so it can be activated when it's required.
             m_ExplosionParticles.gameObject.SetActive(false);
@@ -51,7 +46,7 @@ namespace SynicSugar.Samples.Tank {
 
             // If the current health is at or below zero and it has not yet been registered, call OnDeath.
             if (status.CurrentHP <= 0f && !m_Dead){
-                OnDeath();
+                OnDeath().Forget();
             }
         }
 
@@ -64,10 +59,14 @@ namespace SynicSugar.Samples.Tank {
             m_FillImage.color = Color.Lerp(m_ZeroHealthColor, m_FullHealthColor, status.CurrentHP / m_StartingHealth);
         }
 
-        private void OnDeath(){
+        private async UniTask OnDeath(){
             // Set the flag so that this function is only called once.
             m_Dead = true;
 
+            await PlayEffect();
+            gameObject.SetActive(false);
+        }
+        async UniTask PlayEffect(){
             // Move the instantiated explosion prefab to the tank's position and turn it on.
             m_ExplosionParticles.transform.position = transform.position;
             m_ExplosionParticles.gameObject.SetActive(true);
@@ -76,14 +75,9 @@ namespace SynicSugar.Samples.Tank {
             m_ExplosionParticles.Play();
 
             // Play the tank explosion sound effect.
-            m_ExplosionAudio.Play();
+            TankAudioManager.Instance.PlayTankClipOneshot(TankClips.Explosion);
 
-            // Turn the tank off.
-            gameObject.SetActive(false);
-            DeactivateParticle().Forget();
-        }
-        async UniTask DeactivateParticle(){
-            await UniTask.Delay(3000);
+            await UniTask.Delay(1050);
             m_ExplosionParticles.gameObject.SetActive(false);
         }
     }

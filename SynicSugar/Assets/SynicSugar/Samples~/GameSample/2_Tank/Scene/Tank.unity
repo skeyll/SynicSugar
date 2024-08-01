@@ -167,10 +167,6 @@ PrefabInstance:
       value: CompleteLevelArt
       objectReference: {fileID: 0}
     - target: {fileID: 488946, guid: 312c52d27be2d2d42acea3ccebc4694b, type: 3}
-      propertyPath: m_RootOrder
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 488946, guid: 312c52d27be2d2d42acea3ccebc4694b, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}
@@ -1349,6 +1345,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 90f30fdcd688847b59a431671577b6a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  tankParent: {fileID: 887304003}
   gameResult: {fileID: 1037877745}
   spawners:
   - {fileID: 169069995}
