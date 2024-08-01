@@ -51,7 +51,8 @@ namespace SynicSugar.Samples.Tank {
             ShellRigidbody.transform.position = CalculateAdjustedPosition(data);
             ShellRigidbody.transform.rotation = data.shellTransform.rotation;
             gameObject.SetActive(true);
-            await UniTask.Delay(100, cancellationToken: token); //To avoid effect to player-self.
+            //To avoid effect to player-self.
+            await UniTask.Delay(100, cancellationToken: token); 
             ShellCollider.enabled = true;
         }
         /// <summary> 
@@ -66,7 +67,7 @@ namespace SynicSugar.Samples.Tank {
             return data.shellTransform.position + (data.Power * data.shellTransform.forward * data.GetLatencyBetweenRemoteAndLocal());
         }
         void DisableShell(){
-            if(!gameObject.activeSelf){
+            if(shellTokenSource == null || !shellTokenSource.Token.CanBeCanceled){
                 return;
             }
             shellTokenSource.Cancel();
@@ -74,19 +75,14 @@ namespace SynicSugar.Samples.Tank {
             ShellRigidbody.velocity = Vector3.zero;
             transform.position = Vector3.zero;
             transform.rotation = Quaternion.identity;
-            //Avoid reacting to playerself.
             ShellCollider.enabled = false;
             gameObject.SetActive(false);
-            ExplosionEffect.gameObject.SetActive(false);
         }
 
         void OnTriggerEnter(Collider other){
             // Collect all the colliders in a sphere from the shell's current position to a radius of the explosion radius.
             Collider[] colliders = Physics.OverlapSphere(transform.position, m_ExplosionRadius, m_TankMask);
-            Debug.Log(colliders.Length);
-            if(colliders.Length <= 0){
-                return;
-            }
+
             // Go through all the colliders...
             for (int i = 0; i < colliders.Length; i++){
                 // ... and find their rigidbody.
@@ -116,7 +112,6 @@ namespace SynicSugar.Samples.Tank {
                 // Deal this damage to the tank.
                 target.TakeDamage(new TankDamageData(AttackerID.ToString(), damage));
             }
-
             ExplodeShell();
         }
 
@@ -152,7 +147,7 @@ namespace SynicSugar.Samples.Tank {
             // Play the explosion sound effect.
             TankAudioManager.Instance.PlayShootingClipOneshot(ShootingClips.Explosion);
 
-            await UniTask.Delay(ExplosionDuration);
+            await UniTask.Delay(ExplosionDuration, cancellationToken: this.GetCancellationTokenOnDestroy());
             ExplosionEffect.gameObject.SetActive(false);
         }
     }
