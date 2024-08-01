@@ -28,38 +28,5 @@ namespace  SynicSugar.Samples {
             }
             return descriptions;
         }
-        public static List<AttributeData> GenerateUserAttribute(){
-            //We can set max 100 attributes.
-            List<AttributeData> attributeData = new();
-            //Name
-            AttributeData attribute = new (){
-                Key = "NAME"
-            };
-            string Name = GetRandomString();
-            attribute.SetValue(Name);
-            attributeData.Add(attribute);
-            //Rank
-            attribute = new (){
-                Key = "LEVEL"
-            };
-            int Level = UnityEngine.Random.Range(0, 31);
-            attribute.SetValue(Level);
-            attributeData.Add(attribute);
-            
-            SynicSugarDebug.Instance.Log($"UserName: {Name.ToString()} / Level: {Level}");
-
-            return attributeData;
-            
-            string GetRandomString(){
-                var sample = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-                string name = System.String.Empty;
-                var random = new System.Random();
-
-                for (int i = 0; i < 6; i++){
-                    name += sample[random.Next(sample.Length)];
-                }
-                return name;
-            }
-        }
     }
 }

@@ -36,7 +36,7 @@ namespace SynicSugar.Samples.Tank {
 
     #region Prep for matchmaking
         //At first, prep GUI events for matchmaking.
-        void Awake(){
+        void Start(){
             lobbyMaker = new MatchmakingLobbyMaker(matchConditions);
             SwitchButtonsActive(MatchmakingState.Standby);
             SetGUIEvents();
@@ -161,7 +161,6 @@ namespace SynicSugar.Samples.Tank {
         public void StartMatchMake(int type){
             //To clear old objects.
             ClearLobbyMemberState();
-            SynicSugarDebug.Instance.Log($"Start MatchMake. TYPE: {(MatchmakingType)type}");
 
             MatchMakeEntity((MatchmakingType)type).Forget();
         }
@@ -190,12 +189,10 @@ namespace SynicSugar.Samples.Tank {
             }
                 
             if(result != Result.Success){
-                SynicSugarDebug.Instance.Log("MatchMaking Failed.", result);
                 SwitchButtonsActive(MatchmakingState.Standby);
                 return;
             }
 
-            SynicSugarDebug.Instance.Log($"Success Matching! LobbyID:{MatchMakeManager.Instance.GetCurrentLobbyID()}");
             SceneChanger.ChangeGameScene(SCENELIST.Tank);
         }
         /// <summary>
