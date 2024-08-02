@@ -220,7 +220,7 @@ namespace SynicSugar.Samples.Tank {
 
         }
         async UniTask AsyncCancelMatchMaking(){
-            await MatchMakeManager.Instance.ExitCurrentMatchMake(true);
+            await MatchMakeManager.Instance.ExitCurrentMatchMake(false);
         }
     }
 }
