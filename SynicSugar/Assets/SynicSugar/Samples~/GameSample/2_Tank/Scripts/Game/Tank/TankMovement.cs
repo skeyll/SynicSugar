@@ -11,13 +11,12 @@ namespace SynicSugar.Samples.Tank {
         float m_Speed = 12f;             // How fast the tank moves forward and back.
         public float m_TurnSpeed = 180f; // How fast the tank turns in degrees per second.
 
-        [Synic(0)] public Direction currentDirection;
         // Movement is managed by Move and Stop and calculated locally.
         // Periodically, this value is sent to correct the actual position.
         [SyncVar(2000)] public Vector3 truePlayerPosition;
         // Movement is managed by Move and Stop and calculated locally.
         // Periodically, this value is sent to correct the actual position.
-        [SyncVar(2000)] public Quaternion truePlayerQuaternion;
+        [SyncVar(1000)] public Quaternion truePlayerQuaternion;
         /// Movement is managed by UniTask.
         /// </summary>
         CancellationTokenSource moveTokenSource;
@@ -37,51 +36,43 @@ namespace SynicSugar.Samples.Tank {
         /// <summary>
         /// Keep moving in loop until player press Stop.
         /// </summary>
-        /// <param name="newDirection"></param>
+        /// <param name="data"></param>
         /// <returns></returns>
-        internal async UniTask Move(Direction newDirection){
+        internal async UniTask Move(TankMoveData data){
             GenerateNewToken();
+            SetTransformData(data);
 
-            int sign = newDirection is Direction.Up ? 1 : -1;
+            int sign = data.direction is Direction.Up ? 1 : -1;
             Vector3 movement = sign * m_Rigidbody.transform.forward * m_Speed;
 
             while(!moveTokenSource.Token.IsCancellationRequested){
                 //Fix the pos by true pos.
                 //The actual pos data is sent every 3 seconds from each local.
-                if(!isLocal){
-                    m_Rigidbody.MovePosition(truePlayerPosition);
-                }
-
-                m_Rigidbody.MovePosition(m_Rigidbody.position + movement * Time.deltaTime);
+                m_Rigidbody.MovePosition(truePlayerPosition + movement * Time.deltaTime);
+                m_Rigidbody.angularVelocity = Vector3.zero;
                 
                 truePlayerPosition = m_Rigidbody.position;
-                await UniTask.Yield(moveTokenSource.Token);
+                await UniTask.Yield(PlayerLoopTiming.FixedUpdate, moveTokenSource.Token);
             }
         }
         /// <summary>
         /// Turn toward the new direction.
         /// </summary>
-        /// <param name="newAngle"></param>
+        /// <param name="data"></param>
         /// <returns></returns>
-        internal async UniTask Turn (Direction newAngle){
+        internal async UniTask Turn (TankMoveData data){
             GenerateNewToken();
+            SetTransformData(data);
 
-            float turnSpeed = newAngle is Direction.Right ? m_TurnSpeed : -m_TurnSpeed;
+            float turnSpeed = data.direction is Direction.Right ? m_TurnSpeed : -m_TurnSpeed;
 
             while (!moveTokenSource.Token.IsCancellationRequested){
-                 if(!isLocal){
-                    m_Rigidbody.MoveRotation(truePlayerQuaternion);
-                }
+                Quaternion turn = Quaternion.Euler(0f, turnSpeed * Time.deltaTime, 0f);
+                m_Rigidbody.MoveRotation(truePlayerQuaternion * turn);
+                m_Rigidbody.velocity = Vector3.zero;
 
-                // Calculate rotation for this frame
-                float turn = turnSpeed * Time.deltaTime;
-
-                // Apply rotation
-                Quaternion deltaRotation = Quaternion.Euler(0f, turn, 0f);
-                m_Rigidbody.MoveRotation(m_Rigidbody.rotation * deltaRotation);
-
-                truePlayerQuaternion = m_Rigidbody.rotation;
-                await UniTask.Yield(moveTokenSource.Token);
+                truePlayerQuaternion = transform.rotation;
+                await UniTask.Yield(PlayerLoopTiming.FixedUpdate, moveTokenSource.Token);
             }
         }
 
@@ -94,6 +85,10 @@ namespace SynicSugar.Samples.Tank {
                 m_Rigidbody.velocity = Vector3.zero;
                 m_Rigidbody.angularVelocity = Vector3.zero;
             }
+        }
+        void SetTransformData(TankMoveData data){
+            truePlayerPosition = data.currentPosition;
+            truePlayerQuaternion = data.currentQuaternion;
         }
         void GenerateNewToken(){
             Stop();

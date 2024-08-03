@@ -44,7 +44,7 @@ namespace SynicSugar.Samples.Tank {
         /// <param name="stop"></param>
         internal void RegisterEvents(Action<Direction> move, Action stop) {
             GameObject[] objects = { Up, Left, Down, Right };
-            
+
             for (int i = 0; i < objects.Length; i++) {
                 int keyIndex = i;
                 TankEventRegisterExtenstions.RegisterEvents(objects[i], EventTriggerType.PointerDown, move, (Direction)keyIndex);

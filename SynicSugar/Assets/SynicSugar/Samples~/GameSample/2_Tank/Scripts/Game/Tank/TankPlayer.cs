@@ -28,7 +28,7 @@ namespace  SynicSugar.Samples.Tank {
         [Rpc]
         public void SetPlayerStatus(TankPlayerStatus status){
             this.status = status;
-            this.transform.localPosition = status.RespawnPos;
+            this.transform.position = status.RespawnPos;
 
             PlayerName.text = status.Name;
             movement.SetSpeed(status.Speed);
@@ -50,20 +50,27 @@ namespace  SynicSugar.Samples.Tank {
         /// <summary>
         /// Called from move button and as RPC.
         /// </summary>
-        /// <param name="newDirection">Up or Down</param>
-        [Rpc]
-        public void Move(Direction newDirection){
+        /// <param name="direction">Up or Down</param>
+        public void Move(Direction direction){
             //Simplified because it's hard work. Sound only locally.
-            if(isLocal){
-                TankAudioManager.Instance.PlayTankClip(TankClips.Driving);
-            }
-            if(newDirection is Direction.Up or Direction.Down){
-                movement.Move(newDirection).Forget();
+            TankAudioManager.Instance.PlayTankClip(TankClips.Driving);
+
+            if(direction is Direction.Up or Direction.Down){
+                Move(new TankMoveData(direction, transform));
             }else{
-                movement.Turn(newDirection).Forget();
+                Turn(new TankMoveData(direction, transform));
             }
 
         }
+        [Rpc]
+        public void Move(TankMoveData data){
+            movement.Move(data).Forget();
+        }
+        [Rpc]
+        public void Turn(TankMoveData data){
+            movement.Turn(data).Forget();
+        }
+
         /// <summary>
         /// Called from move button and as RPC.
         /// </summary>
