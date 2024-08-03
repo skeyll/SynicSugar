@@ -97,6 +97,10 @@ namespace  SynicSugar.Samples.Tank {
         }
         [Rpc]
         public void Fire(TankShootingData data){
+            //Cancel Remote charge action.
+            if(!isLocal){
+                ReleaseTheTrigger();
+            }
             TankShellManager.Instance.FireShell(OwnerUserID, data);
         }
         [Rpc]
