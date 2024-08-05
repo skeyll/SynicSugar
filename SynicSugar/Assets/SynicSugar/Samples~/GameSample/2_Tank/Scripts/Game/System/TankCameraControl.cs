@@ -3,8 +3,8 @@ using UnityEngine;
 
 namespace SynicSugar.Samples.Tank {
     public class TankCameraControl : MonoBehaviour {
-        private static readonly Vector3 RELATIVE_POSITION = new Vector3(0f, 5f, 1f);
-        private static readonly Vector3 RELATIVE_ROTATION = new Vector3(45f, 0f, 0f);
+        private static readonly Vector3 RELATIVE_POSITION = new Vector3(0f, 6f, -2f);
+        private static readonly Vector3 RELATIVE_ROTATION = new Vector3(25f, 0f, 0f);
         Camera mainCamera;
         int _freeCameraIndex;
         public int freeCameraIndex {
