@@ -10883,7 +10883,6 @@ MonoBehaviour:
   m_LeftDustTrail: {fileID: 19821292}
   m_RightDustTrail: {fileID: 19809832}
   m_TurnSpeed: 180
-  currentDirection: 0
   truePlayerPosition: {x: 0, y: 0, z: 0}
   truePlayerQuaternion: {x: 0, y: 0, z: 0, w: 0}
 --- !u!114 &217870112266564876
