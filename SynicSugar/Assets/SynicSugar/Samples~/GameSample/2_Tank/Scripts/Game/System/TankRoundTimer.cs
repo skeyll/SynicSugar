@@ -7,7 +7,7 @@ namespace SynicSugar.Samples.Tank {
     [NetworkCommons(true)]
     public partial class TankRoundTimer {
         int MaxRoundTime = 120;
-        [SyncVar(true, 2000)] float reamingTime;
+        [Synic] public float reamingTime;
         Text timerText;
         CancellationTokenSource timerTokenSource;
         
@@ -35,10 +35,10 @@ namespace SynicSugar.Samples.Tank {
                 await UniTask.Yield(token);
             }
         }
-        [Rpc]
         /// <summary>
         /// All local will probably finish at the same time, but just in case,　Host stop the timer manually.
         /// </summary>
+        [Rpc]
         public void StopTimer(){
             if(timerTokenSource != null && timerTokenSource.Token.CanBeCanceled){
                 timerTokenSource.Cancel();
