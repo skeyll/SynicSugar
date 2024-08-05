@@ -51,5 +51,8 @@ namespace SynicSugar.Samples.Tank {
         internal bool RemainingIsMax(){
             return (int)reamingTime == MaxRoundTime;
         }
+        internal float GetCurrentTime(){
+            return reamingTime;
+        }
     }
 }
