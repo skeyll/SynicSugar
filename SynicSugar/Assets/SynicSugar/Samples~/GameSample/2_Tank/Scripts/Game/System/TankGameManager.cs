@@ -33,6 +33,7 @@ namespace SynicSugar.Samples.Tank {
         /// </summary>
         /// <param name="newState"></param>
         internal void InvokeStateProcess(GameState newState){
+            Debug.Log(newState);
             switch(newState){
                 case GameState.PreparationForObjects:
                     PreparationForObjectsProcess();
@@ -204,7 +205,7 @@ namespace SynicSugar.Samples.Tank {
             padGUI.SwitchGUISState(PadState.ALL);
 
             await ConnectHub.Instance.GetInstance<TankRoundTimer>().StartTimer();
-            GameEnding();
+            await GameEnding();
             CurrentGameState = GameState.Result;
             InvokeStateProcess(CurrentGameState);
         }
@@ -213,8 +214,13 @@ namespace SynicSugar.Samples.Tank {
         /// </summary>
         /// <param name="deadUserIndex">To switch camera target</param>
         internal void CheckRoundState(int deadUserIndex){
+            // When local user is dead, deactivate pads.
+            if(deadUserIndex == p2pInfo.Instance.GetUserIndex()){
+                padGUI.SwitchGUISState(PadState.None);
+            }
+            // Swtich camera position
             cameraControl.SwitchTargetToNextSurvivor(deadUserIndex);
-
+            // Need end this round?
             if(isHost && IsLastSurviver()){
                 ConnectHub.Instance.GetInstance<TankRoundTimer>().StopTimer();
             }
@@ -222,8 +228,9 @@ namespace SynicSugar.Samples.Tank {
         bool IsLastSurviver(){
             int surviverCount = 0;
             foreach(var id in p2pInfo.Instance.CurrentAllUserIds){
+                TankPlayer player = ConnectHub.Instance.GetUserInstance<TankPlayer>(id);
                 //A player who has disconnected is also considered dead.
-                if(ConnectHub.Instance.GetUserInstance<TankPlayer>(id).gameObject.activeSelf){
+                if(player.gameObject.activeSelf || player.status.CurrentHP <= 0f){
                     surviverCount++;
                 }
                 if(surviverCount > 1){
@@ -243,14 +250,14 @@ namespace SynicSugar.Samples.Tank {
             systemText.text = "Start";
             ResetSystemText().Forget();
         }
+        async UniTask GameEnding(){
+            padGUI.SwitchGUISState(PadState.None);
+            systemText.text = "Finish";
+            await ResetSystemText();
+        }
         async UniTask ResetSystemText(){
             await UniTask.Delay(2000);
             systemText.text = string.Empty;
-        }
-        void GameEnding(){
-            padGUI.SwitchGUISState(PadState.None);
-            systemText.text = "Finish";
-            ResetSystemText().Forget();
         }
     #endregion
     #region Result

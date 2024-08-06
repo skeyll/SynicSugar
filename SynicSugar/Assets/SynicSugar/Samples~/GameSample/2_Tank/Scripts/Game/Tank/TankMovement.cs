@@ -47,7 +47,7 @@ namespace SynicSugar.Samples.Tank {
 
             while(!moveTokenSource.Token.IsCancellationRequested){
                 //Fix the pos by true pos.
-                //The actual pos data is sent every 3 seconds from each local.
+                //The actual pos data is sent every 2 seconds from each local.
                 m_Rigidbody.MovePosition(truePlayerPosition + movement * Time.deltaTime);
                 m_Rigidbody.angularVelocity = Vector3.zero;
                 
@@ -71,7 +71,7 @@ namespace SynicSugar.Samples.Tank {
                 m_Rigidbody.MoveRotation(truePlayerQuaternion * turn);
                 m_Rigidbody.velocity = Vector3.zero;
 
-                truePlayerQuaternion = transform.rotation;
+                truePlayerQuaternion = m_Rigidbody.rotation;
                 await UniTask.Yield(PlayerLoopTiming.FixedUpdate, moveTokenSource.Token);
             }
         }

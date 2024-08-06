@@ -19,8 +19,7 @@ namespace SynicSugar.Samples.Tank {
 
         private void Awake(){
             // Instantiate the explosion prefab and get a reference to the particle system on it.
-            m_ExplosionParticles = Instantiate(m_ExplosionPrefab, transform).GetComponent<ParticleSystem>();
-
+            m_ExplosionParticles = Instantiate(m_ExplosionPrefab, transform.parent).GetComponent<ParticleSystem>();
             // Disable the prefab so it can be activated when it's required.
             m_ExplosionParticles.gameObject.SetActive(false);
         }
@@ -46,10 +45,9 @@ namespace SynicSugar.Samples.Tank {
 
             // If the current health is at or below zero and it has not yet been registered, call OnDeath.
             if (status.CurrentHP <= 0f && !m_Dead){
-                OnDeath().Forget();
+                OnDeath();
             }
         }
-
 
         private void SetHealthUI(){
             // Set the slider's value appropriately.
@@ -59,12 +57,12 @@ namespace SynicSugar.Samples.Tank {
             m_FillImage.color = Color.Lerp(m_ZeroHealthColor, m_FullHealthColor, status.CurrentHP / m_StartingHealth);
         }
 
-        private async UniTask OnDeath(){
+        private void OnDeath(){
             // Set the flag so that this function is only called once.
             m_Dead = true;
-
-            await PlayEffect();
             gameObject.SetActive(false);
+
+            PlayEffect().Forget();
         }
         async UniTask PlayEffect(){
             // Move the instantiated explosion prefab to the tank's position and turn it on.

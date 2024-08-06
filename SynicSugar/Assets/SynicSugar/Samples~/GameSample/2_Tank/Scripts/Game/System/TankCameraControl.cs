@@ -54,7 +54,7 @@ namespace SynicSugar.Samples.Tank {
             for(int i = currentindex; i < p2pInfo.Instance.AllUserIds.Count; i++){
                 TankPlayer player = ConnectHub.Instance.GetUserInstance<TankPlayer>(p2pInfo.Instance.AllUserIds[i]);
                 //If the target is dead, skip the user
-                if(!player.gameObject.activeSelf){
+                if(player == null || !player.gameObject.activeSelf){
                     continue;
                 }
                 
@@ -64,7 +64,7 @@ namespace SynicSugar.Samples.Tank {
             //0 to index
             for(int i = 0; i < currentindex; i++){
                 TankPlayer player = ConnectHub.Instance.GetUserInstance<TankPlayer>(p2pInfo.Instance.AllUserIds[i]);
-                if(!player.gameObject.activeSelf){
+                if(player == null || !player.gameObject.activeSelf){
                     continue;
                 }
                 

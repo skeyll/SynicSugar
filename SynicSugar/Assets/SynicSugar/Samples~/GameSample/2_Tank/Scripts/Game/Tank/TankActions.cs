@@ -25,6 +25,12 @@ namespace SynicSugar.Samples.Tank {
         void Awake(){
             m_ChargeSpeed = (m_MaxLaunchForce - m_MinLaunchForce) / m_MaxChargeTime;
         }
+        void OnDisable(){
+            // Stop the charge process when a player dead.
+            if(chargeTokeSource != null && chargeTokeSource.Token.CanBeCanceled){
+                chargeTokeSource.Cancel();
+            }
+        }
         void Init(){
             m_CurrentLaunchForce = m_MinLaunchForce;
             m_AimSlider.value = m_MinLaunchForce;
@@ -62,9 +68,14 @@ namespace SynicSugar.Samples.Tank {
             chargeTokeSource.Cancel();
 
             if(isLocal){
+                TankPlayer player = ConnectHub.Instance.GetUserInstance<TankPlayer>(p2pInfo.Instance.LocalUserId);
+                //Not fired when local player is dead.
+                if(player.status.CurrentHP <= 0){
+                    return;
+                }
                 TankAudioManager.Instance.StopShootingSource();
                 //Fired via local Rpc.
-                ConnectHub.Instance.GetUserInstance<TankPlayer>(p2pInfo.Instance.LocalUserId).Fire(TankShootingData.GenerateShootingPacket(m_CurrentLaunchForce, Turret));
+                player.Fire(TankShootingData.GenerateShootingPacket(m_CurrentLaunchForce, Turret));
             }
 
             Init();
