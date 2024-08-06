@@ -22,9 +22,15 @@ namespace SynicSugar.Samples.Tank {
         /// <param name="id"></param>
         void OnDisconnected(UserId id){
             Debug.Log($"{GetPlayerName(id)}: Disconencted");
+            TankGameManager gameManager = ConnectHub.Instance.GetInstance<TankGameManager>();
             //If there are users who disconnected during Stanby, check the ready flag with the remaining players.
-            if(ConnectHub.Instance.GetInstance<TankGameManager>().CurrentGameState == GameState.Standby){
-                ConnectHub.Instance.GetInstance<TankGameManager>().CheckReadyState();
+            switch(gameManager.CurrentGameState){
+                case GameState.Standby:
+                    gameManager.CheckReadyState();
+                break;
+                case GameState.InGame:
+                    gameManager.CheckRoundState(p2pInfo.Instance.GetUserIndex(id));
+                break;
             }
         }
         /// <summary>
