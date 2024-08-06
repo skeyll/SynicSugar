@@ -252,7 +252,6 @@ namespace SynicSugar.Samples.Tank {
             ResetSystemText().Forget();
         }
         async UniTask GameEnding(){
-            Debug.Log("GameEnding");
             padGUI.SwitchGUISState(PadState.None);
             systemText.text = "Finish";
             await ResetSystemText();

@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using System;
 using System.Threading;
 using SynicSugar.P2P;
 using UnityEngine;
@@ -25,16 +26,19 @@ namespace SynicSugar.Samples.Tank {
         /// <returns></returns>
         internal async UniTask StartTimer(){
             timerTokenSource = new CancellationTokenSource();
-            await CountTimer(timerTokenSource.Token);
+            try {
+                await CountTimer(timerTokenSource.Token);
+            } catch (OperationCanceledException) {
+                reamingTime = 0f;
+            } 
         }
         async UniTask CountTimer(CancellationToken token){
-            while(!token.IsCancellationRequested && reamingTime > 0f){
+            while(reamingTime > 0f){
                 reamingTime -= Time.deltaTime;
                 timerText.text = ((int)reamingTime).ToString();
 
                 await UniTask.Yield(token);
             }
-            reamingTime = 0f;
         }
         /// <summary>
         /// All local will probably finish at the same time, but just in case,　Host stop the timer manually.
