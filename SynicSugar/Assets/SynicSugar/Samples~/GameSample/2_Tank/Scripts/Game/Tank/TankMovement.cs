@@ -9,7 +9,7 @@ namespace SynicSugar.Samples.Tank {
         [SerializeField] ParticleSystem m_LeftDustTrail;  // The particle system of dust that is kicked up from the left track.
         [SerializeField] ParticleSystem m_RightDustTrail; // The particle system of dust that is kicked up from the rightt track.
         float m_Speed = 12f;             // How fast the tank moves forward and back.
-        public float m_TurnSpeed = 180f; // How fast the tank turns in degrees per second.
+        public float m_TurnSpeed = 60f; // How fast the tank turns in degrees per second.
 
         // Movement is managed by Move and Stop and calculated locally.
         // Periodically, this value is sent to correct the actual position.
