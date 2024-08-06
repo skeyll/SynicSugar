@@ -41,6 +41,16 @@ namespace SynicSugar.Samples.Tank {
             mainCamera.transform.localRotation = Quaternion.Euler(RELATIVE_ROTATION);
         }
         /// <summary>
+        /// If nobody is the target, move camera to the default position.
+        /// </summary>
+        internal void SetFollowTarget(){
+            freeCameraIndex = -1;
+            mainCamera.transform.SetParent(null, false);
+
+            mainCamera.transform.localPosition = RELATIVE_POSITION;
+            mainCamera.transform.localRotation = Quaternion.Euler(RELATIVE_ROTATION);
+        }
+        /// <summary>
         /// Change camera target on Death.
         /// </summary>
         /// <param name="userIndex">To check to need to change target.</param>
@@ -73,7 +83,7 @@ namespace SynicSugar.Samples.Tank {
                 return;
             }
             //If cannot change target, change it to local player.
-            SetFollowLocalTarget();
+            SetFollowTarget();
         }
     }
 }
