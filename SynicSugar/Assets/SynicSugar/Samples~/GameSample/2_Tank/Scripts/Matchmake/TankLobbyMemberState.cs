@@ -19,6 +19,10 @@ namespace SynicSugar.Samples.Tank {
                 return;
             }
             Kick.onClick.AddListener(() => MatchMakeManager.Instance.KickTargetFromLobby(id).Forget());
+
+            if(MatchMakeManager.Instance.isHost){
+                Kick.gameObject.SetActive(true);
+            }
         }
         internal void SwitchKickButtonActive(bool isActivate){
             Kick.gameObject.SetActive(isActivate);
