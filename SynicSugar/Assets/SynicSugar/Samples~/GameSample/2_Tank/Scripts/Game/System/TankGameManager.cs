@@ -221,23 +221,24 @@ namespace SynicSugar.Samples.Tank {
             // Swtich camera position
             cameraControl.SwitchTargetToNextSurvivor(deadUserIndex);
             // Need end this round?
-            if(isHost && IsLastSurviver()){
+            if(isHost && IsLastSurvivor()){
                 ConnectHub.Instance.GetInstance<TankRoundTimer>().StopTimer();
             }
         }
-        bool IsLastSurviver(){
-            int surviverCount = 0;
+        bool IsLastSurvivor(){
+            int survivorCount = 0;
             foreach(var id in p2pInfo.Instance.CurrentAllUserIds){
                 TankPlayer player = ConnectHub.Instance.GetUserInstance<TankPlayer>(id);
-                //A player who has disconnected is also considered dead.
-                if(player.gameObject.activeSelf || player.status.CurrentHP <= 0f){
-                    surviverCount++;
+                // A player who has disconnected is also considered dead.
+                if(player.gameObject.activeSelf || player.status.CurrentHP > 0f){
+                    survivorCount++;
                 }
-                if(surviverCount > 1){
+                // If not alone, stop counting.
+                if(survivorCount > 1){
                     break;
                 }
             }
-            return surviverCount == 1;
+            return survivorCount == 1;
         }
         async UniTask GameStarting(){
             padGUI.SwitchGUISState(PadState.None);
@@ -251,6 +252,7 @@ namespace SynicSugar.Samples.Tank {
             ResetSystemText().Forget();
         }
         async UniTask GameEnding(){
+            Debug.Log("GameEnding");
             padGUI.SwitchGUISState(PadState.None);
             systemText.text = "Finish";
             await ResetSystemText();
@@ -291,8 +293,9 @@ namespace SynicSugar.Samples.Tank {
             List<TankResultData> result = new List<TankResultData>();
 
             foreach(var id in p2pInfo.Instance.CurrentAllUserIds){
-                TankPlayerStatus status = ConnectHub.Instance.GetUserInstance<TankPlayer>(id).status;
-                result.Add(new TankResultData(id, status.Name, status.CurrentHP));
+                TankPlayer player = ConnectHub.Instance.GetUserInstance<TankPlayer>(id);
+                // Disconnected playerｓ are treated as having 0 HP.
+                result.Add(new TankResultData(id, player.status.Name, player.gameObject.activeSelf ? player.status.CurrentHP : 0f));
             }
             result.OrderByDescending(r => r.RemainHP);
 

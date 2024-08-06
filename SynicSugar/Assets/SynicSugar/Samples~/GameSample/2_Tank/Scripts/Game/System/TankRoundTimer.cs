@@ -28,12 +28,13 @@ namespace SynicSugar.Samples.Tank {
             await CountTimer(timerTokenSource.Token);
         }
         async UniTask CountTimer(CancellationToken token){
-            while(!token.IsCancellationRequested && reamingTime > 0){
+            while(!token.IsCancellationRequested && reamingTime > 0f){
                 reamingTime -= Time.deltaTime;
                 timerText.text = ((int)reamingTime).ToString();
 
                 await UniTask.Yield(token);
             }
+            reamingTime = 0f;
         }
         /// <summary>
         /// All local will probably finish at the same time, but just in case,　Host stop the timer manually.
