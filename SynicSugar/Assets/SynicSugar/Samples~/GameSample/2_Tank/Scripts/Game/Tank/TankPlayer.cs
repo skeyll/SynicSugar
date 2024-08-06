@@ -116,6 +116,7 @@ namespace  SynicSugar.Samples.Tank {
             gameObject.SetActive(true);
         }
         void OnDeath(){
+            gameObject.SetActive(false);
             ConnectHub.Instance.GetInstance<TankGameManager>().CheckRoundState(p2pInfo.Instance.GetUserIndex(OwnerUserID));
         }
         internal void SwitchClownActive(bool isActivate){

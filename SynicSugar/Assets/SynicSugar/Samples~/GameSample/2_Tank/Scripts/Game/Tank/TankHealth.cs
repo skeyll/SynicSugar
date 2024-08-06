@@ -60,7 +60,6 @@ namespace SynicSugar.Samples.Tank {
         private void OnDeath(){
             // Set the flag so that this function is only called once.
             m_Dead = true;
-            gameObject.SetActive(false);
 
             PlayEffect().Forget();
         }

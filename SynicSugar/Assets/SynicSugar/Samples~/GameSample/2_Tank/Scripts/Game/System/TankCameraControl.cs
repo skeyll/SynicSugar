@@ -10,7 +10,7 @@ namespace SynicSugar.Samples.Tank {
         public int freeCameraIndex {
             get { return _freeCameraIndex; }
             private set { 
-                if(value >= p2pInfo.Instance.CurrentAllUserIds.Count - 1)
+                if(value >= p2pInfo.Instance.AllUserIds.Count)
                     value = 0;
 
                 _freeCameraIndex = value;
@@ -50,6 +50,7 @@ namespace SynicSugar.Samples.Tank {
                 return;
             }
             int currentindex = freeCameraIndex;
+            //1
             //index to back
             for(int i = currentindex; i < p2pInfo.Instance.AllUserIds.Count; i++){
                 TankPlayer player = ConnectHub.Instance.GetUserInstance<TankPlayer>(p2pInfo.Instance.AllUserIds[i]);
@@ -57,7 +58,7 @@ namespace SynicSugar.Samples.Tank {
                 if(player == null || !player.gameObject.activeSelf){
                     continue;
                 }
-                
+
                 SetFollowTarget(player.transform, i);
                 return;
             }
@@ -67,8 +68,7 @@ namespace SynicSugar.Samples.Tank {
                 if(player == null || !player.gameObject.activeSelf){
                     continue;
                 }
-                
-                freeCameraIndex = i;
+
                 SetFollowTarget(player.transform, i);
                 return;
             }
