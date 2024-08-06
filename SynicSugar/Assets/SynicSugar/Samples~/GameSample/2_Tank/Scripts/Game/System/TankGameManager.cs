@@ -108,6 +108,7 @@ namespace SynicSugar.Samples.Tank {
             padGUI.RegisterButtonEvents(d => player.Move(d), () => player.Stop(), () => player.StartCharge(), () => player.ReleaseTheTrigger());
             //To system buttons
             TankEventRegisterExtenstions.RegisterEvents(ReadyGame, EventTriggerType.PointerClick, () => ReadyToPlayBattle());
+            TankEventRegisterExtenstions.RegisterEvents(PlayAgainGame, EventTriggerType.PointerClick, () => TryAgain());
             TankEventRegisterExtenstions.RegisterEvents(QuitGame, EventTriggerType.PointerClick, () => ReturnToTitle());
         }
     #endregion
@@ -296,9 +297,8 @@ namespace SynicSugar.Samples.Tank {
                 // Disconnected playerｓ are treated as having 0 HP.
                 result.Add(new TankResultData(id, player.status.Name, player.gameObject.activeSelf ? player.status.CurrentHP : 0f));
             }
-            result.OrderByDescending(r => r.RemainHP);
 
-            return result;
+            return result.OrderByDescending(r => r.RemainHP).ToList();
         }
         /// <summary>
         /// Quit game and back to title scene.
