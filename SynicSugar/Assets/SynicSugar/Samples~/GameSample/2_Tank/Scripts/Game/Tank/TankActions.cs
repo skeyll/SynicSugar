@@ -31,7 +31,10 @@ namespace SynicSugar.Samples.Tank {
                 chargeTokeSource.Cancel();
             }
         }
-        void Init(){
+        internal void Init(){
+            if(chargeTokeSource != null && chargeTokeSource.Token.CanBeCanceled){
+                chargeTokeSource.Cancel();
+            }
             m_CurrentLaunchForce = m_MinLaunchForce;
             m_AimSlider.value = m_MinLaunchForce;
         }

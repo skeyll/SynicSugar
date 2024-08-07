@@ -94,20 +94,15 @@ namespace SynicSugar.Samples.Tank {
             Stop();
             moveTokenSource = new CancellationTokenSource();
         }
-        // his function is called at the start of each round to make sure each tank is set up correctly.
+        // called at the start of each round to make sure each tank is set up correctly.
         internal void SetDefaults(){
             m_Rigidbody.velocity = Vector3.zero;
             m_Rigidbody.angularVelocity = Vector3.zero;
 
             m_LeftDustTrail.Clear();
-            m_LeftDustTrail.Stop();
+            m_LeftDustTrail.Play();
 
             m_RightDustTrail.Clear();
-            m_RightDustTrail.Stop();
-        }
-        
-        public void ReEnableParticles(){
-            m_LeftDustTrail.Play();
             m_RightDustTrail.Play();
         }
     }

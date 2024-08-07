@@ -266,13 +266,13 @@ namespace SynicSugar.Samples.Tank {
         async UniTask ResultProcess(){
             //Deactivate pre clown.
             foreach(var id in p2pInfo.Instance.CurrentAllUserIds){
-                ConnectHub.Instance.GetUserInstance<TankPlayer>(id).SwitchClownActive(false);
+                ConnectHub.Instance.GetUserInstance<TankPlayer>(id).ResetObjectState();
             }
 
             List<TankResultData> results = GetRoundResult();
             //Switch Camera
             TankPlayer winner = ConnectHub.Instance.GetUserInstance<TankPlayer>(results[0].UserId);
-            winner.SwitchClownActive(true);
+            winner.ActivateClown();
             cameraControl.SetFollowTarget(winner.transform, p2pInfo.Instance.GetUserIndex(results[0].UserId));
             await UniTask.Delay(3000);
 
