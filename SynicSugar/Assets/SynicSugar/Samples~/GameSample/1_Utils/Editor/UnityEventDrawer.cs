@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +9,6 @@ using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.Events;
 using Object = UnityEngine.Object;
-
 namespace SynicSugar.Samples {
     /// <summary>
     /// Mark a method with an integer argument with this to display the argument as an enum popup in the UnityEvent
@@ -602,3 +602,4 @@ namespace SynicSugar.Samples {
         }
     }
 }
+#endif
