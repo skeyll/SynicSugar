@@ -22,7 +22,7 @@ using Cysharp.Threading.Tasks;
 using Epic.OnlineServices;
 using SynicSugar.RTC;
 namespace SynicSugar.P2P {
-    internal sealed class ConnectHub : IPacketReciver {
+    internal sealed class ConnectHub : IPacketConvert {
         //Singleton
         private static Lazy<ConnectHub> instance = new Lazy<ConnectHub>();
         public static ConnectHub Instance => instance.Value;
@@ -106,7 +106,7 @@ namespace SynicSugar.P2P {
         /// </summary>
         public async UniTask<Result> ExitSession(bool destroyManager = true, CancellationToken cancelToken = default(CancellationToken)){
             if(cancelToken == default(CancellationToken)){
-                cancelToken = p2pConnectorForOtherAssembly.Instance.gameObject.GetCancellationTokenOnDestroy();
+                cancelToken = p2pInfo.Instance.gameObject.GetCancellationTokenOnDestroy();
             }
             Result isSuccess = await p2pConnectorForOtherAssembly.Instance.ExitSession(destroyManager, cancelToken);
             ClearReferenceDictionaries();
@@ -121,7 +121,7 @@ namespace SynicSugar.P2P {
         /// </summary>
         public async UniTask<Result> CloseSession(bool destroyManager = true, CancellationToken cancelToken = default(CancellationToken)){
             if(cancelToken == default(CancellationToken)){
-                cancelToken = p2pConnectorForOtherAssembly.Instance.gameObject.GetCancellationTokenOnDestroy();
+                cancelToken = p2pInfo.Instance.gameObject.GetCancellationTokenOnDestroy();
             }
             Result isSuccess = await p2pConnectorForOtherAssembly.Instance.CloseSession(destroyManager, cancelToken);
             ClearReferenceDictionaries();

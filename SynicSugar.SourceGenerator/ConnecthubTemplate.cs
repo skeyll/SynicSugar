@@ -28,7 +28,7 @@ namespace SynicSugarGenerator {
                     " imported type\n\nusing UnityEngine;\nusing MemoryPack;\nusing MemoryPack.Compressio" +
                     "n;\nusing System;\nusing System.Collections.Generic;\nusing System.Threading;\nusing" +
                     " Cysharp.Threading.Tasks;\nusing Epic.OnlineServices;\nusing SynicSugar.RTC;\nnames" +
-                    "pace SynicSugar.P2P {\n    internal sealed class ConnectHub : IPacketReciver {\n  " +
+                    "pace SynicSugar.P2P {\n    internal sealed class ConnectHub : IPacketConvert {\n  " +
                     "      //Singleton\n        private static Lazy<ConnectHub> instance = new Lazy<Co" +
                     "nnectHub>();\n        public static ConnectHub Instance => instance.Value;\n\n     " +
                     "   public ConnectHub(){}\n        byte ch_r;\n        ProductUserId id_r;\n        " +
@@ -89,34 +89,34 @@ namespace SynicSugarGenerator {
                     "/summary>\n        public async UniTask<Result> ExitSession(bool destroyManager =" +
                     " true, CancellationToken cancelToken = default(CancellationToken)){\n            " +
                     "if(cancelToken == default(CancellationToken)){\n                cancelToken = p2p" +
-                    "ConnectorForOtherAssembly.Instance.gameObject.GetCancellationTokenOnDestroy();\n " +
-                    "           }\n            Result isSuccess = await p2pConnectorForOtherAssembly.I" +
-                    "nstance.ExitSession(destroyManager, cancelToken);\n            ClearReferenceDict" +
-                    "ionaries();\n            return isSuccess;\n        }\n        /// <summary>\n      " +
-                    "  /// Stop receiver, close all connections and remove the notify events.\n       " +
-                    " /// Then, Host closes and Guest leaves the Lobby.<br />\n        /// When Host c" +
-                    "loses Lobby, Guests are automatically kicked out from the Lobby.\n        /// <pa" +
-                    "ram name=\"destroyManager\">Destroy NetworkManager after exit lobby.</param>\n     " +
-                    "   /// <param name=\"cancelToken\">Cancel token for this task</param>\n        /// " +
-                    "</summary>\n        public async UniTask<Result> CloseSession(bool destroyManager" +
-                    " = true, CancellationToken cancelToken = default(CancellationToken)){\n          " +
-                    "  if(cancelToken == default(CancellationToken)){\n                cancelToken = p" +
-                    "2pConnectorForOtherAssembly.Instance.gameObject.GetCancellationTokenOnDestroy();" +
-                    "\n            }\n            Result isSuccess = await p2pConnectorForOtherAssembly" +
-                    ".Instance.CloseSession(destroyManager, cancelToken);\n            ClearReferenceD" +
-                    "ictionaries();\n            return isSuccess;\n        } \n\n\n        async UniTask " +
-                    "ReciveSynicPackets(CancellationToken token){\n            int count = p2pConfig.I" +
-                    "nstance.SynicReceiverBatchSize;\n\n            while(!token.IsCancellationRequeste" +
-                    "d){\n                bool recivePacket = p2pConnectorForOtherAssembly.Instance.Ge" +
-                    "tSynicPacketFromBuffer(ref ch_r, ref id_r, ref payload_r);\n                count" +
-                    "--;\n\n                if(recivePacket){\n                    ConvertFromPacket(ref" +
-                    " ch_r, UserId.GetUserId(id_r).ToString(), ref payload_r);\n                }\n\n   " +
-                    "             if(count == 0 || !recivePacket){\n                    await UniTask." +
-                    "Yield(PlayerLoopTiming.Update, cancellationToken : token);\n                    \n" +
-                    "                    if(p2pConnectorForOtherAssembly.Instance == null){\n         " +
-                    "               break;\n                    }\n                    count = p2pConfi" +
-                    "g.Instance.SynicReceiverBatchSize;\n                }\n            }\n        }\n\n  " +
-                    "      //(for elements)\n        public enum CHANNELLIST{\n            ");
+                    "Info.Instance.gameObject.GetCancellationTokenOnDestroy();\n            }\n        " +
+                    "    Result isSuccess = await p2pConnectorForOtherAssembly.Instance.ExitSession(d" +
+                    "estroyManager, cancelToken);\n            ClearReferenceDictionaries();\n         " +
+                    "   return isSuccess;\n        }\n        /// <summary>\n        /// Stop receiver, " +
+                    "close all connections and remove the notify events.\n        /// Then, Host close" +
+                    "s and Guest leaves the Lobby.<br />\n        /// When Host closes Lobby, Guests a" +
+                    "re automatically kicked out from the Lobby.\n        /// <param name=\"destroyMana" +
+                    "ger\">Destroy NetworkManager after exit lobby.</param>\n        /// <param name=\"c" +
+                    "ancelToken\">Cancel token for this task</param>\n        /// </summary>\n        pu" +
+                    "blic async UniTask<Result> CloseSession(bool destroyManager = true, Cancellation" +
+                    "Token cancelToken = default(CancellationToken)){\n            if(cancelToken == d" +
+                    "efault(CancellationToken)){\n                cancelToken = p2pInfo.Instance.gameO" +
+                    "bject.GetCancellationTokenOnDestroy();\n            }\n            Result isSucces" +
+                    "s = await p2pConnectorForOtherAssembly.Instance.CloseSession(destroyManager, can" +
+                    "celToken);\n            ClearReferenceDictionaries();\n            return isSucces" +
+                    "s;\n        } \n\n\n        async UniTask ReciveSynicPackets(CancellationToken token" +
+                    "){\n            int count = p2pConfig.Instance.SynicReceiverBatchSize;\n\n         " +
+                    "   while(!token.IsCancellationRequested){\n                bool recivePacket = p2" +
+                    "pConnectorForOtherAssembly.Instance.GetSynicPacketFromBuffer(ref ch_r, ref id_r," +
+                    " ref payload_r);\n                count--;\n\n                if(recivePacket){\n   " +
+                    "                 ConvertFromPacket(ref ch_r, UserId.GetUserId(id_r).ToString(), " +
+                    "ref payload_r);\n                }\n\n                if(count == 0 || !recivePacke" +
+                    "t){\n                    await UniTask.Yield(PlayerLoopTiming.Update, cancellatio" +
+                    "nToken : token);\n                    \n                    if(p2pConnectorForOthe" +
+                    "rAssembly.Instance == null){\n                        break;\n                    " +
+                    "}\n                    count = p2pConfig.Instance.SynicReceiverBatchSize;\n       " +
+                    "         }\n            }\n        }\n\n        //(for elements)\n        public enum" +
+                    " CHANNELLIST{\n            ");
             
             #line default
             #line hidden
