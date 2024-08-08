@@ -239,8 +239,8 @@ namespace SynicSugar.P2P {
 #endif
                 return false; //No packet
             }
-        #if SYNICSUGAR_PACKETINF
-            Debug.Log($"ReceivePacket: {ch.ToString()}({ch}) from user {id} / packet size {bytesWritten} / payload {EOSp2p.ByteArrayToHexString(data)}");
+        #if SYNICSUGAR_PACKETINFO
+            Debug.Log($"ReceivePacket: {ch.ToString()}({ch}) from {id} / packet size {bytesWritten} / payload {EOSp2p.ByteArrayToHexString(data)}");
         #endif
 
             return true;
