@@ -52,8 +52,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxSearchResult: 5
-  hostsTimeoutSec: 180
   TimeoutSec: 180
+  P2PSetupTimeoutSec: 15
   lobbyIdSaveType: 1
   playerprefsSaveKey: eos_lobbyid
   customSaveLobbyID:
@@ -82,6 +82,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cfcb8bb8afbcedd4e97d9ccce350c691, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  relayControl: 1
   packetReliability: 2
   AllowDelayedDelivery: 0
   UseDisconnectedEarlyNotify: 0
@@ -92,7 +93,7 @@ MonoBehaviour:
   SynicReceiverBatchSize: 5
   autoSyncInterval: 1000
   AutoRefreshPing: 0
-  SamplesPerPing: 0
+  SamplesPerPing: 1
   PingAutoRefreshRateSec: 10
 --- !u!114 &4569237702368255570
 MonoBehaviour:

@@ -61,9 +61,16 @@ namespace SynicSugar.P2P {
             set {
                 _socketName = value;
                 SocketId = new SocketId(){ SocketName = _socketName };
-            }}
+        }}
+        /// <summary>
+        /// For actual connection
+        /// </summary>
+        /// <value></value>
         public SocketId SocketId { get; private set; }
-
+        /// <summary>
+        /// For pointer to pass receive packet
+        /// </summary>
+        public SocketId ReferenceSocketId;
         ulong RequestNotifyId, InterruptedNotify, EstablishedNotify, ClosedNotify;
         public CancellationTokenSource p2pToken;
 
@@ -209,7 +216,7 @@ namespace SynicSugar.P2P {
         /// <summary>
         /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll.
         /// </summary>
-        public bool GetPacketFromBuffer(ref byte ch, ref string id, ref ArraySegment<byte> payload){
+        public bool GetPacketFromBuffer(ref byte ch, ref ProductUserId id, ref ArraySegment<byte> payload){
             ResultE existPacket = P2PHandle.GetNextReceivedPacketSize(ref standardPacketSizeOptions, out uint nextPacketSizeBytes);
             if(existPacket != ResultE.Success){
                 return false;
@@ -223,7 +230,7 @@ namespace SynicSugar.P2P {
 
             byte[] data = new byte[nextPacketSizeBytes];
             payload = new ArraySegment<byte>(data);
-            ResultE result = P2PHandle.ReceivePacket(ref options, out ProductUserId peerId, out SocketId socketId, out ch, payload, out uint bytesWritten);
+            ResultE result = P2PHandle.ReceivePacket(ref options, ref id, ref ReferenceSocketId, out ch, payload, out uint bytesWritten);
             
             if (result != ResultE.Success){
 #if SYNICSUGAR_LOG //This range is for performance since this is called every frame.
@@ -233,7 +240,6 @@ namespace SynicSugar.P2P {
 #endif
                 return false; //No packet
             }
-            id = UserId.GetUserId(peerId).ToString();
         #if SYNICSUGAR_PACKETINF
             Debug.Log($"ReceivePacket: {ch.ToString()}({ch}) from user {id} / packet size {bytesWritten} / payload {EOSp2p.ByteArrayToHexString(data)}");
         #endif
@@ -244,7 +250,7 @@ namespace SynicSugar.P2P {
         /// To get only SynicPacket.
         /// Use this from ConenctHub not to call some methods in Main-Assembly from SynicSugar.dll.
         /// </summary>
-        public bool GetSynicPacketFromBuffer(ref byte ch, ref string id, ref ArraySegment<byte> payload){
+        public bool GetSynicPacketFromBuffer(ref byte ch, ref ProductUserId id, ref ArraySegment<byte> payload){
             ResultE existPacket = P2PHandle.GetNextReceivedPacketSize(ref synicPacketSizeOptions, out uint nextPacketSizeBytes);
             if(existPacket != ResultE.Success){
                 return false;
@@ -258,7 +264,7 @@ namespace SynicSugar.P2P {
 
             byte[] data = new byte[nextPacketSizeBytes];
             payload = new ArraySegment<byte>(data);
-            ResultE result = P2PHandle.ReceivePacket(ref options, out ProductUserId peerId, out SocketId socketId, out ch, payload, out uint bytesWritten);
+            ResultE result = P2PHandle.ReceivePacket(ref options, ref id, ref ReferenceSocketId, out ch, payload, out uint bytesWritten);
             
             if (result != ResultE.Success){
 #if SYNICSUGAR_LOG //This range is for performance since this is called every frame.
@@ -268,7 +274,6 @@ namespace SynicSugar.P2P {
 #endif
                 return false; //No packet
             }
-            id = UserId.GetUserId(peerId).ToString();
         #if SYNICSUGAR_PACKETINFO
             Debug.Log($"ReceivePacket(Synic): {ch.ToString()}({ch}) from {id} / packet size {bytesWritten} / payload {EOSp2p.ByteArrayToHexString(data)}");
         #endif
