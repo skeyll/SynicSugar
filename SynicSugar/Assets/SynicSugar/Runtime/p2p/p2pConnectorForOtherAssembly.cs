@@ -39,7 +39,6 @@ namespace SynicSugar.P2P {
             }
         }
         void Start(){
-            SetIntervalSeconds();
             P2PHandle = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface();
 
             //Next packet size
@@ -106,7 +105,7 @@ namespace SynicSugar.P2P {
             P2PHandle.GetPacketQueueInfo(ref options, out info);
 
             while (info.IncomingPacketQueueCurrentPacketCount > 0){
-                await UniTask.Delay(receiverInterval, cancellationToken: token);
+                await UniTask.Yield(PlayerLoopTiming.FixedUpdate, cancellationToken: token);
                 P2PHandle.GetPacketQueueInfo(ref options, out info);
             }
 
@@ -556,30 +555,5 @@ namespace SynicSugar.P2P {
             p2pInfo.Instance.pings.GetPong(id, utc);
         }
         public bool IsEnableRTC => MatchMakeManager.Instance.eosLobby.CurrentLobby.hasConnectedRTCRoom;
-
-    #region Obsolete
-        /// <summary>
-        /// For internal process Use this 
-        /// </summary>
-        /// <value></value>
-        public int receiverInterval { get; private set; } = 20;
-        void SetIntervalSeconds(){
-            switch(p2pConfig.Instance.getPacketFrequency){
-                case p2pConfig.GetPacketFrequency.PerSecondFPS:
-                receiverInterval = 0;
-                break;
-                case p2pConfig.GetPacketFrequency.PerSecond100:
-                receiverInterval = 10;
-                break;
-                case p2pConfig.GetPacketFrequency.PerSecond50:
-                receiverInterval = 20;
-                break;
-                case p2pConfig.GetPacketFrequency.PerSecond25:
-                receiverInterval = 40;
-                break;
-            }
-        }
-
-    #endregion
     }
 }
