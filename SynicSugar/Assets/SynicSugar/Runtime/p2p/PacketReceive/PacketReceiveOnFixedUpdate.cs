@@ -1,9 +1,10 @@
 using System;
 using UnityEngine;
+using Epic.OnlineServices;
 namespace SynicSugar.P2P {
     public class PacketReceiveOnFixedUpdate : MonoBehaviour {
         byte ch_r;
-        string id_r;
+        ProductUserId id_r;
         ArraySegment<byte> payload_r;
         int maxBatchSize;
         IPacketReciver hub;
@@ -27,7 +28,8 @@ namespace SynicSugar.P2P {
                 if(!recivePacket){
                     break;
                 }
-                hub.ConvertFromPacket(ref ch_r, ref id_r, ref payload_r);
+                
+                hub.ConvertFromPacket(ref ch_r,  UserId.GetUserId(id_r).ToString(), ref payload_r);
             }
         }
     }

@@ -37,8 +37,9 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         const byte USERLISTCH = 252;
         byte ch;
-        string id;
+        ProductUserId id;
         ArraySegment<byte> payload;
+        SocketId ReferenceSocketId;
         #region Send
         /// <summary>
         /// For Host to send List after re-connecter has came.
@@ -125,7 +126,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="id"></param>
         /// <param name="payload"></param>
         /// <returns></returns>
-        bool GetPacketFromBuffer(ref byte ch, ref string id, ref ArraySegment<byte> payload){
+        bool GetPacketFromBuffer(ref byte ch, ref ProductUserId id, ref ArraySegment<byte> payload){
             //Next packet size
             var getNextReceivedPacketSizeOptions = new GetNextReceivedPacketSizeOptions {
                 LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
@@ -148,13 +149,12 @@ namespace SynicSugar.MatchMake {
 
             byte[] data = new byte[nextPacketSizeBytes];
             var dataSegment = new ArraySegment<byte>(data);
-            ResultE result = P2PHandle.ReceivePacket(ref options, out ProductUserId peerId, out SocketId socketId, out byte outChannel, dataSegment, out uint bytesWritten);
+            ResultE result = P2PHandle.ReceivePacket(ref options, ref id, ref ReferenceSocketId, out byte outChannel, dataSegment, out uint bytesWritten);
             
             if (result != ResultE.Success){
                 return false; //No packet
             }
             ch = outChannel;
-            id = peerId.ToString();
             payload = new ArraySegment<byte>(dataSegment.Array, dataSegment.Offset, (int)bytesWritten);;
 
             return true;

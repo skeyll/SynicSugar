@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Epic.OnlineServices;
 using SynicSugar.RTC;
 namespace SynicSugar.P2P {
     internal sealed class ConnectHub : IPacketReciver {
@@ -28,7 +29,7 @@ namespace SynicSugar.P2P {
 
         public ConnectHub(){}
         byte ch_r;
-        string id_r;
+        ProductUserId id_r;
         ArraySegment<byte> payload_r;
         //Start
         /// <summary>
@@ -136,7 +137,7 @@ namespace SynicSugar.P2P {
                 count--;
 
                 if(recivePacket){
-                    ConvertFromPacket(ref ch_r, ref id_r, ref payload_r);
+                    ConvertFromPacket(ref ch_r, UserId.GetUserId(id_r).ToString(), ref payload_r);
                 }
 
                 if(count == 0 || !recivePacket){
@@ -192,7 +193,7 @@ namespace SynicSugar.P2P {
         }
 
         //SendPacket(for elements)
-        public void ConvertFromPacket(ref byte ch, ref string id, ref ArraySegment<byte> payload){
+        public void ConvertFromPacket(ref byte ch, string id, ref ArraySegment<byte> payload){
             switch((CHANNELLIST)ch){<#= PacketConvert #>
                 case CHANNELLIST.ObtainPing:
                     EOSp2p.SendPacket((byte)CHANNELLIST.ReturnPong, payload, UserId.GetUserId(id));
@@ -201,20 +202,20 @@ namespace SynicSugar.P2P {
                     p2pConnectorForOtherAssembly.Instance.GetPong(id, payload);
                 return;
                 case CHANNELLIST.Synic:
-                    bool restoredPacket = RestoreSynicPackets(ref ch, ref id, ref payload);
+                    bool restoredPacket = RestoreSynicPackets(ref ch, id, ref payload);
                     if(!restoredPacket){
     #if SYNICSUGAR_LOG 
                         Debug.LogFormat("ConvertFormPacket: Restore packet is in progress. for {0}", id);
     #endif
                         return;
                     }
-                    SyncedSynic(id);
+                    SyncedSynic(id.ToString());
 
                     p2pConnectorForOtherAssembly.Instance.UpdateSyncedState(id, synicPacketInfo[id].phase);
 
                     //Init
-                    synicBuffer.Remove(id);
-                    synicPacketInfo.Remove(id);
+                    synicBuffer.Remove(id.ToString());
+                    synicPacketInfo.Remove(id.ToString());
 
                     //Change AcceptHostsSynic flag.
                     if(p2pInfo.Instance.IsLoaclUser(id)){
@@ -317,7 +318,7 @@ namespace SynicSugar.P2P {
         <# } #>
         
         //Synced 0 = index, 1 = additional packet amount
-        bool RestoreLargePackets(ref byte ch, ref string id, ref ArraySegment<byte> payload){
+        bool RestoreLargePackets(ref byte ch, string id, ref ArraySegment<byte> payload){
             //Prep
             if(!largeBuffer.ContainsKey(id)){
                 largePacketInfo.Add(id, new Dictionary<byte, LargePacketsInfomation>());
@@ -348,7 +349,7 @@ namespace SynicSugar.P2P {
         }
 
         // 0-packet index, 1-additional packet amount, 2-complex data[1bit-isOnly, 4bits-phase, 3bits userType], 3-data's user index
-        bool RestoreSynicPackets(ref byte ch, ref string id, ref ArraySegment<byte> payload){
+        bool RestoreSynicPackets(ref byte ch, string id, ref ArraySegment<byte> payload){
             //Set target id
             int userDataType = (int)(payload[2] & 0x07);
             if(userDataType == 0){
