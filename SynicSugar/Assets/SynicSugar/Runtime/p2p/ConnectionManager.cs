@@ -12,21 +12,7 @@ using ResultE = Epic.OnlineServices.Result;
 //So, use such processes through this assembly.
 //TODO: Change it so that this class can only be used from ConnectHub.
 namespace SynicSugar.P2P {
-    public class p2pConnectorForOtherAssembly : INetworkCore, IGetPacket {
-#region Singleton
-        private p2pConnectorForOtherAssembly() {}
-        private static p2pConnectorForOtherAssembly _instance;
-        internal static p2pConnectorForOtherAssembly Instance {
-            get {
-                if (_instance == null) {
-                    _instance = new p2pConnectorForOtherAssembly();
-                }
-                return _instance;
-            }
-        }
-        public static INetworkCore GetNetworkCore(){
-            return Instance;
-        }
+    public class ConnectionManager : INetworkCore, IGetPacket {
         /// <summary>
         /// Call from Start on NetworkManager 
         /// </summary>
@@ -47,9 +33,7 @@ namespace SynicSugar.P2P {
         }
         internal void Dispose(){
             Destroy(receiverObject);
-            _instance = null;
         }
-#endregion
         GameObject receiverObject;
         internal P2PInterface P2PHandle;
         string _socketName;

@@ -34,7 +34,7 @@ namespace SynicSugar.P2P {
         INetworkCore NetworkCore { 
             get { 
                 if(_networkCore == null){
-                    _networkCore = p2pConnectorForOtherAssembly.GetNetworkCore();
+                    _networkCore = p2pConfig.Instance.GetNetworkCore();
                 }
                 return _networkCore;
             }

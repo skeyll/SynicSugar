@@ -32,14 +32,14 @@ namespace SynicSugar.P2P {
                 SendPacketOptions options = new SendPacketOptions(){
                     LocalUserId = EOSManager.Instance.GetProductUserId(),
                     RemoteUserId = id.AsEpic,
-                    SocketId = p2pConnectorForOtherAssembly.Instance.SocketId,
+                    SocketId = p2pConfig.Instance.connectionManager.SocketId,
                     Channel = ch,
                     AllowDelayedDelivery = p2pConfig.Instance.AllowDelayedDelivery,
                     Reliability = p2pConfig.Instance.packetReliability,
                     Data = data
                 };
 
-                result = p2pConnectorForOtherAssembly.Instance.P2PHandle.SendPacket(ref options);
+                result = p2pConfig.Instance.connectionManager.P2PHandle.SendPacket(ref options);
                 if(result != ResultE.Success){
                     Debug.LogErrorFormat("Send Packet: can't send packet, code: {0}", result);
                     continue;
@@ -48,7 +48,7 @@ namespace SynicSugar.P2P {
                 count--;
                 if(count <= 0){
                     await UniTask.Yield();
-                    if(p2pConnectorForOtherAssembly.Instance.p2pToken != null && p2pConnectorForOtherAssembly.Instance.p2pToken.IsCancellationRequested){
+                    if(p2pConfig.Instance.connectionManager.p2pToken != null && p2pConfig.Instance.connectionManager.p2pToken.IsCancellationRequested){
                 #if SYNICSUGAR_LOG
                         Debug.Log("Send Packet: get out of the loop by Cancel");
                 #endif
@@ -90,14 +90,14 @@ namespace SynicSugar.P2P {
                 SendPacketOptions options = new SendPacketOptions(){
                     LocalUserId = EOSManager.Instance.GetProductUserId(),
                     RemoteUserId = id.AsEpic,
-                    SocketId = p2pConnectorForOtherAssembly.Instance.SocketId,
+                    SocketId = p2pConfig.Instance.connectionManager.SocketId,
                     Channel = ch,
                     AllowDelayedDelivery = p2pConfig.Instance.AllowDelayedDelivery,
                     Reliability = p2pConfig.Instance.packetReliability,
                     Data = data
                 };
 
-                result = p2pConnectorForOtherAssembly.Instance.P2PHandle.SendPacket(ref options);
+                result = p2pConfig.Instance.connectionManager.P2PHandle.SendPacket(ref options);
                 if(result != ResultE.Success){
                     Debug.LogErrorFormat("Send Packet: can't send packet, code: {0}", result);
                     continue;
@@ -105,7 +105,7 @@ namespace SynicSugar.P2P {
                 count--;
                 if(count <= 0){
                     await UniTask.Yield();
-                    if(p2pConnectorForOtherAssembly.Instance.p2pToken != null && p2pConnectorForOtherAssembly.Instance.p2pToken.IsCancellationRequested){
+                    if(p2pConfig.Instance.connectionManager.p2pToken != null && p2pConfig.Instance.connectionManager.p2pToken.IsCancellationRequested){
                 #if SYNICSUGAR_LOG
                         Debug.Log("Send Packet: get out of the loop by Cancel");
                 #endif
@@ -134,14 +134,14 @@ namespace SynicSugar.P2P {
                 SendPacketOptions options = new SendPacketOptions(){
                     LocalUserId = EOSManager.Instance.GetProductUserId(),
                     RemoteUserId = id.AsEpic,
-                    SocketId = p2pConnectorForOtherAssembly.Instance.SocketId,
+                    SocketId = p2pConfig.Instance.connectionManager.SocketId,
                     Channel = ch,
                     AllowDelayedDelivery = p2pConfig.Instance.AllowDelayedDelivery,
                     Reliability = p2pConfig.Instance.packetReliability,
                     Data = value
                 };
 
-                result = p2pConnectorForOtherAssembly.Instance.P2PHandle.SendPacket(ref options);
+                result = p2pConfig.Instance.connectionManager.P2PHandle.SendPacket(ref options);
                 if(result != ResultE.Success){
                     Debug.LogErrorFormat("Send Packet: can't send packet, code: {0}", result);
                     continue;
@@ -149,7 +149,7 @@ namespace SynicSugar.P2P {
                 count--;
                 if(count <= 0){
                     await UniTask.Yield();
-                    if(p2pConnectorForOtherAssembly.Instance.p2pToken != null && p2pConnectorForOtherAssembly.Instance.p2pToken.IsCancellationRequested){
+                    if(p2pConfig.Instance.connectionManager.p2pToken != null && p2pConfig.Instance.connectionManager.p2pToken.IsCancellationRequested){
                 #if SYNICSUGAR_LOG
                         Debug.Log("Send Packet: get out of the loop by Cancel");
                 #endif
@@ -169,7 +169,7 @@ namespace SynicSugar.P2P {
             SendPacketOptions options = new SendPacketOptions(){
                 LocalUserId = EOSManager.Instance.GetProductUserId(),
                 RemoteUserId = targetId.AsEpic,
-                SocketId = p2pConnectorForOtherAssembly.Instance.SocketId,
+                SocketId = p2pConfig.Instance.connectionManager.SocketId,
                 Channel = ch,
                 AllowDelayedDelivery = p2pConfig.Instance.AllowDelayedDelivery,
                 Reliability = p2pConfig.Instance.packetReliability,
@@ -178,7 +178,7 @@ namespace SynicSugar.P2P {
         #if SYNICSUGAR_PACKETINFO
             Debug.Log($"SendPacket: ch {ch} / payload {ByteArrayToHexString(value)}");
         #endif
-            ResultE result = p2pConnectorForOtherAssembly.Instance.P2PHandle.SendPacket(ref options);
+            ResultE result = p2pConfig.Instance.connectionManager.P2PHandle.SendPacket(ref options);
 
             if(result != ResultE.Success){
                 Debug.LogErrorFormat("Send Packet: can't send packet, code: {0}", result);
@@ -202,7 +202,7 @@ namespace SynicSugar.P2P {
             SendPacketOptions options = new SendPacketOptions(){
                 LocalUserId = EOSManager.Instance.GetProductUserId(),
                 RemoteUserId = targetId.AsEpic,
-                SocketId = p2pConnectorForOtherAssembly.Instance.SocketId,
+                SocketId = p2pConfig.Instance.connectionManager.SocketId,
                 Channel = ch,
                 AllowDelayedDelivery = p2pConfig.Instance.AllowDelayedDelivery,
                 Reliability = p2pConfig.Instance.packetReliability,
@@ -211,7 +211,7 @@ namespace SynicSugar.P2P {
         #if SYNICSUGAR_PACKETINFO
             Debug.Log($"SendPacket: ch {ch} / payload {ByteArrayToHexString(value)}");
         #endif
-            ResultE result = p2pConnectorForOtherAssembly.Instance.P2PHandle.SendPacket(ref options);
+            ResultE result = p2pConfig.Instance.connectionManager.P2PHandle.SendPacket(ref options);
 
             if(result != ResultE.Success){
                 Debug.LogErrorFormat("Send Packet: can't send packet, code: {0}", result);
@@ -229,7 +229,7 @@ namespace SynicSugar.P2P {
             SendPacketOptions options = new SendPacketOptions(){
                 LocalUserId = EOSManager.Instance.GetProductUserId(),
                 RemoteUserId = targetId.AsEpic,
-                SocketId = p2pConnectorForOtherAssembly.Instance.SocketId,
+                SocketId = p2pConfig.Instance.connectionManager.SocketId,
                 Channel = ch,
                 AllowDelayedDelivery = p2pConfig.Instance.AllowDelayedDelivery,
                 Reliability = p2pConfig.Instance.packetReliability,
@@ -238,7 +238,7 @@ namespace SynicSugar.P2P {
         #if SYNICSUGAR_PACKETINFO
             Debug.Log($"SendPacket: ch {ch} / payload {ByteArrayToHexString(value)}");
         #endif
-            ResultE result = p2pConnectorForOtherAssembly.Instance.P2PHandle.SendPacket(ref options);
+            ResultE result = p2pConfig.Instance.connectionManager.P2PHandle.SendPacket(ref options);
 
             if(result != ResultE.Success){
                 Debug.LogErrorFormat("Send Packet: can't send packet, code: {0}", result);
@@ -332,14 +332,14 @@ namespace SynicSugar.P2P {
             SendPacketOptions options = new SendPacketOptions(){
                 LocalUserId = EOSManager.Instance.GetProductUserId(),
                 RemoteUserId = targetId.AsEpic,
-                SocketId = p2pConnectorForOtherAssembly.Instance.SocketId,
+                SocketId = p2pConfig.Instance.connectionManager.SocketId,
                 Channel = ch,
                 AllowDelayedDelivery = true,
                 Reliability = PacketReliability.ReliableOrdered, //Fixed
                 Data = new ArraySegment<byte>(payload.ToArray())
             };
 
-            ResultE result = p2pConnectorForOtherAssembly.Instance.P2PHandle.SendPacket(ref options);
+            ResultE result = p2pConfig.Instance.connectionManager.P2PHandle.SendPacket(ref options);
 
             if(result != ResultE.Success){
                 Debug.LogErrorFormat("Send Large Packet: can't send packet, code: {0}", result);
@@ -433,14 +433,14 @@ namespace SynicSugar.P2P {
                 SendPacketOptions options = new SendPacketOptions(){
                     LocalUserId = EOSManager.Instance.GetProductUserId(),
                     RemoteUserId = targetId.AsEpic,
-                    SocketId = p2pConnectorForOtherAssembly.Instance.SocketId,
+                    SocketId = p2pConfig.Instance.connectionManager.SocketId,
                     Channel = ch,
                     AllowDelayedDelivery = true,
                     Reliability = PacketReliability.ReliableOrdered, //Fixed
                     Data = new ArraySegment<byte>(payload.ToArray())
                 };
 
-                ResultE result = p2pConnectorForOtherAssembly.Instance.P2PHandle.SendPacket(ref options);
+                ResultE result = p2pConfig.Instance.connectionManager.P2PHandle.SendPacket(ref options);
 
                 if(result != ResultE.Success){
                     Debug.LogErrorFormat("Send Large Packet: can't send packet, code: {0}", result);

@@ -12,15 +12,16 @@ namespace SynicSugar.P2P {
             }
             Instance = this;
             natRelay = new NatRelayManager();
-            p2pConnectorForOtherAssembly.Instance.InitConencter();
+            connectionManager.InitConencter();
         }
         void OnDestroy() {
             if( Instance == this ) {
-                p2pConnectorForOtherAssembly.Instance.Dispose();
+                connectionManager.Dispose();
                 Instance = null;
             }
         }
 #endregion
+        internal readonly ConnectionManager connectionManager = new ConnectionManager();
         NatRelayManager natRelay;
         /// <summary>
         /// Users with settings NoRelay and ForceRelays cannot connect.<br />
@@ -81,6 +82,14 @@ namespace SynicSugar.P2P {
         /// <param name="relay">AllowRelay is Default</param>
         public void SetRelayControl(RelayControl relay){
             natRelay.SetRelayControl(relay);
+        }
+        /// <summary>
+        /// Get instance to manage connection. <br />
+        /// Basically call these processes via ConnectHub, but we can also call this to call own processes.
+        /// </summary>
+        /// <returns></returns>
+        public INetworkCore GetNetworkCore(){
+            return connectionManager;
         }
     }
 }

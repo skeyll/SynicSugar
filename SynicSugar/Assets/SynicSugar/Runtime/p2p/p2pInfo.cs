@@ -187,14 +187,14 @@ namespace SynicSugar.P2P {
         /// </summary>
         /// <returns></returns>
         public async UniTask RefreshPing(UserId target){
-            await pings.RefreshPing(target, p2pConnectorForOtherAssembly.Instance.p2pToken.Token);
+            await pings.RefreshPing(target, p2pConfig.Instance.connectionManager.p2pToken.Token);
         }
         /// <summary>
         /// Manually update Pings data to latest.
         /// </summary>
         /// <returns></returns>
         public async UniTask RefreshPings(){
-            await pings.RefreshPings(p2pConnectorForOtherAssembly.Instance.p2pToken.Token);
+            await pings.RefreshPings(p2pConfig.Instance.connectionManager.p2pToken.Token);
         }
     #endregion
         /// <summary>

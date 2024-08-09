@@ -34,79 +34,78 @@ namespace SynicSugarGenerator {
                     "   public ConnectHub(){\n            syncTokenSource = new CancellationTokenSourc" +
                     "e();\n        }\n        INetworkCore _networkCore;\n        INetworkCore NetworkCo" +
                     "re { \n            get { \n                if(_networkCore == null){\n             " +
-                    "       _networkCore = p2pConnectorForOtherAssembly.GetNetworkCore();\n           " +
-                    "     }\n                return _networkCore;\n            }\n        }\n        /// " +
-                    "<summary>\n        /// SyncToken is managed with the connection\'s valid state.\n  " +
-                    "      /// </summary>\n        CancellationTokenSource syncTokenSource;\n\n        p" +
-                    "ublic CancellationToken GetSyncToken(){\n            return syncTokenSource.Token" +
-                    ";\n        }\n        //Start\n        /// <summary>\n        /// Start the packet r" +
-                    "eceiver. Call after creating the Network Instance required for reception.<br />\n" +
-                    "        /// This cannot be called with other Receiver same time. If start the ot" +
-                    "her Receiver, ConenctHub stop this Receiver automatically before start the new o" +
-                    "ne.\n        /// </summary>\n        /// <param name=\"receiveTiming\">The timing th" +
-                    "at packet receiver gets packet from buffer.</param>\n        /// <param name=\"max" +
-                    "BatchSize\">How many times during 1 FPS are received</param>\n        public void " +
-                    "StartPacketReceiver(PacketReceiveTiming receiveTiming = PacketReceiveTiming.Upda" +
-                    "te, uint maxBatchSize = 1){\n        #if SYNICSUGAR_PACKETINFO\n            string" +
-                    " chs = string.Empty;\n            string[] chList = Enum.GetNames(typeof(ConnectH" +
-                    "ub.CHANNELLIST));\n            foreach(var l in chList){\n                chs += l" +
-                    ".ToString() + \", \";\n            }\n            Debug.Log($\"ch info: amount {chLis" +
-                    "t.Length} / {chs}\");\n        #endif\n            NetworkCore.StartPacketReceiver(" +
-                    "this, receiveTiming, maxBatchSize);\n        }\n        \n        /// <summary>\n   " +
-                    "     /// To get only SynicPacket in burst FPS. Call after creating the Network I" +
-                    "nstance required for reception.<br />\n        /// This cannot be called with oth" +
-                    "er Receiver same time. If start the other Receiver, ConenctHub stop this Receive" +
-                    "r automatically before start the new one.\n        /// </summary>\n        /// <pa" +
-                    "ram name=\"maxBatchSize\">How many times during 1 FPS are received</param>\n       " +
-                    " public void StartSynicReceiver(uint maxBatchSize = 1){\n            NetworkCore." +
-                    "StartSynicReceiver(this, maxBatchSize);\n        }\n        //Pause receiver\n     " +
-                    "   /// <summary>\n        /// Pause getting a packet from the buffer. To re-start" +
-                    ", call StartPacketReceiver().<br />\n        /// *Packet receiving to the buffer " +
-                    "is continue. If the packet is over the buffer, subsequent packets are discarded." +
-                    "\n        /// </summary>\n        public void PausePacketReceiver(){\n            N" +
-                    "etworkCore.StopPacketReceiver();\n        }\n\n        //Pause Reciving buffer\n    " +
-                    "    /// <summary>\n        /// Pause receiving a packet to the receive buffer. To" +
-                    " re-start, call RestartConnections(). <br />\n        /// After call this, packet" +
-                    "s will have been discarded until connection will re-open.<br />\n        /// WARN" +
-                    "ING: This doesn\'t work as intended now. Can\'t stop receiving packets to buffer, " +
-                    "so SynicSugar discard those packets before re-start.\n        /// </summary>\n    " +
-                    "    /// <param name=\"isForced\">If True, force to stop and clear current packet q" +
-                    "ueue. <br />\n        /// If false, process current queue, then stop it.</param>\n" +
-                    "        public async UniTask PauseConnections(bool isForced = false, Cancellatio" +
-                    "nTokenSource cancelToken = default(CancellationTokenSource)){\n            if(can" +
-                    "celToken == default(CancellationTokenSource)){\n                cancelToken = new" +
-                    " CancellationTokenSource();\n            }\n            syncTokenSource.Cancel();\n" +
-                    "            await NetworkCore.PauseConnections(isForced, cancelToken.Token);\n   " +
-                    "     }\n        /// <summary>\n        /// Prepare to receive packets in advance. " +
-                    "If user sent a packet, it can also open connection to get packets without this.\n" +
-                    "        /// </summary>\n        public void RestartConnections(){\n            Net" +
-                    "workCore.RestartConnections();\n            syncTokenSource = new CancellationTok" +
-                    "enSource();\n            StartPacketReceiver();\n        }\n        \n        /// <s" +
-                    "ummary>\n        /// Stop receiver, close all connections and remove the notify e" +
-                    "vents.\n        /// Then, the user leave the lobby.<br />\n        /// The last us" +
-                    "er closes the lobby in Backend.\n        /// <param name=\"destroyManager\">Destroy" +
-                    " NetworkManager after exit lobby.</param>\n        /// <param name=\"cancelToken\">" +
-                    "Cancel token for this task</param>\n        /// </summary>\n        public async U" +
-                    "niTask<Result> ExitSession(bool destroyManager = true, CancellationToken cancelT" +
-                    "oken = default(CancellationToken)){\n            if(cancelToken == default(Cancel" +
-                    "lationToken)){\n                cancelToken = p2pConfig.Instance.gameObject.GetCa" +
-                    "ncellationTokenOnDestroy();\n            }\n            Result isSuccess = await N" +
-                    "etworkCore.ExitSession(destroyManager, cancelToken);\n            syncTokenSource" +
-                    ".Cancel();\n            ClearReferenceDictionaries();\n            return isSucces" +
-                    "s;\n        }\n        /// <summary>\n        /// Stop receiver, close all connecti" +
-                    "ons and remove the notify events.\n        /// Then, Host closes and Guest leaves" +
-                    " the Lobby.<br />\n        /// When Host closes Lobby, Guests are automatically k" +
-                    "icked out from the Lobby.\n        /// <param name=\"destroyManager\">Destroy Netwo" +
-                    "rkManager after exit lobby.</param>\n        /// <param name=\"cancelToken\">Cancel" +
-                    " token for this task</param>\n        /// </summary>\n        public async UniTask" +
-                    "<Result> CloseSession(bool destroyManager = true, CancellationToken cancelToken " +
-                    "= default(CancellationToken)){\n            if(cancelToken == default(Cancellatio" +
-                    "nToken)){\n                cancelToken = p2pConfig.Instance.gameObject.GetCancell" +
-                    "ationTokenOnDestroy();\n            }\n            Result isSuccess = await Networ" +
-                    "kCore.CloseSession(destroyManager, cancelToken);\n            syncTokenSource.Can" +
-                    "cel();\n            ClearReferenceDictionaries();\n            return isSuccess;\n " +
-                    "       }\n\n        //(for elements)\n        public enum CHANNELLIST{\n            " +
-                    "");
+                    "       _networkCore = p2pConfig.Instance.GetNetworkCore();\n                }\n   " +
+                    "             return _networkCore;\n            }\n        }\n        /// <summary>\n" +
+                    "        /// SyncToken is managed with the connection\'s valid state.\n        /// " +
+                    "</summary>\n        CancellationTokenSource syncTokenSource;\n\n        public Canc" +
+                    "ellationToken GetSyncToken(){\n            return syncTokenSource.Token;\n        " +
+                    "}\n        //Start\n        /// <summary>\n        /// Start the packet receiver. C" +
+                    "all after creating the Network Instance required for reception.<br />\n        //" +
+                    "/ This cannot be called with other Receiver same time. If start the other Receiv" +
+                    "er, ConenctHub stop this Receiver automatically before start the new one.\n      " +
+                    "  /// </summary>\n        /// <param name=\"receiveTiming\">The timing that packet " +
+                    "receiver gets packet from buffer.</param>\n        /// <param name=\"maxBatchSize\"" +
+                    ">How many times during 1 FPS are received</param>\n        public void StartPacke" +
+                    "tReceiver(PacketReceiveTiming receiveTiming = PacketReceiveTiming.Update, uint m" +
+                    "axBatchSize = 1){\n        #if SYNICSUGAR_PACKETINFO\n            string chs = str" +
+                    "ing.Empty;\n            string[] chList = Enum.GetNames(typeof(ConnectHub.CHANNEL" +
+                    "LIST));\n            foreach(var l in chList){\n                chs += l.ToString(" +
+                    ") + \", \";\n            }\n            Debug.Log($\"ch info: amount {chList.Length} " +
+                    "/ {chs}\");\n        #endif\n            NetworkCore.StartPacketReceiver(this, rece" +
+                    "iveTiming, maxBatchSize);\n        }\n        \n        /// <summary>\n        /// T" +
+                    "o get only SynicPacket in burst FPS. Call after creating the Network Instance re" +
+                    "quired for reception.<br />\n        /// This cannot be called with other Receive" +
+                    "r same time. If start the other Receiver, ConenctHub stop this Receiver automati" +
+                    "cally before start the new one.\n        /// </summary>\n        /// <param name=\"" +
+                    "maxBatchSize\">How many times during 1 FPS are received</param>\n        public vo" +
+                    "id StartSynicReceiver(uint maxBatchSize = 1){\n            NetworkCore.StartSynic" +
+                    "Receiver(this, maxBatchSize);\n        }\n        //Pause receiver\n        /// <su" +
+                    "mmary>\n        /// Pause getting a packet from the buffer. To re-start, call Sta" +
+                    "rtPacketReceiver().<br />\n        /// *Packet receiving to the buffer is continu" +
+                    "e. If the packet is over the buffer, subsequent packets are discarded.\n        /" +
+                    "// </summary>\n        public void PausePacketReceiver(){\n            NetworkCore" +
+                    ".StopPacketReceiver();\n        }\n\n        //Pause Reciving buffer\n        /// <s" +
+                    "ummary>\n        /// Pause receiving a packet to the receive buffer. To re-start," +
+                    " call RestartConnections(). <br />\n        /// After call this, packets will hav" +
+                    "e been discarded until connection will re-open.<br />\n        /// WARNING: This " +
+                    "doesn\'t work as intended now. Can\'t stop receiving packets to buffer, so SynicSu" +
+                    "gar discard those packets before re-start.\n        /// </summary>\n        /// <p" +
+                    "aram name=\"isForced\">If True, force to stop and clear current packet queue. <br " +
+                    "/>\n        /// If false, process current queue, then stop it.</param>\n        pu" +
+                    "blic async UniTask PauseConnections(bool isForced = false, CancellationTokenSour" +
+                    "ce cancelToken = default(CancellationTokenSource)){\n            if(cancelToken =" +
+                    "= default(CancellationTokenSource)){\n                cancelToken = new Cancellat" +
+                    "ionTokenSource();\n            }\n            syncTokenSource.Cancel();\n          " +
+                    "  await NetworkCore.PauseConnections(isForced, cancelToken.Token);\n        }\n   " +
+                    "     /// <summary>\n        /// Prepare to receive packets in advance. If user se" +
+                    "nt a packet, it can also open connection to get packets without this.\n        //" +
+                    "/ </summary>\n        public void RestartConnections(){\n            NetworkCore.R" +
+                    "estartConnections();\n            syncTokenSource = new CancellationTokenSource()" +
+                    ";\n            StartPacketReceiver();\n        }\n        \n        /// <summary>\n  " +
+                    "      /// Stop receiver, close all connections and remove the notify events.\n   " +
+                    "     /// Then, the user leave the lobby.<br />\n        /// The last user closes " +
+                    "the lobby in Backend.\n        /// <param name=\"destroyManager\">Destroy NetworkMa" +
+                    "nager after exit lobby.</param>\n        /// <param name=\"cancelToken\">Cancel tok" +
+                    "en for this task</param>\n        /// </summary>\n        public async UniTask<Res" +
+                    "ult> ExitSession(bool destroyManager = true, CancellationToken cancelToken = def" +
+                    "ault(CancellationToken)){\n            if(cancelToken == default(CancellationToke" +
+                    "n)){\n                cancelToken = p2pConfig.Instance.gameObject.GetCancellation" +
+                    "TokenOnDestroy();\n            }\n            Result isSuccess = await NetworkCore" +
+                    ".ExitSession(destroyManager, cancelToken);\n            syncTokenSource.Cancel();" +
+                    "\n            ClearReferenceDictionaries();\n            return isSuccess;\n       " +
+                    " }\n        /// <summary>\n        /// Stop receiver, close all connections and re" +
+                    "move the notify events.\n        /// Then, Host closes and Guest leaves the Lobby" +
+                    ".<br />\n        /// When Host closes Lobby, Guests are automatically kicked out " +
+                    "from the Lobby.\n        /// <param name=\"destroyManager\">Destroy NetworkManager " +
+                    "after exit lobby.</param>\n        /// <param name=\"cancelToken\">Cancel token for" +
+                    " this task</param>\n        /// </summary>\n        public async UniTask<Result> C" +
+                    "loseSession(bool destroyManager = true, CancellationToken cancelToken = default(" +
+                    "CancellationToken)){\n            if(cancelToken == default(CancellationToken)){\n" +
+                    "                cancelToken = p2pConfig.Instance.gameObject.GetCancellationToken" +
+                    "OnDestroy();\n            }\n            Result isSuccess = await NetworkCore.Clos" +
+                    "eSession(destroyManager, cancelToken);\n            syncTokenSource.Cancel();\n   " +
+                    "         ClearReferenceDictionaries();\n            return isSuccess;\n        }\n\n" +
+                    "        //(for elements)\n        public enum CHANNELLIST{\n            ");
             
             #line default
             #line hidden
