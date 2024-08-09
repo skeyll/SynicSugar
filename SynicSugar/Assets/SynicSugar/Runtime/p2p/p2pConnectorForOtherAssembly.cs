@@ -106,6 +106,8 @@ namespace SynicSugar.P2P {
             LateUpdateReceiver.SetGetPacket(this);
             SynicReceiver.SetGetPacket(this);
 
+            UnityEngine.Object.DontDestroyOnLoad(receiverObject);
+
             validReceiverType = ReceiverType.None;
         }
         void Destroy(GameObject gameObject) {
