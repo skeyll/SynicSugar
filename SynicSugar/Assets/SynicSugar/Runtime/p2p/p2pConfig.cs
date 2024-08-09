@@ -43,37 +43,18 @@ namespace SynicSugar.P2P {
         public bool AllowDelayedDelivery = false;
         public bool UseDisconnectedEarlyNotify;
 
-        public enum GetPacketFrequency {
-            PerSecondBurstFPS, PerSecondFPS, PerSecond100, PerSecond50, PerSecond25
-        }
-        [HideInInspector, Obsolete("This will soon be obsolete. This is managed from PacketReciveTiming that is in PacketReceiver's args now.")] 
-        /// <summary>
-        /// PacketReceiver's Frequency/per seconds.<br />
-        /// Cannot exceed the recive's fps of the app's. <br />
-        /// </summary>
-        public GetPacketFrequency getPacketFrequency = GetPacketFrequency.PerSecond50;
-        /// <summary>
-        /// Frequency of BurstFPS's GetPacket in a frame. Recommend: 2-5
-        /// </summary>
-        [HideInInspector, Obsolete("This will soon be obsolete. This is managed from PacketReciveTiming that is in PacketReceiver's args now.")]
-        public int BurstReceiveBatchSize = 5;
-        [Space(10), Range(1, 16)]
         /// <summary>
         /// The number of target users to be sent packet of RPC in a frame. Wait for a frame after a set. <br />
         /// The sending buffer is probably around 64 KB, so it should not exceed this. If we set 0 from the script, it will cause crash.
         /// </summary>
+        [Space(10), Range(1, 16)]
         public int RPCBatchSize = 3;
-        [Range(1, 16)]
         /// <summary>
         /// The number of packets to be sent of a large packet in a frame. Wait for a frame after a set. <br />
         /// The sending buffer is probably around 64 KB, so it should not exceed this. If we set 0 from the script, it will cause crash.
         /// </summary>
+        [Range(1, 16)]
         public int LargePacketBatchSize = 3;
-        /// <summary>
-        /// Frequency of GetSynicPacket in a frame. Recommend: 5-8
-        /// </summary>
-        [Range(2, 16)]
-        public int SynicReceiverBatchSize = 5;
         [Range(0, 5000)]
         /// <summary>
         /// Interval ms that a SyncVar dosen't been send even if the value changes after send that SyncVar.<br />
