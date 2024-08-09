@@ -7,13 +7,20 @@ namespace SynicSugar.P2P{
         protected byte ch_r;
         protected ProductUserId id_r;
         protected ArraySegment<byte> payload_r;
-        protected byte maxBatchSize;
+        protected uint maxBatchSize;
         protected IPacketConvert hub;
+        protected IGetPacket getPacket;
+        void Awake(){
+            enabled = false;
+        }
+        public void SetGetPacket(IGetPacket instance){
+            getPacket = instance;
+        }
         /// <summary>
         /// Must manage this object active from here.
         /// </summary>
         /// <param name="ReceivingBatchSize"></param>
-        public virtual void StartPacketReceiver(IPacketConvert hubInstance, byte ReceivingBatchSize = 1){
+        public virtual void StartPacketReceiver(IPacketConvert hubInstance, uint ReceivingBatchSize = 1){
             hub = hubInstance;
             maxBatchSize = ReceivingBatchSize;
             this.enabled = true;

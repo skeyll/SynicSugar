@@ -26,7 +26,7 @@ namespace SynicSugar.MatchMake {
                 p2pConnectorForOtherAssembly.Instance.RemoveNotifyPeerConnectionnEstablished();
             }
             if(!p2pInfo.Instance.ConnectionNotifier.completeConnectPreparetion){
-                await p2pConnectorForOtherAssembly.Instance.CloseSession(false, token);
+                await ((INetworkCore)p2pConnectorForOtherAssembly.Instance).CloseSession(false, token);
                 return Result.TimedOut;
             }
             return Result.Success;

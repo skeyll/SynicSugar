@@ -12,9 +12,11 @@ namespace SynicSugar.P2P {
             }
             Instance = this;
             natRelay = new NatRelayManager();
+            p2pConnectorForOtherAssembly.Instance.InitConencter();
         }
         void OnDestroy() {
             if( Instance == this ) {
+                p2pConnectorForOtherAssembly.Instance.Dispose();
                 Instance = null;
             }
         }

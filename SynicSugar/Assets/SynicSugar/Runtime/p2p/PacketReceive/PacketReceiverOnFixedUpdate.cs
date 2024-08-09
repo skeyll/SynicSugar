@@ -2,7 +2,7 @@ namespace SynicSugar.P2P {
     public class PacketReceiverOnFixedUpdate : PacketReceiver {
         void FixedUpdate(){
             for(int i = 0; i < maxBatchSize; i++){
-                bool recivePacket = p2pConnectorForOtherAssembly.Instance.GetPacketFromBuffer(ref ch_r, ref id_r, ref payload_r);
+                bool recivePacket = getPacket.GetPacketFromBuffer(ref ch_r, ref id_r, ref payload_r);
                 //Skip to next frame.
                 if(!recivePacket){
                     break;
