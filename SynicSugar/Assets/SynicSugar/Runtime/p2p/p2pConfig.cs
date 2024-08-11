@@ -11,8 +11,8 @@ namespace SynicSugar.P2P {
                 return;
             }
             Instance = this;
-            natRelay = new NatRelayManager();
             connectionManager.InitConencter();
+            p2pInfo.Instance.SetDependency(connectionManager, natRelayManager);
         }
         void OnDestroy() {
             if( Instance == this ) {
@@ -22,7 +22,7 @@ namespace SynicSugar.P2P {
         }
 #endregion
         internal readonly ConnectionManager connectionManager = new ConnectionManager();
-        NatRelayManager natRelay;
+        internal readonly NatRelayManager natRelayManager = new NatRelayManager();
         /// <summary>
         /// Users with settings NoRelay and ForceRelays cannot connect.<br />
         /// So, we should use only AllowRelays and one of the other settings.<br /?
@@ -81,7 +81,7 @@ namespace SynicSugar.P2P {
         /// </summary>
         /// <param name="relay">AllowRelay is Default</param>
         public void SetRelayControl(RelayControl relay){
-            natRelay.SetRelayControl(relay);
+            natRelayManager.SetRelayControl(relay);
         }
         /// <summary>
         /// Get instance to manage connection. <br />

@@ -1516,7 +1516,7 @@ namespace SynicSugar.MatchMake {
             if(p2pConfig.Instance.relayControl != RelayControl.AllowRelays){
                 p2pConfig.Instance.SetRelayControl(p2pConfig.Instance.relayControl);
             }
-            await p2pInfo.Instance.natRelay.Init();
+            await p2pConfig.Instance.natRelayManager.Init();
             RemoveNotifyLobbyMemberUpdateReceived();
             p2pConfig.Instance.connectionManager.OpenConnection(true);
         #if SYNICSUGAR_LOG
@@ -1551,7 +1551,7 @@ namespace SynicSugar.MatchMake {
             if(p2pConfig.Instance.relayControl != RelayControl.AllowRelays){
                 p2pConfig.Instance.SetRelayControl(p2pConfig.Instance.relayControl);
             }
-            await p2pInfo.Instance.natRelay.Init();
+            await p2pConfig.Instance.natRelayManager.Init();
             p2pConfig.Instance.connectionManager.OpenConnection(true);
             Result canConnect = await ConnectPreparation.WaitConnectPreparation(token, initconnectTimeoutMS);
             if(canConnect != Result.Success){

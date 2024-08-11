@@ -12,7 +12,7 @@ using ResultE = Epic.OnlineServices.Result;
 //So, use such processes through this assembly.
 //TODO: Change it so that this class can only be used from ConnectHub.
 namespace SynicSugar.P2P {
-    public class ConnectionManager : INetworkCore, IGetPacket {
+    public sealed class ConnectionManager : INetworkCore, IGetPacket {
         /// <summary>
         /// Call from Start on NetworkManager 
         /// </summary>
@@ -39,7 +39,7 @@ namespace SynicSugar.P2P {
         string _socketName;
         public string ScoketName { 
             get { return _socketName; }
-            set {
+            internal set {
                 _socketName = value;
                 SocketId = new SocketId(){ SocketName = _socketName };
         }}

@@ -1,6 +1,7 @@
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEditor.MemoryProfiler;
 namespace SynicSugar.P2P {
     public class p2pInfo : MonoBehaviour {
 #region Singleton
@@ -12,7 +13,6 @@ namespace SynicSugar.P2P {
             }
             Instance = this;
             userIds = new ();
-            natRelay = new();
             pings = new();
             lastRpcInfo = new();
             lastTargetRPCInfo = new();
@@ -27,11 +27,21 @@ namespace SynicSugar.P2P {
             }
         }
 #endregion
-        internal NatRelayManager natRelay;
+        ConnectionManager connectionManager;
+        NatRelayManager natRelayManager;
         internal UserIds userIds;
         internal p2pPing pings;
         internal RPCInformation lastRpcInfo;
         internal TargetRPCInformation lastTargetRPCInfo;
+        /// <summary>
+        /// Set reference of some manager classes.
+        /// </summary>
+        /// <param name="connectionInstance"></param>
+        /// <param name="natrelayInstance"></param>
+        internal void SetDependency(ConnectionManager connectionInstance, NatRelayManager natrelayInstance){
+            connectionManager = connectionInstance;
+            natRelayManager = natrelayInstance;
+        }
     #region UserId basic info
         /// <summary>
         /// This lobby's Host UserId.
@@ -127,12 +137,12 @@ namespace SynicSugar.P2P {
         /// <summary>
         /// Update local user's NATType to the latest state.
         /// </summary>
-        public async UniTask QueryNATType() => await natRelay.QueryNATType();
+        public async UniTask QueryNATType() => await natRelayManager.QueryNATType();
         /// <summary>
         /// Get last-queried NAT-type, if it has been successfully queried.
         /// </summary>
         /// <returns>Open means being able connect with direct p2p. Otherwise, the connection may be via Epic relay.</returns>
-        public NATType GetNATType() => natRelay.GetNATType();
+        public NATType GetNATType() => natRelayManager.GetNATType();
     #region IsHost
         /// <summary>
         /// Is this local user Game Host?
