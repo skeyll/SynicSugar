@@ -20,7 +20,7 @@ namespace SynicSugar.P2P {
         /// <param name="relay">Default is AllowRelay</param>
         internal void SetRelayControl(RelayControl relay){
             SetRelayControlOptions options = new SetRelayControlOptions() { RelayControl = (Epic.OnlineServices.P2P.RelayControl)relay };
-            var result = P2PHandle.SetRelayControl(ref options);
+            var result = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface().SetRelayControl(ref options);
             if (result != ResultE.Success) {
                 Debug.LogErrorFormat("SetRelayControl: Set Relay Control is failed. error: {0}", result);
                 return;
