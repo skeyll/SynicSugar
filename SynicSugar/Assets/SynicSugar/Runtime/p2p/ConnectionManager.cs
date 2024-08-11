@@ -30,6 +30,7 @@ namespace SynicSugar.P2P {
                 LocalUserId = EOSManager.Instance.GetProductUserId(),
                 RequestedChannel = 255
             };
+            IsConnected = false;
         }
         internal void Dispose(){
             Destroy(receiverObject);
@@ -66,6 +67,10 @@ namespace SynicSugar.P2P {
         /// </summary>
         GetNextReceivedPacketSizeOptions standardPacketSizeOptions, synicPacketSizeOptions;
         bool IsEnableRTC => MatchMakeManager.Instance.eosLobby.CurrentLobby.hasConnectedRTCRoom;
+        /// <summary>
+        /// Is the connection currently active?
+        /// </summary>
+        internal bool IsConnected;
         
         /// <summary>
         /// Generate packet receiver object and add each receiver script.
@@ -105,6 +110,7 @@ namespace SynicSugar.P2P {
         /// If false, process current queue, then stop it.</param>
         /// <param name="token">For this task</param>
         async UniTask INetworkCore.PauseConnections(bool isForced, CancellationToken token){
+            IsConnected = false;
             CancelRTTToken();
             if(isForced){
                 ResetConnections();
@@ -136,6 +142,7 @@ namespace SynicSugar.P2P {
         /// The Last user closes lobby.
         /// </summary>
         async UniTask<Result> INetworkCore.ExitSession(bool destroyManager, CancellationToken token){
+            IsConnected = false;
             ResetConnections();
             Result canExit;
             //The last user
@@ -157,6 +164,7 @@ namespace SynicSugar.P2P {
         /// If host call this after the lobby has other users, Guests in this lobby are kicked out from the lobby.
         /// </summary>
         async UniTask<Result> INetworkCore.CloseSession(bool destroyManager, CancellationToken token){
+            IsConnected = false;
             ResetConnections();
             Result canLeave;
             if(p2pInfo.Instance.IsHost()){
@@ -389,6 +397,7 @@ namespace SynicSugar.P2P {
             AddNotifyPeerConnectionInterrupted();
             AddNotifyPeerConnectionClosed();
         }
+        IsConnected = true;
     }
     //Reason: This order(Receiver, Connection, Que) is that if the RPC includes Rpc to reply, the connections are automatically re-started.
     /// <summary>

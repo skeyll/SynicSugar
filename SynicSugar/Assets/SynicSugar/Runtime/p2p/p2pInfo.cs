@@ -1,7 +1,7 @@
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using System.Collections.Generic;
-using UnityEditor.MemoryProfiler;
+
 namespace SynicSugar.P2P {
     public class p2pInfo : MonoBehaviour {
 #region Singleton
