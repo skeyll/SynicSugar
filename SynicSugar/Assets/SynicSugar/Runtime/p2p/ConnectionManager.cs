@@ -53,7 +53,7 @@ namespace SynicSugar.P2P {
         /// </summary>
         public SocketId ReferenceSocketId;
         ulong RequestNotifyId, InterruptedNotify, EstablishedNotify, ClosedNotify;
-        public CancellationTokenSource p2pToken;
+        public CancellationTokenSource autoRttTokenSource;
 
         //Packet Receiver
         enum ReceiverType {
@@ -105,6 +105,7 @@ namespace SynicSugar.P2P {
         /// If false, process current queue, then stop it.</param>
         /// <param name="token">For this task</param>
         async UniTask INetworkCore.PauseConnections(bool isForced, CancellationToken token){
+            CancelRTTToken();
             if(isForced){
                 ResetConnections();
                 return;
@@ -117,12 +118,11 @@ namespace SynicSugar.P2P {
             P2PHandle.GetPacketQueueInfo(ref options, out info);
 
             while (info.IncomingPacketQueueCurrentPacketCount > 0){
-                await UniTask.Yield(PlayerLoopTiming.FixedUpdate, cancellationToken: token);
+                await UniTask.Yield(PlayerLoopTiming.EarlyUpdate, cancellationToken: token);
                 P2PHandle.GetPacketQueueInfo(ref options, out info);
             }
 
             ((INetworkCore)this).StopPacketReceiver();
-            p2pToken.Cancel();
         }
         /// <summary>
         /// Prepare to receive in advance. If user sent packets, it can open to get packets for a socket id without this.
@@ -179,7 +179,8 @@ namespace SynicSugar.P2P {
             }
 
             if(p2pConfig.Instance.AutoRefreshPing){
-                AutoRefreshPings(p2pToken.Token).Forget();
+                autoRttTokenSource = new CancellationTokenSource();
+                AutoRefreshPings(autoRttTokenSource.Token).Forget();
             }
             
             switch(timing){
@@ -395,7 +396,7 @@ namespace SynicSugar.P2P {
     /// </summary>
     void ResetConnections(){
         ((INetworkCore)this).StopPacketReceiver();
-        p2pToken?.Cancel();
+        CancelRTTToken();
         CloseConnection();
         ClearPacketQueue();
     }
@@ -569,6 +570,12 @@ namespace SynicSugar.P2P {
             if(token.IsCancellationRequested){ return; }
             
             AutoRefreshPings(token).Forget();
+        }
+        internal void CancelRTTToken(){
+            if(autoRttTokenSource == null || !autoRttTokenSource.Token.CanBeCanceled){
+                return;
+            }
+            autoRttTokenSource.Cancel();
         }
         /// <summary>
         /// Change AcceptHostsSynic to false. Call from ConnectHub

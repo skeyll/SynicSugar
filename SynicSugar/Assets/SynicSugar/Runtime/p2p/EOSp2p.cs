@@ -48,7 +48,7 @@ namespace SynicSugar.P2P {
                 count--;
                 if(count <= 0){
                     await UniTask.Yield();
-                    if(p2pConfig.Instance.connectionManager.p2pToken != null && p2pConfig.Instance.connectionManager.p2pToken.IsCancellationRequested){
+                    if(p2pConfig.Instance.connectionManager.autoRttTokenSource != null && p2pConfig.Instance.connectionManager.autoRttTokenSource.IsCancellationRequested){
                 #if SYNICSUGAR_LOG
                         Debug.Log("Send Packet: get out of the loop by Cancel");
                 #endif
@@ -105,7 +105,7 @@ namespace SynicSugar.P2P {
                 count--;
                 if(count <= 0){
                     await UniTask.Yield();
-                    if(p2pConfig.Instance.connectionManager.p2pToken != null && p2pConfig.Instance.connectionManager.p2pToken.IsCancellationRequested){
+                    if(p2pConfig.Instance.connectionManager.autoRttTokenSource != null && p2pConfig.Instance.connectionManager.autoRttTokenSource.IsCancellationRequested){
                 #if SYNICSUGAR_LOG
                         Debug.Log("Send Packet: get out of the loop by Cancel");
                 #endif
@@ -149,7 +149,7 @@ namespace SynicSugar.P2P {
                 count--;
                 if(count <= 0){
                     await UniTask.Yield();
-                    if(p2pConfig.Instance.connectionManager.p2pToken != null && p2pConfig.Instance.connectionManager.p2pToken.IsCancellationRequested){
+                    if(p2pConfig.Instance.connectionManager.autoRttTokenSource != null && p2pConfig.Instance.connectionManager.autoRttTokenSource.IsCancellationRequested){
                 #if SYNICSUGAR_LOG
                         Debug.Log("Send Packet: get out of the loop by Cancel");
                 #endif
