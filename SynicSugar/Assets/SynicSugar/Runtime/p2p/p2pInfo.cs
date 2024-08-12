@@ -238,5 +238,12 @@ namespace SynicSugar.P2P {
         public bool ConnectionIsValid(){
             return connectionManager.IsConnected;
         }
+        /// <summary>
+        /// Gets the currently valid (active) packet receiver type.
+        /// </summary>
+        /// <returns>The active ReceiverType enum value</returns>
+        public ReceiverType GetActiveReceiverType(){
+            return connectionManager.validReceiverType;
+        }
     }
 }
