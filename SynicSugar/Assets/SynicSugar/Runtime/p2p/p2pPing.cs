@@ -27,6 +27,10 @@ namespace SynicSugar.P2P {
         /// <param name="token"></param>
         /// <returns></returns>
         internal async UniTask<bool> RefreshPing(UserId targetId, CancellationToken token){
+            if(!p2pConfig.Instance.connectionManager.IsConnected){
+                UnityEngine.Debug.LogError("RefreshPings: The connection is invalid.");
+                return false;
+            }
             if(isRefreshing){
                 UnityEngine.Debug.LogError("RefreshPing: is Refreshing now.");
                 return false;
@@ -49,6 +53,10 @@ namespace SynicSugar.P2P {
         /// </summary> 
         // MEMO: Replace SendPacketToAll when it can be made more efficient.
         internal async UniTask<bool> RefreshPings(CancellationToken token){
+            if(!p2pConfig.Instance.connectionManager.IsConnected){
+                UnityEngine.Debug.LogError("RefreshPings: The connection is invalid.");
+                return false;
+            }
             if(isRefreshing){
                 UnityEngine.Debug.LogError("RefreshPings: is Refreshing now.");
                 return false;
