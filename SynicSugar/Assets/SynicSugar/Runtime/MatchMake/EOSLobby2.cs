@@ -279,14 +279,14 @@ namespace SynicSugar.MatchMake {
             matchmakingResultCode = Result.None;
             //Search
             MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Recconect);
-            Result canSearch = await RetriveLobbyByLobbyId(LobbyID, token);
+            var retrieveResult = await RetriveLobbyByLobbyId(LobbyID, token);
 
-            if(canSearch != Result.Success){
+            if(retrieveResult.result != Result.Success){
                 #if SYNICSUGAR_LOG
                     Debug.LogErrorFormat("JoinLobbyBySavedLobbyId: RetriveLobbyByLobbyId is failer.: {0}.", canSearch);
                 #endif
                 await MatchMakeManager.Instance.OnDeleteLobbyID();
-                return canSearch; //This is NOT Success. Can't retrive Lobby data from EOS.
+                return retrieveResult.result; //This is NOT Success. Can't retrive Lobby data from EOS.
             }
             //Join when lobby has members than more one.
             Result canJoin = await TryJoinSearchResults(token, true);
@@ -526,9 +526,9 @@ namespace SynicSugar.MatchMake {
         /// <returns></returns>
         async UniTask<Result> JoinExistingLobby(Lobby lobbyCondition, CancellationToken token){
             //Serach
-            Result canRetrive = await RetriveLobbyByAttribute(lobbyCondition, token);
-            if(canRetrive != Result.Success){
-                return canRetrive; //Need to create own session
+            var retrieveResult = await RetriveLobbyByAttribute(lobbyCondition, token);
+            if(retrieveResult.result != Result.Success){
+                return retrieveResult.result; //Need to create own session
             }
             //Join
             Result canJoin = await TryJoinSearchResults(token);
@@ -551,7 +551,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="lobbyCondition"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        async UniTask<Result> RetriveLobbyByAttribute(Lobby lobbyCondition, CancellationToken token){
+        async UniTask<(Result result, LobbySearch lobbySerach)> RetriveLobbyByAttribute(Lobby lobbyCondition, CancellationToken token){
             //Create Search handle on local
             // Create new handle 
             CreateLobbySearchOptions searchOptions = new CreateLobbySearchOptions(){
@@ -563,7 +563,7 @@ namespace SynicSugar.MatchMake {
 
             if (result != ResultE.Success){
                 Debug.LogErrorFormat("Search Lobby: could not create SearchByAttribute. Error code: {0}", result);
-                return (Result)result;
+                return ((Result)result, null);
             }
 
             CurrentSearch = lobbySearchHandle;
@@ -582,7 +582,7 @@ namespace SynicSugar.MatchMake {
             
             if (result != ResultE.Success){
                 Debug.LogErrorFormat("Retrieve Lobby: failed to add bucketID. Error code: {0}", result);
-                return (Result)result;
+                return ((Result)result, null);
             }
             
             // Set other attributes
@@ -595,19 +595,14 @@ namespace SynicSugar.MatchMake {
 
                 if (result != ResultE.Success){
                     Debug.LogErrorFormat("Retrieve Lobby: failed to add option attribute. Error code: {0}", result);
-                    return (Result)result;
+                    return ((Result)result, null);
                 }
             }
-
             //Search with handle
-            LobbySearchFindOptions findOptions = new LobbySearchFindOptions();
-            findOptions.LocalUserId = EOSManager.Instance.GetProductUserId();
-            waitingMatch = true;
-            lobbySearchHandle.Find(ref findOptions, null, OnLobbySearchCompleted);
+            Result findResult = await FindLobby(lobbySearchHandle, token);
 
-            await UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token);
             //Can retrive data
-            return Result.Success;
+            return (findResult, lobbySearchHandle);
         }
         /// <summary>
         /// Get Lobby from EOS by LobbyID<br />
@@ -616,7 +611,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="lobbyId">Id to get</param>
         /// <param name="token"></param>
         /// <returns></returns>
-        async UniTask<Result> RetriveLobbyByLobbyId(string lobbyId, CancellationToken token){
+        async UniTask<(Result result, LobbySearch lobbySerach)> RetriveLobbyByLobbyId(string lobbyId, CancellationToken token){
             //Create Search handle on local
             // Create new handle 
             CreateLobbySearchOptions searchOptions = new CreateLobbySearchOptions(){ 
@@ -628,7 +623,7 @@ namespace SynicSugar.MatchMake {
 
             if (result != ResultE.Success){
                 Debug.LogErrorFormat("RetriveLobbyByLobbyId: could not create LobbySearch Object for SearchByLobbyId. Error code: {0}", result);
-                return (Result)result;
+                return ((Result)result, null);
             }
 
             CurrentSearch = lobbySearchHandle;
@@ -641,29 +636,42 @@ namespace SynicSugar.MatchMake {
 
             if (result != ResultE.Success){
                 Debug.LogErrorFormat("RetriveLobbyByLobbyId: failed to update LobbySearch Object with lobby id. Error code: {0}", result);
-                return (Result)result;
+                return ((Result)result, null);
             }
 
             //Search with handle
+            Result findResult = await FindLobby(lobbySearchHandle, token);
+
+            //Can retrive data
+            return (findResult, lobbySearchHandle);
+        }
+        /// <summary>
+        /// Find lobby Wity searchhandle.
+        /// </summary>
+        /// <param name="lobbySearchHandle">lobbySearch that set search options.</param>
+        /// <param name="token">cancel token</param>
+        /// <returns>Api result</returns>
+        async UniTask<Result> FindLobby(LobbySearch lobbySearchHandle, CancellationToken token){
             LobbySearchFindOptions findOptions = new LobbySearchFindOptions() {
                 LocalUserId = EOSManager.Instance.GetProductUserId()
             };
-            waitingMatch = true;
+            Result result = Result.None;
+            bool finishFound = false;
             lobbySearchHandle.Find(ref findOptions, null, OnLobbySearchCompleted);
 
-            await UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token);
-            //Can retrive data
-            return (Result)result;
-        }
+            await UniTask.WaitUntil(() => finishFound, cancellationToken: token);
 
-        void OnLobbySearchCompleted(ref LobbySearchFindCallbackInfo info){
-                matchmakingResultCode = (Result)info.ResultCode;
-                waitingMatch = false;
-            if (info.ResultCode != ResultE.Success) {
-                Debug.LogErrorFormat("Search Lobby: error code: {0}", info.ResultCode);
-                return;
+            return result;
+
+            void OnLobbySearchCompleted(ref LobbySearchFindCallbackInfo info){
+                result = (Result)info.ResultCode;
+                if (info.ResultCode != ResultE.Success) {
+                    Debug.LogErrorFormat("Search Lobby: error code: {0}", info.ResultCode);
+                }
+                finishFound = true;
             }
         }
+
 #endregion
 #region Join
         /// <summary>
