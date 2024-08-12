@@ -700,25 +700,23 @@ namespace SynicSugar.MatchMake {
             }
 
             LobbySearchCopySearchResultByIndexOptions indexOptions = new LobbySearchCopySearchResultByIndexOptions();
-            isMatchSuccess = false; //Init
+            Result joinResult = Result.None;
+            
             for (uint i = 0; i < searchResultCount; i++){
                 indexOptions.LobbyIndex = i;
 
-                ResultE result = CurrentSearch.CopySearchResultByIndex(ref indexOptions, out LobbyDetails lobbyHandle);
+                ResultE searchResult = CurrentSearch.CopySearchResultByIndex(ref indexOptions, out LobbyDetails lobbyHandle);
 
-                if (result == ResultE.Success && lobbyHandle != null){
+                if (searchResult == ResultE.Success && lobbyHandle != null){
 
-                    var joinResult = await JoinLobby(lobbyHandle, token);
+                    joinResult = await JoinLobby(lobbyHandle, token);
                     
                     if(joinResult == Result.Success){
                         break;
                     }
-                    if(token.IsCancellationRequested){
-                        return Result.Canceled;
-                    }
                 }
             }
-            return Result.Success;
+            return joinResult;
         }
         /// <summary>
         /// For Reconnection. <br />
