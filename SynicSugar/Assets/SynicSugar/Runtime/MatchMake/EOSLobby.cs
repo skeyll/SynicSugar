@@ -619,14 +619,15 @@ namespace SynicSugar.MatchMake {
         async UniTask<Result> RetriveLobbyByLobbyId(string lobbyId, CancellationToken token){
             //Create Search handle on local
             // Create new handle 
-            CreateLobbySearchOptions searchOptions = new CreateLobbySearchOptions();
-            searchOptions.MaxResults = 1;
+            CreateLobbySearchOptions searchOptions = new CreateLobbySearchOptions(){ 
+                MaxResults = 1 
+            };
 
             LobbyInterface lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();
             ResultE result = lobbyInterface.CreateLobbySearch(ref searchOptions, out LobbySearch lobbySearchHandle);
 
             if (result != ResultE.Success){
-                Debug.LogErrorFormat("Lobby Search: could not create SearchByLobbyId. Error code: {0}", result);
+                Debug.LogErrorFormat("RetriveLobbyByLobbyId: could not create LobbySearch Object for SearchByLobbyId. Error code: {0}", result);
                 return (Result)result;
             }
 
@@ -639,13 +640,14 @@ namespace SynicSugar.MatchMake {
             result = lobbySearchHandle.SetLobbyId(ref setLobbyOptions);
 
             if (result != ResultE.Success){
-                Debug.LogErrorFormat("Search Lobby: failed to update SearchByLobbyId with lobby id. Error code: {0}", result);
+                Debug.LogErrorFormat("RetriveLobbyByLobbyId: failed to update LobbySearch Object with lobby id. Error code: {0}", result);
                 return (Result)result;
             }
 
             //Search with handle
-            LobbySearchFindOptions findOptions = new LobbySearchFindOptions();
-            findOptions.LocalUserId = EOSManager.Instance.GetProductUserId();
+            LobbySearchFindOptions findOptions = new LobbySearchFindOptions() {
+                LocalUserId = EOSManager.Instance.GetProductUserId()
+            };
             waitingMatch = true;
             lobbySearchHandle.Find(ref findOptions, null, OnLobbySearchCompleted);
 
@@ -685,7 +687,7 @@ namespace SynicSugar.MatchMake {
             //For reconnecter
             if(needCheckMemberCount){
                 Result result = HasMembers();
-                if(result == Result.Success){   
+                if(result != Result.Success){   
                     return Result.LobbyClosed;
                 }
             }
