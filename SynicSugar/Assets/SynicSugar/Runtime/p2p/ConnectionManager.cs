@@ -143,7 +143,7 @@ namespace SynicSugar.P2P {
             ResetConnections();
             Result canExit;
             //The last user
-            if (p2pInfo.Instance.IsHost() && p2pInfo.Instance.AllUserIds.Count == 1){
+            if (p2pInfo.Instance.IsHost() && p2pInfo.Instance.CurrentConnectedUserIds.Count == 1){
                 canExit = await MatchMakeManager.Instance.CloseCurrentLobby(token);
             }else{
                 canExit = await MatchMakeManager.Instance.ExitCurrentLobby(token);
