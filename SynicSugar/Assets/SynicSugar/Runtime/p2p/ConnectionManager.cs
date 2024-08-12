@@ -54,7 +54,7 @@ namespace SynicSugar.P2P {
         /// </summary>
         public SocketId ReferenceSocketId;
         ulong RequestNotifyId, InterruptedNotify, EstablishedNotify, ClosedNotify;
-        internal CancellationTokenSource autoRttTokenSource;
+        internal CancellationTokenSource rttTokenSource;
 
         //Packet Receiver
         internal ReceiverType validReceiverType { get; private set; }
@@ -184,8 +184,8 @@ namespace SynicSugar.P2P {
             }
 
             if(p2pConfig.Instance.AutoRefreshPing){
-                autoRttTokenSource = new CancellationTokenSource();
-                AutoRefreshPings(autoRttTokenSource.Token).Forget();
+                rttTokenSource = new CancellationTokenSource();
+                AutoRefreshPings(rttTokenSource.Token).Forget();
             }
             
             switch(timing){
@@ -394,6 +394,7 @@ namespace SynicSugar.P2P {
             AddNotifyPeerConnectionInterrupted();
             AddNotifyPeerConnectionClosed();
         }
+        rttTokenSource = new CancellationTokenSource();
         IsConnected = true;
     }
     //Reason: This order(Receiver, Connection, Que) is that if the RPC includes Rpc to reply, the connections are automatically re-started.
@@ -578,10 +579,10 @@ namespace SynicSugar.P2P {
             AutoRefreshPings(token).Forget();
         }
         internal void CancelRTTToken(){
-            if(autoRttTokenSource == null || !autoRttTokenSource.Token.CanBeCanceled){
+            if(rttTokenSource == null || !rttTokenSource.Token.CanBeCanceled){
                 return;
             }
-            autoRttTokenSource.Cancel();
+            rttTokenSource.Cancel();
         }
         /// <summary>
         /// Change AcceptHostsSynic to false. Call from ConnectHub
