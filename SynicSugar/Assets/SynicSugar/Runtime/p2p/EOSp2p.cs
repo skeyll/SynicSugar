@@ -21,6 +21,7 @@ namespace SynicSugar.P2P {
         /// <param name="ch">(byte)ConnectHub.CHANNELLIST</param>
         /// <param name="value">Payload</param>
         public static async UniTaskVoid SendPacketToAll(byte ch, byte[] value){
+            if(!p2pConfig.Instance.connectionManager.IsConnected){ return; }
             ArraySegment<byte> data = value is not null ? value : Array.Empty<byte>();
             ResultE result;
             int count = p2pConfig.Instance.RPCBatchSize;
@@ -68,6 +69,7 @@ namespace SynicSugar.P2P {
         /// <param name="recordPacketInfo">If true, hold the last info in p2pInfo.</param>
         /// <returns></returns>
         public static async UniTaskVoid SendPacketToAll(byte ch, byte[] value, bool recordPacketInfo){
+            if(!p2pConfig.Instance.connectionManager.IsConnected){ return; }
             ArraySegment<byte> data = value is not null ? value : Array.Empty<byte>();
             if(recordPacketInfo){
                 p2pInfo.Instance.lastRpcInfo.ch = ch;
@@ -124,6 +126,7 @@ namespace SynicSugar.P2P {
         /// <param name="value">Payload</param>
         /// <returns></returns>
         public static async UniTaskVoid SendPacketToAll(byte ch, ArraySegment<byte> value){
+            if(!p2pConfig.Instance.connectionManager.IsConnected){ return; }
             ResultE result;
             int count = p2pConfig.Instance.RPCBatchSize;
 
@@ -166,6 +169,7 @@ namespace SynicSugar.P2P {
         /// <param name="value">Payload</param>
         /// <param name="targetId">Target to send</param>
         public static void SendPacket(byte ch, byte[] value, UserId targetId){
+            if(!p2pConfig.Instance.connectionManager.IsConnected){ return; }
             SendPacketOptions options = new SendPacketOptions(){
                 LocalUserId = EOSManager.Instance.GetProductUserId(),
                 RemoteUserId = targetId.AsEpic,
@@ -193,6 +197,7 @@ namespace SynicSugar.P2P {
         /// <param name="targetId">Target to send</param>
         /// <param name="recordPacketInfo">If true, hold the last info in p2pInfo.</param>
         public static void SendPacket(byte ch, byte[] value, UserId targetId, bool recordPacketInfo){
+            if(!p2pConfig.Instance.connectionManager.IsConnected){ return; }
             if(recordPacketInfo){
                 p2pInfo.Instance.lastTargetRPCInfo.ch = ch;
                 p2pInfo.Instance.lastTargetRPCInfo.payload = value;
@@ -226,6 +231,7 @@ namespace SynicSugar.P2P {
         /// <param name="value">Payload</param>
         /// <param name="targetId">Target to send</param>
         public static void SendPacket(byte ch, ArraySegment<byte> value, UserId targetId){
+            if(!p2pConfig.Instance.connectionManager.IsConnected){ return; }
             SendPacketOptions options = new SendPacketOptions(){
                 LocalUserId = EOSManager.Instance.GetProductUserId(),
                 RemoteUserId = targetId.AsEpic,
@@ -254,6 +260,7 @@ namespace SynicSugar.P2P {
         /// <param name="value"></param>
         /// <param name="targetId"></param>
         public async static UniTask SendLargePackets(byte ch, byte[] value, UserId targetId){
+            if(!p2pConfig.Instance.connectionManager.IsConnected){ return; }
             if(value.Length > MAX_LARGEPACKET_SIZE){
                 throw new ArgumentException("SendPacket: Data size exceeds maximum large packet size");
             }
@@ -287,6 +294,7 @@ namespace SynicSugar.P2P {
         /// <param name="value"></param>
         /// <param name="targetId"></param>
         public async static UniTask SendLargePackets(byte ch, byte[] value, UserId targetId, bool recordPacketInfo){
+            if(!p2pConfig.Instance.connectionManager.IsConnected){ return; }
             if(value.Length > MAX_LARGEPACKET_SIZE){
                 throw new ArgumentException("SendPacket(Large): Data size exceeds maximum large packet size");
             }
@@ -321,6 +329,7 @@ namespace SynicSugar.P2P {
         }
         //To use Span. However, this process generates Garbage by each loop.
         static void SendPacket(byte[] value, int startIndex, int length, byte[] header, UserId targetId, byte ch){
+            if(!p2pConfig.Instance.connectionManager.IsConnected){ return; }
             Span<byte> _payload = new Span<byte>(value, startIndex, length); 
             //Add header
             Span<byte> payload = new byte[header.Length + length];
@@ -353,6 +362,7 @@ namespace SynicSugar.P2P {
         /// <param name="value"></param>
         /// <returns></returns>
         public async static UniTask SendLargePacketsToAll(byte ch, byte[] value){
+            if(!p2pConfig.Instance.connectionManager.IsConnected){ return; }
             if(value.Length > MAX_LARGEPACKET_SIZE){
                 throw new ArgumentException("SendPacket(Large/All): Data size exceeds maximum large packet size");
             }
@@ -371,6 +381,7 @@ namespace SynicSugar.P2P {
         /// <param name="value"></param>
         /// <returns></returns>
         public async static UniTask SendLargePacketsToAll(byte ch, byte[] value, bool recordPacketInfo){
+            if(!p2pConfig.Instance.connectionManager.IsConnected){ return; }
             if(value.Length > MAX_LARGEPACKET_SIZE){
                 throw new ArgumentException("SendPacket(Large/ALL): Data size exceeds maximum large packet size");
             }
@@ -395,7 +406,6 @@ namespace SynicSugar.P2P {
     #endregion
 
     #region For Synic
-        
         /// <summary>
         /// Send a synic packet to a specific peer. Main uses is to send hame data to returner. <br />
         /// Add header to sent divided packets.
@@ -408,6 +418,7 @@ namespace SynicSugar.P2P {
         /// <param name="syncedPhase">Sync from 0 to hierarchy</param>
         /// <param name="syncSpecificPhase">If false, synchronize an only specific hierarchy</param>
         public static void SendSynicPackets(byte ch, byte[] value, UserId targetId, UserId dataOwner, byte syncedPhase = 9, bool syncSpecificPhase = false){
+            if(!p2pConfig.Instance.connectionManager.IsConnected){ return; }
             if(value.Length > MAX_LARGEPACKET_SIZE){
                 throw new ArgumentException("SendPacket(Synic): Data size exceeds maximum large packet size");
             }
