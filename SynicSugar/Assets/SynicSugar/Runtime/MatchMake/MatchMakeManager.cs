@@ -531,7 +531,7 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         /// <returns>Always return true. the LastResultCode becomes Success after return true.</returns>
         public async UniTask<Result> DestoryOfflineLobby(bool destroyManager = true){
-            p2pConnectorForOtherAssembly.Instance.p2pToken?.Cancel();
+            p2pConfig.Instance.connectionManager.autoRttTokenSource?.Cancel();
             await eosLobby.DestroyOfflineLobby();
             if(destroyManager){
                 Destroy(this.gameObject);

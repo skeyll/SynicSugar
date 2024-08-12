@@ -29,7 +29,7 @@ namespace SynicSugar.Samples {
             //IsReconnecter means that this local user is a reconnector and they has not received Synic data about themself.
             if(p2pInfo.Instance.IsReconnecter){
                 //To get SynicPacket.
-                ConnectHub.Instance.StartSynicReceiver();
+                ConnectHub.Instance.StartSynicReceiver(5);
                 //This flag(HasReceivedAllSyncSynic) cannot be used at the same time. Once it returns True, it returns False again.
                 await UniTask.WaitUntil(() => p2pInfo.Instance.HasReceivedAllSyncSynic);
                 UpdateChatCount();

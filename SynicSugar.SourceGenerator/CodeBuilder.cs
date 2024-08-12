@@ -218,7 +218,7 @@
             EOSp2p.SendPacketToAll((byte)ConnectHub.CHANNELLIST.{name}, MemoryPack.MemoryPackSerializer.Serialize({name})).Forget();
             await UniTask.Delay({intervalTime});
             
-            if(p2pConnectorForOtherAssembly.Instance.p2pToken.IsCancellationRequested){{
+            if(ConnectHub.Instance.GetSyncToken().IsCancellationRequested){{
                 return;
             }}
             if(preValue == {name}){{

@@ -12,36 +12,15 @@ using ResultE = Epic.OnlineServices.Result;
 //So, use such processes through this assembly.
 //TODO: Change it so that this class can only be used from ConnectHub.
 namespace SynicSugar.P2P {
-    [RequireComponent(typeof(PacketReceiveOnUpdate))]
-    [RequireComponent(typeof(PacketReceiveOnLateUpdate))]
-    [RequireComponent(typeof(PacketReceiveOnFixedUpdate))]
-    public class p2pConnectorForOtherAssembly : MonoBehaviour {
-#region Singleton
-        public static p2pConnectorForOtherAssembly Instance { get; private set; }
-        void Awake() {
-            if( Instance != null ) {
-                Destroy( this );
-                return;
-            }
-            Instance = this;
-            //Packet Receiver
-            FixedUpdateReceiver = this.GetComponent<PacketReceiveOnFixedUpdate>();
-            UpdateReceiver = this.GetComponent<PacketReceiveOnUpdate>();
-            LateUpdateReceiver = this.GetComponent<PacketReceiveOnLateUpdate>();
-            
-            FixedUpdateReceiver.enabled = false;
-            UpdateReceiver.enabled = false;
-            LateUpdateReceiver.enabled = false;
-        }
-        void OnDestroy() {
-            if( Instance == this ) {
-                Instance = null;
-            }
-        }
-        void Start(){
+    public sealed class ConnectionManager : INetworkCore, IGetPacket {
+        /// <summary>
+        /// Call from Start on NetworkManager 
+        /// </summary>
+        internal void InitConencter(){
+            GeneratePacketReceiver();
             P2PHandle = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface();
 
-            //Next packet size
+            // To get Next packet size
             standardPacketSizeOptions = new GetNextReceivedPacketSizeOptions {
                 LocalUserId = EOSManager.Instance.GetProductUserId(),
                 RequestedChannel = null
@@ -51,13 +30,17 @@ namespace SynicSugar.P2P {
                 LocalUserId = EOSManager.Instance.GetProductUserId(),
                 RequestedChannel = 255
             };
+            IsConnected = false;
         }
-#endregion
+        internal void Dispose(){
+            Destroy(receiverObject);
+        }
+        GameObject receiverObject;
         internal P2PInterface P2PHandle;
         string _socketName;
         public string ScoketName { 
             get { return _socketName; }
-            set {
+            internal set {
                 _socketName = value;
                 SocketId = new SocketId(){ SocketName = _socketName };
         }}
@@ -71,28 +54,64 @@ namespace SynicSugar.P2P {
         /// </summary>
         public SocketId ReferenceSocketId;
         ulong RequestNotifyId, InterruptedNotify, EstablishedNotify, ClosedNotify;
-        public CancellationTokenSource p2pToken;
+        public CancellationTokenSource autoRttTokenSource;
 
         //Packet Receiver
-        PacketReceiveTiming currentTiming;
-        bool isReceiving;
-        PacketReceiveOnFixedUpdate FixedUpdateReceiver;
-        PacketReceiveOnUpdate UpdateReceiver;
-        PacketReceiveOnLateUpdate LateUpdateReceiver;
+        enum ReceiverType {
+            None, FixedUpdate, Update, LateUpdate, Synic
+        }
+        ReceiverType validReceiverType;
+        PacketReceiver FixedUpdateReceiver, UpdateReceiver, LateUpdateReceiver, SynicReceiver;
         /// <summary>
         /// To get packets
         /// </summary>
         GetNextReceivedPacketSizeOptions standardPacketSizeOptions, synicPacketSizeOptions;
+        bool IsEnableRTC => MatchMakeManager.Instance.eosLobby.CurrentLobby.hasConnectedRTCRoom;
+        /// <summary>
+        /// Is the connection currently active?
+        /// </summary>
+        internal bool IsConnected;
         
+        /// <summary>
+        /// Generate packet receiver object and add each receiver script.
+        /// </summary>
+        void GeneratePacketReceiver(){
+            if(receiverObject != null){
+                return;
+            }
+            receiverObject = new GameObject("SynicSugarReceiver");
+            receiverObject.AddComponent<PacketReceiverOnFixedUpdate>();
+            receiverObject.AddComponent<PacketReceiverOnUpdate>();
+            receiverObject.AddComponent<PacketReceiverOnLateUpdate>();
+            receiverObject.AddComponent<PacketReceiverForSynic>();
 
-    #region Pause Session
+            FixedUpdateReceiver = receiverObject.GetComponent<PacketReceiver>();
+            UpdateReceiver = receiverObject.GetComponent<PacketReceiver>();
+            LateUpdateReceiver = receiverObject.GetComponent<PacketReceiver>();
+            SynicReceiver = receiverObject.GetComponent<PacketReceiver>();
+
+            FixedUpdateReceiver.SetGetPacket(this);
+            UpdateReceiver.SetGetPacket(this);
+            LateUpdateReceiver.SetGetPacket(this);
+            SynicReceiver.SetGetPacket(this);
+
+            UnityEngine.Object.DontDestroyOnLoad(receiverObject);
+
+            validReceiverType = ReceiverType.None;
+        }
+        void Destroy(GameObject gameObject) {
+            UnityEngine.Object.Destroy(gameObject);
+        }
+    #region INetworkCore
         /// <summary>
         /// For ConnectManager. Stop packet receeiveing to buffer. While stopping, packets are dropped.
         /// </summary>
-        /// <param name="isForced">If True, stop and clear current packet queue. </ br>
+        /// <param name="isForced">If True, stop and clear current packet queue. <br />
         /// If false, process current queue, then stop it.</param>
         /// <param name="token">For this task</param>
-        public async UniTask PauseConnections(bool isForced, CancellationToken token){
+        async UniTask INetworkCore.PauseConnections(bool isForced, CancellationToken token){
+            IsConnected = false;
+            CancelRTTToken();
             if(isForced){
                 ResetConnections();
                 return;
@@ -105,26 +124,25 @@ namespace SynicSugar.P2P {
             P2PHandle.GetPacketQueueInfo(ref options, out info);
 
             while (info.IncomingPacketQueueCurrentPacketCount > 0){
-                await UniTask.Yield(PlayerLoopTiming.FixedUpdate, cancellationToken: token);
+                await UniTask.Yield(PlayerLoopTiming.EarlyUpdate, cancellationToken: token);
                 P2PHandle.GetPacketQueueInfo(ref options, out info);
             }
 
-            StopPacketReceiving();
-            p2pToken.Cancel();
+            ((INetworkCore)this).StopPacketReceiver();
         }
         /// <summary>
         /// Prepare to receive in advance. If user sent packets, it can open to get packets for a socket id without this.
         /// </summary>
-        public void RestartConnections(){
+        void INetworkCore.RestartConnections(){
             OpenConnection();
         }
-    #endregion
         /// <summary>
-        /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll.</ br>
+        /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll.<br />
         /// Stop connections, exit current lobby.<br />
         /// The Last user closes lobby.
         /// </summary>
-        public async UniTask<Result> ExitSession(bool destroyManager, CancellationToken token){
+        async UniTask<Result> INetworkCore.ExitSession(bool destroyManager, CancellationToken token){
+            IsConnected = false;
             ResetConnections();
             Result canExit;
             //The last user
@@ -135,7 +153,7 @@ namespace SynicSugar.P2P {
             }
             
             if(destroyManager && canExit == Result.Success){
-                Destroy(this.gameObject);
+                Destroy(MatchMakeManager.Instance.gameObject);
             }
             return canExit;
         }
@@ -145,7 +163,8 @@ namespace SynicSugar.P2P {
         /// Host closes lobby. Guest leaves lobby. <br />
         /// If host call this after the lobby has other users, Guests in this lobby are kicked out from the lobby.
         /// </summary>
-        public async UniTask<Result> CloseSession(bool destroyManager, CancellationToken token){
+        async UniTask<Result> INetworkCore.CloseSession(bool destroyManager, CancellationToken token){
+            IsConnected = false;
             ResetConnections();
             Result canLeave;
             if(p2pInfo.Instance.IsHost()){
@@ -154,68 +173,81 @@ namespace SynicSugar.P2P {
                 canLeave = await MatchMakeManager.Instance.ExitCurrentLobby(token);
             }
             if(destroyManager && canLeave == Result.Success){
-                Destroy(this.gameObject);
+                Destroy(MatchMakeManager.Instance.gameObject);
             }
             return canLeave;
         }
         /// <summary>
-        /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll. <br />
-        /// TODO: Change it so that this class can only be used from ConnectHub.
+        /// Start standart packet receiver on each timing. Only one can be enabled, including Synic.<br />
+        /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll. 
         /// </summary>
-        public void StartPacketReceiver(IPacketReciver hubInstance, PacketReceiveTiming timing, int maxBatchSize){
-            if(isReceiving){
-                //Delete in future.
-                //Want to avoid using UniTask for packet receive.
-                p2pToken.Cancel();
-                StopPacketReceiving();
+        void INetworkCore.StartPacketReceiver(IPacketConvert hubInstance, PacketReceiveTiming timing, uint maxBatchSize){
+            if(validReceiverType != ReceiverType.None){
+                ((INetworkCore)this).StopPacketReceiver();
             }
 
-            p2pToken = new CancellationTokenSource();
-
             if(p2pConfig.Instance.AutoRefreshPing){
-                AutoRefreshPings(p2pToken.Token).Forget();
+                autoRttTokenSource = new CancellationTokenSource();
+                AutoRefreshPings(autoRttTokenSource.Token).Forget();
             }
             
             switch(timing){
                 case PacketReceiveTiming.FixedUpdate:
-                    FixedUpdateReceiver.StartPacketReceiving(hubInstance, maxBatchSize);
+                    FixedUpdateReceiver.StartPacketReceiver(hubInstance, maxBatchSize);
+                    validReceiverType = ReceiverType.FixedUpdate;
                 break;
                 case PacketReceiveTiming.Update:
-                    UpdateReceiver.StartPacketReceiving(hubInstance, maxBatchSize);
+                    UpdateReceiver.StartPacketReceiver(hubInstance, maxBatchSize);
+                    validReceiverType = ReceiverType.Update;
                 break;
                 case PacketReceiveTiming.LateUpdate:
-                    LateUpdateReceiver.StartPacketReceiving(hubInstance, maxBatchSize);
+                    LateUpdateReceiver.StartPacketReceiver(hubInstance, maxBatchSize);
+                    validReceiverType = ReceiverType.LateUpdate;
                 break;
             }
             
             if(IsEnableRTC){
                 RTCManager.Instance.ToggleReceiveingFromTarget(null, true);
             }
-            currentTiming = timing;
-            isReceiving = true;
-        }
-        public void StopPacketReceiving(){
-            if(!isReceiving){
-                Debug.Log("StopPacketReceiving: PacketReciver is not working now.");
-                return;
-            }
-            switch(currentTiming){
-                case PacketReceiveTiming.FixedUpdate:
-                    FixedUpdateReceiver.StopPacketReceiving();
-                break;
-                case PacketReceiveTiming.Update:
-                    UpdateReceiver.StopPacketReceiving();
-                break;
-                case PacketReceiveTiming.LateUpdate:
-                    LateUpdateReceiver.StopPacketReceiving();
-                break;
-            }
-            isReceiving = false;
         }
         /// <summary>
+        /// Start Synic packet receiver on each timing. Only one can be enabled, including Standard receiver.<br />
+        /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll. <br />
+        /// </summary>
+        void INetworkCore.StartSynicReceiver(IPacketConvert hubInstance, uint maxBatchSize){
+            if(validReceiverType != ReceiverType.None){
+                ((INetworkCore)this).StopPacketReceiver();
+            }
+
+            SynicReceiver.StartPacketReceiver(hubInstance, maxBatchSize);
+            validReceiverType = ReceiverType.Synic;
+        }
+        void INetworkCore.StopPacketReceiver(){
+            if(validReceiverType is ReceiverType.None){
+                Debug.Log("StopPacketReceiver: PacketReciver is not working now.");
+                return;
+            }
+            switch(validReceiverType){
+                case ReceiverType.FixedUpdate:
+                    FixedUpdateReceiver.StopPacketReceiver();
+                break;
+                case ReceiverType.Update:
+                    UpdateReceiver.StopPacketReceiver();
+                break;
+                case ReceiverType.LateUpdate:
+                    LateUpdateReceiver.StopPacketReceiver();
+                break;
+                case ReceiverType.Synic:
+                    SynicReceiver.StopPacketReceiver();
+                break;
+            }
+            validReceiverType = ReceiverType.None;
+        }
+        /// <summary>
+        /// <br />
         /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll.
         /// </summary>
-        public bool GetPacketFromBuffer(ref byte ch, ref ProductUserId id, ref ArraySegment<byte> payload){
+        bool IGetPacket.GetPacketFromBuffer(ref byte ch, ref ProductUserId id, ref ArraySegment<byte> payload){
             ResultE existPacket = P2PHandle.GetNextReceivedPacketSize(ref standardPacketSizeOptions, out uint nextPacketSizeBytes);
             if(existPacket != ResultE.Success){
                 return false;
@@ -239,8 +271,8 @@ namespace SynicSugar.P2P {
 #endif
                 return false; //No packet
             }
-        #if SYNICSUGAR_PACKETINF
-            Debug.Log($"ReceivePacket: {ch.ToString()}({ch}) from user {id} / packet size {bytesWritten} / payload {EOSp2p.ByteArrayToHexString(data)}");
+        #if SYNICSUGAR_PACKETINFO
+            Debug.Log($"ReceivePacket: {ch.ToString()}({ch}) from {id} / packet size {bytesWritten} / payload {EOSp2p.ByteArrayToHexString(data)}");
         #endif
 
             return true;
@@ -249,7 +281,7 @@ namespace SynicSugar.P2P {
         /// To get only SynicPacket.
         /// Use this from ConenctHub not to call some methods in Main-Assembly from SynicSugar.dll.
         /// </summary>
-        public bool GetSynicPacketFromBuffer(ref byte ch, ref ProductUserId id, ref ArraySegment<byte> payload){
+        bool IGetPacket.GetSynicPacketFromBuffer(ref byte ch, ref ProductUserId id, ref ArraySegment<byte> payload){
             ResultE existPacket = P2PHandle.GetNextReceivedPacketSize(ref synicPacketSizeOptions, out uint nextPacketSizeBytes);
             if(existPacket != ResultE.Success){
                 return false;
@@ -279,6 +311,8 @@ namespace SynicSugar.P2P {
 
             return true;
         }
+    
+    #endregion
         /// <summary>
         /// Clear the packet queues.
         /// Just for PausePacketXXX.
@@ -363,14 +397,15 @@ namespace SynicSugar.P2P {
             AddNotifyPeerConnectionInterrupted();
             AddNotifyPeerConnectionClosed();
         }
+        IsConnected = true;
     }
     //Reason: This order(Receiver, Connection, Que) is that if the RPC includes Rpc to reply, the connections are automatically re-started.
     /// <summary>
     /// Stop packet reciver, clse connections, then clear PacketQueue(incoming and outgoing).
     /// </summary>
     void ResetConnections(){
-        StopPacketReceiving();
-        p2pToken?.Cancel();
+        ((INetworkCore)this).StopPacketReceiver();
+        CancelRTTToken();
         CloseConnection();
         ClearPacketQueue();
     }
@@ -545,15 +580,20 @@ namespace SynicSugar.P2P {
             
             AutoRefreshPings(token).Forget();
         }
+        internal void CancelRTTToken(){
+            if(autoRttTokenSource == null || !autoRttTokenSource.Token.CanBeCanceled){
+                return;
+            }
+            autoRttTokenSource.Cancel();
+        }
         /// <summary>
         /// Change AcceptHostsSynic to false. Call from ConnectHub
         /// </summary>
-        public void CloseHostSynic(){
+        void INetworkCore.CloseHostSynic(){
             p2pInfo.Instance.userIds.ReceivedocalUserSynic();
         }
-        public void GetPong(string id, ArraySegment<byte> utc){
+        void INetworkCore.GetPong(string id, ArraySegment<byte> utc){
             p2pInfo.Instance.pings.GetPong(id, utc);
         }
-        public bool IsEnableRTC => MatchMakeManager.Instance.eosLobby.CurrentLobby.hasConnectedRTCRoom;
     }
 }

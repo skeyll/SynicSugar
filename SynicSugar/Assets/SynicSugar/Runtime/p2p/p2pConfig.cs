@@ -11,15 +11,18 @@ namespace SynicSugar.P2P {
                 return;
             }
             Instance = this;
-            natRelay = new NatRelayManager();
+            connectionManager.InitConencter();
+            p2pInfo.Instance.SetDependency(connectionManager, natRelayManager);
         }
         void OnDestroy() {
             if( Instance == this ) {
+                connectionManager.Dispose();
                 Instance = null;
             }
         }
 #endregion
-        NatRelayManager natRelay;
+        internal readonly ConnectionManager connectionManager = new ConnectionManager();
+        internal readonly NatRelayManager natRelayManager = new NatRelayManager();
         /// <summary>
         /// Users with settings NoRelay and ForceRelays cannot connect.<br />
         /// So, we should use only AllowRelays and one of the other settings.<br /?
@@ -41,37 +44,18 @@ namespace SynicSugar.P2P {
         public bool AllowDelayedDelivery = false;
         public bool UseDisconnectedEarlyNotify;
 
-        public enum GetPacketFrequency {
-            PerSecondBurstFPS, PerSecondFPS, PerSecond100, PerSecond50, PerSecond25
-        }
-        [HideInInspector, Obsolete("This will soon be obsolete. This is managed from PacketReciveTiming that is in PacketReceiver's args now.")] 
-        /// <summary>
-        /// PacketReceiver's Frequency/per seconds.<br />
-        /// Cannot exceed the recive's fps of the app's. <br />
-        /// </summary>
-        public GetPacketFrequency getPacketFrequency = GetPacketFrequency.PerSecond50;
-        /// <summary>
-        /// Frequency of BurstFPS's GetPacket in a frame. Recommend: 2-5
-        /// </summary>
-        [HideInInspector, Obsolete("This will soon be obsolete. This is managed from PacketReciveTiming that is in PacketReceiver's args now.")]
-        public int BurstReceiveBatchSize = 5;
-        [Space(10), Range(1, 16)]
         /// <summary>
         /// The number of target users to be sent packet of RPC in a frame. Wait for a frame after a set. <br />
         /// The sending buffer is probably around 64 KB, so it should not exceed this. If we set 0 from the script, it will cause crash.
         /// </summary>
+        [Space(10), Range(1, 16)]
         public int RPCBatchSize = 3;
-        [Range(1, 16)]
         /// <summary>
         /// The number of packets to be sent of a large packet in a frame. Wait for a frame after a set. <br />
         /// The sending buffer is probably around 64 KB, so it should not exceed this. If we set 0 from the script, it will cause crash.
         /// </summary>
+        [Range(1, 16)]
         public int LargePacketBatchSize = 3;
-        /// <summary>
-        /// Frequency of GetSynicPacket in a frame. Recommend: 5-8
-        /// </summary>
-        [Range(2, 16)]
-        public int SynicReceiverBatchSize = 5;
         [Range(0, 5000)]
         /// <summary>
         /// Interval ms that a SyncVar dosen't been send even if the value changes after send that SyncVar.<br />
@@ -97,7 +81,15 @@ namespace SynicSugar.P2P {
         /// </summary>
         /// <param name="relay">AllowRelay is Default</param>
         public void SetRelayControl(RelayControl relay){
-            natRelay.SetRelayControl(relay);
+            natRelayManager.SetRelayControl(relay);
+        }
+        /// <summary>
+        /// Get instance to manage connection. <br />
+        /// Basically call these processes via ConnectHub, but we can also call this to call own processes.
+        /// </summary>
+        /// <returns></returns>
+        public INetworkCore GetNetworkCore(){
+            return connectionManager;
         }
     }
 }
