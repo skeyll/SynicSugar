@@ -16,7 +16,6 @@ namespace SynicSugar.MatchMake {
 
         bool waitingMatch, waitLeave, canLeave;
         LobbySearch CurrentSearch;
-        Dictionary<Lobby, LobbyDetails> SearchResults = new Dictionary<Lobby, LobbyDetails>();
         //User config
         uint MAX_SEARCH_RESULT;
         int timeoutMS, initconnectTimeoutMS;
@@ -289,7 +288,7 @@ namespace SynicSugar.MatchMake {
                 return retrieveResult.result; //This is NOT Success. Can't retrive Lobby data from EOS.
             }
             //Join when lobby has members than more one.
-            Result canJoin = await TryJoinSearchResults(token, true);
+            Result canJoin = await TryJoinSearchResults(retrieveResult.lobbySerach, token, true);
         #if SYNICSUGAR_LOG
             Debug.LogFormat("JoinLobbyBySavedLobbyId: TryJoinSearchResults is '{0}'.", canJoin);
         #endif
@@ -531,7 +530,7 @@ namespace SynicSugar.MatchMake {
                 return retrieveResult.result; //Need to create own session
             }
             //Join
-            Result canJoin = await TryJoinSearchResults(token);
+            Result canJoin = await TryJoinSearchResults(retrieveResult.lobbySerach, token);
             if(canJoin != Result.Success){
                 return canJoin;  //Need to create own session
             }
@@ -680,14 +679,14 @@ namespace SynicSugar.MatchMake {
         /// <param name="token"></param>
         /// <param name="needCheckMemberCount">For Reconenction process. If member is 0, it means ClosedLobby.</param>
         /// <returns></returns>
-        async UniTask<Result> TryJoinSearchResults(CancellationToken token, bool needCheckMemberCount = false){ 
-            if (CurrentSearch == null){
-                Debug.LogError("TryJoinSearchResults: Failure on creating CurrentSearch data.");
-                return Result.InvalidParameters;
+        async UniTask<Result> TryJoinSearchResults(LobbySearch lobbySearch, CancellationToken token, bool needCheckMemberCount = false){ 
+            if (lobbySearch == null){
+                Debug.LogError("TryJoinSearchResults: There is no LobbySearch.");
+                return Result.NotFound;
             }
 
-            var lobbySearchGetSearchResultCountOptions = new LobbySearchGetSearchResultCountOptions(); 
-            uint searchResultCount = CurrentSearch.GetSearchResultCount(ref lobbySearchGetSearchResultCountOptions);
+            var resultCountOptions = new LobbySearchGetSearchResultCountOptions(); 
+            uint searchResultCount = lobbySearch.GetSearchResultCount(ref resultCountOptions);
             
             if(searchResultCount == 0){
                 return Result.NotFound;
@@ -699,24 +698,19 @@ namespace SynicSugar.MatchMake {
                     return Result.LobbyClosed;
                 }
             }
-            SearchResults.Clear();
 
             LobbySearchCopySearchResultByIndexOptions indexOptions = new LobbySearchCopySearchResultByIndexOptions();
             isMatchSuccess = false; //Init
             for (uint i = 0; i < searchResultCount; i++){
-                Lobby lobbyObj = new Lobby();
                 indexOptions.LobbyIndex = i;
 
                 ResultE result = CurrentSearch.CopySearchResultByIndex(ref indexOptions, out LobbyDetails lobbyHandle);
 
                 if (result == ResultE.Success && lobbyHandle != null){
-                    waitingMatch = true;
-                    JoinLobby(lobbyHandle);
+
+                    var joinResult = await JoinLobby(lobbyHandle, token);
                     
-                    await UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token);
-                    
-                    if(isMatchSuccess){
-                        SearchResults.Add(lobbyObj, lobbyHandle);
+                    if(joinResult == Result.Success){
                         break;
                     }
                     if(token.IsCancellationRequested){
@@ -756,47 +750,51 @@ namespace SynicSugar.MatchMake {
         /// Call this from TryJoinSearchResults.<br />
         /// If can join a lobby, then update local lobby infomation in callback.
         /// </summary>
-        void JoinLobby(LobbyDetails lobbyDetails){
+        async UniTask<Result> JoinLobby(LobbyDetails lobbyDetails, CancellationToken token){
             JoinLobbyOptions joinOptions = new JoinLobbyOptions(){
                 LocalUserId = EOSManager.Instance.GetProductUserId(),
                 LobbyDetailsHandle = lobbyDetails,
                 PresenceEnabled = false
             };
+            Result result = Result.None;
+            bool finishJoined = false;
 
             LobbyInterface lobbyInterface = EOSManager.Instance.GetEOSPlatformInterface().GetLobbyInterface();
             lobbyInterface.JoinLobby(ref joinOptions, null, OnJoinLobbyCompleted);
-        }
-        void OnJoinLobbyCompleted(ref JoinLobbyCallbackInfo info){
-            matchmakingResultCode = (Result)info.ResultCode;
-            if (info.ResultCode != ResultE.Success){
-                Debug.LogErrorFormat("Join Lobby: error code: {0}", info.ResultCode);
-                waitingMatch = false;
-                return;
-            }
+            
+            await UniTask.WaitUntil(() => finishJoined, cancellationToken: token);
 
-            // If has joined in other lobby
-            if (CurrentLobby.isValid() && !string.Equals(CurrentLobby.LobbyId, info.LobbyId)){
-                LeaveLobby(true).Forget();
-            }
+            return result;
 
-            CurrentLobby.InitFromLobbyHandle(info.LobbyId);
-            //Member Attribute
-            AddUserAttributes();
-            //RTC
-            RTCManager.Instance.AddNotifyParticipantStatusChanged();
-            string LocalId = EOSManager.Instance.GetProductUserId().ToString();
-            foreach(var member in CurrentLobby.Members){
-                MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(UserId.GetUserId(member.Key), true);
-            }
-            if(userAttributes != null && userAttributes.Count > 0){
-                foreach(var m in CurrentLobby.Members){
-                    if(m.Key != LocalId){
+            void OnJoinLobbyCompleted(ref JoinLobbyCallbackInfo info){
+                result = (Result)info.ResultCode;
+                if (result != Result.Success){
+                    Debug.LogErrorFormat("Join Lobby: can't join Lobby.: {0}", info.ResultCode);
+                    finishJoined = true;
+                    return;
+                }
+
+                // If has joined in other lobby
+                if (CurrentLobby.isValid() && !string.Equals(CurrentLobby.LobbyId, info.LobbyId)){
+                    LeaveLobby(true).Forget();
+                }
+
+                CurrentLobby.InitFromLobbyHandle(info.LobbyId);
+                //Member Attribute
+                AddUserAttributes();
+                //RTC
+                RTCManager.Instance.AddNotifyParticipantStatusChanged();
+                string LocalId = EOSManager.Instance.GetProductUserId().ToString();
+                foreach(var member in CurrentLobby.Members){
+                    MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(UserId.GetUserId(member.Key), true);
+                }
+                if(userAttributes != null && userAttributes.Count > 0){
+                    foreach(var m in CurrentLobby.Members){
                         MatchMakeManager.Instance.MemberUpdatedNotifier.MemberAttributesUpdated(UserId.GetUserId(m.Key));
                     }
                 }
+                finishJoined = true;
             }
-
-            waitingMatch = false;
         }
 #endregion
 #region Kick
@@ -999,8 +997,6 @@ namespace SynicSugar.MatchMake {
             }
 
             OnLobbyUpdated(info.LobbyId);
-                 
-            MatchMakeManager.Instance.MemberUpdatedNotifier.MemberAttributesUpdated(UserId.GetUserId(info.TargetUserId));
         }
 #endregion
 #region Modify
