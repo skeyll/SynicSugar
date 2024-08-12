@@ -197,14 +197,14 @@ namespace SynicSugar.P2P {
         /// </summary>
         /// <returns></returns>
         public async UniTask RefreshPing(UserId target){
-            await pings.RefreshPing(target, connectionManager.autoRttTokenSource.Token);
+            await pings.RefreshPing(target, connectionManager.rttTokenSource.Token);
         }
         /// <summary>
         /// Manually update Pings data to latest.
         /// </summary>
         /// <returns></returns>
         public async UniTask RefreshPings(){
-            await pings.RefreshPings(connectionManager.autoRttTokenSource.Token);
+            await pings.RefreshPings(connectionManager.rttTokenSource.Token);
         }
     #endregion
         /// <summary>

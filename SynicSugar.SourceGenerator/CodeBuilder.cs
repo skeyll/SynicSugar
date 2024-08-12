@@ -191,7 +191,7 @@
         internal void SetLocal{name}({GetFullName(paramNamespace, type)} value) {{
             {name} = value;
         }}"
-         ;
+        ;
             return $@"
         bool {intervalCondition};
         {setterMethod}
@@ -216,7 +216,7 @@
             var preValue = {name};
 
             EOSp2p.SendPacketToAll((byte)ConnectHub.CHANNELLIST.{name}, MemoryPack.MemoryPackSerializer.Serialize({name})).Forget();
-            await UniTask.Delay({intervalTime});
+            await UniTask.Delay({intervalTime}, cancellationToken: ConnectHub.Instance.GetSyncToken());
             
             if(ConnectHub.Instance.GetSyncToken().IsCancellationRequested){{
                 return;

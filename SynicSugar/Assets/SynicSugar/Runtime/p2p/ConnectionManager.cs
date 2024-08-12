@@ -54,7 +54,7 @@ namespace SynicSugar.P2P {
         /// </summary>
         public SocketId ReferenceSocketId;
         ulong RequestNotifyId, InterruptedNotify, EstablishedNotify, ClosedNotify;
-        internal CancellationTokenSource autoRttTokenSource;
+        internal CancellationTokenSource rttTokenSource;
 
         //Packet Receiver
         internal ReceiverType validReceiverType { get; private set; }
@@ -143,7 +143,7 @@ namespace SynicSugar.P2P {
             ResetConnections();
             Result canExit;
             //The last user
-            if (p2pInfo.Instance.IsHost() && p2pInfo.Instance.AllUserIds.Count == 1){
+            if (p2pInfo.Instance.IsHost() && p2pInfo.Instance.CurrentConnectedUserIds.Count == 1){
                 canExit = await MatchMakeManager.Instance.CloseCurrentLobby(token);
             }else{
                 canExit = await MatchMakeManager.Instance.ExitCurrentLobby(token);
@@ -184,8 +184,8 @@ namespace SynicSugar.P2P {
             }
 
             if(p2pConfig.Instance.AutoRefreshPing){
-                autoRttTokenSource = new CancellationTokenSource();
-                AutoRefreshPings(autoRttTokenSource.Token).Forget();
+                rttTokenSource = new CancellationTokenSource();
+                AutoRefreshPings(rttTokenSource.Token).Forget();
             }
             
             switch(timing){
@@ -394,6 +394,7 @@ namespace SynicSugar.P2P {
             AddNotifyPeerConnectionInterrupted();
             AddNotifyPeerConnectionClosed();
         }
+        rttTokenSource = new CancellationTokenSource();
         IsConnected = true;
     }
     //Reason: This order(Receiver, Connection, Que) is that if the RPC includes Rpc to reply, the connections are automatically re-started.
@@ -569,19 +570,19 @@ namespace SynicSugar.P2P {
             p2pInfo.Instance.SyncSnyicNotifier.UpdateSyncedState(id, phase);
         }
         public async UniTask AutoRefreshPings(CancellationToken token){
-            await UniTask.Delay(p2pConfig.Instance.PingAutoRefreshRateSec * 1000);
-            if(token.IsCancellationRequested){ return; }
+            await UniTask.Delay(p2pConfig.Instance.PingAutoRefreshRateSec * 1000, cancellationToken: token);
+            if(!IsConnected){ return; }
 
             await p2pInfo.Instance.pings.RefreshPings(token);
-            if(token.IsCancellationRequested){ return; }
+            if(!IsConnected){ return; }
             
             AutoRefreshPings(token).Forget();
         }
         internal void CancelRTTToken(){
-            if(autoRttTokenSource == null || !autoRttTokenSource.Token.CanBeCanceled){
+            if(rttTokenSource == null || !rttTokenSource.Token.CanBeCanceled){
                 return;
             }
-            autoRttTokenSource.Cancel();
+            rttTokenSource.Cancel();
         }
         /// <summary>
         /// Change AcceptHostsSynic to false. Call from ConnectHub
