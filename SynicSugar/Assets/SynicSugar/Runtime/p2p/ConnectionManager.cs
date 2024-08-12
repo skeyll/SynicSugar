@@ -38,9 +38,9 @@ namespace SynicSugar.P2P {
         GameObject receiverObject;
         internal P2PInterface P2PHandle;
         string _socketName;
-        public string ScoketName { 
+        internal string ScoketName { 
             get { return _socketName; }
-            internal set {
+            set {
                 _socketName = value;
                 SocketId = new SocketId(){ SocketName = _socketName };
         }}
@@ -48,19 +48,16 @@ namespace SynicSugar.P2P {
         /// For actual connection
         /// </summary>
         /// <value></value>
-        public SocketId SocketId { get; private set; }
+        internal SocketId SocketId { get; private set; }
         /// <summary>
         /// For pointer to pass receive packet
         /// </summary>
         public SocketId ReferenceSocketId;
         ulong RequestNotifyId, InterruptedNotify, EstablishedNotify, ClosedNotify;
-        public CancellationTokenSource autoRttTokenSource;
+        internal CancellationTokenSource autoRttTokenSource;
 
         //Packet Receiver
-        enum ReceiverType {
-            None, FixedUpdate, Update, LateUpdate, Synic
-        }
-        ReceiverType validReceiverType;
+        internal ReceiverType validReceiverType { get; private set; }
         PacketReceiver FixedUpdateReceiver, UpdateReceiver, LateUpdateReceiver, SynicReceiver;
         /// <summary>
         /// To get packets
