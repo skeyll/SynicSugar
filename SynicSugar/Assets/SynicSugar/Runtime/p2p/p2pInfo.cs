@@ -229,5 +229,14 @@ namespace SynicSugar.P2P {
         public UserId LastTargetRPCUserId => lastTargetRPCInfo.target;
         public bool LastRPCIsLargePacket => lastRpcInfo.isLargePacket;
         public bool LastTargetRPCIsLargePacket => lastTargetRPCInfo.isLargePacket;
+        /// <summary>
+        /// Checks if the connection has been enabled by the library or user.
+        /// This does not necessarily mean that an actual connection has been established.
+        /// The IsConnected flag becomes true after the user or library initiates the connection.
+        /// </summary>
+        /// <returns>True if the connection is open, false otherwise.</returns>
+        public bool ConnectionIsValid(){
+            return connectionManager.IsConnected;
+        }
     }
 }
