@@ -43,6 +43,15 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         Result matchmakingResultCode, cancelResultCode;
 
+        /// <summary>
+        /// For WaitForMatchingEstablishment(). Change this in notify.
+        /// </summary>
+        bool isMatchmakingCompleted;
+        /// <summary>
+        /// For WaitForMatchingEstablishment(). Change this in notify.
+        /// </summary>
+        Result MatchingResult;
+
         internal EOSLobby2(uint maxSearch, int MatchmakingTimeout, int InitialConnectionTimeout){
             MAX_SEARCH_RESULT = maxSearch;
             //For Unitask
@@ -77,56 +86,37 @@ namespace SynicSugar.MatchMake {
             var hasTimedOutTask = TimeoutTimer(token);
             //Serach
             MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Start);
-            Result canJoin = await JoinExistingLobby(lobbyCondition, token);
+            Result joinLobby = await JoinExistingLobby(lobbyCondition, token);
 
-            if(canJoin == Result.Success){
-                // Wait for SocketName to use p2p connection
-                // Chagne these value via MamberStatusUpdate notification.
-                isMatchSuccess = false;
-                waitingMatch = true;
+            if(joinLobby == Result.Success){
+                // Wait for establised matchmaking and to get SocketName to be used in p2p connection.
                 MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Wait);
 
-                await UniTask.WhenAny(UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token), hasTimedOutTask);
+                Result matchingEstablishment = await WaitForMatchingEstablishment(token);
 
-                if(hasTimedOutTask.Status.IsCompleted() && await hasTimedOutTask){
-                    return Result.TimedOut;
+                if(matchingEstablishment != Result.Success){
+                    return matchingEstablishment;
                 }
-                if(token.IsCancellationRequested){
-                    return Result.Canceled;
-                }
-
-                if(isMatchSuccess){
-                    Result openConnection = await PrepareForp2pConnection(token);
-                    return openConnection;
-                }
+                Result openConnection = await PrepareForp2pConnection(token);
+                return openConnection;
             }
             //If player cannot join lobby as a guest, creates a lobby as a host and waits for other player.
             //Create
-            Result canCreate = await CreateLobby(lobbyCondition, token);
-            if(canCreate == Result.Success){
-                // Wait for other player to join
-                // Chagne these value via MamberStatusUpdate notification.
-                isMatchSuccess = false;
-                waitingMatch = true;
+            Result createLobby = await CreateLobby(lobbyCondition, token);
+            if(createLobby == Result.Success){
+                // Wait for establised matchmaking and to get SocketName to be used in p2p connection.
                 MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Wait);
+                Result matchingEstablishment = await WaitForMatchingEstablishment(token);
 
-                await UniTask.WhenAny(UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token), hasTimedOutTask);
-                
-                if(hasTimedOutTask.Status.IsCompleted() && await hasTimedOutTask){
-                    return Result.TimedOut;
-                }
-                if(token.IsCancellationRequested){
-                    return Result.Canceled;
+                if(matchingEstablishment != Result.Success){
+                    return matchingEstablishment;
                 }
                 
-                if(isMatchSuccess){
-                    Result openConnection = await PrepareForp2pConnection(token);
-                    return openConnection;
-                }
-                return isMatchSuccess ? Result.Success : matchmakingResultCode;
+                Result openConnection = await PrepareForp2pConnection(token);
+                return openConnection;
             }
             //Failed due to no-playing-user or server problems.
-            return matchmakingResultCode;
+            return createLobby;
         }
         /// <summary>
         /// Just search Lobby<br />
@@ -147,32 +137,22 @@ namespace SynicSugar.MatchMake {
             var hasTimedOutTask = TimeoutTimer(token);
             //Serach
             MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Start);
-            Result canJoin = await JoinExistingLobby(lobbyCondition, token);
-            if(canJoin == Result.Success){
-                // Wait for SocketName to use p2p connection
-                // Chagne these value via MamberStatusUpdate notification.
-                isMatchSuccess = false;
-                waitingMatch = true;
+            Result joinLobby = await JoinExistingLobby(lobbyCondition, token);
+
+            if(joinLobby == Result.Success){
+                // Wait for establised matchmaking and to get SocketName to be used in p2p connection.
                 MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Wait);
-                //Wait for closing lobby or timeout
-                await UniTask.WhenAny(UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token), hasTimedOutTask);
-                
-                if(hasTimedOutTask.Status.IsCompleted() && await hasTimedOutTask){
-                    return Result.TimedOut;
-                }
-                if(token.IsCancellationRequested){
-                    return Result.Canceled;
+                Result matchingEstablishment = await WaitForMatchingEstablishment(token);
+
+                if(matchingEstablishment != Result.Success){
+                    return matchingEstablishment;
                 }
 
-                if(isMatchSuccess){
-                    Result openConnection = await PrepareForp2pConnection(token);
-                    return openConnection;
-                }
-                // Failure is Result.LobbyClosed or Result.UserKicked or Result.NetworkDisconnected from OnLobbyMemberStatusReceived();
-                return isMatchSuccess ? Result.Success : matchmakingResultCode;
+                Result openConnection = await PrepareForp2pConnection(token);
+                return openConnection;
             }
             //This is NOT Success. Failed due to no-playing-user or server problems.
-            return canJoin;
+            return joinLobby;
         }
         /// <summary>
         /// Create lobby as host<br />
@@ -192,31 +172,20 @@ namespace SynicSugar.MatchMake {
             var hasTimedOutTask = TimeoutTimer(token);
 
             MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Start);
-            Result canCreate = await CreateLobby(lobbyCondition, token);
-            if(canCreate == Result.Success){
-                // Wait for other player to join
-                // Chagne these value via MamberStatusUpdate notification.
-                isMatchSuccess = false;
-                waitingMatch = true;
+            Result creatLobby = await CreateLobby(lobbyCondition, token);
+            if(creatLobby == Result.Success){
+                // Wait for establised matchmaking and to get SocketName to be used in p2p connection.
                 MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Wait);
-                await UniTask.WhenAny(UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token), hasTimedOutTask);
+                Result matchingEstablishment = await WaitForMatchingEstablishment(token);
 
-                if(hasTimedOutTask.Status.IsCompleted() && await hasTimedOutTask){
-                    return Result.TimedOut;
+                if(matchingEstablishment != Result.Success){
+                    return matchingEstablishment;
                 }
-                if(token.IsCancellationRequested){
-                    return Result.Canceled;
-                }
-
-                if(isMatchSuccess){
-                    Result openConnection = await PrepareForp2pConnection(token);
-                    return openConnection;
-                }
-                // Failure is Result.LobbyClosed or Result.UserKicked or Result.NetworkDisconnected from OnLobbyMemberStatusReceived();
-                return isMatchSuccess ? Result.Success : matchmakingResultCode;
+                Result openConnection = await PrepareForp2pConnection(token);
+                return openConnection;
             }
             //This is NOT Success. Failed due to no-playing-user or server problems.
-            return canCreate;
+            return creatLobby;
         }
         /// <summary>
         /// Join the Lobby with specific id to that lobby. <br />
@@ -490,7 +459,6 @@ namespace SynicSugar.MatchMake {
             // To get Member attributes
             AddNotifyLobbyMemberUpdateReceived();
 
-            
             if(isMatchSuccess){
                 MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Conclude);
                 Result canInit = InitConnectConfig(ref p2pInfo.Instance.userIds);
@@ -516,19 +484,21 @@ namespace SynicSugar.MatchMake {
             // return Result.Success;
         }
         /// <summary>
-        /// これまだ
+        /// Wait for a match to be made or cancelled.
         /// </summary>
         /// <param name="token"></param>
-        /// <returns></returns>
-        async UniTask<Result> WaitForMatchEstablishment(CancellationToken token){
-            // Wait for SocketName to use p2p connection
-            // Chagne these value via MamberStatusUpdate notification.
-            isMatchSuccess = false;
-            waitingMatch = true;
+        /// <returns>Waiting result. Just returne value when matchmaking is established, canceled, kicked, or otherwise unable to wait.</returns>
+        async UniTask<Result> WaitForMatchingEstablishment(CancellationToken token){
+            //　Wait for the matchmaking result.
+            //These value are changed by MamberStatusUpdate notification.
+            isMatchmakingCompleted = false;
+            MatchingResult = Result.None;
             MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Wait);
             //Wait for closing lobby or timeout
-            await UniTask.WhenAny(UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token));
-            return Result.Success;
+            //まだ。　ここらへんにTryCatchで部屋の解散処理などを入れる？
+            await UniTask.WhenAny(UniTask.WaitUntil(() => isMatchmakingCompleted, cancellationToken: token));
+
+            return MatchingResult;
         }
         /// <summary>
         /// Create object to connection via p2p, then open conenction. 
@@ -550,6 +520,7 @@ namespace SynicSugar.MatchMake {
             }
             
             await MatchMakeManager.Instance.OnSaveLobbyID();
+            p2pInfo.Instance.IsInGame = true;
             return result;
         }
         /// <summary>
@@ -864,11 +835,11 @@ namespace SynicSugar.MatchMake {
         }
         void OnLobbyMemberStatusReceived(ref LobbyMemberStatusReceivedCallbackInfo info){
             if (!info.TargetUserId.IsValid()){
-                Debug.LogError("Lobby Notification: Current player is invalid.");
+                Debug.LogError("Lobby Notification: This target player is invalid.");
                 return;
             }
             ProductUserId productUserId = EOSManager.Instance.GetProductUserId();
-            // Target is local user and dosen't need to be updated.
+            // When a local player is kicked out of the Lobby
             if (info.TargetUserId == productUserId){
                 if (info.CurrentStatus == LobbyMemberStatus.Closed ||
                     info.CurrentStatus == LobbyMemberStatus.Kicked ||
@@ -876,31 +847,33 @@ namespace SynicSugar.MatchMake {
                     OnKickedFromLobby(info.LobbyId);
                     switch(info.CurrentStatus){
                         case LobbyMemberStatus.Closed:
-                            matchmakingResultCode = Result.LobbyClosed;
+                            MatchingResult = Result.LobbyClosed;
                         break;
                         case LobbyMemberStatus.Kicked:
-                            matchmakingResultCode = Result.UserKicked;
+                            MatchingResult = Result.UserKicked;
                         break;
                         case LobbyMemberStatus.Disconnected:
-                            matchmakingResultCode = Result.NetworkDisconnected;
+                            MatchingResult = Result.NetworkDisconnected;
                         break;
                     }
-                    //Fail to MatchMake.
-                    waitingMatch = false;
+                    isMatchmakingCompleted = true;
                     return;
                 }
             }
+
             OnLobbyUpdated(info.LobbyId);
             
             //For MatchMaking
-            if(waitingMatch){ //This flag is shared by both host and guest, and is false after getting SocketName.
+            if(!p2pInfo.Instance.IsInGame){
                 if(info.TargetUserId == productUserId && info.CurrentStatus == LobbyMemberStatus.Promoted){
             #if SYNICSUGAR_LOG
                 Debug.Log("OnLobbyMemberStatusReceived: This local user becomes new Host.");
             #endif
-                    //This local player manage lobby, So dosen't need update notify.
+                    // This local player manage lobby.
+                    // So, this user dosen't need to get update notify.
                     RemoveNotifyLobbyUpdateReceived();
                 }
+                //Meet member condition?
                 if(useManualFinishMatchMake){
                     MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(UserId.GetUserId(info.TargetUserId), info.CurrentStatus == LobbyMemberStatus.Joined, CurrentLobby.Members.Count >= requiredMembers);
                 }else{
@@ -972,7 +945,7 @@ namespace SynicSugar.MatchMake {
             OnLobbyUpdated(info.LobbyId);
 
             if(CurrentLobby.PermissionLevel == LobbyPermissionLevel.Joinviapresence){
-                //No need to get lobby update info (to get socket name)
+                // No need to get lobby update info (to get socket name)
                 RemoveNotifyLobbyUpdateReceived();
                 
                 isMatchSuccess = true;
@@ -1013,17 +986,16 @@ namespace SynicSugar.MatchMake {
         /// Use lobbyID to connect on the problem, so save lobbyID in local somewhere.
         /// </summary>
         /// <returns></returns>
-        internal void SwitchLobbyAttribute(){
+        void SwitchLobbyAttribute(){
             if (!CurrentLobby.isHost()){
-#if SYNICSUGAR_LOG
                 Debug.LogError("SwitchLobbyAttribute: This user isn't lobby owner.");
-#endif
+                MatchingResult = Result.InvalidAPICall;
                 return;
             }
             if(CurrentLobby.Members.Count < requiredMembers){
-#if SYNICSUGAR_LOG
-                Debug.LogError("SwitchLobbyAttribute: This lobby doesn't meet member condition.");
-#endif
+                Debug.LogError("SwitchLobbyAttribute: This lobby doesn't meet required member condition.");
+                MatchingResult = Result.InvalidAPICall;
+                isMatchmakingCompleted = true;
                 return;
             }
 
@@ -1037,8 +1009,9 @@ namespace SynicSugar.MatchMake {
             ResultE result = lobbyInterface.UpdateLobbyModification(ref options, out LobbyModification lobbyHandle);
 
             if (result != ResultE.Success){
-                matchmakingResultCode = (Result)result;
                 Debug.LogErrorFormat("SwitchLobbyAttribute: Could not create lobby modification. Error code: {0}", result);
+                MatchingResult = (Result)result;
+                isMatchmakingCompleted = true;
                 return;
             }
             //Change permission level
@@ -1047,8 +1020,9 @@ namespace SynicSugar.MatchMake {
             };
             result = lobbyHandle.SetPermissionLevel(ref permissionOptions);
             if (result != ResultE.Success){
-                matchmakingResultCode = (Result)result;
                 Debug.LogErrorFormat("SwitchLobbyAttribute: can't switch permission level. Error code: {0}", result);
+                MatchingResult = (Result)result;
+                isMatchmakingCompleted = true;
                 return;
             }
 
@@ -1066,8 +1040,9 @@ namespace SynicSugar.MatchMake {
 
             result = lobbyHandle.AddAttribute(ref addAttributeOptions);
             if (result != ResultE.Success){
-                matchmakingResultCode = (Result)result;
                 Debug.LogErrorFormat("SwitchLobbyAttribute: could not add socket name. Error code: {0}", result);
+                MatchingResult = (Result)result;
+                isMatchmakingCompleted = true;
                 return;
             }
             // Set attribute to handle in local
@@ -1078,22 +1053,10 @@ namespace SynicSugar.MatchMake {
 
                 result = lobbyHandle.RemoveAttribute(ref removeAttributeOptions);
                 if (result != ResultE.Success){
-                    matchmakingResultCode = (Result)result;
                     Debug.LogErrorFormat("SwitchLobbyAttribute: could not remove attribute. Error code: {0}", result);
-                    return;
-                }
-            }
-            //For Host's attribute.
-            foreach(var attr in userAttributes){
-                var attrOptions = new LobbyModificationAddMemberAttributeOptions(){
-                    Attribute = attr.AsLobbyAttribute(),
-                    Visibility = LobbyAttributeVisibility.Public
-                };
-                result = lobbyHandle.AddMemberAttribute(ref attrOptions);
 
-                if (result != ResultE.Success){
-                    matchmakingResultCode = (Result)result;
-                    Debug.LogErrorFormat("AddSerachLobbyAttribute: could not add Host's member attribute. Error code: {0}", result);
+                    MatchingResult = (Result)result;
+                    isMatchmakingCompleted = true;
                     return;
                 }
             }
@@ -1104,18 +1067,18 @@ namespace SynicSugar.MatchMake {
 
             lobbyInterface.UpdateLobby(ref updateOptions, null, OnSwitchLobbyAttribute);
             lobbyHandle.Release();
-        }
-        void OnSwitchLobbyAttribute(ref UpdateLobbyCallbackInfo info){
-            matchmakingResultCode = (Result)info.ResultCode;
-            if (info.ResultCode != ResultE.Success){
-                Debug.LogErrorFormat("Modify Lobby: error code: {0}", info.ResultCode);
-                waitingMatch = false;
-                return;
-            }
 
-            OnLobbyUpdated(info.LobbyId);
-            isMatchSuccess = true;
-            waitingMatch = false;
+            void OnSwitchLobbyAttribute(ref UpdateLobbyCallbackInfo info){
+                MatchingResult = (Result)info.ResultCode;
+                if (info.ResultCode != ResultE.Success){
+                    Debug.LogErrorFormat("Modify Lobby: error code: {0}", info.ResultCode);
+                    isMatchmakingCompleted = true;
+                    return;
+                }
+
+                OnLobbyUpdated(info.LobbyId);
+                isMatchmakingCompleted = true;
+            }
         }
         /// <summary>
         /// For join. Host add self attributes on adding serach attribute.
@@ -1298,7 +1261,7 @@ namespace SynicSugar.MatchMake {
         //About Guests, when the lobby is Destroyed by Host, they Leave the lobby automatically.
         /// <summary>
         /// Leave the Participating Lobby.<br />
-        /// When a game is over, call DestroyLobby() instead of this. .
+        /// When a game is over, call DestroyLobby() instead of this.
         /// </summary>
         /// <param name="inMatchMaking"></param>
         /// <param name="token"></param>
@@ -1323,6 +1286,7 @@ namespace SynicSugar.MatchMake {
                 await MatchMakeManager.Instance.OnDeleteLobbyID();
             }
 
+            p2pInfo.Instance.IsInGame = false;
             return cancelResultCode;
         }
         void OnLeaveLobbyCompleted(ref LeaveLobbyCallbackInfo info){
@@ -1381,6 +1345,8 @@ namespace SynicSugar.MatchMake {
             await MatchMakeManager.Instance.OnDeleteLobbyID();
             RemoveNotifyLobbyMemberStatusReceived();
             RemoveNotifyLobbyMemberUpdateReceived();
+
+            p2pInfo.Instance.IsInGame = false;
             return cancelResultCode;
         }
         void OnDestroyLobbyCompleted(ref DestroyLobbyCallbackInfo info){
@@ -1449,12 +1415,16 @@ namespace SynicSugar.MatchMake {
                 MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Ready);
                 await UniTask.Delay((int)delay.ReadyForConnectionDelay, cancellationToken: token);
             }
+
+            p2pInfo.Instance.IsInGame = true;
             matchmakingResultCode = Result.Success;
         }
         internal async UniTask DestroyOfflineLobby(){
             matchmakingResultCode = Result.None;
             await MatchMakeManager.Instance.OnDeleteLobbyID();
             CurrentLobby.Clear();
+
+            p2pInfo.Instance.IsInGame = false;
             matchmakingResultCode = Result.Success;
         }
 #endregion
@@ -1575,6 +1545,7 @@ namespace SynicSugar.MatchMake {
             await basicInfo.ReciveUserIdsPacket(token);
 
             p2pInfo.Instance.pings.Init();
+            p2pInfo.Instance.IsInGame = true;
             return Result.Success;
         }
         /// <summary>
