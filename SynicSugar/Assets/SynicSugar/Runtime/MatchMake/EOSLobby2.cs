@@ -402,31 +402,30 @@ namespace SynicSugar.MatchMake {
                 LobbyModificationHandle = lobbyHandle
             };
             // Init for async
-            waitingMatch = true;
-            isMatchSuccess = false;
+            Result updateResult = Result.None;
+            bool finishUpdate = false;
             
             lobbyInterface.UpdateLobby(ref updateOptions, null, OnAddSearchAttribute);
 
-            await UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token);
+            await UniTask.WaitUntil(() => finishUpdate, cancellationToken: token);
             lobbyHandle.Release();
 
-            return matchmakingResultCode; //"isMatchSuccess" is changed in async and callback method with result.
-        }
-        void OnAddSearchAttribute(ref UpdateLobbyCallbackInfo info){
-            if (info.ResultCode != ResultE.Success){
-                matchmakingResultCode = (Result)info.ResultCode;
-                waitingMatch = false;
-                Debug.LogErrorFormat("Modify Lobby: error code: {0}", info.ResultCode);
-                return;
-            }
-            matchmakingResultCode = Result.Success;
-            OnLobbyUpdated(info.LobbyId);
-            CurrentLobby._BeingCreated = false;
-            //RTC
-            RTCManager.Instance.AddNotifyParticipantStatusChanged();
+            return updateResult;
 
-            isMatchSuccess = true;
-            waitingMatch = false;
+            void OnAddSearchAttribute(ref UpdateLobbyCallbackInfo info){
+                updateResult = (Result)info.ResultCode;
+                if (info.ResultCode != ResultE.Success){
+                    finishUpdate = true;
+                    Debug.LogErrorFormat("Modify Lobby: error code: {0}", info.ResultCode);
+                    return;
+                }
+                OnLobbyUpdated(info.LobbyId);
+                CurrentLobby._BeingCreated = false;
+                //RTC
+                RTCManager.Instance.AddNotifyParticipantStatusChanged();
+
+                finishUpdate = true;
+            }
         }
 #endregion
 //Guest
@@ -894,7 +893,7 @@ namespace SynicSugar.MatchMake {
             }
         }
         /// <summary>
-        /// For Guest to retrive the SoketName just after joining lobby.
+        /// For Guest to retrive the SoketName after joining lobby.
         /// On getting the ScoketName, discard this event.
         /// </summary>
         /// <returns></returns>
