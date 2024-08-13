@@ -459,29 +459,7 @@ namespace SynicSugar.MatchMake {
             // To get Member attributes
             AddNotifyLobbyMemberUpdateReceived();
 
-            if(isMatchSuccess){
-                MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Conclude);
-                Result canInit = InitConnectConfig(ref p2pInfo.Instance.userIds);
-                if(canInit != Result.Success){
-                    Debug.LogErrorFormat("Fail InitConnectConfig: {0}", canInit);
-                    return canInit;
-                }
-
-                Result canConnect = await OpenConnection(token);
-                if(canConnect != Result.Success){
-                    Debug.LogErrorFormat("Fail OpenConnection :{0}", canConnect);
-                    return canConnect;
-                }
-                
-                await MatchMakeManager.Instance.OnSaveLobbyID();
-            }
-            // Failure is Result.LobbyClosed or Result.UserKicked or Result.NetworkDisconnected from OnLobbyMemberStatusReceived();
-            return isMatchSuccess ? Result.Success : matchmakingResultCode;
-            
-            //This is NOT Success. Failed due to no-playing-user or server problems.
-            // return canJoin;
-
-            // return Result.Success;
+            return joinLobby;
         }
         /// <summary>
         /// Wait for a match to be made or cancelled.
