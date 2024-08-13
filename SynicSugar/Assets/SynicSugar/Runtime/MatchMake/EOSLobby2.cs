@@ -73,7 +73,6 @@ namespace SynicSugar.MatchMake {
             this.userAttributes = userAttributes;
             useManualFinishMatchMake = minLobbyMember > 0;
             requiredMembers = minLobbyMember;
-
             //Start timer 
             var hasTimedOutTask = TimeoutTimer(token);
             //Serach
@@ -97,22 +96,9 @@ namespace SynicSugar.MatchMake {
                 }
 
                 if(isMatchSuccess){
-                    MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Conclude);
-                    Result canInit = InitConnectConfig(ref p2pInfo.Instance.userIds);
-                    if(canInit != Result.Success){
-                        Debug.LogErrorFormat("Fail InitConnectConfig :{0}", canInit);
-                        return canInit;
-                    }
-
-                    Result canConnect = await OpenConnection(token);
-                    if(canConnect != Result.Success){
-                        Debug.LogErrorFormat("Fail OpenConnection :{0}", canConnect);
-                        return canConnect;
-                    }
-
-                    await MatchMakeManager.Instance.OnSaveLobbyID();
+                    Result openConnection = await PrepareForp2pConnection(token);
+                    return openConnection;
                 }
-                return isMatchSuccess ? Result.Success : matchmakingResultCode;
             }
             //If player cannot join lobby as a guest, creates a lobby as a host and waits for other player.
             //Create
@@ -134,23 +120,10 @@ namespace SynicSugar.MatchMake {
                 }
                 
                 if(isMatchSuccess){
-                    MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Conclude);
-                    Result canInit = InitConnectConfig(ref p2pInfo.Instance.userIds);
-                    if(canInit != Result.Success){
-                        Debug.LogErrorFormat("Fail InitConnectConfig: {0}", canInit);
-                        return canInit;
-                    }
-
-                    Result canConnect = await OpenConnection(token);
-                    if(canConnect != Result.Success){
-                        Debug.LogErrorFormat("Fail OpenConnection :{0}", canConnect);
-                        return canConnect;
-                    }
-
-                    await MatchMakeManager.Instance.OnSaveLobbyID();
-
-                    return Result.Success;
+                    Result openConnection = await PrepareForp2pConnection(token);
+                    return openConnection;
                 }
+                return isMatchSuccess ? Result.Success : matchmakingResultCode;
             }
             //Failed due to no-playing-user or server problems.
             return matchmakingResultCode;
@@ -192,20 +165,8 @@ namespace SynicSugar.MatchMake {
                 }
 
                 if(isMatchSuccess){
-                    MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Conclude);
-                    Result canInit = InitConnectConfig(ref p2pInfo.Instance.userIds);
-                    if(canInit != Result.Success){
-                        Debug.LogErrorFormat("Fail InitConnectConfig: {0}", canInit);
-                        return canInit;
-                    }
-    
-                    Result canConnect = await OpenConnection(token);
-                    if(canConnect != Result.Success){
-                        Debug.LogErrorFormat("Fail OpenConnection :{0}", canConnect);
-                        return canConnect;
-                    }
-                    
-                    await MatchMakeManager.Instance.OnSaveLobbyID();
+                    Result openConnection = await PrepareForp2pConnection(token);
+                    return openConnection;
                 }
                 // Failure is Result.LobbyClosed or Result.UserKicked or Result.NetworkDisconnected from OnLobbyMemberStatusReceived();
                 return isMatchSuccess ? Result.Success : matchmakingResultCode;
@@ -248,20 +209,8 @@ namespace SynicSugar.MatchMake {
                 }
 
                 if(isMatchSuccess){
-                    MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Conclude);
-                    Result canInit = InitConnectConfig(ref p2pInfo.Instance.userIds);
-                    if(canInit != Result.Success){
-                        Debug.LogErrorFormat("Fail InitConnectConfig: {0}", canInit);
-                        return canInit;
-                    }
-
-                    Result canConnect = await OpenConnection(token);
-                    if(canConnect != Result.Success){
-                        Debug.LogErrorFormat("Fail OpenConnection :{0}", canConnect);
-                        return canConnect;
-                    }
-
-                    await MatchMakeManager.Instance.OnSaveLobbyID();
+                    Result openConnection = await PrepareForp2pConnection(token);
+                    return openConnection;
                 }
                 // Failure is Result.LobbyClosed or Result.UserKicked or Result.NetworkDisconnected from OnLobbyMemberStatusReceived();
                 return isMatchSuccess ? Result.Success : matchmakingResultCode;
@@ -530,9 +479,9 @@ namespace SynicSugar.MatchMake {
                 return retrieveResult.result; //Need to create own session
             }
             //Join
-            Result canJoin = await TryJoinSearchResults(retrieveResult.lobbySerach, token);
-            if(canJoin != Result.Success){
-                return canJoin;  //Need to create own session
+            Result joinLobby = await TryJoinSearchResults(retrieveResult.lobbySerach, token);
+            if(joinLobby != Result.Success){
+                return joinLobby;  //Need to create own session
             }
             // To get SocketName safety
             AddNotifyLobbyUpdateReceived();
@@ -541,7 +490,67 @@ namespace SynicSugar.MatchMake {
             // To get Member attributes
             AddNotifyLobbyMemberUpdateReceived();
 
+            
+            if(isMatchSuccess){
+                MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Conclude);
+                Result canInit = InitConnectConfig(ref p2pInfo.Instance.userIds);
+                if(canInit != Result.Success){
+                    Debug.LogErrorFormat("Fail InitConnectConfig: {0}", canInit);
+                    return canInit;
+                }
+
+                Result canConnect = await OpenConnection(token);
+                if(canConnect != Result.Success){
+                    Debug.LogErrorFormat("Fail OpenConnection :{0}", canConnect);
+                    return canConnect;
+                }
+                
+                await MatchMakeManager.Instance.OnSaveLobbyID();
+            }
+            // Failure is Result.LobbyClosed or Result.UserKicked or Result.NetworkDisconnected from OnLobbyMemberStatusReceived();
+            return isMatchSuccess ? Result.Success : matchmakingResultCode;
+            
+            //This is NOT Success. Failed due to no-playing-user or server problems.
+            // return canJoin;
+
+            // return Result.Success;
+        }
+        /// <summary>
+        /// これまだ
+        /// </summary>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        async UniTask<Result> WaitForMatchEstablishment(CancellationToken token){
+            // Wait for SocketName to use p2p connection
+            // Chagne these value via MamberStatusUpdate notification.
+            isMatchSuccess = false;
+            waitingMatch = true;
+            MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Wait);
+            //Wait for closing lobby or timeout
+            await UniTask.WhenAny(UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token));
             return Result.Success;
+        }
+        /// <summary>
+        /// Create object to connection via p2p, then open conenction. 
+        /// </summary>
+        /// <param name="token">Token not related to timeout　token</param>
+        /// <returns></returns>
+        async UniTask<Result> PrepareForp2pConnection(CancellationToken token){
+            MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Conclude);
+            Result result = InitConnectConfig(ref p2pInfo.Instance.userIds);
+            if(result != Result.Success){
+                Debug.LogErrorFormat("InitConnectConfig :Not enough data to make the connection.: {0}", result);
+                return result;
+            }
+
+            result = await OpenConnection(token);
+            if(result != Result.Success){
+                Debug.LogErrorFormat("OpenConnection :Failure to make connection.: {0}", result);
+                return result;
+            }
+            
+            await MatchMakeManager.Instance.OnSaveLobbyID();
+            return result;
         }
         /// <summary>
         /// For use in normal matching. Retrive Lobby by Attributes. 
