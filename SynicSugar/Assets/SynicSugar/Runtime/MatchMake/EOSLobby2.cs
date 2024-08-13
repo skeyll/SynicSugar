@@ -285,8 +285,8 @@ namespace SynicSugar.MatchMake {
             };
 
             // Init for async
-            waitingMatch = true;
-            isMatchSuccess = false;
+            Result result = Result.None;
+            bool finishCreated = false;
 
             LobbyInterface lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();
             //Set lobby data
@@ -296,45 +296,46 @@ namespace SynicSugar.MatchMake {
 
             lobbyInterface.CreateLobby(ref createLobbyOptions, null, OnCreateLobbyCompleted);
 
-            await UniTask.WaitUntil(() => !waitingMatch, cancellationToken: token);
+            await UniTask.WaitUntil(() => finishCreated, cancellationToken: token);
 
-            if(!isMatchSuccess){
-                Debug.LogError("Create Lobby: can't new lobby");
-                return matchmakingResultCode;
+            if(result != Result.Success){
+                Debug.LogErrorFormat("Create Lobby: can't create new lobby.: {0}", result);
+                return result;
             }
             // For the host migration
             AddNotifyLobbyMemberStatusReceived();
             // To get Member attributes
             AddNotifyLobbyMemberUpdateReceived();
             //Need add condition for serach
-            Result canModify = await AddSerachLobbyAttribute(lobbyCondition, token);
-            if(canModify != Result.Success){
-                Debug.LogError("Create Lobby: can't add lobby search attributes");
-                return matchmakingResultCode;
+            Result modifyAttribute = await AddSerachLobbyAttribute(lobbyCondition, token);
+
+            if(modifyAttribute != Result.Success){
+                Debug.LogError("Create Lobby: can't add lobby search attributes.");
+                return modifyAttribute;
             }
             
-            return Result.Success;
-        }
-        void OnCreateLobbyCompleted(ref CreateLobbyCallbackInfo info){
-            if (info.ResultCode != ResultE.Success){
-                matchmakingResultCode = (Result)info.ResultCode;
-                Debug.LogErrorFormat("Created Lobby: error code: {0}", info.ResultCode);
-                waitingMatch = false;
-                return;
-            }
-            
-            if (string.IsNullOrEmpty(info.LobbyId) || !CurrentLobby._BeingCreated){
-                waitingMatch = false;
-                return;
-            }
-            matchmakingResultCode = Result.Success;
-            CurrentLobby.LobbyId = info.LobbyId;
+            return modifyAttribute;
 
-            //For self
-            MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(UserId.GetUserId(EOSManager.Instance.GetProductUserId()), true);
+            void OnCreateLobbyCompleted(ref CreateLobbyCallbackInfo info){
+                result = (Result)info.ResultCode;
+                if (info.ResultCode != ResultE.Success){
+                    Debug.LogErrorFormat("Created Lobby: Request failed.: {0}", info.ResultCode);
+                    waitingMatch = false;
+                    return;
+                }
+                
+                if (string.IsNullOrEmpty(info.LobbyId) || !CurrentLobby._BeingCreated){
+                    Debug.LogErrorFormat("Created Lobby: Lobby initialization failed: {0}", info.ResultCode);
+                    waitingMatch = false;
+                    return;
+                }
+                CurrentLobby.LobbyId = info.LobbyId;
 
-            isMatchSuccess = true;
-            waitingMatch = false;
+                //For self
+                MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(UserId.GetUserId(EOSManager.Instance.GetProductUserId()), true);
+
+                finishCreated = true;
+            }
         }
         /// <summary>
         /// Set attribute for search and Host attributes.. This process is only for Host player.
@@ -344,9 +345,7 @@ namespace SynicSugar.MatchMake {
         /// <returns></returns>
         async UniTask<Result> AddSerachLobbyAttribute(Lobby lobbyCondition, CancellationToken token){
             if (!CurrentLobby.isHost()){
-#if SYNICSUGAR_LOG
-                Debug.LogError("Change Lobby: This isn't lobby owner.");
-#endif
+                Debug.LogError("Change Lobby: This user is not lobby owner.");
                 return Result.InvalidAPICall;
             }
 
