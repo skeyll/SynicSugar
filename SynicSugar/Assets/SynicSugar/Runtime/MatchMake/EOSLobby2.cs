@@ -776,20 +776,15 @@ namespace SynicSugar.MatchMake {
         }
 #endregion
 #region Kick
-        bool isKicking, canKick;
         /// <summary>
         /// Currently preventing duplicate calls.
         /// </summary>
         /// <param name="target"></param>
         /// <returns></returns>
-        internal async UniTask<bool> KickTargetMember(UserId target, CancellationToken token){
+        internal async UniTask<Result> KickTargetMember(UserId target, CancellationToken token){
             if(!CurrentLobby.isHost()){
                 Debug.LogError("KickTargetMember: This user is not Host.");
-                return false;
-            }
-            if(isKicking){
-                Debug.LogError("KickTargetMember: This user is kicking member now.");
-                return false;
+                return Result.InvalidAPICall;
             }
             var lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();
             var options = new KickMemberOptions(){
@@ -797,19 +792,20 @@ namespace SynicSugar.MatchMake {
                 LocalUserId = CurrentLobby.LobbyOwner,
                 TargetUserId = target.AsEpic
             };
-            isKicking = true;
-            canKick = false;
+            bool finishKicked = false;
+            Result result = Result.None;
+
             lobbyInterface.KickMember(ref options, null, OnKickMember);
-            await UniTask.WaitUntil(() => !isKicking, cancellationToken: token);
-            return canKick;
-        }
-        void OnKickMember(ref KickMemberCallbackInfo info){
-            if(info.LobbyId == CurrentLobby.LobbyId){
-                canKick = info.ResultCode == ResultE.Success;
-            }else{
-                Debug.LogError("This is other lobby result.");
+            await UniTask.WaitUntil(() => finishKicked, cancellationToken: token);
+            return result;
+
+            void OnKickMember(ref KickMemberCallbackInfo info){
+                result = (Result)info.ResultCode;
+                if(result != Result.Success){
+                    Debug.LogErrorFormat("KickTarget: Can't kick target. :{0}", result);
+                }
+                finishKicked = true;
             }
-            isKicking = false;
         }
 #endregion
 //Common

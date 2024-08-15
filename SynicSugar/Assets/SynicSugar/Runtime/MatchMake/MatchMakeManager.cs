@@ -476,11 +476,10 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         /// <param name="token">token for this task</param>
         /// <returns></returns>
-        public async UniTask<bool> KickTargetFromLobby(UserId targetId, CancellationToken token = default(CancellationToken)){
-            token = token == default ? this.GetCancellationTokenOnDestroy() : token;
-            bool canKick = await eosLobby.KickTargetMember(targetId, token);
+        public async UniTask<Result> KickTargetFromLobby(UserId targetId, CancellationToken token = default(CancellationToken)){
+            Result result = await eosLobby.KickTargetMember(targetId, token);
 
-            return canKick;
+            return result;
         }
         /// <summary>
         /// Leave the current lobby in Game.
