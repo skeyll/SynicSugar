@@ -19,7 +19,7 @@ namespace SynicSugar.MatchMake {
             Instance = this;
             DontDestroyOnLoad(this);
 
-            eosLobby = new EOSLobby(maxSearchResult, TimeoutSec, P2PSetupTimeoutSec);
+            eosLobby = new EOSLobby2(maxSearchResult, TimeoutSec, P2PSetupTimeoutSec);
             MemberUpdatedNotifier = new();
 
             if(lobbyIdSaveType == RecconectLobbyIdSaveType.CustomMethod){
@@ -85,7 +85,7 @@ namespace SynicSugar.MatchMake {
         public LobbyIDMethod lobbyIDMethod = new LobbyIDMethod();
         public AsyncLobbyIDMethod asyncLobbyIDMethod = new AsyncLobbyIDMethod();
     #endregion
-        internal EOSLobby eosLobby { get; private set; }
+        internal EOSLobby2 eosLobby { get; private set; }
         internal CancellationTokenSource matchingToken;
         public MatchMakingGUIEvents MatchMakingGUIEvents = new MatchMakingGUIEvents();
         // Events
@@ -106,7 +106,7 @@ namespace SynicSugar.MatchMake {
         /// <summary>
         /// Is this id is LocalUser's id?
         /// </summary>
-        /// <param name="target"></param>
+        /// <param name="id"></param>
         /// <returns></returns>
         public bool isLocalUserId(string id){
             return UserId.GetUserId(id) == localUserId;
@@ -393,6 +393,7 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         public void ConcludeMatchMake(){
             if(isConcluding || !isHost){
+                Debug.LogError("ConcludeMatchMake: This user can't conclude lobby now.");
                 return;
             }
             isConcluding = true;
@@ -428,17 +429,18 @@ namespace SynicSugar.MatchMake {
         /// Exit lobby and cancel MatchMake. <br />
         /// When Host calls this method, Guest will becomes new Host automatically after Host-migration.
         /// </summary>
-        /// <param name="token">token for this task</param>
         /// <param name="destroyManager">If true, destroy NetworkManager after cancel matchmake.</param>
+        /// <param name="cleanupMemberCountChanged">Need to call MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(id, false) after exit lobby?</param>
+        /// <param name="token">token for this task</param>
         /// <returns></returns>
-        public async UniTask<Result> ExitCurrentMatchMake(bool destroyManager = true, CancellationToken token = default(CancellationToken)){
+        public async UniTask<Result> ExitCurrentMatchMake(bool destroyManager = true, bool cleanupMemberCountChanged = false, CancellationToken token = default(CancellationToken)){
             if(matchingToken == null || !matchingToken.Token.CanBeCanceled){
             #if SYNICSUGAR_LOG
                 Debug.Log("ExitCurrentMatchMake: Is this user currently in matchmaking?");
             #endif
                 return Result.InvalidAPICall;
             }
-            Result canCancel = await eosLobby.CancelMatchMaking(matchingToken, token);
+            Result canCancel = await eosLobby.CancelMatchMaking(matchingToken, cleanupMemberCountChanged,token);
             
             if(destroyManager && canCancel == Result.Success){
                 Destroy(this.gameObject);
@@ -450,17 +452,18 @@ namespace SynicSugar.MatchMake {
         /// If Guest, just leave lobby and cancels MatchMake.<br />
         /// We use ConnectHub.Instance.ExitSession and ConnectHub.Instance.CloseSession after matchmaking.
         /// </summary>
-        /// <param name="token">token for this task</param>
         /// <param name="destroyManager">If true, destroy NetworkManager after cancel matchmake.</param>
+        /// <param name="cleanupMemberCountChanged">Need to call MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(id, false) after exit lobby?</param>
+        /// <param name="token">token for this task</param>
         /// <returns></returns>
-        public async UniTask<Result> CloseCurrentMatchMake(bool destroyManager = true, CancellationToken token = default(CancellationToken)){
+        public async UniTask<Result> CloseCurrentMatchMake(bool destroyManager = true, bool cleanupMemberCountChanged = false, CancellationToken token = default(CancellationToken)){
             if(matchingToken == null || !matchingToken.Token.CanBeCanceled){
             #if SYNICSUGAR_LOG
                 Debug.Log("CloseCurrentMatchMake: Is this user currently in matchmaking?");
             #endif
                 return Result.InvalidAPICall;
             }
-            Result canCancel = await eosLobby.CloseMatchMaking(matchingToken, token);
+            Result canCancel = await eosLobby.CloseMatchMaking(matchingToken, cleanupMemberCountChanged, token);
             
             if(destroyManager && canCancel == Result.Success){
                 Destroy(this.gameObject);
@@ -482,19 +485,21 @@ namespace SynicSugar.MatchMake {
         /// <summary>
         /// Leave the current lobby in Game.
         /// </summary>
-        /// <param name="token"></param>
-        internal async UniTask<Result> ExitCurrentLobby(CancellationToken token){
-            Result canDestroy = await eosLobby.LeaveLobby(false, token);
+        /// <param name="cleanupMemberCountChanged">Need to call MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(id, false) after exit lobby?</param>
+        /// <param name="token">Token for this task</param>
+        internal async UniTask<Result> ExitCurrentLobby(bool cleanupMemberCountChanged, CancellationToken token){
+            Result canDestroy = await eosLobby.LeaveLobby(cleanupMemberCountChanged, token);
 
             return canDestroy;
         }
         /// <summary>
         /// Destroy the current lobby on the end of Game.
         /// </summary>
-        /// <param name="token"></param>
+        /// <param name="cleanupMemberCountChanged">Need to call MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(id, false) after exit lobby?</param>
+        /// <param name="token">Token for this task</param>
         /// <returns>True on success. If user isn't host, return false.</returns>
-        internal async UniTask<Result> CloseCurrentLobby(CancellationToken token){
-            Result canDestroy = await eosLobby.DestroyLobby(token);
+        internal async UniTask<Result> CloseCurrentLobby(bool cleanupMemberCountChanged = false, CancellationToken token = default(CancellationToken)){
+            Result canDestroy = await eosLobby.DestroyLobby(cleanupMemberCountChanged, token);
 
             return canDestroy;
         }

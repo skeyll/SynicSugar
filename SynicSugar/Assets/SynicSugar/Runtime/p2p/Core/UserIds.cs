@@ -1,8 +1,6 @@
 using PlayEveryWare.EpicOnlineServices;
-using System;
 using System.Collections.Generic;
 using Epic.OnlineServices;
-using MemoryPack;
 
 namespace SynicSugar.P2P {
     /// <summary>

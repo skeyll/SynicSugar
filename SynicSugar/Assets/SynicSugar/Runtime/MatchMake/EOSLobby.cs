@@ -1155,7 +1155,7 @@ namespace SynicSugar.MatchMake {
         #endif
         }
         void OnLobbyUpdated(string lobbyId){
-            if (!string.IsNullOrEmpty(lobbyId) && CurrentLobby.LobbyId == lobbyId){
+            if (CurrentLobby.LobbyId == lobbyId){
                 CurrentLobby.InitFromLobbyHandle(lobbyId);
             #if SYNICSUGAR_LOG
                 Debug.Log($"OnLobbyUpdated: Update Lobby with {lobbyId}");
