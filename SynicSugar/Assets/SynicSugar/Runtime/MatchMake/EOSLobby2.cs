@@ -268,6 +268,7 @@ namespace SynicSugar.MatchMake {
             // Init for async
             Result result = Result.None;
             bool finishCreated = false;
+            CurrentLobby.Clear();
 
             LobbyInterface lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();
             //Set lobby data
@@ -658,7 +659,6 @@ namespace SynicSugar.MatchMake {
                 if (searchResult == ResultE.Success && lobbyHandle != null){
 
                     joinResult = await JoinLobby(lobbyHandle, userAttributes, isReconnecter, token);
-                    lobbyHandle.Release();
                     
                     if(joinResult == Result.Success){
                         break;
@@ -713,6 +713,7 @@ namespace SynicSugar.MatchMake {
             
             await UniTask.WaitUntil(() => finishJoined, cancellationToken: token);
 
+            lobbyDetails.Release();
             return result;
 
             void OnJoinLobbyCompleted(ref JoinLobbyCallbackInfo info){

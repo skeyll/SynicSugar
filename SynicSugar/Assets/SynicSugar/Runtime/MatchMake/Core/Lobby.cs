@@ -82,8 +82,18 @@ namespace SynicSugar.MatchMake {
         internal void Clear(){
             LobbyId = string.Empty;
             LobbyOwner = new ProductUserId();
-            Attributes.Clear();
             Members.Clear();
+            _maxLobbyMembers = 0;
+            
+            _BeingCreated = false;
+            PermissionLevel = LobbyPermissionLevel.Publicadvertised;
+            BucketId = string.Empty;
+            bAllowInvites = false;
+            bDisableHostMigration = true;
+            bEnableRTCRoom = false;
+            RejoinAfterKickRequiresInvite = false;
+            
+            Attributes.Clear();
             RTCManager.Instance.RemoveRTCEvents();
         }
 
