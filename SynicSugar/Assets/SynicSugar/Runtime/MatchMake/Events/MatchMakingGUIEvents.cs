@@ -32,7 +32,7 @@ namespace SynicSugar.MatchMake {
     #else
         public Text stateText = null;
     #endif
-
+        bool enabledManualConclude = false;
         // public TextP
         public bool canKick { get; internal set; }
     #region Event
@@ -111,6 +111,8 @@ namespace SynicSugar.MatchMake {
         internal void ChangeState(State state){
             switch(state){
                 case State.Standby:
+                    canKick = false;
+                    enabledManualConclude = false;
                     if(stateText != null){
                         stateText.SetText(System.String.Empty);
                     }
@@ -118,6 +120,7 @@ namespace SynicSugar.MatchMake {
                 case State.Start:
                     DisableStart?.Invoke();
                     canKick = false;
+                    enabledManualConclude = false;
                     if(stateText != null){
                         stateText.SetText(StartMatchmaking);
                     }
@@ -194,7 +197,6 @@ namespace SynicSugar.MatchMake {
             }
         }
     #endif
-        bool enabledManualConclude = false;
         /// <summary>
         /// To display Member count. <br />
         /// After meet lobby min member counts.
