@@ -817,6 +817,9 @@ namespace SynicSugar.MatchMake {
             }
         }
         void RemoveNotifyLobbyMemberStatusReceived(){
+            if(LobbyMemberStatusNotifyId == 0){
+                return;
+            }
             EOSManager.Instance.GetEOSLobbyInterface().RemoveNotifyLobbyMemberStatusReceived(LobbyMemberStatusNotifyId);
             LobbyMemberStatusNotifyId = 0;
         }
@@ -831,7 +834,7 @@ namespace SynicSugar.MatchMake {
                 if (info.CurrentStatus == LobbyMemberStatus.Closed ||
                     info.CurrentStatus == LobbyMemberStatus.Kicked ||
                     info.CurrentStatus == LobbyMemberStatus.Disconnected){
-                    OnKickedFromLobby(info.LobbyId);
+                    CurrentLobby.Clear();
                     switch(info.CurrentStatus){
                         case LobbyMemberStatus.Closed:
                             MatchingResult = Result.LobbyClosed;
@@ -843,6 +846,7 @@ namespace SynicSugar.MatchMake {
                             MatchingResult = Result.NetworkDisconnected;
                         break;
                     }
+                    RemoveAllNotifyEvents();
                     isMatchmakingCompleted = true;
                     return;
                 }
@@ -919,6 +923,9 @@ namespace SynicSugar.MatchMake {
             }
         }
         void RemoveNotifyLobbyUpdateReceived(){
+            if(LobbyUpdateNotififyId == 0){
+                return;
+            }
             EOSManager.Instance.GetEOSLobbyInterface().RemoveNotifyLobbyUpdateReceived(LobbyUpdateNotififyId);
             LobbyUpdateNotififyId = 0;
         }
@@ -957,6 +964,9 @@ namespace SynicSugar.MatchMake {
             }
         }
         void RemoveNotifyLobbyMemberUpdateReceived(){
+            if(LobbyMemberUpdateNotifyId == 0){
+                return;
+            }
             EOSManager.Instance.GetEOSLobbyInterface().RemoveNotifyLobbyMemberUpdateReceived(LobbyMemberUpdateNotifyId);
             LobbyMemberUpdateNotifyId = 0;
         }
@@ -968,6 +978,14 @@ namespace SynicSugar.MatchMake {
 
             OnLobbyUpdated(info.LobbyId);
             MatchMakeManager.Instance.MemberUpdatedNotifier.MemberAttributesUpdated(UserId.GetUserId(info.TargetUserId));
+        }
+        /// <summary>
+        /// Delete all notification events if the result is not Success and the API is completed.
+        /// </summary> 
+        void RemoveAllNotifyEvents(){
+            RemoveNotifyLobbyMemberStatusReceived();
+            RemoveNotifyLobbyMemberUpdateReceived();
+            RemoveNotifyLobbyUpdateReceived();
         }
 #endregion
 #region Modify
@@ -1322,13 +1340,6 @@ namespace SynicSugar.MatchMake {
                 finishLeave = true;
             }
         }
-        void OnKickedFromLobby(string lobbyId){
-            if (CurrentLobby.isValid() && CurrentLobby.LobbyId.Equals(lobbyId, StringComparison.OrdinalIgnoreCase)){
-                RemoveNotifyLobbyMemberStatusReceived();
-                RemoveNotifyLobbyMemberUpdateReceived();
-            }
-            CurrentLobby.Clear();
-        }
 #endregion
 #region Destroy
         /// <summary>
@@ -1443,7 +1454,6 @@ namespace SynicSugar.MatchMake {
             return Result.Success;
         }
 #endregion
-        
         /// <summary>
         /// Init p2pManager's room info with new lobby data.
         /// </summary>
