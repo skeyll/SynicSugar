@@ -13,7 +13,6 @@ using SynicSugar.RTC;
 namespace SynicSugar.MatchMake {
     internal class EOSLobby2 {
         internal Lobby CurrentLobby { get; private set; } = new Lobby();
-        LobbySearch CurrentSearch;
         //User config
         uint MAX_SEARCH_RESULT;
         int timeoutMS, initconnectTimeoutMS;
@@ -32,12 +31,6 @@ namespace SynicSugar.MatchMake {
         /// Member attributes.
         /// </summary>
         ulong LobbyMemberUpdateNotifyId;
-
-        string socketName = string.Empty;
-        /// <summary>
-        /// For callback
-        /// </summary>
-        Result cancelResultCode;
 
         /// <summary>
         /// For WaitForMatchingEstablishment(). Change this in notify.
@@ -181,6 +174,7 @@ namespace SynicSugar.MatchMake {
         /// To return to a disconnected lobby.
         /// </summary>
         /// <param name="LobbyID">Lobby ID to <c>re</c>-connect</param>
+        /// <param name="token"></param>
         internal async UniTask<Result> JoinLobbyBySavedLobbyId(string LobbyID, CancellationToken token){
             //Search
             MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Recconect);
@@ -195,11 +189,10 @@ namespace SynicSugar.MatchMake {
                 return retrieveResult.result; //This is NOT Success. Can't retrive Lobby data from EOS.
             }
             //Join when lobby has members than more one.
-            Result canJoin = await TryJoinSearchResults(retrieveResult.lobbySerach, null, token, true);
+            Result canJoin = await TryJoinSearchResults(retrieveResult.lobbySerach, null, true, token);
         #if SYNICSUGAR_LOG
             Debug.LogFormat("JoinLobbyBySavedLobbyId: TryJoinSearchResults is '{0}'.", canJoin);
         #endif
-            ReleaseLobbySearch(retrieveResult.lobbySerach);
             if(canJoin != Result.Success){
                 await MatchMakeManager.Instance.OnDeleteLobbyID();
                 return canJoin; //This is NOT Success. The lobby was already closed.
@@ -451,8 +444,7 @@ namespace SynicSugar.MatchMake {
                 return retrieveResult.result; //Need to create own session
             }
             //Join
-            Result joinLobby = await TryJoinSearchResults(retrieveResult.lobbySerach, userAttributes, token);
-            ReleaseLobbySearch(retrieveResult.lobbySerach);
+            Result joinLobby = await TryJoinSearchResults(retrieveResult.lobbySerach, userAttributes, false, token);
             if(joinLobby != Result.Success){
                 return joinLobby;  //Need to create own session
             }
@@ -520,8 +512,6 @@ namespace SynicSugar.MatchMake {
                 return ((Result)result, null);
             }
 
-            CurrentSearch = lobbySearchHandle;
-
             //Set Backet ID
             Epic.OnlineServices.Lobby.AttributeData bucketAttribute = new (){
                 Key = "bucket",
@@ -580,8 +570,6 @@ namespace SynicSugar.MatchMake {
                 return ((Result)result, null);
             }
 
-            CurrentSearch = lobbySearchHandle;
-
             // Set Lobby ID
             LobbySearchSetLobbyIdOptions setLobbyOptions = new LobbySearchSetLobbyIdOptions(){
                 LobbyId = lobbyId
@@ -634,10 +622,12 @@ namespace SynicSugar.MatchMake {
         /// <summary>
         /// Check result amounts, then if it has 1 or more, try join the lobby.
         /// </summary>
+        /// <param name="lobbySearch"></param>
+        /// <param name="userAttributes"></param>
+        /// <param name="isReconnecter">For Reconenction process. If member is 0, it means ClosedLobby.</param>
         /// <param name="token"></param>
-        /// <param name="needCheckMemberCount">For Reconenction process. If member is 0, it means ClosedLobby.</param>
         /// <returns></returns>
-        async UniTask<Result> TryJoinSearchResults(LobbySearch lobbySearch, List<AttributeData> userAttributes, CancellationToken token, bool isReconnecter = false){ 
+        async UniTask<Result> TryJoinSearchResults(LobbySearch lobbySearch, List<AttributeData> userAttributes, bool isReconnecter = false, CancellationToken token = default(CancellationToken)){ 
             if (lobbySearch == null){
                 Debug.LogError("TryJoinSearchResults: There is no LobbySearch.");
                 return Result.NotFound;
@@ -651,7 +641,7 @@ namespace SynicSugar.MatchMake {
             }
             //For reconnecter
             if(isReconnecter){
-                Result result = HasMembers();
+                Result result = HasMembers(lobbySearch);
                 if(result != Result.Success){   
                     return Result.LobbyClosed;
                 }
@@ -663,7 +653,7 @@ namespace SynicSugar.MatchMake {
             for (uint i = 0; i < searchResultCount; i++){
                 indexOptions.LobbyIndex = i;
 
-                ResultE searchResult = CurrentSearch.CopySearchResultByIndex(ref indexOptions, out LobbyDetails lobbyHandle);
+                ResultE searchResult = lobbySearch.CopySearchResultByIndex(ref indexOptions, out LobbyDetails lobbyHandle);
 
                 if (searchResult == ResultE.Success && lobbyHandle != null){
 
@@ -675,6 +665,7 @@ namespace SynicSugar.MatchMake {
                     }
                 }
             }
+            ReleaseLobbySearch(lobbySearch);
             return joinResult;
         }
         /// <summary>
@@ -683,18 +674,19 @@ namespace SynicSugar.MatchMake {
         /// Can't go back to the empty lobby.
         /// </summary>
         /// <returns></returns>
-        Result HasMembers(){
+        Result HasMembers(LobbySearch lobbySearch){
             LobbySearchCopySearchResultByIndexOptions indexOptions = new LobbySearchCopySearchResultByIndexOptions(){ LobbyIndex = 0 };
-            ResultE result = CurrentSearch.CopySearchResultByIndex(ref indexOptions, out LobbyDetails lobbyDetails);
+            ResultE result = lobbySearch.CopySearchResultByIndex(ref indexOptions, out LobbyDetails lobbyDetails);
 
             if (result != ResultE.Success){
+                lobbyDetails.Release();
                 Debug.LogError("TryJoinSearchResults: Reconnecter can't create lobby handle to check member count.");
                 return (Result)result;
             }
             LobbyDetailsGetMemberCountOptions countOptions = new LobbyDetailsGetMemberCountOptions();
             uint MemberCount = lobbyDetails.GetMemberCount(ref countOptions);
+            
             lobbyDetails.Release();
-
             if(MemberCount == 0){
                 Debug.LogError("TryJoinSearchResults: The lobby had been closed. There is no one.");
                 return Result.LobbyClosed;
@@ -1025,7 +1017,7 @@ namespace SynicSugar.MatchMake {
             }
 
             // Set SocketName
-            string socket = !string.IsNullOrEmpty(socketName) ? socketName : EOSp2pExtenstions.GenerateRandomSocketName();
+            string socket = EOSp2pExtenstions.GenerateRandomSocketName();
             Epic.OnlineServices.Lobby.AttributeData socketAttribute = new(){
                 Key = "socket",
                 Value = new AttributeDataValue(){ AsUtf8 = socket }
@@ -1311,7 +1303,7 @@ namespace SynicSugar.MatchMake {
                 p2pInfo.Instance.IsInGame = false;
             }
 
-            return cancelResultCode;
+            return result;
 
             void OnLeaveLobbyCompleted(ref LeaveLobbyCallbackInfo info){
                 result = (Result)info.ResultCode;
@@ -1373,7 +1365,7 @@ namespace SynicSugar.MatchMake {
             RemoveNotifyLobbyMemberUpdateReceived();
 
             p2pInfo.Instance.IsInGame = false;
-            return cancelResultCode;
+            return result;
 
             void OnDestroyLobbyCompleted(ref DestroyLobbyCallbackInfo info){
                 result = (Result)info.ResultCode;
@@ -1451,6 +1443,7 @@ namespace SynicSugar.MatchMake {
             return Result.Success;
         }
 #endregion
+        
         /// <summary>
         /// Init p2pManager's room info with new lobby data.
         /// </summary>
