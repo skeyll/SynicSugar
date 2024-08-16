@@ -77,7 +77,6 @@ namespace SynicSugar.MatchMake {
 
             if(joinLobby == Result.Success){
                 // Wait for establised matchmaking and to get SocketName to be used in p2p connection.
-                MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Wait);
                 Result matchingEstablishment = await WaitForMatchingEstablishment(token);
 
                 if(matchingEstablishment != Result.Success){
@@ -91,7 +90,6 @@ namespace SynicSugar.MatchMake {
             Result createLobby = await CreateLobby(lobbyCondition, userAttributes, token);
             if(createLobby == Result.Success){
                 // Wait for establised matchmaking and to get SocketName to be used in p2p connection.
-                MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Wait);
                 Result matchingEstablishment = await WaitForMatchingEstablishment(token);
 
                 if(matchingEstablishment != Result.Success){
@@ -125,7 +123,6 @@ namespace SynicSugar.MatchMake {
 
             if(joinLobby == Result.Success){
                 // Wait for establised matchmaking and to get SocketName to be used in p2p connection.
-                MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Wait);
                 Result matchingEstablishment = await WaitForMatchingEstablishment(token);
 
                 if(matchingEstablishment != Result.Success){
@@ -157,7 +154,6 @@ namespace SynicSugar.MatchMake {
             Result createLobby = await CreateLobby(lobbyCondition, userAttributes, token);
             if(createLobby == Result.Success){
                 // Wait for establised matchmaking and to get SocketName to be used in p2p connection.
-                MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Wait);
                 Result matchingEstablishment = await WaitForMatchingEstablishment(token);
 
                 if(matchingEstablishment != Result.Success){

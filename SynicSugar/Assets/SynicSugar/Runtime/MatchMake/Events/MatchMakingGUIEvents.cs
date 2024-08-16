@@ -158,7 +158,7 @@ namespace SynicSugar.MatchMake {
             switch(state){
                 case State.Standby:
                     if(stateText != null){
-                        stateText.text = System.String.Empty;
+                        stateText.text = string.Empty;
                     }
                 break;
                 case State.Start:
