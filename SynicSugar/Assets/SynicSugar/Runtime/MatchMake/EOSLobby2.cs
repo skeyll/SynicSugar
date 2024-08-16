@@ -154,8 +154,8 @@ namespace SynicSugar.MatchMake {
             var hasTimedOutTask = TimeoutTimer(token);
 
             MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Start);
-            Result creatLobby = await CreateLobby(lobbyCondition, userAttributes, token);
-            if(creatLobby == Result.Success){
+            Result createLobby = await CreateLobby(lobbyCondition, userAttributes, token);
+            if(createLobby == Result.Success){
                 // Wait for establised matchmaking and to get SocketName to be used in p2p connection.
                 MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Wait);
                 Result matchingEstablishment = await WaitForMatchingEstablishment(token);
@@ -167,7 +167,7 @@ namespace SynicSugar.MatchMake {
                 return openConnection;
             }
             //This is NOT Success. Failed due to no-playing-user or server problems.
-            return creatLobby;
+            return createLobby;
         }
         /// <summary>
         /// Join the Lobby with specific id to that lobby. <br />
