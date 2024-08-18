@@ -223,6 +223,23 @@ namespace SynicSugar.MatchMake {
                 }
             }
         }
+        internal void LocalUserIsPromoted(bool meetMinCondition){
+            if(!MatchMakeManager.Instance.isHost){
+                return;
+            }
+            if(enabledManualConclude != meetMinCondition){
+                enabledManualConclude = meetMinCondition;
+                
+                if(meetMinCondition){
+                #if SYNICSUGAR_LOG
+                    UnityEngine.Debug.Log("LobbyMemberCountChanged: Matchmaking meets min member conditions. Host can close Lobby from now.");
+                #endif
+                    EnableHostConclude?.Invoke();
+                }else{
+                    DisableHostConclude?.Invoke();
+                }
+            }
+        }
         /// <summary>
         /// To display Member count.
         /// </summary>
