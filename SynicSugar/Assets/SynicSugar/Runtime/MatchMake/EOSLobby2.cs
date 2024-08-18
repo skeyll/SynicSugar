@@ -459,9 +459,7 @@ namespace SynicSugar.MatchMake {
             await UniTask.WaitUntil(() => isMatchmakingCompleted, cancellationToken: token);
 
             Debug.LogFormat("WaitForMatchingEstablishment: {0}", MatchingResult);
-            if(MatchingResult != Result.Success){
-                MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
-            }
+            
             return MatchingResult;
         }
         /// <summary>
@@ -868,7 +866,7 @@ namespace SynicSugar.MatchMake {
 
                             // Change the UI state when local user is promoted.
                             if(useManualFinishMatchMake){
-                                MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(UserId.GetUserId(info.TargetUserId), info.CurrentStatus == LobbyMemberStatus.Joined, CurrentLobby.Members.Count >= requiredMembers);
+                                MatchMakeManager.Instance.MatchMakingGUIEvents.LocalUserIsPromoted(CurrentLobby.Members.Count >= requiredMembers);
                             }
                         }
                         return;
