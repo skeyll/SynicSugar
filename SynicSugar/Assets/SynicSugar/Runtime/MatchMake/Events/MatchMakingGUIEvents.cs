@@ -65,6 +65,10 @@ namespace SynicSugar.MatchMake {
     #endregion
     #region Text
         /// <summary>
+        /// Wait for starting(pushing) the matchmaking process (button).<br />
+        /// </summary>
+        public string Standby;
+        /// <summary>
         /// Until join or create lobby.<br />
         /// Invoke DisableStart().
         /// </summary>
@@ -114,7 +118,7 @@ namespace SynicSugar.MatchMake {
                     canKick = false;
                     enabledManualConclude = false;
                     if(stateText != null){
-                        stateText.SetText(System.String.Empty);
+                        stateText.SetText(Standby);
                     }
                 break;
                 case State.Start:
@@ -158,7 +162,7 @@ namespace SynicSugar.MatchMake {
             switch(state){
                 case State.Standby:
                     if(stateText != null){
-                        stateText.text = string.Empty;
+                        stateText.text = Standby;
                     }
                 break;
                 case State.Start:
@@ -206,10 +210,11 @@ namespace SynicSugar.MatchMake {
         /// <param name="meetMinCondition"></param>
         internal void LobbyMemberCountChanged(UserId target, bool isParticipated, bool meetMinCondition){
             OnLobbyMemberCountChanged?.Invoke(target, isParticipated);
-
+            UnityEngine.Debug.Log("A" + meetMinCondition);
             if(!MatchMakeManager.Instance.isHost){
                 return;
             }
+            UnityEngine.Debug.Log("B" + meetMinCondition);
             if(enabledManualConclude != meetMinCondition){
                 enabledManualConclude = meetMinCondition;
                 
