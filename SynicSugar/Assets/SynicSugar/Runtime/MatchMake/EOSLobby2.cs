@@ -11,11 +11,9 @@ using ResultE = Epic.OnlineServices.Result;
 using SynicSugar.RTC;
 
 namespace SynicSugar.MatchMake {
-    internal class EOSLobby2 {
-        internal Lobby CurrentLobby { get; private set; } = new Lobby();
+    internal class EOSLobby2 : MatchmakingCore {
+        // internal Lobby CurrentLobby { get; private set; } = new Lobby();
         //User config
-        uint MAX_SEARCH_RESULT;
-        int timeoutMS, initconnectTimeoutMS;
         bool useManualFinishMatchMake;
         uint requiredMembers;
         //Notification
@@ -41,12 +39,9 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         Result MatchingResult;
 
-        internal EOSLobby2(uint maxSearch, int MatchmakingTimeout, int InitialConnectionTimeout){
-            MAX_SEARCH_RESULT = maxSearch;
-            //For Unitask
-            timeoutMS = MatchmakingTimeout * 1000;
-            initconnectTimeoutMS = InitialConnectionTimeout * 1000;
-        }
+        public override bool isHost { get { return CurrentLobby.isHost(); } }
+        public EOSLobby2(uint maxSearch, int matchmakingTimeout, int initialConnectionTimeout) : base(maxSearch, matchmakingTimeout, initialConnectionTimeout) {}
+
         /// <summary>
         /// If call this in matchmaking, it could cause a bug.
         /// </summary>
@@ -58,6 +53,7 @@ namespace SynicSugar.MatchMake {
             initconnectTimeoutMS = InitialConnectionTimeout * 1000;
         }
 
+        /// <summary>
         /// Search for lobbies in backend and join in one to meet conditions.<br />
         /// When player could not join, they create lobby as host and wait for other player.
         /// </summary>
@@ -66,7 +62,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="userAttributes"></param>
         /// <param name="minLobbyMember"></param>
         /// <returns></returns>
-        internal async UniTask<Result> StartMatching(Lobby lobbyCondition, CancellationToken token, List<AttributeData> userAttributes, uint minLobbyMember){
+        public override async UniTask<Result> StartMatching(Lobby lobbyCondition, CancellationToken token, List<AttributeData> userAttributes, uint minLobbyMember){
             useManualFinishMatchMake = minLobbyMember > 0;
             requiredMembers = minLobbyMember;
             //Start timer 
@@ -111,7 +107,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="userAttributes"></param>
         /// <param name="minLobbyMember"></param>
         /// <returns>True on success. If false, EOS backend have something problem. So, when you call this process again, should wait for some time.</returns>
-        internal async UniTask<Result> StartJustSearch(Lobby lobbyCondition, CancellationToken token, List<AttributeData> userAttributes, uint minLobbyMember){
+        public override async UniTask<Result> StartJustSearch(Lobby lobbyCondition, CancellationToken token, List<AttributeData> userAttributes, uint minLobbyMember){
             //For host migration
             useManualFinishMatchMake = minLobbyMember > 0;
             requiredMembers = minLobbyMember;
@@ -144,7 +140,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="userAttributes"></param>
         /// <param name="minLobbyMember"></param>
         /// <returns>True on success. If false, EOS backend have something problem. So, when you call this process again, should wait for some time.</returns>
-        internal async UniTask<Result> StartJustCreate(Lobby lobbyCondition, CancellationToken token, List<AttributeData> userAttributes, uint minLobbyMember){
+        public override async UniTask<Result> StartJustCreate(Lobby lobbyCondition, CancellationToken token, List<AttributeData> userAttributes, uint minLobbyMember){
             useManualFinishMatchMake = minLobbyMember > 0;
             requiredMembers = minLobbyMember;
             
@@ -171,7 +167,7 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         /// <param name="LobbyID">Lobby ID to <c>re</c>-connect</param>
         /// <param name="token"></param>
-        internal async UniTask<Result> JoinLobbyBySavedLobbyId(string LobbyID, CancellationToken token){
+        public override async UniTask<Result> JoinLobbyBySavedLobbyId(string LobbyID, CancellationToken token){
             //Search
             MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Recconect);
             var retrieveResult = await RetriveLobbyByLobbyId(LobbyID, token);
@@ -460,8 +456,12 @@ namespace SynicSugar.MatchMake {
             MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Wait);
             //Wait for closing lobby or timeout
             //まだ。　ここらへんにTryCatchで部屋の解散処理などを入れる？
-            await UniTask.WhenAny(UniTask.WaitUntil(() => isMatchmakingCompleted, cancellationToken: token));
+            await UniTask.WaitUntil(() => isMatchmakingCompleted, cancellationToken: token);
 
+            Debug.LogFormat("WaitForMatchingEstablishment: {0}", MatchingResult);
+            if(MatchingResult != Result.Success){
+                MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
+            }
             return MatchingResult;
         }
         /// <summary>
@@ -770,7 +770,7 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         /// <param name="target"></param>
         /// <returns></returns>
-        internal async UniTask<Result> KickTargetMember(UserId target, CancellationToken token){
+        public override async UniTask<Result> KickTargetMember(UserId target, CancellationToken token){
             if(!CurrentLobby.isHost()){
                 Debug.LogError("KickTargetMember: This user is not Host.");
                 return Result.InvalidAPICall;
@@ -843,6 +843,7 @@ namespace SynicSugar.MatchMake {
                             MatchingResult = Result.NetworkDisconnected;
                         break;
                     }
+                    Debug.Log("Lobby Notification: Cancel");
                     RemoveAllNotifyEvents();
                     isMatchmakingCompleted = true;
                     return;
@@ -853,13 +854,24 @@ namespace SynicSugar.MatchMake {
             
             //For MatchMaking
             if(!p2pInfo.Instance.IsInGame){
-                if(info.TargetUserId == productUserId && info.CurrentStatus == LobbyMemberStatus.Promoted){
-            #if SYNICSUGAR_LOG
-                Debug.Log("OnLobbyMemberStatusReceived: This local user becomes new Host.");
-            #endif
-                    // This local player manage lobby.
-                    // So, this user dosen't need to get update notify.
-                    RemoveNotifyLobbyUpdateReceived();
+                // The notify about promote dosen't change member amount.
+                if(info.TargetUserId == productUserId){
+                    if(info.CurrentStatus == LobbyMemberStatus.Promoted){
+                        // This local player manage lobby from this time.
+                        // So, this user dosen't need to get update notify.
+                        if(info.TargetUserId == productUserId){
+                            #if SYNICSUGAR_LOG
+                                Debug.Log("OnLobbyMemberStatusReceived: This local user becomes new Host.");
+                            #endif
+                            RemoveNotifyLobbyUpdateReceived();
+
+                            // Change the UI state when local user is promoted.
+                            if(useManualFinishMatchMake){
+                                MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(UserId.GetUserId(info.TargetUserId), info.CurrentStatus == LobbyMemberStatus.Joined, CurrentLobby.Members.Count >= requiredMembers);
+                            }
+                        }
+                        return;
+                    }
                 }
                 //Meet member condition?
                 if(useManualFinishMatchMake){
@@ -992,12 +1004,13 @@ namespace SynicSugar.MatchMake {
         /// Use lobbyID to connect on the problem, so save lobbyID in local somewhere.
         /// </summary>
         /// <returns></returns>
-        internal void SwitchLobbyAttribute(){
+        public override void SwitchLobbyAttribute(){
             if (!CurrentLobby.isHost()){
                 Debug.LogError("SwitchLobbyAttribute: This user isn't lobby owner.");
                 MatchingResult = Result.InvalidAPICall;
                 return;
             }
+            //ここまだ。マッチング時のみ参照にする
             if(CurrentLobby.Members.Count < requiredMembers){
                 Debug.LogError("SwitchLobbyAttribute: This lobby doesn't meet required member condition.");
                 MatchingResult = Result.InvalidAPICall;
@@ -1153,7 +1166,7 @@ namespace SynicSugar.MatchMake {
         /// To check disconencted user's conenction state after p2p.
         /// </summary>
         /// <param name="index">User Index in AllUserIds</param>
-        internal void UpdateMemberAttributeAsHeartBeat(int index){
+        public override void UpdateMemberAttributeAsHeartBeat(int index){
             LobbyInterface lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();
             UpdateLobbyModificationOptions options = new UpdateLobbyModificationOptions(){
                 LobbyId = CurrentLobby.LobbyId,
@@ -1200,7 +1213,7 @@ namespace SynicSugar.MatchMake {
     /// <param name="cleanupMemberCountChanged"></param>
     /// <param name="token"></param>
     /// <returns></returns>
-    internal async UniTask<Result> CloseMatchMaking(CancellationTokenSource matchmakeTokenSource, bool cleanupMemberCountChanged = false, CancellationToken token = default(CancellationToken)){
+    public override async UniTask<Result> CloseMatchMaking(CancellationTokenSource matchmakeTokenSource, bool cleanupMemberCountChanged = false, CancellationToken token = default(CancellationToken)){
         if(!CurrentLobby.isValid()){
             Debug.LogError($"Cancel MatchMaking: this user has not participated a lobby.");
             return Result.InvalidAPICall;
@@ -1241,7 +1254,7 @@ namespace SynicSugar.MatchMake {
     /// <param name="cleanupMemberCountChanged"></param>
     /// <param name="token"></param>
     /// <returns>If true, user can leave or destroy the lobby. </returns>
-    internal async UniTask<Result> CancelMatchMaking(CancellationTokenSource matchmakeTokenSource, bool cleanupMemberCountChanged = false, CancellationToken token = default(CancellationToken)){
+    public override async UniTask<Result> CancelMatchMaking(CancellationTokenSource matchmakeTokenSource, bool cleanupMemberCountChanged = false, CancellationToken token = default(CancellationToken)){
         if(!CurrentLobby.isValid()){
             Debug.LogError($"Cancel MatchMaking: this user has not participated a lobby.");
             return Result.InvalidAPICall;
@@ -1289,7 +1302,7 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         /// <param name="cleanupMemberCountChanged"></param>
         /// <param name="token"></param>
-        internal async UniTask<Result> LeaveLobby(bool cleanupMemberCountChanged = false, CancellationToken token = default(CancellationToken)){
+        public override async UniTask<Result> LeaveLobby(bool cleanupMemberCountChanged = false, CancellationToken token = default(CancellationToken)){
             if (CurrentLobby == null || string.IsNullOrEmpty(CurrentLobby.LobbyId) || !EOSManager.Instance.GetProductUserId().IsValid()){
                 Debug.LogWarning("Leave Lobby: user is not in a lobby.");
                 return Result.InvalidAPICall;
@@ -1345,7 +1358,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="cleanupMemberCountChanged"></param>
         /// <param name="token"></param>
         /// <returns>On destroy success, return true.</returns>
-        internal async UniTask<Result> DestroyLobby(bool cleanupMemberCountChanged = false, CancellationToken token = default(CancellationToken)){
+        public override async UniTask<Result> DestroyLobby(bool cleanupMemberCountChanged = false, CancellationToken token = default(CancellationToken)){
             if(!CurrentLobby.isHost()){
                 Debug.LogError("Destroy Lobby: This user is not Host.");
                 return Result.InvalidAPICall;
@@ -1404,7 +1417,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="userAttributes"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        internal async UniTask<Result> CreateOfflineLobby(Lobby lobbyCondition, OfflineMatchmakingDelay delay, List<AttributeData> userAttributes, CancellationToken token){
+        public override async UniTask<Result> CreateOfflineLobby(Lobby lobbyCondition, OfflineMatchmakingDelay delay, List<AttributeData> userAttributes, CancellationToken token){
             if(delay.StartMatchmakingDelay > 0){
                 MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Start);
                 await UniTask.Delay((int)delay.StartMatchmakingDelay, cancellationToken: token);
@@ -1443,7 +1456,7 @@ namespace SynicSugar.MatchMake {
             p2pInfo.Instance.IsInGame = true;
             return Result.Success;
         }
-        internal async UniTask<Result> DestroyOfflineLobby(){
+        public override async UniTask<Result> DestroyOfflineLobby(){
             await MatchMakeManager.Instance.OnDeleteLobbyID();
             CurrentLobby.Clear();
 
@@ -1575,16 +1588,30 @@ namespace SynicSugar.MatchMake {
         /// For library user to save ID.
         /// </summary>
         /// <returns></returns>
-        internal string GetCurrentLobbyID(){
+        public override string GetCurrentLobbyID(){
             return CurrentLobby.LobbyId;
         }
         
-        internal int GetCurrentLobbyMemberCount(){
+        public override int GetCurrentLobbyMemberCount(){
             //When Host create lobby, they can't count self. This is called before adding member attributes.
            return CurrentLobby._BeingCreated ? 1 : CurrentLobby.Members.Count;
         }
-        internal int GetLobbyMemberLimit(){
+
+        public override int GetLobbyMemberLimit(){
            return (int)CurrentLobby.MaxLobbyMembers;
+        }
+
+        public override AttributeData GetTargetAttributeData(UserId target, string Key){
+            return CurrentLobby.Members[target.ToString()]?.GetAttributeData(Key);
+        }
+
+        /// <summary>
+        /// Get target all attributes.
+        /// </summary>
+        /// <param name="target">target user id</param>
+        /// <returns>If no data, return null.</returns>
+        public override List<AttributeData> GetTargetAttributeData(UserId target){
+            return CurrentLobby.Members[target.ToString()]?.Attributes;
         }
     }
 }

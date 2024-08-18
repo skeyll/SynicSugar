@@ -19,7 +19,7 @@ namespace SynicSugar.MatchMake {
             Instance = this;
             DontDestroyOnLoad(this);
 
-            eosLobby = new EOSLobby2(maxSearchResult, TimeoutSec, P2PSetupTimeoutSec);
+            eosLobby = SynicSugarStateManger.Instance.GetCoreFactory().GenerateMatchmakingCore(maxSearchResult, TimeoutSec, P2PSetupTimeoutSec);
             MemberUpdatedNotifier = new();
 
             if(lobbyIdSaveType == RecconectLobbyIdSaveType.CustomMethod){
@@ -85,7 +85,7 @@ namespace SynicSugar.MatchMake {
         public LobbyIDMethod lobbyIDMethod = new LobbyIDMethod();
         public AsyncLobbyIDMethod asyncLobbyIDMethod = new AsyncLobbyIDMethod();
     #endregion
-        internal EOSLobby2 eosLobby { get; private set; }
+        internal MatchmakingCore eosLobby { get; private set; }
         internal CancellationTokenSource matchingToken;
         public MatchMakingGUIEvents MatchMakingGUIEvents = new MatchMakingGUIEvents();
         // Events
@@ -93,7 +93,7 @@ namespace SynicSugar.MatchMake {
         /// <summary>
         /// Is this user Host?
         /// </summary>
-        public bool isHost { get { return eosLobby.CurrentLobby.isHost(); }}
+        public bool isHost { get { return eosLobby.isHost; }}
         UserId localUserId;
         /// <summary>
         /// Is this id is LocalUser's id?
@@ -625,7 +625,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="Key">attribute key</param>
         /// <returns>If no data, return null.</returns>
         public AttributeData GetTargetAttributeData(UserId target, string Key){
-            return eosLobby.CurrentLobby.Members[target.ToString()]?.GetAttributeData(Key);
+            return eosLobby.GetTargetAttributeData(target, Key);
         }
         /// <summary>
         /// Get target all attributes.
@@ -633,8 +633,9 @@ namespace SynicSugar.MatchMake {
         /// <param name="target">target user id</param>
         /// <returns>If no data, return null.</returns>
         public List<AttributeData> GetTargetAttributeData(UserId target){
-            return eosLobby.CurrentLobby.Members[target.ToString()]?.Attributes;
+            return eosLobby.GetTargetAttributeData(target);
         }
+
         /// <summary>
         /// To check disconencted user's conenction state after p2p.
         /// </summary>
