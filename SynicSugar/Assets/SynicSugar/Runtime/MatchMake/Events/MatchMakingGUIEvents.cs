@@ -111,14 +111,13 @@ namespace SynicSugar.MatchMake {
             OnLobbyMemberCountChanged = null;
         }
         
-    #if SYNICSUGAR_TMP
         internal void ChangeState(State state){
             switch(state){
                 case State.Standby:
                     canKick = false;
                     enabledManualConclude = false;
                     if(stateText != null){
-                        stateText.SetText(Standby);
+                        SetText(Standby);
                     }
                 break;
                 case State.Start:
@@ -126,81 +125,52 @@ namespace SynicSugar.MatchMake {
                     canKick = false;
                     enabledManualConclude = false;
                     if(stateText != null){
-                        stateText.SetText(StartMatchmaking);
+                        SetText(StartMatchmaking);
                     }
                 break;
                 case State.Wait:
                     EnableCancelKick?.Invoke();
                     canKick = true;
                     if(stateText != null){
-                        stateText.SetText(WaitForOpponents);
+                        SetText(WaitForOpponents);
                     }
                 break;
                 case State.Conclude:
                     DisableCancelKickConclude?.Invoke();
                     canKick = false;
                     if(stateText != null){
-                        stateText.SetText(FinishMatchmaking);
+                        SetText(FinishMatchmaking);
                     }
                 break;
                 case State.Ready:
                     if(stateText != null){
-                        stateText.SetText(ReadyForConnection);
+                        SetText(ReadyForConnection);
                     }
                 break;
                 case State.Cancel:
                     DisableCancelKickConclude?.Invoke();
                     canKick = false;
                     if(stateText != null){
-                        stateText.SetText(TryToCancel);
+                        SetText(TryToCancel);
                     }
                 break;
             }
         }
-    #else
-        internal void ChangeState(State state){
-            switch(state){
-                case State.Standby:
-                    if(stateText != null){
-                        stateText.text = Standby;
-                    }
-                break;
-                case State.Start:
-                    DisableStart?.Invoke();
-                    canKick = false;
-                    if(stateText != null){
-                        stateText.text = StartMatchmaking;
-                    }
-                break;
-                case State.Wait:
-                    EnableCancelKick?.Invoke();
-                    canKick = true;
-                    if(stateText != null){
-                        stateText.text = WaitForOpponents;
-                    }
-                break;
-                case State.Conclude:
-                    DisableCancelKickConclude?.Invoke();
-                    canKick = false;
-                    if(stateText != null){
-                        stateText.text = FinishMatchmaking;
-                    }
-                break;
-                case State.Ready:
-                    if(stateText != null){
-                        stateText.text = ReadyForConnection;
-                    }
-                break;
-                case State.Cancel:
-                    DisableCancelKickConclude?.Invoke();
-                    canKick = false;
-                    if(stateText != null){
-                        stateText.text = TryToCancel;
-                    }
-                break;
-            }
+        /// <summary>
+        /// Set text to TMP or Legacy text.
+        /// </summary>
+        /// <param name="text"></param> <summary>
+        /// 
+        /// </summary>
+        /// <param name="text"></param>
+        void SetText(string text){
+        #if SYNICSUGAR_TMP
+            stateText.SetText(text);
+        #else
+            stateText.text = text;
+        #endif
         }
-    #endif
+
         /// <summary>
         /// To display Member count. <br />
         /// After meet lobby min member counts.
