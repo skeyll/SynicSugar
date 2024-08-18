@@ -63,7 +63,6 @@ namespace SynicSugar.P2P {
         /// To get packets
         /// </summary>
         GetNextReceivedPacketSizeOptions standardPacketSizeOptions, synicPacketSizeOptions;
-        bool IsEnableRTC => MatchMakeManager.Instance.eosLobby.CurrentLobby.hasConnectedRTCRoom;
         /// <summary>
         /// Is the connection currently active?
         /// </summary>
@@ -209,7 +208,7 @@ namespace SynicSugar.P2P {
                 break;
             }
             
-            if(IsEnableRTC){
+            if(MatchMakeManager.Instance.matchmakingCore.CurrentLobby.hasConnectedRTCRoom){
                 RTCManager.Instance.ToggleReceiveingFromTarget(null, true);
             }
         }

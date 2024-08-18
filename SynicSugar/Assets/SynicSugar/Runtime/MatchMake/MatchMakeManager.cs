@@ -19,7 +19,7 @@ namespace SynicSugar.MatchMake {
             Instance = this;
             DontDestroyOnLoad(this);
 
-            eosLobby = SynicSugarStateManger.Instance.GetCoreFactory().GenerateMatchmakingCore(maxSearchResult, TimeoutSec, P2PSetupTimeoutSec);
+            matchmakingCore = SynicSugarStateManger.Instance.GetCoreFactory().GenerateMatchmakingCore(maxSearchResult, TimeoutSec, P2PSetupTimeoutSec);
             MemberUpdatedNotifier = new();
 
             if(lobbyIdSaveType == RecconectLobbyIdSaveType.CustomMethod){
@@ -85,7 +85,7 @@ namespace SynicSugar.MatchMake {
         public LobbyIDMethod lobbyIDMethod = new LobbyIDMethod();
         public AsyncLobbyIDMethod asyncLobbyIDMethod = new AsyncLobbyIDMethod();
     #endregion
-        internal MatchmakingCore eosLobby { get; private set; }
+        internal MatchmakingCore matchmakingCore { get; private set; }
         internal CancellationTokenSource matchingToken;
         public MatchMakingGUIEvents MatchMakingGUIEvents = new MatchMakingGUIEvents();
         // Events
@@ -93,7 +93,7 @@ namespace SynicSugar.MatchMake {
         /// <summary>
         /// Is this user Host?
         /// </summary>
-        public bool isHost { get { return eosLobby.isHost; }}
+        public bool isHost { get { return matchmakingCore.isHost; }}
         UserId localUserId;
         /// <summary>
         /// Is this id is LocalUser's id?
@@ -112,11 +112,11 @@ namespace SynicSugar.MatchMake {
             return UserId.GetUserId(id) == localUserId;
         }
         public int GetCurrentLobbyMemberCount(){
-           return eosLobby.GetCurrentLobbyMemberCount();
+           return matchmakingCore.GetCurrentLobbyMemberCount();
         }
 
         public int GetMaxLobbyMemberCount(){
-           return eosLobby.GetLobbyMemberLimit();
+           return matchmakingCore.GetLobbyMemberLimit();
         }
         
         /// <summary>
@@ -128,7 +128,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="InitialConnectionTimeout">Timeout sec from the start of preparation for p2p until the the end of the preparetion. <br />
         /// If nothing is passed, pass the value set in Editor.　Recommend:5-20</param>
         public void SetTimeoutSec(ushort MatchmakingTimeout = 180, ushort InitialConnectionTimeout = 15){
-            eosLobby.SetTimeoutSec(MatchmakingTimeout == 180 ? TimeoutSec : MatchmakingTimeout, InitialConnectionTimeout == 15 ? P2PSetupTimeoutSec : InitialConnectionTimeout);
+            matchmakingCore.SetTimeoutSec(MatchmakingTimeout == 180 ? TimeoutSec : MatchmakingTimeout, InitialConnectionTimeout == 15 ? P2PSetupTimeoutSec : InitialConnectionTimeout);
         }
         /// <summary>
         /// MatchMake player with conditions and get the data for p2p connect. <br />
@@ -150,7 +150,7 @@ namespace SynicSugar.MatchMake {
             //Match at Lobby
             if(needTryCatch){
                 try{
-                    canMatch = await eosLobby.StartMatching(lobbyCondition, matchingToken.Token, new(), 0);
+                    canMatch = await matchmakingCore.StartMatching(lobbyCondition, matchingToken.Token, new(), 0);
                 }catch(OperationCanceledException){
                 #if SYNICSUGAR_LOG
                     Debug.Log("MatchMaking is canceled");
@@ -159,7 +159,7 @@ namespace SynicSugar.MatchMake {
                     return Result.Canceled;
                 }
             }else{
-                canMatch = await eosLobby.StartMatching(lobbyCondition, matchingToken.Token, new(), 0);
+                canMatch = await matchmakingCore.StartMatching(lobbyCondition, matchingToken.Token, new(), 0);
             }
 
             if(canMatch != Result.Success){
@@ -198,7 +198,7 @@ namespace SynicSugar.MatchMake {
             //Match at Lobby
             if(needTryCatch){
                 try{
-                    canMatch = await eosLobby.StartMatching(lobbyCondition, matchingToken.Token, userAttributes ?? new(), minLobbyMember);
+                    canMatch = await matchmakingCore.StartMatching(lobbyCondition, matchingToken.Token, userAttributes ?? new(), minLobbyMember);
                 }catch(OperationCanceledException){
                 #if SYNICSUGAR_LOG
                     Debug.Log("MatchMaking is canceled");
@@ -207,7 +207,7 @@ namespace SynicSugar.MatchMake {
                     return Result.Canceled;
                 }
             }else{
-                canMatch = await eosLobby.StartMatching(lobbyCondition, matchingToken.Token, userAttributes ?? new(), minLobbyMember);
+                canMatch = await matchmakingCore.StartMatching(lobbyCondition, matchingToken.Token, userAttributes ?? new(), minLobbyMember);
             }
 
             if(canMatch != Result.Success){
@@ -235,7 +235,7 @@ namespace SynicSugar.MatchMake {
             //Match at Lobby
             if(needTryCatch){
                 try{
-                    canMatch = await eosLobby.StartJustSearch(lobbyCondition, matchingToken.Token, new(), 0);
+                    canMatch = await matchmakingCore.StartJustSearch(lobbyCondition, matchingToken.Token, new(), 0);
                 }catch(OperationCanceledException){
                 #if SYNICSUGAR_LOG
                     Debug.Log("MatchMaking is canceled");
@@ -244,7 +244,7 @@ namespace SynicSugar.MatchMake {
                     return Result.Canceled;
                 }
             }else{
-                canMatch = await eosLobby.StartJustSearch(lobbyCondition, matchingToken.Token, null, 0);
+                canMatch = await matchmakingCore.StartJustSearch(lobbyCondition, matchingToken.Token, null, 0);
             }
             
 
@@ -282,7 +282,7 @@ namespace SynicSugar.MatchMake {
             //Match at Lobby
             if(needTryCatch){
                 try{
-                    canMatch = await eosLobby.StartJustSearch(lobbyCondition, matchingToken.Token, userAttributes ?? new(), minLobbyMember);
+                    canMatch = await matchmakingCore.StartJustSearch(lobbyCondition, matchingToken.Token, userAttributes ?? new(), minLobbyMember);
                 }catch(OperationCanceledException){
                 #if SYNICSUGAR_LOG
                     Debug.Log("MatchMaking is canceled");
@@ -291,7 +291,7 @@ namespace SynicSugar.MatchMake {
                     return Result.Canceled;
                 }
             }else{
-                canMatch = await eosLobby.StartJustSearch(lobbyCondition, matchingToken.Token, userAttributes ?? new(), minLobbyMember);
+                canMatch = await matchmakingCore.StartJustSearch(lobbyCondition, matchingToken.Token, userAttributes ?? new(), minLobbyMember);
             }
             
 
@@ -321,7 +321,7 @@ namespace SynicSugar.MatchMake {
             //Match at Lobby
             if(needTryCatch){
                 try{
-                    canMatch = await eosLobby.StartJustCreate(lobbyCondition, matchingToken.Token, new(), 0);
+                    canMatch = await matchmakingCore.StartJustCreate(lobbyCondition, matchingToken.Token, new(), 0);
                 }catch(OperationCanceledException){
                 #if SYNICSUGAR_LOG
                     Debug.Log("MatchMaking is canceled");
@@ -330,7 +330,7 @@ namespace SynicSugar.MatchMake {
                     return Result.Canceled;
                 }
             }else{
-                canMatch = await eosLobby.StartJustCreate(lobbyCondition, matchingToken.Token, new(), 0);
+                canMatch = await matchmakingCore.StartJustCreate(lobbyCondition, matchingToken.Token, new(), 0);
             }
             
             if(canMatch != Result.Success){
@@ -367,7 +367,7 @@ namespace SynicSugar.MatchMake {
             //Match at Lobby
             if(needTryCatch){
                 try{
-                    canMatch = await eosLobby.StartJustCreate(lobbyCondition, matchingToken.Token, userAttributes ?? new(), minLobbyMember);
+                    canMatch = await matchmakingCore.StartJustCreate(lobbyCondition, matchingToken.Token, userAttributes ?? new(), minLobbyMember);
                 }catch(OperationCanceledException){
                 #if SYNICSUGAR_LOG
                     Debug.Log("MatchMaking is canceled");
@@ -376,7 +376,7 @@ namespace SynicSugar.MatchMake {
                     return Result.Canceled;
                 }
             }else{
-                canMatch = await eosLobby.StartJustCreate(lobbyCondition, matchingToken.Token, userAttributes ?? new(), minLobbyMember);
+                canMatch = await matchmakingCore.StartJustCreate(lobbyCondition, matchingToken.Token, userAttributes ?? new(), minLobbyMember);
             }
             
             if(canMatch != Result.Success){
@@ -397,7 +397,7 @@ namespace SynicSugar.MatchMake {
                 return;
             }
             isConcluding = true;
-            eosLobby.SwitchLobbyAttribute();
+            matchmakingCore.SwitchLobbyAttribute();
             isConcluding = false;
         }
         /// <summary>
@@ -414,7 +414,7 @@ namespace SynicSugar.MatchMake {
     #endif
             matchingToken = token == default ? new CancellationTokenSource() : token;
             
-            Result canJoin = await eosLobby.JoinLobbyBySavedLobbyId(LobbyID, matchingToken.Token);
+            Result canJoin = await matchmakingCore.JoinLobbyBySavedLobbyId(LobbyID, matchingToken.Token);
 
             if(canJoin != Result.Success){
                 MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
@@ -440,7 +440,7 @@ namespace SynicSugar.MatchMake {
             #endif
                 return Result.InvalidAPICall;
             }
-            Result canCancel = await eosLobby.CancelMatchMaking(matchingToken, cleanupMemberCountChanged,token);
+            Result canCancel = await matchmakingCore.CancelMatchMaking(matchingToken, cleanupMemberCountChanged,token);
             
             if(destroyManager && canCancel == Result.Success){
                 Destroy(this.gameObject);
@@ -463,7 +463,7 @@ namespace SynicSugar.MatchMake {
             #endif
                 return Result.InvalidAPICall;
             }
-            Result canCancel = await eosLobby.CloseMatchMaking(matchingToken, cleanupMemberCountChanged, token);
+            Result canCancel = await matchmakingCore.CloseMatchMaking(matchingToken, cleanupMemberCountChanged, token);
             
             if(destroyManager && canCancel == Result.Success){
                 Destroy(this.gameObject);
@@ -477,7 +477,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="token">token for this task</param>
         /// <returns></returns>
         public async UniTask<Result> KickTargetFromLobby(UserId targetId, CancellationToken token = default(CancellationToken)){
-            Result result = await eosLobby.KickTargetMember(targetId, token);
+            Result result = await matchmakingCore.KickTargetMember(targetId, token);
 
             return result;
         }
@@ -487,7 +487,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="cleanupMemberCountChanged">Need to call MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(id, false) after exit lobby?</param>
         /// <param name="token">Token for this task</param>
         internal async UniTask<Result> ExitCurrentLobby(bool cleanupMemberCountChanged, CancellationToken token){
-            Result canDestroy = await eosLobby.LeaveLobby(cleanupMemberCountChanged, token);
+            Result canDestroy = await matchmakingCore.LeaveLobby(cleanupMemberCountChanged, token);
 
             return canDestroy;
         }
@@ -498,7 +498,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="token">Token for this task</param>
         /// <returns>True on success. If user isn't host, return false.</returns>
         internal async UniTask<Result> CloseCurrentLobby(bool cleanupMemberCountChanged = false, CancellationToken token = default(CancellationToken)){
-            Result canDestroy = await eosLobby.DestroyLobby(cleanupMemberCountChanged, token);
+            Result canDestroy = await matchmakingCore.DestroyLobby(cleanupMemberCountChanged, token);
 
             return canDestroy;
         }
@@ -516,7 +516,7 @@ namespace SynicSugar.MatchMake {
 
             if(needTryCatch){
                 try{
-                    await eosLobby.CreateOfflineLobby(lobbyCondition, delay, userAttributes ?? new(), matchingToken.Token);
+                    await matchmakingCore.CreateOfflineLobby(lobbyCondition, delay, userAttributes ?? new(), matchingToken.Token);
                 }catch(OperationCanceledException){
                 #if SYNICSUGAR_LOG
                     Debug.Log("MatchMaking is canceled");
@@ -525,7 +525,7 @@ namespace SynicSugar.MatchMake {
                     return Result.Canceled;
                 }
             }else{
-                await eosLobby.CreateOfflineLobby(lobbyCondition, delay, userAttributes ?? new(), matchingToken.Token);
+                await matchmakingCore.CreateOfflineLobby(lobbyCondition, delay, userAttributes ?? new(), matchingToken.Token);
             }
             return Result.Success;
         }
@@ -536,7 +536,7 @@ namespace SynicSugar.MatchMake {
         /// <returns>Always return true. the LastResultCode becomes Success after return true.</returns>
         public async UniTask<Result> DestoryOfflineLobby(bool destroyManager = true){
             p2pConfig.Instance.connectionManager.rttTokenSource?.Cancel();
-            await eosLobby.DestroyOfflineLobby();
+            await matchmakingCore.DestroyOfflineLobby();
             if(destroyManager){
                 Destroy(this.gameObject);
             }
@@ -549,7 +549,7 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         /// <returns>string LobbyID</returns>
         public string GetCurrentLobbyID(){
-            return eosLobby.GetCurrentLobbyID();
+            return matchmakingCore.GetCurrentLobbyID();
         }
         
         /// <summary>
@@ -625,7 +625,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="Key">attribute key</param>
         /// <returns>If no data, return null.</returns>
         public AttributeData GetTargetAttributeData(UserId target, string Key){
-            return eosLobby.GetTargetAttributeData(target, Key);
+            return matchmakingCore.GetTargetAttributeData(target, Key);
         }
         /// <summary>
         /// Get target all attributes.
@@ -633,7 +633,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="target">target user id</param>
         /// <returns>If no data, return null.</returns>
         public List<AttributeData> GetTargetAttributeData(UserId target){
-            return eosLobby.GetTargetAttributeData(target);
+            return matchmakingCore.GetTargetAttributeData(target);
         }
 
         /// <summary>
@@ -641,7 +641,7 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         /// <param name="disconenctedUserIndex"> UserIndex. For second Heart beat, +100</param>
         internal void UpdateMemberAttributeAsHeartBeat(int disconenctedUserIndex){
-            eosLobby.UpdateMemberAttributeAsHeartBeat(disconenctedUserIndex);
+            matchmakingCore.UpdateMemberAttributeAsHeartBeat(disconenctedUserIndex);
         }
     }
 }
