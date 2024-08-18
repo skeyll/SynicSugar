@@ -180,11 +180,9 @@ namespace SynicSugar.MatchMake {
         /// <param name="meetMinCondition"></param>
         internal void LobbyMemberCountChanged(UserId target, bool isParticipated, bool meetMinCondition){
             OnLobbyMemberCountChanged?.Invoke(target, isParticipated);
-            UnityEngine.Debug.Log("A" + meetMinCondition);
             if(!MatchMakeManager.Instance.isHost){
                 return;
             }
-            UnityEngine.Debug.Log("B" + meetMinCondition);
             if(enabledManualConclude != meetMinCondition){
                 enabledManualConclude = meetMinCondition;
                 

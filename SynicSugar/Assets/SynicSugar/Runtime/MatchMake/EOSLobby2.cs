@@ -457,8 +457,6 @@ namespace SynicSugar.MatchMake {
             //Wait for closing lobby or timeout
             //まだ。　ここらへんにTryCatchで部屋の解散処理などを入れる？
             await UniTask.WaitUntil(() => isMatchmakingCompleted, cancellationToken: token);
-
-            Debug.LogFormat("WaitForMatchingEstablishment: {0}", MatchingResult);
             
             return MatchingResult;
         }
@@ -842,7 +840,6 @@ namespace SynicSugar.MatchMake {
                             MatchingResult = Result.NetworkDisconnected;
                         break;
                     }
-                    Debug.Log("Lobby Notification: Cancel");
                     RemoveAllNotifyEvents();
                     isMatchmakingCompleted = true;
                     return;
