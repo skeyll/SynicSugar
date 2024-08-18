@@ -308,6 +308,8 @@ namespace SynicSugar.MatchMake {
                 AddNotifyLobbyMemberUpdateReceived();
                 //For self
                 MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(UserId.GetUserId(EOSManager.Instance.GetProductUserId()), true);
+                //RTC
+                RTCManager.Instance.AddNotifyParticipantStatusChanged();
 
                 finishCreated = true;
             }
@@ -411,8 +413,6 @@ namespace SynicSugar.MatchMake {
                 }
                 OnLobbyUpdated(info.LobbyId);
                 CurrentLobby._BeingCreated = false;
-                //RTC
-                RTCManager.Instance.AddNotifyParticipantStatusChanged();
 
                 finishUpdate = true;
             }
@@ -750,6 +750,8 @@ namespace SynicSugar.MatchMake {
                 }
                 // For the host migration
                 AddNotifyLobbyMemberStatusReceived();
+                //RTC
+                RTCManager.Instance.AddNotifyParticipantStatusChanged();
                 //Member Attribute
                 result = await AddUserAttributes(userAttributes, token);
 
@@ -757,8 +759,7 @@ namespace SynicSugar.MatchMake {
                     finishJoined = true;
                     return;
                 }
-                //RTC
-                RTCManager.Instance.AddNotifyParticipantStatusChanged();
+                
                 string LocalId = EOSManager.Instance.GetProductUserId().ToString();
                 finishJoined = true;
             }
