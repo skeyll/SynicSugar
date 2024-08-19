@@ -30,8 +30,14 @@ namespace SynicSugar.RTC {
                 Instance = null;
             }
         }
-        // RTCRoom CurrentRoom = new();
-        internal Lobby CurrentLobby { get { return MatchMakeManager.Instance.matchmakingCore.CurrentLobby; }}
+        /// <summary>
+        /// Set from Matchmaking core.
+        /// </summary>
+        /// <param name="currentLobbyInstance"></param>
+        internal void SetLobbyReference(Lobby currentLobbyInstance){
+            CurrentLobby = currentLobbyInstance;
+        }
+        Lobby CurrentLobby;
         RTCInterface rtcInterface;
         RTCAudioInterface audioInterface;
         CancellationTokenSource pttToken;
@@ -71,8 +77,8 @@ namespace SynicSugar.RTC {
                 return;
             }
 
-            MatchMakeManager.Instance.matchmakingCore.CurrentLobby.hasConnectedRTCRoom = isConnected;
-            MatchMakeManager.Instance.matchmakingCore.CurrentLobby.RTCRoomName = GetRTCRoomName();
+            CurrentLobby.hasConnectedRTCRoom = isConnected;
+            CurrentLobby.RTCRoomName = GetRTCRoomName();
 
             //Check audio devices
             var audioOptions = new GetAudioInputDevicesCountOptions();

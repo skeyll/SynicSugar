@@ -5,7 +5,6 @@ using SynicSugar.P2P;
 
 namespace SynicSugar.MatchMake {
     public abstract class MatchmakingCore {
-        public Lobby CurrentLobby { get; protected set; } = new Lobby();
         protected uint MAX_SEARCH_RESULT;
         protected int timeoutMS, initconnectTimeoutMS;
         protected MatchmakingCore(uint maxSearch, int MatchmakingTimeout, int InitialConnectionTimeout){
@@ -19,7 +18,7 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         /// <param name="MatchmakingTimeout"></param>
         /// <param name="InitialConnectionTimeout"></param>
-        public void SetTimeoutSec(int MatchmakingTimeout, int InitialConnectionTimeout){
+        public virtual void SetTimeoutSec(int MatchmakingTimeout, int InitialConnectionTimeout){
             //For Unitask
             timeoutMS = MatchmakingTimeout * 1000;
             initconnectTimeoutMS = InitialConnectionTimeout * 1000;

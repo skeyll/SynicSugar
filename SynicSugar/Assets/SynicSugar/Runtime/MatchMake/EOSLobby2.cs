@@ -12,7 +12,7 @@ using SynicSugar.RTC;
 
 namespace SynicSugar.MatchMake {
     internal class EOSLobby2 : MatchmakingCore {
-        // internal Lobby CurrentLobby { get; private set; } = new Lobby();
+        Lobby CurrentLobby { get; set; } = new Lobby();
         //User config
         bool useManualFinishMatchMake;
         uint requiredMembers;
@@ -40,14 +40,16 @@ namespace SynicSugar.MatchMake {
         Result MatchingResult;
 
         public override bool isHost { get { return CurrentLobby.isHost(); } }
-        public EOSLobby2(uint maxSearch, int matchmakingTimeout, int initialConnectionTimeout) : base(maxSearch, matchmakingTimeout, initialConnectionTimeout) {}
+        public EOSLobby2(uint maxSearch, int matchmakingTimeout, int initialConnectionTimeout) : base(maxSearch, matchmakingTimeout, initialConnectionTimeout) {
+            RTCManager.Instance.SetLobbyReference(CurrentLobby);
+        }
 
         /// <summary>
         /// If call this in matchmaking, it could cause a bug.
         /// </summary>
         /// <param name="MatchmakingTimeout"></param>
         /// <param name="InitialConnectionTimeout"></param>
-        internal void SetTimeoutSec(int MatchmakingTimeout, int InitialConnectionTimeout){
+        public override void SetTimeoutSec(int MatchmakingTimeout, int InitialConnectionTimeout){
             //For Unitask
             timeoutMS = MatchmakingTimeout * 1000;
             initconnectTimeoutMS = InitialConnectionTimeout * 1000;

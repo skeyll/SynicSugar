@@ -62,7 +62,6 @@ namespace SynicSugar.MatchMake {
         [Range(5, 60)]
         public ushort P2PSetupTimeoutSec = 15;
 
-
     #region TODO: Change this to Enum and display only one field for the selected way on UnityEditor.
         public enum RecconectLobbyIdSaveType {
             NoReconnection, Playerprefs, CustomMethod, AsyncCustomMethod
@@ -90,6 +89,9 @@ namespace SynicSugar.MatchMake {
         public MatchMakingGUIEvents MatchMakingGUIEvents = new MatchMakingGUIEvents();
         // Events
         public MemberUpdatedNotifier MemberUpdatedNotifier;
+
+        public bool isLooking { get; private set; }
+        public float timeUntilTimeout { get; private set;}
         /// <summary>
         /// Is this user Host?
         /// </summary>
@@ -119,6 +121,33 @@ namespace SynicSugar.MatchMake {
            return matchmakingCore.GetLobbyMemberLimit();
         }
         
+        /// <summary>
+        /// Wait for timeout. When pass time, stop matchmake task.
+        /// </summary>
+        /// <param name="timeoutSec"></param>
+        /// <param name="token">Token for function to be passed from Main api.</param>
+        /// <returns></returns>
+        async UniTask TimeoutTimer(int timeoutSec, CancellationToken token){
+            try{
+                while(timeUntilTimeout > 0f && isLooking){
+                    await UniTask.Yield(PlayerLoopTiming.Update, cancellationToken: token);
+                }
+            }
+            catch (OperationCanceledException){ // Cancel matchmaking process by user or library.
+            #if SYNICSUGAR_LOG
+                if(timeUntilTimeout > 0){
+                    Debug.Log("Canceld matching by cancel token from MatchMakeManager outside.");
+                }else{
+                    Debug.Log("Cancel matching by timeout");
+                }
+            #endif
+                matchingToken?.Cancel();
+                return;
+            }
+            if(isLooking){
+                matchingToken?.Cancel();
+            }
+        }
         /// <summary>
         /// Set Timeout sec. Should call this before start matchmake. <br />
         /// If use this, need call this before start matchmaking.
