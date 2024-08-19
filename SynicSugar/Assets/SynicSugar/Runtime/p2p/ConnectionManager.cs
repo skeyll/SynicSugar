@@ -208,9 +208,7 @@ namespace SynicSugar.P2P {
                 break;
             }
             
-            if(MatchMakeManager.Instance.matchmakingCore.CurrentLobby.hasConnectedRTCRoom){
-                RTCManager.Instance.ToggleReceiveingFromTarget(null, true);
-            }
+            RTCManager.Instance.ToggleReceiveingFromTarget(null, true);
         }
         /// <summary>
         /// Start Synic packet receiver on each timing. Only one can be enabled, including Standard receiver.<br />
