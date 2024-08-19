@@ -193,6 +193,16 @@ namespace SynicSugar.MatchMake {
                 return canMatch;
             }
             
+            //Setup
+            p2pInfo.Instance.userIds = new UserIds();
+
+            Result SetupResult = await matchmakingCore.SetupP2PConnection(matchingToken.Token);
+
+            if(SetupResult != Result.Success){
+                MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
+                return SetupResult;
+            }
+
             MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Ready);
             return Result.Success;
         }
@@ -241,6 +251,16 @@ namespace SynicSugar.MatchMake {
                 return canMatch;
             }
             
+            //Setup
+            p2pInfo.Instance.userIds = new UserIds();
+
+            Result SetupResult = await matchmakingCore.SetupP2PConnection(matchingToken.Token);
+
+            if(SetupResult != Result.Success){
+                MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
+                return SetupResult;
+            }
+
             MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Ready);
             return Result.Success;
         }
@@ -273,10 +293,19 @@ namespace SynicSugar.MatchMake {
                 canMatch = await matchmakingCore.StartJustSearch(lobbyCondition, matchingToken.Token, null, 0);
             }
             
-
             if(canMatch != Result.Success){
                 MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
                 return canMatch;
+            }
+
+            //Setup
+            p2pInfo.Instance.userIds = new UserIds();
+
+            Result SetupResult = await matchmakingCore.SetupP2PConnection(matchingToken.Token);
+
+            if(SetupResult != Result.Success){
+                MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
+                return SetupResult;
             }
             
             MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Ready);
@@ -325,6 +354,16 @@ namespace SynicSugar.MatchMake {
                 MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
                 return canMatch;
             }
+
+            //Setup
+            p2pInfo.Instance.userIds = new UserIds();
+
+            Result SetupResult = await matchmakingCore.SetupP2PConnection(matchingToken.Token);
+
+            if(SetupResult != Result.Success){
+                MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
+                return SetupResult;
+            }
             
             MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Ready);
             return Result.Success;
@@ -364,6 +403,16 @@ namespace SynicSugar.MatchMake {
                 return canMatch;
             }
             
+            //Setup
+            p2pInfo.Instance.userIds = new UserIds();
+
+            Result SetupResult = await matchmakingCore.SetupP2PConnection(matchingToken.Token);
+
+            if(SetupResult != Result.Success){
+                MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
+                return SetupResult;
+            }
+
             MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Ready);
             return Result.Success;
         }
@@ -410,6 +459,16 @@ namespace SynicSugar.MatchMake {
                 return canMatch;
             }
 
+            //Setup
+            p2pInfo.Instance.userIds = new UserIds();
+
+            Result SetupResult = await matchmakingCore.SetupP2PConnection(matchingToken.Token);
+
+            if(SetupResult != Result.Success){
+                MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
+                return SetupResult;
+            }
+
             MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Ready);
             return Result.Success;
         }
@@ -440,11 +499,22 @@ namespace SynicSugar.MatchMake {
     #endif
             matchingToken = token == default ? new CancellationTokenSource() : token;
             
-            Result canJoin = await matchmakingCore.JoinLobbyBySavedLobbyId(LobbyID, matchingToken.Token);
+            Result joinResult = await matchmakingCore.JoinLobbyBySavedLobbyId(LobbyID, matchingToken.Token);
 
-            if(canJoin != Result.Success){
+            if(joinResult != Result.Success){
                 MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
-                return canJoin;
+                return joinResult;
+            }
+
+            //Setup
+            //Create userIds with Reconnecter flag.
+            p2pInfo.Instance.userIds = new UserIds(true);
+
+            Result SetupResult = await matchmakingCore.SetupP2PConnection(matchingToken.Token);
+
+            if(SetupResult != Result.Success){
+                MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
+                return SetupResult;
             }
 
             MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Ready);

@@ -120,15 +120,34 @@ namespace SynicSugar.MatchMake {
         /// When player could not join, they create lobby as host and wait for other player.
         /// </summary>
         /// <param name="lobbyCondition">Create and search condition. <c>MUST NOT</c> add the data not to open public.</param>
-        /// <param name="delay"></param>
+        /// <param name="delay">To create pseudo-delay</param>
         /// <param name="userAttributes"></param>
         /// <param name="token"></param>
         /// <returns></returns>
         public abstract UniTask<Result> CreateOfflineLobby(Lobby lobbyCondition, OfflineMatchmakingDelay delay, List<AttributeData> userAttributes, CancellationToken token);
         
+        /// <summary>
+        /// Destroy Offline lobby that has created by CreateOfflineLobby.
+        /// </summary>
+        /// <returns></returns>
         public abstract UniTask<Result> DestroyOfflineLobby();
 
+        /// <summary>
+        /// Calling after the opponents are found and the lobby is closed. Establish communication and exchange UserID lists, then return results when the user is ready to communicate.
+        /// </summary>
+        /// <returns></returns>
+        public abstract UniTask<Result> SetupP2PConnection(CancellationToken token);
+
+        /// <summary>
+        /// Return whether the local user is host or not.
+        /// </summary>
+        /// <returns></returns>
         public abstract bool isHost();
+        /// <summary>
+        /// Returns whether this userId is a local user or not.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
         public abstract bool isLocalUser(UserId userId);
         /// <summary>
         /// Get current lobby member count.

@@ -79,34 +79,25 @@ namespace SynicSugar.MatchMake {
             var hasTimedOutTask = TimeoutTimer(token);
             //Serach
             MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Start);
-            Result joinLobby = await JoinExistingLobby(lobbyCondition, userAttributes, token);
+            Result joinResult = await JoinExistingLobby(lobbyCondition, userAttributes, token);
 
-            if(joinLobby == Result.Success){
+            if(joinResult == Result.Success){
                 // Wait for establised matchmaking and to get SocketName to be used in p2p connection.
-                Result matchingEstablishment = await WaitForMatchingEstablishment(token);
-
-                if(matchingEstablishment != Result.Success){
-                    return matchingEstablishment;
-                }
-                Result openConnection = await PrepareForp2pConnection(token);
-                return openConnection;
+                Result matchingResult = await WaitForMatchingEstablishment(token);
+                
+                return matchingResult;
             }
             //If player cannot join lobby as a guest, creates a lobby as a host and waits for other player.
             //Create
-            Result createLobby = await CreateLobby(lobbyCondition, userAttributes, token);
-            if(createLobby == Result.Success){
+            Result createResult = await CreateLobby(lobbyCondition, userAttributes, token);
+            if(createResult == Result.Success){
                 // Wait for establised matchmaking and to get SocketName to be used in p2p connection.
-                Result matchingEstablishment = await WaitForMatchingEstablishment(token);
+                Result matchingResult = await WaitForMatchingEstablishment(token);
 
-                if(matchingEstablishment != Result.Success){
-                    return matchingEstablishment;
-                }
-                
-                Result openConnection = await PrepareForp2pConnection(token);
-                return openConnection;
+                return matchingResult;
             }
             //Failed due to no-playing-user or server problems.
-            return createLobby;
+            return createResult;
         }
         /// <summary>
         /// Just search Lobby<br />
@@ -125,21 +116,16 @@ namespace SynicSugar.MatchMake {
             var hasTimedOutTask = TimeoutTimer(token);
             //Serach
             MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Start);
-            Result joinLobby = await JoinExistingLobby(lobbyCondition, userAttributes, token);
+            Result joinResult = await JoinExistingLobby(lobbyCondition, userAttributes, token);
 
-            if(joinLobby == Result.Success){
+            if(joinResult == Result.Success){
                 // Wait for establised matchmaking and to get SocketName to be used in p2p connection.
-                Result matchingEstablishment = await WaitForMatchingEstablishment(token);
-
-                if(matchingEstablishment != Result.Success){
-                    return matchingEstablishment;
-                }
-
-                Result openConnection = await PrepareForp2pConnection(token);
-                return openConnection;
+                Result matchingResult = await WaitForMatchingEstablishment(token);
+                
+                return matchingResult;
             }
             //This is NOT Success. Failed due to no-playing-user or server problems.
-            return joinLobby;
+            return joinResult;
         }
         /// <summary>
         /// Create lobby as host<br />
@@ -157,19 +143,16 @@ namespace SynicSugar.MatchMake {
             var hasTimedOutTask = TimeoutTimer(token);
 
             MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Start);
-            Result createLobby = await CreateLobby(lobbyCondition, userAttributes, token);
-            if(createLobby == Result.Success){
+            Result createResult = await CreateLobby(lobbyCondition, userAttributes, token);
+            
+            if(createResult == Result.Success){
                 // Wait for establised matchmaking and to get SocketName to be used in p2p connection.
-                Result matchingEstablishment = await WaitForMatchingEstablishment(token);
-
-                if(matchingEstablishment != Result.Success){
-                    return matchingEstablishment;
-                }
-                Result openConnection = await PrepareForp2pConnection(token);
-                return openConnection;
+                Result matchingResult = await WaitForMatchingEstablishment(token);
+                
+                return matchingResult;
             }
             //This is NOT Success. Failed due to no-playing-user or server problems.
-            return createLobby;
+            return createResult;
         }
         /// <summary>
         /// Join the Lobby with specific id to that lobby. <br />
@@ -190,29 +173,17 @@ namespace SynicSugar.MatchMake {
                 ReleaseLobbySearch(retrieveResult.lobbySerach);
                 return retrieveResult.result; //This is NOT Success. Can't retrive Lobby data from EOS.
             }
+
             //Join when lobby has members than more one.
-            Result canJoin = await TryJoinSearchResults(retrieveResult.lobbySerach, null, true, token);
+            Result joinResult = await TryJoinSearchResults(retrieveResult.lobbySerach, null, true, token);
         #if SYNICSUGAR_LOG
-            Debug.LogFormat("JoinLobbyBySavedLobbyId: TryJoinSearchResults is '{0}'.", canJoin);
+            Debug.LogFormat("JoinLobbyBySavedLobbyId: TryJoinSearchResults is '{0}'.", joinResult);
         #endif
-            if(canJoin != Result.Success){
+            if(joinResult != Result.Success){
                 await MatchMakeManager.Instance.OnDeleteLobbyID();
-                return canJoin; //This is NOT Success. The lobby was already closed.
-            }
-            //Create new instance with Reconnecter flag.
-            p2pInfo.Instance.userIds = new UserIds(true);
-            //Prep Connection
-            Result canInit = InitConnectConfig(ref p2pInfo.Instance.userIds);
-            if(canInit != Result.Success){
-                Debug.LogError("Fail InitConnectConfig");
-                return canInit; //This is NOT Success. 
+                return joinResult; //This is NOT Success. The lobby was already closed.
             }
 
-            Result canConnect = await OpenConnectionForReconnecter(token);
-            if(canConnect != Result.Success){
-                return canConnect; //This is NOT Success. 
-            }
-            
             return Result.Success;
         }
         /// <summary>
@@ -475,7 +446,7 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         /// <param name="token">Token not related to timeout　token</param>
         /// <returns></returns>
-        async UniTask<Result> PrepareForp2pConnection(CancellationToken token){
+        public override async UniTask<Result> SetupP2PConnection(CancellationToken token){
             MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Conclude);
             Result result = InitConnectConfig(ref p2pInfo.Instance.userIds);
             if(result != Result.Success){
@@ -490,7 +461,7 @@ namespace SynicSugar.MatchMake {
             }
             
             await MatchMakeManager.Instance.OnSaveLobbyID();
-            p2pInfo.Instance.IsInGame = true;
+            p2pInfo.Instance.IsInGame = true; //本当にここで変更する？Manager側でしないか？
             return result;
         }
         /// <summary>
