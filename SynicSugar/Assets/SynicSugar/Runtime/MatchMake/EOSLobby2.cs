@@ -38,9 +38,17 @@ namespace SynicSugar.MatchMake {
         /// For WaitForMatchingEstablishment(). Change this in notify.
         /// </summary>
         Result MatchingResult;
+        UserId localUserId;
 
-        public override bool isHost { get { return CurrentLobby.isHost(); } }
+        public override bool isHost(){
+            return localUserId == UserId.GetUserId(CurrentLobby.LobbyOwner);
+        }
+        public override bool isLocalUser(UserId userId){
+            return userId == localUserId;
+        }
+
         public EOSLobby2(uint maxSearch, int matchmakingTimeout, int initialConnectionTimeout) : base(maxSearch, matchmakingTimeout, initialConnectionTimeout) {
+            localUserId = UserId.GetUserId(EOSManager.Instance.GetProductUserId());
             RTCManager.Instance.SetLobbyReference(CurrentLobby);
         }
 

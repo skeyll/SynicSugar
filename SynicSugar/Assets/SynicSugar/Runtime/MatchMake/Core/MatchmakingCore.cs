@@ -128,7 +128,8 @@ namespace SynicSugar.MatchMake {
         
         public abstract UniTask<Result> DestroyOfflineLobby();
 
-        public abstract bool isHost { get; }
+        public abstract bool isHost();
+        public abstract bool isLocalUser(UserId userId);
         /// <summary>
         /// Get current lobby member count.
         /// </summary>

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using PlayEveryWare.EpicOnlineServices;
 using SynicSugar.P2P;
 using UnityEngine;
 using UnityEngine.Events;
@@ -28,7 +27,6 @@ namespace SynicSugar.MatchMake {
                     lobbyIDMethod.Delete += () => customDeleteLobbyID.Invoke();
                 }
             }
-            localUserId = UserId.GetUserId(EOSManager.Instance.GetProductUserId());
         }
         void OnDestroy() {
             if( Instance == this ) {
@@ -95,15 +93,14 @@ namespace SynicSugar.MatchMake {
         /// <summary>
         /// Is this user Host?
         /// </summary>
-        public bool isHost { get { return matchmakingCore.isHost; }}
-        UserId localUserId;
+        public bool isHost { get { return matchmakingCore.isHost(); }}
         /// <summary>
         /// Is this id is LocalUser's id?
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
         public bool isLocalUserId(UserId id){
-            return id == localUserId;
+            return matchmakingCore.isLocalUser(id);
         }
         /// <summary>
         /// Is this id is LocalUser's id?
@@ -111,7 +108,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="id"></param>
         /// <returns></returns>
         public bool isLocalUserId(string id){
-            return UserId.GetUserId(id) == localUserId;
+            return matchmakingCore.isLocalUser(UserId.GetUserId(id));
         }
         public int GetCurrentLobbyMemberCount(){
            return matchmakingCore.GetCurrentLobbyMemberCount();
