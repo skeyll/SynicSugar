@@ -464,11 +464,11 @@ namespace SynicSugar.MatchMake {
         async UniTask<Result> SetupP2P(bool isReconencter, CancellationToken token){
             p2pInfo.Instance.userIds = new UserIds(isReconencter);
 
-            Result SetupResult = await matchmakingCore.SetupP2PConnection(p2pSetupTimeoutSec, token);
+            Result setupResult = await matchmakingCore.SetupP2PConnection(p2pSetupTimeoutSec, token);
 
-            if(SetupResult != Result.Success){
+            if(setupResult != Result.Success){
                 MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
-                return SetupResult;
+                return setupResult;
             }
 
             MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Ready);
