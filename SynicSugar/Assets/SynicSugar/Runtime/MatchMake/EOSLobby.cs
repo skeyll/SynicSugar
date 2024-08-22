@@ -1408,15 +1408,12 @@ namespace SynicSugar.MatchMake {
                 await UniTask.Delay((int)delay.ReadyForConnectionDelay, cancellationToken: token);
             }
 
-            SynicSugarStateManger.Instance.State.IsMatchmaking = false;
-            SynicSugarStateManger.Instance.State.IsInSession = true;
             return Result.Success;
         }
         public override async UniTask<Result> DestroyOfflineLobby(){
             await MatchMakeManager.Instance.OnDeleteLobbyID();
             CurrentLobby.Clear();
 
-            SynicSugarStateManger.Instance.State.IsInSession = false;
             return Result.Success;
         }
 #endregion
