@@ -490,13 +490,15 @@ namespace SynicSugar.MatchMake {
         
         /// <summary>
         /// Exit lobby and cancel MatchMake. <br />
-        /// When Host calls this method, Guest will becomes new Host automatically after Host-migration.
+        /// When Host calls this method, Guest will becomes new Host automatically after Host-migration. <br />
+        /// When this process is called, Timer process that was calculating the Timeout stops, and the API that exits or closes the Lobby is called.
+        /// Then, after this process returns Result.Success result, the MatchmakingAPIs starts the process to finish the Matchmaking Task and returns Result.LobbyClosed on success.
+        /// This process is valid only during matchmaking.　To finish Connection after matchmaking, we use ConnectHub.Instance.ExitSession and ConnectHub.Instance.CloseSession.
         /// </summary>
         /// <param name="destroyManager">If true, destroy NetworkManager after cancel matchmake.</param>
-        /// <param name="cleanupMemberCountChanged">Need to call MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(id, false) after exit lobby?</param>
         /// <param name="token">token for this task</param>
         /// <returns></returns>
-        public async UniTask<Result> ExitCurrentMatchMake(bool destroyManager = true, bool cleanupMemberCountChanged = false, CancellationToken token = default(CancellationToken)){
+        public async UniTask<Result> ExitCurrentMatchMake(bool destroyManager = true, CancellationToken token = default(CancellationToken)){
             if(!isLooking){
             #if SYNICSUGAR_LOG
                 Debug.Log("ExitCurrentMatchMake: This user is not in matchmaking now.");
@@ -504,7 +506,7 @@ namespace SynicSugar.MatchMake {
                 return Result.InvalidAPICall;
             }
             isLooking = false;
-            Result cancelResult = await matchmakingCore.CancelMatchMaking(cleanupMemberCountChanged, token);
+            Result cancelResult = await matchmakingCore.CancelMatchMaking(false, token);
             
             if(destroyManager && cancelResult == Result.Success){
                 Destroy(this.gameObject);
@@ -514,13 +516,14 @@ namespace SynicSugar.MatchMake {
         /// <summary>
         /// If Host, destroy lobby and cancels MatchMake.<br />
         /// If Guest, just leave lobby and cancels MatchMake.<br />
-        /// We use ConnectHub.Instance.ExitSession and ConnectHub.Instance.CloseSession after matchmaking.
+        /// When this process is called, Timer process that was calculating the Timeout stops, and the API that exits or closes the Lobby is called.
+        /// Then, after this process returns Result.Success result, the MatchmakingAPIs starts the process to finish the Matchmaking Task and returns Result.LobbyClosed on success. <br />
+        /// This process is valid only during matchmaking.　To finish Connection after matchmaking, we use ConnectHub.Instance.ExitSession and ConnectHub.Instance.CloseSession.
         /// </summary>
         /// <param name="destroyManager">If true, destroy NetworkManager after cancel matchmake.</param>
-        /// <param name="cleanupMemberCountChanged">Need to call MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(id, false) after exit lobby?</param>
         /// <param name="token">token for this task</param>
         /// <returns></returns>
-        public async UniTask<Result> CloseCurrentMatchMake(bool destroyManager = true, bool cleanupMemberCountChanged = false, CancellationToken token = default(CancellationToken)){
+        public async UniTask<Result> CloseCurrentMatchMake(bool destroyManager = true, CancellationToken token = default(CancellationToken)){
             if(!isLooking){
             #if SYNICSUGAR_LOG
                 Debug.Log("CloseCurrentMatchMake: This user is not in matchmaking now.");
@@ -528,7 +531,7 @@ namespace SynicSugar.MatchMake {
                 return Result.InvalidAPICall;
             }
             isLooking = false;
-            Result closeResult = await matchmakingCore.CloseMatchMaking(cleanupMemberCountChanged, token);
+            Result closeResult = await matchmakingCore.CloseMatchMaking(false, token);
             
             if(destroyManager && closeResult == Result.Success){
                 Destroy(this.gameObject);
