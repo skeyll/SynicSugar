@@ -6,22 +6,8 @@ using SynicSugar.P2P;
 namespace SynicSugar.MatchMake {
     public abstract class MatchmakingCore {
         protected uint MAX_SEARCH_RESULT;
-        protected int timeoutMS, initconnectTimeoutMS;
-        protected MatchmakingCore(uint maxSearch, int MatchmakingTimeout, int InitialConnectionTimeout){
+        protected MatchmakingCore(uint maxSearch){
             MAX_SEARCH_RESULT = maxSearch;
-            //For Unitask
-            timeoutMS = MatchmakingTimeout * 1000;
-            initconnectTimeoutMS = InitialConnectionTimeout * 1000;
-        }
-        /// <summary>
-        /// If call this in matchmaking, it could cause a bug.
-        /// </summary>
-        /// <param name="MatchmakingTimeout"></param>
-        /// <param name="InitialConnectionTimeout"></param>
-        public virtual void SetTimeoutSec(int MatchmakingTimeout, int InitialConnectionTimeout){
-            //For Unitask
-            timeoutMS = MatchmakingTimeout * 1000;
-            initconnectTimeoutMS = InitialConnectionTimeout * 1000;
         }
 
         /// <summary>
@@ -33,7 +19,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="userAttributes"></param>
         /// <param name="minLobbyMember"></param>
         /// <returns></returns>
-        public abstract UniTask<Result> StartMatching(Lobby lobbyCondition, CancellationToken token, List<AttributeData> userAttributes, uint minLobbyMember);
+        public abstract UniTask<Result> StartMatching(Lobby lobbyCondition, List<AttributeData> userAttributes, uint minLobbyMember, CancellationToken token);
 
         /// <summary>
         /// Just search Lobby<br />
@@ -44,7 +30,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="userAttributes"></param>
         /// <param name="minLobbyMember"></param>
         /// <returns>True on success. If false, EOS backend have something problem. So, when you call this process again, should wait for some time.</returns>
-        public abstract UniTask<Result> StartJustSearch(Lobby lobbyCondition, CancellationToken token, List<AttributeData> userAttributes, uint minLobbyMember);
+        public abstract UniTask<Result> StartJustSearch(Lobby lobbyCondition, List<AttributeData> userAttributes, uint minLobbyMember, CancellationToken token);
     
         /// <summary>
         /// Create lobby as host<br />
@@ -55,7 +41,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="userAttributes"></param>
         /// <param name="minLobbyMember"></param>
         /// <returns>True on success. If false, EOS backend have something problem. So, when you call this process again, should wait for some time.</returns>
-        public abstract UniTask<Result> StartJustCreate(Lobby lobbyCondition, CancellationToken token, List<AttributeData> userAttributes, uint minLobbyMember);
+        public abstract UniTask<Result> StartJustCreate(Lobby lobbyCondition, List<AttributeData> userAttributes, uint minLobbyMember, CancellationToken token);
     
 
         /// <summary>
@@ -77,20 +63,18 @@ namespace SynicSugar.MatchMake {
         /// <summary>
         /// Cancel MatcgMaking and leave the lobby.
         /// </summary>
-        /// <param name="matchmakeTokenSource"></param>
         /// <param name="cleanupMemberCountChanged"></param>
         /// <param name="token"></param>
         /// <returns>If true, user can leave or destroy the lobby. </returns>
-        public abstract UniTask<Result> CancelMatchMaking(CancellationTokenSource matchmakeTokenSource, bool cleanupMemberCountChanged = false, CancellationToken token = default(CancellationToken));
+        public abstract UniTask<Result> CancelMatchMaking(bool cleanupMemberCountChanged = false, CancellationToken token = default(CancellationToken));
         
         /// <summary>
         /// Host close matchmaking. Guest Cancel matchmaking.
         /// </summary>
-        /// <param name="matchmakeTokenSource"></param>
         /// <param name="cleanupMemberCountChanged"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        public abstract UniTask<Result> CloseMatchMaking(CancellationTokenSource matchmakeTokenSource, bool cleanupMemberCountChanged = false, CancellationToken token = default(CancellationToken));
+        public abstract UniTask<Result> CloseMatchMaking(bool cleanupMemberCountChanged = false, CancellationToken token = default(CancellationToken));
        
         /// <summary>
         /// Currently preventing duplicate calls.
@@ -135,8 +119,10 @@ namespace SynicSugar.MatchMake {
         /// <summary>
         /// Calling after the opponents are found and the lobby is closed. Establish communication and exchange UserID lists, then return results when the user is ready to communicate.
         /// </summary>
+        /// <param name="setupTimeoutSec">the time from starting to establishing the connections.</param>
+        /// <param name="token">Token for this task</param>
         /// <returns></returns>
-        public abstract UniTask<Result> SetupP2PConnection(CancellationToken token);
+        public abstract UniTask<Result> SetupP2PConnection(ushort setupTimeoutSec, CancellationToken token);
 
         /// <summary>
         /// Return whether the local user is host or not.

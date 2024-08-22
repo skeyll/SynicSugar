@@ -333,7 +333,7 @@ namespace SynicSugar.MatchMake {
                 Debug.Log("Cancel matching by timeout");
         #endif
                 if(canLeave == Result.Success){
-                    MatchMakeManager.Instance.matchingToken?.Cancel();
+                    MatchMakeManager.Instance.matchmakeTokenSource?.Cancel();
                 }
             }
         }
