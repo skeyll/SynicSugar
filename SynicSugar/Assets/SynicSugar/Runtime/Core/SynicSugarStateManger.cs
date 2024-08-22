@@ -1,7 +1,7 @@
 using UnityEngine;
 
 namespace SynicSugar {
-    public class SynicSugarStateManger : MonoBehaviour {
+    public sealed class SynicSugarStateManger : MonoBehaviour {
 #region Singleton
         public static SynicSugarStateManger Instance { get; private set; }
         void Awake() {
@@ -19,6 +19,7 @@ namespace SynicSugar {
             }
         }
 #endregion
+        public readonly SynicSugarState State = new SynicSugarState();
         SynicSugarCoreFactoryBase coreFactory;
         void SetCoreFactory(){
             coreFactory = new SynicSugarCoreFactory();
