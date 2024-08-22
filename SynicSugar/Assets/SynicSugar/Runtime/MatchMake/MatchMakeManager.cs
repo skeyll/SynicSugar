@@ -577,30 +577,30 @@ namespace SynicSugar.MatchMake {
         /// When Quit OfflineMode, call MatchMakeManager.Instance.DestoryOfflineLobby or just Unity's Destory(MatchMakeManager.Instance)　and delete LobbyID method.<br />
         /// *No Timeout and failure
         /// </summary>
+        /// <param name="lobbyCondition">Crate by EOSLobbyExtenstions.GenerateLobby().</param>
+        /// <param name="delay">Delay to simulate matchmaking. If pass NoDelay for this, Matchmaking GUI Events are NOT invoked on each step.<br />
+        /// To close automatically, 0 or pass nothing. The case completes matchmaking on filled in lobby by max members. <br />
+        /// If 2 or more, after lobby reach this min value,  (If we use EnableManualFinish event.) ManualFinish Button is displayed for Host. Host calls FinishMatchmake(), then the matchmaking is completed and start p2p. (If not call FinishMatchmake(), the matchmaking is going on until timeout and get failed.)</param>
+        /// <param name="userAttributes">The user attributes of names, job and so on that is needed before P2P. <br />
+        /// These should be used just for matchmaking and the kick, the data for actual game should be exchanged via p2p for the lag and server bandwidth .</param>
+        /// <param name="token">For cancel matchmaking. If cancelled externally, all processes are cancelled via Timeout processing.</param>
         /// <returns>Always return true. the LastResultCode becomes Success after return true.</returns>
-        public async UniTask<Result> CreateOfflineLobby(Lobby lobbyCondition, OfflineMatchmakingDelay delay, List<AttributeData> userAttributes = null, CancellationTokenSource token = default(CancellationTokenSource)){
-            bool needTryCatch = token == default;
-            matchmakeTokenSource = needTryCatch ? new CancellationTokenSource() : token;
-
-            if(needTryCatch){
-                try{
-                    await matchmakingCore.CreateOfflineLobby(lobbyCondition, delay, userAttributes ?? new(), matchmakeTokenSource.Token);
-                }catch(OperationCanceledException){
-                #if SYNICSUGAR_LOG
-                    Debug.Log("MatchMaking is canceled");
-                #endif
-                    MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
-                    return Result.Canceled;
-                }
-            }else{
-                await matchmakingCore.CreateOfflineLobby(lobbyCondition, delay, userAttributes ?? new(), matchmakeTokenSource.Token);
+        public async UniTask<Result> CreateOfflineLobby(Lobby lobbyCondition, OfflineMatchmakingDelay delay, List<AttributeData> userAttributes = null, CancellationToken token = default(CancellationToken)){
+            try{
+                return await matchmakingCore.CreateOfflineLobby(lobbyCondition, delay, userAttributes ?? new(), token);
+            }catch(OperationCanceledException){
+            #if SYNICSUGAR_LOG
+                Debug.Log("MatchMaking is canceled");
+            #endif
+                MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
+                return Result.Canceled;
             }
-            return Result.Success;
         }
         /// <summary>
         /// Just for solo mode like as tutorial. <br />
         /// Destory Lobby Instance. We can use just Destory(MatchMakeManager.Instance)　and delete LobbyID method without calling this.<br />
         /// </summary>
+        /// <param name="destroyManager">If true, destroy NetworkManager after cancel matchmake.</param>
         /// <returns>Always return true. the LastResultCode becomes Success after return true.</returns>
         public async UniTask<Result> DestoryOfflineLobby(bool destroyManager = true){
             p2pConfig.Instance.connectionManager.rttTokenSource?.Cancel();
@@ -668,7 +668,7 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         /// <returns>If it exists, returns STRING key. If not, returns String.Empty.</returns>
         public string GetReconnectLobbyID(){
-            return PlayerPrefs.GetString (playerprefsSaveKey, System.String.Empty);
+            return PlayerPrefs.GetString (playerprefsSaveKey, string.Empty);
         }
     #endregion
         /// <summary>
@@ -903,6 +903,29 @@ namespace SynicSugar.MatchMake {
             }         
 
             return await SetupP2P(true, token.Token);
+        }
+
+
+        /// <summary>
+        /// Just for solo mode like as tutorial. <br />
+        /// This lobby is not connected to the network and backend and is just for a local Host. <br />
+        /// When Quit OfflineMode, call MatchMakeManager.Instance.DestoryOfflineLobby or just Unity's Destory(MatchMakeManager.Instance)　and delete LobbyID method.<br />
+        /// *No Timeout and failure
+        /// </summary>
+        /// <returns>Always return true. the LastResultCode becomes Success after return true.</returns>
+        [Obsolete("This is old. Can use new one that pass the CancellationToken instead of CancellationTokenSource.")]
+        public async UniTask<Result> CreateOfflineLobby(Lobby lobbyCondition, OfflineMatchmakingDelay delay, List<AttributeData> userAttributes, CancellationTokenSource token){
+            try{
+                await matchmakingCore.CreateOfflineLobby(lobbyCondition, delay, userAttributes ?? new(), token.Token);
+            }catch(OperationCanceledException){
+            #if SYNICSUGAR_LOG
+                Debug.Log("MatchMaking is canceled");
+            #endif
+                MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
+                return Result.Canceled;
+            }
+
+            return Result.Success;
         }
         #endregion
     }
