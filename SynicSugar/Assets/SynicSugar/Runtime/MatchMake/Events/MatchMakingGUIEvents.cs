@@ -32,7 +32,7 @@ namespace SynicSugar.MatchMake {
     #else
         public Text stateText = null;
     #endif
-
+        bool enabledManualConclude = false;
         // public TextP
         public bool canKick { get; internal set; }
     #region Event
@@ -64,6 +64,10 @@ namespace SynicSugar.MatchMake {
         public event Action<UserId, bool> OnLobbyMemberCountChanged;
     #endregion
     #region Text
+        /// <summary>
+        /// Wait for starting(pushing) the matchmaking process (button).<br />
+        /// </summary>
+        public string Standby;
         /// <summary>
         /// Until join or create lobby.<br />
         /// Invoke DisableStart().
@@ -107,94 +111,66 @@ namespace SynicSugar.MatchMake {
             OnLobbyMemberCountChanged = null;
         }
         
-    #if SYNICSUGAR_TMP
         internal void ChangeState(State state){
             switch(state){
                 case State.Standby:
+                    canKick = false;
+                    enabledManualConclude = false;
                     if(stateText != null){
-                        stateText.SetText(System.String.Empty);
+                        SetText(Standby);
                     }
                 break;
                 case State.Start:
                     DisableStart?.Invoke();
                     canKick = false;
+                    enabledManualConclude = false;
                     if(stateText != null){
-                        stateText.SetText(StartMatchmaking);
+                        SetText(StartMatchmaking);
                     }
                 break;
                 case State.Wait:
                     EnableCancelKick?.Invoke();
                     canKick = true;
                     if(stateText != null){
-                        stateText.SetText(WaitForOpponents);
+                        SetText(WaitForOpponents);
                     }
                 break;
                 case State.Conclude:
                     DisableCancelKickConclude?.Invoke();
                     canKick = false;
                     if(stateText != null){
-                        stateText.SetText(FinishMatchmaking);
+                        SetText(FinishMatchmaking);
                     }
                 break;
                 case State.Ready:
                     if(stateText != null){
-                        stateText.SetText(ReadyForConnection);
+                        SetText(ReadyForConnection);
                     }
                 break;
                 case State.Cancel:
                     DisableCancelKickConclude?.Invoke();
                     canKick = false;
                     if(stateText != null){
-                        stateText.SetText(TryToCancel);
+                        SetText(TryToCancel);
                     }
                 break;
             }
         }
-    #else
-        internal void ChangeState(State state){
-            switch(state){
-                case State.Standby:
-                    if(stateText != null){
-                        stateText.text = System.String.Empty;
-                    }
-                break;
-                case State.Start:
-                    DisableStart?.Invoke();
-                    canKick = false;
-                    if(stateText != null){
-                        stateText.text = StartMatchmaking;
-                    }
-                break;
-                case State.Wait:
-                    EnableCancelKick?.Invoke();
-                    canKick = true;
-                    if(stateText != null){
-                        stateText.text = WaitForOpponents;
-                    }
-                break;
-                case State.Conclude:
-                    DisableCancelKickConclude?.Invoke();
-                    canKick = false;
-                    if(stateText != null){
-                        stateText.text = FinishMatchmaking;
-                    }
-                break;
-                case State.Ready:
-                    if(stateText != null){
-                        stateText.text = ReadyForConnection;
-                    }
-                break;
-                case State.Cancel:
-                    DisableCancelKickConclude?.Invoke();
-                    canKick = false;
-                    if(stateText != null){
-                        stateText.text = TryToCancel;
-                    }
-                break;
-            }
+        /// <summary>
+        /// Set text to TMP or Legacy text.
+        /// </summary>
+        /// <param name="text"></param> <summary>
+        /// 
+        /// </summary>
+        /// <param name="text"></param>
+        void SetText(string text){
+        #if SYNICSUGAR_TMP
+            stateText.SetText(text);
+        #else
+            stateText.text = text;
+        #endif
         }
-    #endif
-        bool enabledManualConclude = false;
+
         /// <summary>
         /// To display Member count. <br />
         /// After meet lobby min member counts.
@@ -204,7 +180,23 @@ namespace SynicSugar.MatchMake {
         /// <param name="meetMinCondition"></param>
         internal void LobbyMemberCountChanged(UserId target, bool isParticipated, bool meetMinCondition){
             OnLobbyMemberCountChanged?.Invoke(target, isParticipated);
-
+            if(!MatchMakeManager.Instance.isHost){
+                return;
+            }
+            if(enabledManualConclude != meetMinCondition){
+                enabledManualConclude = meetMinCondition;
+                
+                if(meetMinCondition){
+                #if SYNICSUGAR_LOG
+                    UnityEngine.Debug.Log("LobbyMemberCountChanged: Matchmaking meets min member conditions. Host can close Lobby from now.");
+                #endif
+                    EnableHostConclude?.Invoke();
+                }else{
+                    DisableHostConclude?.Invoke();
+                }
+            }
+        }
+        internal void LocalUserIsPromoted(bool meetMinCondition){
             if(!MatchMakeManager.Instance.isHost){
                 return;
             }

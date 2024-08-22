@@ -85,38 +85,40 @@ namespace SynicSugarGenerator {
                     "      /// Stop receiver, close all connections and remove the notify events.\n   " +
                     "     /// Then, the user leave the lobby.<br />\n        /// The last user closes " +
                     "the lobby in Backend.\n        /// <param name=\"destroyManager\">Destroy NetworkMa" +
-                    "nager after exit lobby.</param>\n        /// <param name=\"cancelToken\">Cancel tok" +
-                    "en for this task</param>\n        /// </summary>\n        public async UniTask<Res" +
-                    "ult> ExitSession(bool destroyManager = true, CancellationToken cancelToken = def" +
-                    "ault(CancellationToken)){\n            if(cancelToken == default(CancellationToke" +
-                    "n)){\n                cancelToken = p2pConfig.Instance.gameObject.GetCancellation" +
-                    "TokenOnDestroy();\n            }\n            Result isSuccess = await NetworkCore" +
-                    ".ExitSession(destroyManager, cancelToken);\n            syncTokenSource.Cancel();" +
-                    "\n            ClearReferenceDictionaries();\n            return isSuccess;\n       " +
-                    " }\n        /// <summary>\n        /// Stop receiver, close all connections and re" +
-                    "move the notify events.\n        /// Then, Host closes and Guest leaves the Lobby" +
-                    ".<br />\n        /// When Host closes Lobby, Guests are automatically kicked out " +
-                    "from the Lobby.\n        /// <param name=\"destroyManager\">Destroy NetworkManager " +
-                    "after exit lobby.</param>\n        /// <param name=\"cancelToken\">Cancel token for" +
-                    " this task</param>\n        /// </summary>\n        public async UniTask<Result> C" +
-                    "loseSession(bool destroyManager = true, CancellationToken cancelToken = default(" +
-                    "CancellationToken)){\n            if(cancelToken == default(CancellationToken)){\n" +
-                    "                cancelToken = p2pConfig.Instance.gameObject.GetCancellationToken" +
-                    "OnDestroy();\n            }\n            Result isSuccess = await NetworkCore.Clos" +
-                    "eSession(destroyManager, cancelToken);\n            syncTokenSource.Cancel();\n   " +
-                    "         ClearReferenceDictionaries();\n            return isSuccess;\n        }\n\n" +
-                    "        //(for elements)\n        public enum CHANNELLIST{\n            ");
+                    "nager after exit lobby.</param>\n        /// <param name=\"cleanupMemberCountChang" +
+                    "ed\">Need to call MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCount" +
+                    "Changed(id, false) after exit lobby?</param>\n        /// <param name=\"cancelToke" +
+                    "n\">Cancel token for this task</param>\n        /// </summary>\n        public asyn" +
+                    "c UniTask<Result> ExitSession(bool destroyManager = true, bool cleanupMemberCoun" +
+                    "tChanged = false, CancellationToken cancelToken = default(CancellationToken)){\n " +
+                    "           Result isSuccess = await NetworkCore.ExitSession(destroyManager, clea" +
+                    "nupMemberCountChanged, cancelToken);\n            syncTokenSource.Cancel();\n     " +
+                    "       ClearReferenceDictionaries();\n            return isSuccess;\n        }\n   " +
+                    "     /// <summary>\n        /// Stop receiver, close all connections and remove t" +
+                    "he notify events.\n        /// Then, Host closes and Guest leaves the Lobby.<br /" +
+                    ">\n        /// When Host closes Lobby, Guests are automatically kicked out from t" +
+                    "he Lobby.\n        /// <param name=\"destroyManager\">Destroy NetworkManager after " +
+                    "exit lobby.</param>\n        /// <param name=\"cleanupMemberCountChanged\">Need to " +
+                    "call MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(id, " +
+                    "false) after exit lobby?</param>\n        /// <param name=\"cancelToken\">Cancel to" +
+                    "ken for this task</param>\n        /// </summary>\n        public async UniTask<Re" +
+                    "sult> CloseSession(bool destroyManager = true, bool cleanupMemberCountChanged = " +
+                    "false, CancellationToken cancelToken = default(CancellationToken)){\n            " +
+                    "Result isSuccess = await NetworkCore.CloseSession(destroyManager, cleanupMemberC" +
+                    "ountChanged, cancelToken);\n            syncTokenSource.Cancel();\n            Cle" +
+                    "arReferenceDictionaries();\n            return isSuccess;\n        }\n\n        //(f" +
+                    "or elements)\n        public enum CHANNELLIST{\n            ");
             
             #line default
             #line hidden
             
-            #line 145 ""
+            #line 141 ""
             this.Write(this.ToStringHelper.ToStringWithCulture( SyncList ));
             
             #line default
             #line hidden
             
-            #line 145 ""
+            #line 141 ""
             this.Write(@"
         }
         //For Synic(UserId, value)
@@ -132,25 +134,25 @@ namespace SynicSugarGenerator {
             #line default
             #line hidden
             
-            #line 155 ""
+            #line 151 ""
             this.Write(this.ToStringHelper.ToStringWithCulture( Reference ));
             
             #line default
             #line hidden
             
-            #line 155 ""
+            #line 151 ""
             this.Write("\n\n        //Clear ref\n        private void ClearReferenceDictionaries(){ ");
             
             #line default
             #line hidden
             
-            #line 158 ""
+            #line 154 ""
             this.Write(this.ToStringHelper.ToStringWithCulture( ClearReference ));
             
             #line default
             #line hidden
             
-            #line 158 ""
+            #line 154 ""
             this.Write("\n            synicBuffer.Clear();\n            synicPacketInfo.Clear();\n          " +
                     "  largeBuffer.Clear();\n            largePacketInfo.Clear();\n        }\n\n        /" +
                     "/Register(for class)");
@@ -158,13 +160,13 @@ namespace SynicSugarGenerator {
             #line default
             #line hidden
             
-            #line 165 ""
+            #line 161 ""
             this.Write(this.ToStringHelper.ToStringWithCulture( Register ));
             
             #line default
             #line hidden
             
-            #line 165 ""
+            #line 161 ""
             this.Write(@"
         
         /// <summary>
@@ -177,13 +179,13 @@ namespace SynicSugarGenerator {
             #line default
             #line hidden
             
-            #line 172 ""
+            #line 168 ""
             this.Write(this.ToStringHelper.ToStringWithCulture( PlayeInstance ));
             
             #line default
             #line hidden
             
-            #line 172 ""
+            #line 168 ""
             this.Write(@"
             return default(T);
         }
@@ -197,13 +199,13 @@ namespace SynicSugarGenerator {
             #line default
             #line hidden
             
-            #line 180 ""
+            #line 176 ""
             this.Write(this.ToStringHelper.ToStringWithCulture( CommonsInstance ));
             
             #line default
             #line hidden
             
-            #line 180 ""
+            #line 176 ""
             this.Write("\n            return default(T);\n        }\n\n        //SendPacket(for elements)\n   " +
                     "     public void ConvertFromPacket(ref byte ch, string id, ref ArraySegment<byte" +
                     "> payload){\n            switch((CHANNELLIST)ch){");
@@ -211,13 +213,13 @@ namespace SynicSugarGenerator {
             #line default
             #line hidden
             
-            #line 186 ""
+            #line 182 ""
             this.Write(this.ToStringHelper.ToStringWithCulture( PacketConvert ));
             
             #line default
             #line hidden
             
-            #line 186 ""
+            #line 182 ""
             this.Write("\n                case CHANNELLIST.ObtainPing:\n                    EOSp2p.SendPack" +
                     "et((byte)CHANNELLIST.ReturnPong, payload, UserId.GetUserId(id));\n               " +
                     " return;\n                case CHANNELLIST.ReturnPong:\n                    Networ" +
@@ -264,13 +266,13 @@ namespace SynicSugarGenerator {
             #line default
             #line hidden
             
-            #line 256 ""
+            #line 252 ""
  if (needSyncSynic) { 
             
             #line default
             #line hidden
             
-            #line 257 ""
+            #line 253 ""
             this.Write("        \n        /// <summary>\n        /// Sync all Synic variables. This is very" +
                     " heavy because it handles multiple data and repeats compression and serializatio" +
                     "n.\n        /// </summary>\n        /// <param name=\"targetId\">Target to be synced" +
@@ -309,26 +311,26 @@ namespace SynicSugarGenerator {
             #line default
             #line hidden
             
-            #line 301 ""
+            #line 297 ""
             this.Write(this.ToStringHelper.ToStringWithCulture( GenerateSynicContainer ));
             
             #line default
             #line hidden
             
-            #line 301 ""
+            #line 297 ""
             this.Write("\n                default:\n                goto case 9;\n            }\n            " +
                     "return synicContainer;\n        }\n        ");
             
             #line default
             #line hidden
             
-            #line 307 ""
+            #line 303 ""
  } 
             
             #line default
             #line hidden
             
-            #line 308 ""
+            #line 304 ""
             this.Write("        \n        //Synced 0 = index, 1 = additional packet amount\n        bool Re" +
                     "storeLargePackets(ref byte ch, string id, ref ArraySegment<byte> payload){\n     " +
                     "       //Prep\n            if(!largeBuffer.ContainsKey(id)){\n                larg" +
@@ -395,26 +397,26 @@ namespace SynicSugarGenerator {
             #line default
             #line hidden
             
-            #line 400 ""
+            #line 396 ""
             this.Write(this.ToStringHelper.ToStringWithCulture( SyncedInvoker ));
             
             #line default
             #line hidden
             
-            #line 400 ""
+            #line 396 ""
             this.Write("\n                default:\n                goto case 9;\n            }\n        }\n  " +
                     "      ");
             
             #line default
             #line hidden
             
-            #line 405 ""
+            #line 401 ""
             this.Write(this.ToStringHelper.ToStringWithCulture( SyncedItems ));
             
             #line default
             #line hidden
             
-            #line 405 ""
+            #line 401 ""
             this.Write("\n    }\n}");
             
             #line default

@@ -34,6 +34,10 @@ namespace SynicSugar.P2P {
         internal RPCInformation lastRpcInfo;
         internal TargetRPCInformation lastTargetRPCInfo;
         /// <summary>
+        /// Whether matching has been completed and the game has started.
+        /// </summary>
+        internal bool IsInGame;
+        /// <summary>
         /// Set reference of some manager classes.
         /// </summary>
         /// <param name="connectionInstance"></param>

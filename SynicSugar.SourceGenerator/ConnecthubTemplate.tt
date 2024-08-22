@@ -112,13 +112,11 @@ namespace SynicSugar.P2P {
         /// Then, the user leave the lobby.<br />
         /// The last user closes the lobby in Backend.
         /// <param name="destroyManager">Destroy NetworkManager after exit lobby.</param>
+        /// <param name="cleanupMemberCountChanged">Need to call MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(id, false) after exit lobby?</param>
         /// <param name="cancelToken">Cancel token for this task</param>
         /// </summary>
-        public async UniTask<Result> ExitSession(bool destroyManager = true, CancellationToken cancelToken = default(CancellationToken)){
-            if(cancelToken == default(CancellationToken)){
-                cancelToken = p2pConfig.Instance.gameObject.GetCancellationTokenOnDestroy();
-            }
-            Result isSuccess = await NetworkCore.ExitSession(destroyManager, cancelToken);
+        public async UniTask<Result> ExitSession(bool destroyManager = true, bool cleanupMemberCountChanged = false, CancellationToken cancelToken = default(CancellationToken)){
+            Result isSuccess = await NetworkCore.ExitSession(destroyManager, cleanupMemberCountChanged, cancelToken);
             syncTokenSource.Cancel();
             ClearReferenceDictionaries();
             return isSuccess;
@@ -128,13 +126,11 @@ namespace SynicSugar.P2P {
         /// Then, Host closes and Guest leaves the Lobby.<br />
         /// When Host closes Lobby, Guests are automatically kicked out from the Lobby.
         /// <param name="destroyManager">Destroy NetworkManager after exit lobby.</param>
+        /// <param name="cleanupMemberCountChanged">Need to call MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(id, false) after exit lobby?</param>
         /// <param name="cancelToken">Cancel token for this task</param>
         /// </summary>
-        public async UniTask<Result> CloseSession(bool destroyManager = true, CancellationToken cancelToken = default(CancellationToken)){
-            if(cancelToken == default(CancellationToken)){
-                cancelToken = p2pConfig.Instance.gameObject.GetCancellationTokenOnDestroy();
-            }
-            Result isSuccess = await NetworkCore.CloseSession(destroyManager, cancelToken);
+        public async UniTask<Result> CloseSession(bool destroyManager = true, bool cleanupMemberCountChanged = false, CancellationToken cancelToken = default(CancellationToken)){
+            Result isSuccess = await NetworkCore.CloseSession(destroyManager, cleanupMemberCountChanged, cancelToken);
             syncTokenSource.Cancel();
             ClearReferenceDictionaries();
             return isSuccess;

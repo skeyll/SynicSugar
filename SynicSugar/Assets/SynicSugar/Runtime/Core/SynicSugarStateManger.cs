@@ -1,15 +1,16 @@
 using UnityEngine;
 
 namespace SynicSugar {
-    public class EOSManagerInstanceManger : MonoBehaviour {
+    public class SynicSugarStateManger : MonoBehaviour {
 #region Singleton
-        public static EOSManagerInstanceManger Instance { get; private set; }
+        public static SynicSugarStateManger Instance { get; private set; }
         void Awake() {
             if( Instance != null ) {
                 Destroy( this.gameObject );
                 return;
             }
             Instance = this;
+            SetCoreFactory();
             DontDestroyOnLoad(this);
         }
         void OnDestroy() {
@@ -18,5 +19,12 @@ namespace SynicSugar {
             }
         }
 #endregion
+        SynicSugarCoreFactoryBase coreFactory;
+        void SetCoreFactory(){
+            coreFactory = new SynicSugarCoreFactory();
+        }
+        internal SynicSugarCoreFactoryBase GetCoreFactory(){
+            return coreFactory;
+        }
     }
 }

@@ -63,7 +63,6 @@ namespace SynicSugar.P2P {
         /// To get packets
         /// </summary>
         GetNextReceivedPacketSizeOptions standardPacketSizeOptions, synicPacketSizeOptions;
-        bool IsEnableRTC => MatchMakeManager.Instance.eosLobby.CurrentLobby.hasConnectedRTCRoom;
         /// <summary>
         /// Is the connection currently active?
         /// </summary>
@@ -138,15 +137,18 @@ namespace SynicSugar.P2P {
         /// Stop connections, exit current lobby.<br />
         /// The Last user closes lobby.
         /// </summary>
-        async UniTask<Result> INetworkCore.ExitSession(bool destroyManager, CancellationToken token){
+        /// <param name="destroyManager">If true, destroy NetworkManager after cancel matchmake.</param>
+        /// <param name="cleanupMemberCountChanged">Need to call MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(id, false) after exit lobby?</param>
+        /// <param name="token">token for this task</param>
+        async UniTask<Result> INetworkCore.ExitSession(bool destroyManager, bool cleanupMemberCountChanged , CancellationToken token){
             IsConnected = false;
             ResetConnections();
             Result canExit;
             //The last user
             if (p2pInfo.Instance.IsHost() && p2pInfo.Instance.CurrentConnectedUserIds.Count == 1){
-                canExit = await MatchMakeManager.Instance.CloseCurrentLobby(token);
+                canExit = await MatchMakeManager.Instance.CloseCurrentLobby(cleanupMemberCountChanged, token);
             }else{
-                canExit = await MatchMakeManager.Instance.ExitCurrentLobby(token);
+                canExit = await MatchMakeManager.Instance.ExitCurrentLobby(cleanupMemberCountChanged, token);
             }
             
             if(destroyManager && canExit == Result.Success){
@@ -155,19 +157,22 @@ namespace SynicSugar.P2P {
             return canExit;
         }
         /// <summary>
-        /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll.</ br>
+        /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll.<br />
         /// Stop connections, exit current lobby.<br />
         /// Host closes lobby. Guest leaves lobby. <br />
         /// If host call this after the lobby has other users, Guests in this lobby are kicked out from the lobby.
         /// </summary>
-        async UniTask<Result> INetworkCore.CloseSession(bool destroyManager, CancellationToken token){
+        /// <param name="destroyManager">If true, destroy NetworkManager after cancel matchmake.</param>
+        /// <param name="cleanupMemberCountChanged">Need to call MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(id, false) after exit lobby?</param>
+        /// <param name="token">token for this task</param>
+        async UniTask<Result> INetworkCore.CloseSession(bool destroyManager, bool cleanupMemberCountChanged, CancellationToken token){
             IsConnected = false;
             ResetConnections();
             Result canLeave;
             if(p2pInfo.Instance.IsHost()){
-                canLeave = await MatchMakeManager.Instance.CloseCurrentLobby(token);
+                canLeave = await MatchMakeManager.Instance.CloseCurrentLobby(cleanupMemberCountChanged, token);
             }else{
-                canLeave = await MatchMakeManager.Instance.ExitCurrentLobby(token);
+                canLeave = await MatchMakeManager.Instance.ExitCurrentLobby(cleanupMemberCountChanged, token);
             }
             if(destroyManager && canLeave == Result.Success){
                 Destroy(MatchMakeManager.Instance.gameObject);
@@ -203,9 +208,7 @@ namespace SynicSugar.P2P {
                 break;
             }
             
-            if(IsEnableRTC){
-                RTCManager.Instance.ToggleReceiveingFromTarget(null, true);
-            }
+            RTCManager.Instance.ToggleReceiveingFromTarget(null, true);
         }
         /// <summary>
         /// Start Synic packet receiver on each timing. Only one can be enabled, including Standard receiver.<br />
@@ -563,8 +566,8 @@ namespace SynicSugar.P2P {
         /// <summary>
         /// Update SyncedInfo, then Invoke SyncedSynic event.
         /// </summary>
-        /// <param name="id"></param>
-        /// <param name="phase"></param>
+        /// <param name="id">target id</param>
+        /// <param name="phase">Synic phase</param>
         /// <summary>
         public void UpdateSyncedState(string id, byte phase){
             p2pInfo.Instance.SyncSnyicNotifier.UpdateSyncedState(id, phase);
@@ -590,6 +593,9 @@ namespace SynicSugar.P2P {
         void INetworkCore.CloseHostSynic(){
             p2pInfo.Instance.userIds.ReceivedocalUserSynic();
         }
+        /// <summary>
+        /// Return pong to calculate RTT. Call from ConnectHub
+        /// </summary>
         void INetworkCore.GetPong(string id, ArraySegment<byte> utc){
             p2pInfo.Instance.pings.GetPong(id, utc);
         }
