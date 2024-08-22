@@ -36,7 +36,7 @@ namespace SynicSugar.P2P {
         /// <summary>
         /// Whether matching has been completed and the game has started.
         /// </summary>
-        internal bool IsInGame;
+        internal bool IsConnecting;
         /// <summary>
         /// Set reference of some manager classes.
         /// </summary>

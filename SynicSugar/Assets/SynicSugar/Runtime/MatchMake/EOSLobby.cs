@@ -460,7 +460,6 @@ namespace SynicSugar.MatchMake {
             }
             
             await MatchMakeManager.Instance.OnSaveLobbyID();
-            p2pInfo.Instance.IsInGame = true; //本当にここで変更する？Manager側でしないか？
             return result;
         }
         /// <summary>
@@ -829,7 +828,7 @@ namespace SynicSugar.MatchMake {
             OnLobbyUpdated(info.LobbyId);
             
             //For MatchMaking
-            if(!p2pInfo.Instance.IsInGame){
+            if(!SynicSugarStateManger.Instance.State.IsMatchmaking){
                 // The notify about promote dosen't change member amount.
                 if(info.TargetUserId == productUserId){
                     if(info.CurrentStatus == LobbyMemberStatus.Promoted){
@@ -1278,12 +1277,11 @@ namespace SynicSugar.MatchMake {
             }
 
             RemoveAllNotifyEvents();
-            if(!isMatchmakingCompleted){
+            if(SynicSugarStateManger.Instance.State.IsMatchmaking){
                 matchingResult = Result.LobbyClosed;
                 isMatchmakingCompleted = true;
-            }else if(p2pInfo.Instance.IsInGame){
+            }else if(SynicSugarStateManger.Instance.State.IsInSession){
                 await MatchMakeManager.Instance.OnDeleteLobbyID();
-                p2pInfo.Instance.IsInGame = false;
             }
 
             return result;
@@ -1336,12 +1334,11 @@ namespace SynicSugar.MatchMake {
                 return result;
             }
             RemoveAllNotifyEvents();
-            if(!isMatchmakingCompleted){
+            if(SynicSugarStateManger.Instance.State.IsMatchmaking){
                 matchingResult = Result.LobbyClosed;
                 isMatchmakingCompleted = true;
-            }else if(p2pInfo.Instance.IsInGame){
+            }else if(SynicSugarStateManger.Instance.State.IsInSession){
                 await MatchMakeManager.Instance.OnDeleteLobbyID();
-                p2pInfo.Instance.IsInGame = false;
             }
 
             return result;
@@ -1411,14 +1408,15 @@ namespace SynicSugar.MatchMake {
                 await UniTask.Delay((int)delay.ReadyForConnectionDelay, cancellationToken: token);
             }
 
-            p2pInfo.Instance.IsInGame = true;
+            SynicSugarStateManger.Instance.State.IsMatchmaking = false;
+            SynicSugarStateManger.Instance.State.IsInSession = true;
             return Result.Success;
         }
         public override async UniTask<Result> DestroyOfflineLobby(){
             await MatchMakeManager.Instance.OnDeleteLobbyID();
             CurrentLobby.Clear();
 
-            p2pInfo.Instance.IsInGame = false;
+            SynicSugarStateManger.Instance.State.IsInSession = false;
             return Result.Success;
         }
 #endregion

@@ -472,6 +472,9 @@ namespace SynicSugar.MatchMake {
             }
 
             MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Ready);
+
+            SynicSugarStateManger.Instance.State.IsMatchmaking = false;
+            SynicSugarStateManger.Instance.State.IsInSession = true;
             return Result.Success;
         }
 
