@@ -1,12 +1,12 @@
 using UnityEngine;
 
 namespace SynicSugar {
-    public sealed class SynicSugarStateManger : MonoBehaviour {
+    public sealed class SynicSugarManger : MonoBehaviour {
 #region Singleton
-        public static SynicSugarStateManger Instance { get; private set; }
+        public static SynicSugarManger Instance { get; private set; }
         void Awake() {
             if( Instance != null ) {
-                Destroy( this.gameObject );
+                Destroy( gameObject );
                 return;
             }
             Instance = this;

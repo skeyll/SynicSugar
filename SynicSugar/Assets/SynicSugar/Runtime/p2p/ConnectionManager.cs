@@ -106,7 +106,7 @@ namespace SynicSugar.P2P {
         /// If false, process current queue, then stop it.</param>
         /// <param name="token">For this task</param>
         async UniTask INetworkCore.PauseConnections(bool isForced, CancellationToken token){
-            if(!IsConnected || !SynicSugarStateManger.Instance.State.IsInSession){
+            if(!IsConnected || !SynicSugarManger.Instance.State.IsInSession){
             #if SYNICSUGAR_LOG
                 Debug.Log(!IsConnected ? "PauseConnections: Connection is invalid now." : "PauseConnections: This local user is NOT in Session.");
             #endif
@@ -135,7 +135,7 @@ namespace SynicSugar.P2P {
         /// Prepare to receive in advance. If user sent packets, it can open to get packets for a socket id without this.
         /// </summary>
         void INetworkCore.RestartConnections(){
-            if(IsConnected || !SynicSugarStateManger.Instance.State.IsInSession){
+            if(IsConnected || !SynicSugarManger.Instance.State.IsInSession){
             #if SYNICSUGAR_LOG
                 Debug.Log(IsConnected ? "RestartConnections: Connection is invalid now." : "RestartConnections: This local user is NOT in Session.");
             #endif
@@ -152,7 +152,7 @@ namespace SynicSugar.P2P {
         /// <param name="cleanupMemberCountChanged">Need to call MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(id, false) after exit lobby?</param>
         /// <param name="token">token for this task</param>
         async UniTask<Result> INetworkCore.ExitSession(bool destroyManager, bool cleanupMemberCountChanged , CancellationToken token){
-            if(!SynicSugarStateManger.Instance.State.IsInSession){
+            if(!SynicSugarManger.Instance.State.IsInSession){
             #if SYNICSUGAR_LOG
                 Debug.Log("ExitSession: This local user is NOT in Session.");
             #endif
@@ -174,7 +174,7 @@ namespace SynicSugar.P2P {
                 Destroy(MatchMakeManager.Instance.gameObject);
             }
 
-            SynicSugarStateManger.Instance.State.IsInSession = false;
+            SynicSugarManger.Instance.State.IsInSession = false;
             return Result.Success;
         }
         /// <summary>
@@ -187,7 +187,7 @@ namespace SynicSugar.P2P {
         /// <param name="cleanupMemberCountChanged">Need to call MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(id, false) after exit lobby?</param>
         /// <param name="token">token for this task</param>
         async UniTask<Result> INetworkCore.CloseSession(bool destroyManager, bool cleanupMemberCountChanged, CancellationToken token){
-            if(!SynicSugarStateManger.Instance.State.IsInSession){
+            if(!SynicSugarManger.Instance.State.IsInSession){
             #if SYNICSUGAR_LOG
                 Debug.Log("CloseSession: This local user is NOT in Session.");
             #endif
@@ -207,7 +207,7 @@ namespace SynicSugar.P2P {
                 Destroy(MatchMakeManager.Instance.gameObject);
             }
 
-            SynicSugarStateManger.Instance.State.IsInSession = false;
+            SynicSugarManger.Instance.State.IsInSession = false;
             return Result.Success;
         }
         /// <summary>
@@ -215,7 +215,7 @@ namespace SynicSugar.P2P {
         /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll. 
         /// </summary>
         void INetworkCore.StartPacketReceiver(IPacketConvert hubInstance, PacketReceiveTiming timing, uint maxBatchSize){
-            if(!SynicSugarStateManger.Instance.State.IsInSession){
+            if(!SynicSugarManger.Instance.State.IsInSession){
             #if SYNICSUGAR_LOG
                 Debug.Log("StartPacketReceiver: This local user is NOT in Session.");
             #endif
@@ -260,7 +260,7 @@ namespace SynicSugar.P2P {
             validReceiverType = ReceiverType.Synic;
         }
         void INetworkCore.StopPacketReceiver(){
-            if(!SynicSugarStateManger.Instance.State.IsInSession){
+            if(!SynicSugarManger.Instance.State.IsInSession){
             #if SYNICSUGAR_LOG
                 Debug.Log("StopPacketReceiver: This local user is NOT in Session.");
             #endif

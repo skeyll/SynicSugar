@@ -16,7 +16,8 @@ namespace SynicSugar.Login {
             return EOSManager.Instance.HasLoggedInWithConnect();
         }
         /// <summary>
-        /// Login with DeviceID. If success, return true.
+        /// Login with DeviceID. If success, return true. <br />
+        /// We can't use DeviceId directly for security. This id is saved secure pos like as Keystore.
         /// </summary>
         /// <param name="token"></param>
         /// <returns></returns>
@@ -56,6 +57,10 @@ namespace SynicSugar.Login {
                 return result;
             }
 
+            if(result == Result.Success){
+                // SynicSugarManger
+            }
+
             return result;
 
             void OnCreateDeviceIdCallback(ref CreateDeviceIdCallbackInfo data){
@@ -70,7 +75,8 @@ namespace SynicSugar.Login {
         }
 
         /// <summary>
-        /// Login with DeviceID. If success, return true.
+        /// Login with DeviceID. If success, return true. <br />
+        /// We can't use DeviceId directly for security. This id is saved secure pos like as Keystore.
         /// </summary>
         /// <param name="displayName"></param>
         /// <param name="token"></param>

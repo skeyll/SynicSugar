@@ -828,7 +828,7 @@ namespace SynicSugar.MatchMake {
             OnLobbyUpdated(info.LobbyId);
             
             //For MatchMaking
-            if(!SynicSugarStateManger.Instance.State.IsMatchmaking){
+            if(!SynicSugarManger.Instance.State.IsMatchmaking){
                 // The notify about promote dosen't change member amount.
                 if(info.TargetUserId == productUserId){
                     if(info.CurrentStatus == LobbyMemberStatus.Promoted){
@@ -1277,10 +1277,10 @@ namespace SynicSugar.MatchMake {
             }
 
             RemoveAllNotifyEvents();
-            if(SynicSugarStateManger.Instance.State.IsMatchmaking){
+            if(SynicSugarManger.Instance.State.IsMatchmaking){
                 matchingResult = Result.LobbyClosed;
                 isMatchmakingCompleted = true;
-            }else if(SynicSugarStateManger.Instance.State.IsInSession){
+            }else if(SynicSugarManger.Instance.State.IsInSession){
                 await MatchMakeManager.Instance.OnDeleteLobbyID();
             }
 
@@ -1334,10 +1334,10 @@ namespace SynicSugar.MatchMake {
                 return result;
             }
             RemoveAllNotifyEvents();
-            if(SynicSugarStateManger.Instance.State.IsMatchmaking){
+            if(SynicSugarManger.Instance.State.IsMatchmaking){
                 matchingResult = Result.LobbyClosed;
                 isMatchmakingCompleted = true;
-            }else if(SynicSugarStateManger.Instance.State.IsInSession){
+            }else if(SynicSugarManger.Instance.State.IsInSession){
                 await MatchMakeManager.Instance.OnDeleteLobbyID();
             }
 
