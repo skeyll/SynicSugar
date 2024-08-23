@@ -526,7 +526,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="token">token for this task</param>
         /// <returns></returns>
         public async UniTask<Result> ExitCurrentMatchMake(bool destroyManager = true, CancellationToken token = default(CancellationToken)){
-            if(!SynicSugarManger.Instance.State.IsMatchmaking){
+            if(!SynicSugarManger.Instance.State.IsMatchmaking || !isLooking){
             #if SYNICSUGAR_LOG
                 Debug.Log("ExitCurrentMatchMake: This user is not in matchmaking now.");
             #endif
@@ -556,7 +556,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="token">token for this task</param>
         /// <returns></returns>
         public async UniTask<Result> CloseCurrentMatchMake(bool destroyManager = true, CancellationToken token = default(CancellationToken)){
-            if(!SynicSugarManger.Instance.State.IsMatchmaking){
+            if(!SynicSugarManger.Instance.State.IsMatchmaking || !isLooking){
             #if SYNICSUGAR_LOG
                 Debug.Log("CloseCurrentMatchMake: This user is not in matchmaking now.");
             #endif
