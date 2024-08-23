@@ -17,6 +17,7 @@ namespace SynicSugar.P2P {
         /// Call from Start on NetworkManager 
         /// </summary>
         internal void InitConencter(){
+            IsConnected = false;
             GeneratePacketReceiver();
             P2PHandle = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface();
 
@@ -30,7 +31,6 @@ namespace SynicSugar.P2P {
                 LocalUserId = EOSManager.Instance.GetProductUserId(),
                 RequestedChannel = 255
             };
-            IsConnected = false;
         }
         internal void Dispose(){
             Destroy(receiverObject);
@@ -106,7 +106,12 @@ namespace SynicSugar.P2P {
         /// If false, process current queue, then stop it.</param>
         /// <param name="token">For this task</param>
         async UniTask INetworkCore.PauseConnections(bool isForced, CancellationToken token){
-            IsConnected = false;
+            if(!IsConnected || !SynicSugarManger.Instance.State.IsInSession){
+            #if SYNICSUGAR_LOG
+                Debug.Log(!IsConnected ? "PauseConnections: Connection is invalid now." : "PauseConnections: This local user is NOT in Session.");
+            #endif
+                return;
+            }
             CancelRTTToken();
             if(isForced){
                 ResetConnections();
@@ -130,6 +135,12 @@ namespace SynicSugar.P2P {
         /// Prepare to receive in advance. If user sent packets, it can open to get packets for a socket id without this.
         /// </summary>
         void INetworkCore.RestartConnections(){
+            if(IsConnected || !SynicSugarManger.Instance.State.IsInSession){
+            #if SYNICSUGAR_LOG
+                Debug.Log(IsConnected ? "RestartConnections: Connection is invalid now." : "RestartConnections: This local user is NOT in Session.");
+            #endif
+                return;
+            }
             OpenConnection();
         }
         /// <summary>
@@ -141,20 +152,30 @@ namespace SynicSugar.P2P {
         /// <param name="cleanupMemberCountChanged">Need to call MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(id, false) after exit lobby?</param>
         /// <param name="token">token for this task</param>
         async UniTask<Result> INetworkCore.ExitSession(bool destroyManager, bool cleanupMemberCountChanged , CancellationToken token){
-            IsConnected = false;
+            if(!SynicSugarManger.Instance.State.IsInSession){
+            #if SYNICSUGAR_LOG
+                Debug.Log("ExitSession: This local user is NOT in Session.");
+            #endif
+                return Result.InvalidAPICall;
+            }
             ResetConnections();
-            Result canExit;
+            Result  exitResult;
             //The last user
             if (p2pInfo.Instance.IsHost() && p2pInfo.Instance.CurrentConnectedUserIds.Count == 1){
-                canExit = await MatchMakeManager.Instance.CloseCurrentLobby(cleanupMemberCountChanged, token);
+                exitResult = await MatchMakeManager.Instance.CloseCurrentLobby(cleanupMemberCountChanged, token);
             }else{
-                canExit = await MatchMakeManager.Instance.ExitCurrentLobby(cleanupMemberCountChanged, token);
+                exitResult = await MatchMakeManager.Instance.ExitCurrentLobby(cleanupMemberCountChanged, token);
             }
             
-            if(destroyManager && canExit == Result.Success){
+            if(exitResult != Result.Success){
+                return exitResult;
+            }
+            if(destroyManager){
                 Destroy(MatchMakeManager.Instance.gameObject);
             }
-            return canExit;
+
+            SynicSugarManger.Instance.State.IsInSession = false;
+            return Result.Success;
         }
         /// <summary>
         /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll.<br />
@@ -166,24 +187,40 @@ namespace SynicSugar.P2P {
         /// <param name="cleanupMemberCountChanged">Need to call MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(id, false) after exit lobby?</param>
         /// <param name="token">token for this task</param>
         async UniTask<Result> INetworkCore.CloseSession(bool destroyManager, bool cleanupMemberCountChanged, CancellationToken token){
-            IsConnected = false;
-            ResetConnections();
-            Result canLeave;
-            if(p2pInfo.Instance.IsHost()){
-                canLeave = await MatchMakeManager.Instance.CloseCurrentLobby(cleanupMemberCountChanged, token);
-            }else{
-                canLeave = await MatchMakeManager.Instance.ExitCurrentLobby(cleanupMemberCountChanged, token);
+            if(!SynicSugarManger.Instance.State.IsInSession){
+            #if SYNICSUGAR_LOG
+                Debug.Log("CloseSession: This local user is NOT in Session.");
+            #endif
+                return Result.InvalidAPICall;
             }
-            if(destroyManager && canLeave == Result.Success){
+            ResetConnections();
+            Result closeResult;
+            if(p2pInfo.Instance.IsHost()){
+                closeResult = await MatchMakeManager.Instance.CloseCurrentLobby(cleanupMemberCountChanged, token);
+            }else{
+                closeResult = await MatchMakeManager.Instance.ExitCurrentLobby(cleanupMemberCountChanged, token);
+            }
+            if(closeResult != Result.Success){
+                return closeResult;
+            }
+            if(destroyManager){
                 Destroy(MatchMakeManager.Instance.gameObject);
             }
-            return canLeave;
+
+            SynicSugarManger.Instance.State.IsInSession = false;
+            return Result.Success;
         }
         /// <summary>
         /// Start standart packet receiver on each timing. Only one can be enabled, including Synic.<br />
         /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll. 
         /// </summary>
         void INetworkCore.StartPacketReceiver(IPacketConvert hubInstance, PacketReceiveTiming timing, uint maxBatchSize){
+            if(!SynicSugarManger.Instance.State.IsInSession){
+            #if SYNICSUGAR_LOG
+                Debug.Log("StartPacketReceiver: This local user is NOT in Session.");
+            #endif
+                return;
+            }
             if(validReceiverType != ReceiverType.None){
                 ((INetworkCore)this).StopPacketReceiver();
             }
@@ -223,6 +260,12 @@ namespace SynicSugar.P2P {
             validReceiverType = ReceiverType.Synic;
         }
         void INetworkCore.StopPacketReceiver(){
+            if(!SynicSugarManger.Instance.State.IsInSession){
+            #if SYNICSUGAR_LOG
+                Debug.Log("StopPacketReceiver: This local user is NOT in Session.");
+            #endif
+                return;
+            }
             if(validReceiverType is ReceiverType.None){
                 Debug.Log("StopPacketReceiver: PacketReciver is not working now.");
                 return;
@@ -560,7 +603,10 @@ namespace SynicSugar.P2P {
             ResultE result = P2PHandle.CloseConnections(ref closeOptions);
             if(result != ResultE.Success){
                 Debug.LogErrorFormat("CloseConnections: Failed to disconnect {0}", result);
+                return;
             }
+
+            IsConnected = false;
         }
 #endregion
         /// <summary>
