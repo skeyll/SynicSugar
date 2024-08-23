@@ -49,8 +49,6 @@ namespace SynicSugar.Auth {
                 Debug.Log("LoginWithDeviceID: Cancel StartConnectLoginWithDeviceToken.");
                 return result;
             }
-            
-            SynicSugarManger.Instance.State.IsLoggedIn = result == Result.Success;
 
             return result;
 
@@ -58,7 +56,7 @@ namespace SynicSugar.Auth {
                 result = (Result)data.ResultCode;
                 if (result is Result.Success or Result.DuplicateNotAllowed) {
                 #if SYNICSUGAR_LOG
-                    Debug.Log(result is Result.Success  ? "EOSConnect: Create new DeviceId" : "EOSConnect: Already have DeviceID in local");
+                    Debug.Log(result is Result.Success  ? "EOSAuthentication: Create new DeviceId" : "EOSAuthentication: Already have DeviceID in local");
                 #endif
                 }
                 finishCallback = true;
@@ -82,7 +80,7 @@ namespace SynicSugar.Auth {
             try{
                 await UniTask.WaitUntil(() => finishCallback, cancellationToken: token);
             }catch(OperationCanceledException){
-                Debug.Log("DeleteDeviceID: Canceled.");
+                Debug.Log("DeleteAccount: Canceled.");
                 return Result.Canceled;
             }
             
@@ -91,7 +89,7 @@ namespace SynicSugar.Auth {
             void OnDeleteDeviceId(ref DeleteDeviceIdCallbackInfo data){
                 result = (Result)data.ResultCode;
                 if(result != Result.Success){
-                    Debug.Log("DeleteDeviceID: Failuer " + data.ResultCode);
+                    Debug.Log("DeleteAccount: Failure " + data.ResultCode);
                 }
                 finishCallback = true;
             }
