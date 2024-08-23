@@ -58,6 +58,7 @@ namespace SynicSugar.Auth {
                 #if SYNICSUGAR_LOG
                     Debug.Log(result is Result.Success  ? "EOSAuthentication: Create new DeviceId" : "EOSAuthentication: Already have DeviceID in local");
                 #endif
+                    result = Result.Success;
                 }
                 finishCallback = true;
             }
