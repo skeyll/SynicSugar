@@ -12,6 +12,7 @@ namespace SynicSugar.Login {
         /// </summary>
         /// <returns>Returns true if the user has successfully logged in with EOS Connect,
         /// otherwise returns false.</returns>
+        [Obsolete("This is Obsolete. We can use SynicSugarManger.Instance.State.IsLoggedIn instead of this.")]
         public static bool HasLoggedinEOS(){
             return EOSManager.Instance.HasLoggedInWithConnect();
         }
@@ -21,6 +22,7 @@ namespace SynicSugar.Login {
         /// </summary>
         /// <param name="token"></param>
         /// <returns></returns>
+        [Obsolete("This is Obsolete. We can use SynicSugarAuthentication.Login in SynicSugar.Auth instead of this.")]
         public static async UniTask<Result> LoginWithDeviceID(CancellationToken token = default(CancellationToken)){
             bool finishCallback = false;
             Result result = Result.Canceled;
@@ -68,6 +70,7 @@ namespace SynicSugar.Login {
                     Debug.Log(result is Result.Success  ? "EOSConnect: Create new DeviceId" : "EOSConnect: Already have DeviceID in local");
                 #endif
                 }
+                result = Result.Success;
                 finishCallback = true;
             }
         }
@@ -79,6 +82,7 @@ namespace SynicSugar.Login {
         /// <param name="displayName"></param>
         /// <param name="token"></param>
         /// <returns></returns>
+        [Obsolete("This is Obsolete. We can use SynicSugarAuthentication.Login in SynicSugar.Auth instead of this.")]
         public static async UniTask<Result> LoginWithDeviceID(string displayName, CancellationToken token = default(CancellationToken)){
             bool finishCallback = false;
             Result result = Result.Canceled;
@@ -114,7 +118,7 @@ namespace SynicSugar.Login {
                 Debug.Log("LoginWithDeviceID: Cancel StartConnectLoginWithDeviceToken.");
                 return result;
             }
-            
+
             SynicSugarManger.Instance.State.IsLoggedIn = result == Result.Success;
 
             return result;
@@ -125,6 +129,7 @@ namespace SynicSugar.Login {
                 #if SYNICSUGAR_LOG
                     Debug.Log(result is Result.Success  ? "EOSConnect: Create new DeviceId" : "EOSConnect: Already have DeviceID in local");
                 #endif
+                    result = Result.Success;
                 }
                 finishCallback = true;
             }
@@ -136,6 +141,7 @@ namespace SynicSugar.Login {
         /// </summary>
         /// <param name="token"></param>
         /// <returns></returns>
+        [Obsolete("This is Obsolete. We can use SynicSugarAccount.DeleteAccount in SynicSugar.Auth instead of this.")]
         public static async UniTask<Result> DeleteDeviceID(CancellationToken token = default(CancellationToken)){
             var connectInterface = EOSManager.Instance.GetEOSPlatformInterface().GetConnectInterface();
             DeleteDeviceIdOptions options = new DeleteDeviceIdOptions();
@@ -156,7 +162,7 @@ namespace SynicSugar.Login {
             void OnDeleteDeviceId(ref DeleteDeviceIdCallbackInfo data){
                 result = (Result)data.ResultCode;
                 if(result != Result.Success){
-                    Debug.Log("DeleteDeviceID: Failuer " + data.ResultCode);
+                    Debug.Log("DeleteDeviceID: Failure: " + data.ResultCode);
                 }
                 finishCallback = true;
             }

@@ -1,22 +1,21 @@
 using Cysharp.Threading.Tasks;
 using System.Threading;
-using SynicSugar.Login;
+using SynicSugar.Auth;
 using UnityEngine;
 namespace  SynicSugar.Samples {
     public class Login : MonoBehaviour {
         [SerializeField] GameObject modeSelectCanvas;
         [SerializeField] bool needResultDetail;
         void Start(){
-            bool hasLogin = EOSConnect.HasLoggedinEOS();
         #if SYNICSUGAR_FPSTEST
-            if(!hasLogin){
+            if(!SynicSugarManger.Instance.State.IsLoggedIn){
                 //Set game FPS
                 Application.targetFrameRate = 60;
             }
         #endif
             
-            this.gameObject.SetActive(!hasLogin);
-            modeSelectCanvas.SetActive(hasLogin);
+            this.gameObject.SetActive(!SynicSugarManger.Instance.State.IsLoggedIn);
+            modeSelectCanvas.SetActive(SynicSugarManger.Instance.State.IsLoggedIn);
         }
         /// <summary>
         /// For button event
@@ -28,7 +27,7 @@ namespace  SynicSugar.Samples {
             this.gameObject.SetActive(false);
             SynicSugarDebug.Instance.Log("Trt to connect EOS with deviceID.");
             //(bool, Result)
-            var result = await EOSConnect.LoginWithDeviceID("TestPlayer");
+            var result = await SynicSugarAuthentication.Login("TestPlayer");
     
             if(result == Result.Success){
                 modeSelectCanvas.SetActive(true);
@@ -47,7 +46,7 @@ namespace  SynicSugar.Samples {
             DeleteDeviceIDRequest().Forget();
         }
         public async UniTask DeleteDeviceIDRequest(){
-            var result = await EOSConnect.DeleteDeviceID();
+            var result = await SynicSugarAccount.DeleteAccount();
             if(result == Result.Success){
                 SynicSugarDebug.Instance.Log("Delete DeviceID: Success.");
                 return;
