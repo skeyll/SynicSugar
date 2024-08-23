@@ -30,7 +30,7 @@ namespace SynicSugar.MatchMake {
             timeUntilTimeout = 0f;
         }
         void Start(){
-            matchmakingCore = SynicSugarManger.Instance.GetCoreFactory().GenerateMatchmakingCore(maxSearchResult);
+            matchmakingCore = SynicSugarManger.Instance.GetCoreFactory().GetMatchmakingCore(maxSearchResult);
         }
         void OnDestroy() {
             if( Instance == this ) {

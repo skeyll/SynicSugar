@@ -1,7 +1,15 @@
+using SynicSugar.Auth;
 using SynicSugar.MatchMake;
 namespace SynicSugar {
     internal sealed class SynicSugarCoreFactory : SynicSugarCoreFactoryBase {
-        public override MatchmakingCore GenerateMatchmakingCore(uint maxSearch){
+        AuthenticationCore auth;
+        public SynicSugarCoreFactory (){
+            auth = new EOSAuthentication ();
+        }
+        public override AuthenticationCore GetAuthenticationCore(){
+            return auth;
+        }
+        public override MatchmakingCore GetMatchmakingCore(uint maxSearch){
             return new EOSLobby(maxSearch);
         }
     }

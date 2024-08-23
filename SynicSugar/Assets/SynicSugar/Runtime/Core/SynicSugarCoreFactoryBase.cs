@@ -1,7 +1,9 @@
+using SynicSugar.Auth;
 using SynicSugar.MatchMake;
 
 namespace SynicSugar {
     public abstract class SynicSugarCoreFactoryBase {
-        public abstract MatchmakingCore GenerateMatchmakingCore(uint maxSearch);
+        public abstract AuthenticationCore GetAuthenticationCore();
+        public abstract MatchmakingCore GetMatchmakingCore(uint maxSearch);
     }
 }
