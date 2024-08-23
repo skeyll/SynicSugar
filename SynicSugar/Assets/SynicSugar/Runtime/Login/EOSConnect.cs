@@ -56,10 +56,8 @@ namespace SynicSugar.Login {
                 Debug.Log("LoginWithDeviceID: Cancel StartConnectLoginWithDeviceToken.");
                 return result;
             }
-
-            if(result == Result.Success){
-                // SynicSugarManger
-            }
+            
+            SynicSugarManger.Instance.State.IsLoggedIn = result == Result.Success;
 
             return result;
 
@@ -116,6 +114,8 @@ namespace SynicSugar.Login {
                 Debug.Log("LoginWithDeviceID: Cancel StartConnectLoginWithDeviceToken.");
                 return result;
             }
+            
+            SynicSugarManger.Instance.State.IsLoggedIn = result == Result.Success;
 
             return result;
 
