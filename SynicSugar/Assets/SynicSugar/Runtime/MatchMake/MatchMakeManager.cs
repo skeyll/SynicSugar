@@ -181,6 +181,7 @@ namespace SynicSugar.MatchMake {
 
             if(matchmakingResult != Result.Success){
                 MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
+                SynicSugarManger.Instance.State.IsMatchmaking = false;
                 return matchmakingResult;
             }
             
@@ -211,6 +212,7 @@ namespace SynicSugar.MatchMake {
 
             if(matchmakingResult != Result.Success){
                 MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
+                SynicSugarManger.Instance.State.IsMatchmaking = false;
                 return matchmakingResult;
             }
             
@@ -232,6 +234,7 @@ namespace SynicSugar.MatchMake {
             }catch(OperationCanceledException){
                 MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
                 isLooking = false;
+                SynicSugarManger.Instance.State.IsMatchmaking = false;
                 return Result.Canceled;
             }         
         }
@@ -256,6 +259,7 @@ namespace SynicSugar.MatchMake {
 
             if(matchmakingResult != Result.Success){
                 MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
+                SynicSugarManger.Instance.State.IsMatchmaking = false;
                 return matchmakingResult;
             }
             
@@ -286,6 +290,7 @@ namespace SynicSugar.MatchMake {
 
             if(matchmakingResult != Result.Success){
                 MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
+                SynicSugarManger.Instance.State.IsMatchmaking = false;
                 return matchmakingResult;
             }
             
@@ -308,6 +313,7 @@ namespace SynicSugar.MatchMake {
             }catch(OperationCanceledException){
                 MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
                 isLooking = false;
+                SynicSugarManger.Instance.State.IsMatchmaking = false;
                 return Result.Canceled;
             }         
         }
@@ -332,6 +338,7 @@ namespace SynicSugar.MatchMake {
 
             if(matchmakingResult != Result.Success){
                 MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
+                SynicSugarManger.Instance.State.IsMatchmaking = false;
                 return matchmakingResult;
             }
             
@@ -362,6 +369,7 @@ namespace SynicSugar.MatchMake {
 
             if(matchmakingResult != Result.Success){
                 MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
+                SynicSugarManger.Instance.State.IsMatchmaking = false;
                 return matchmakingResult;
             }
             
@@ -384,6 +392,7 @@ namespace SynicSugar.MatchMake {
             }catch(OperationCanceledException){
                 MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
                 isLooking = false;
+                SynicSugarManger.Instance.State.IsMatchmaking = false;
                 return Result.Canceled;
             }         
         }
@@ -411,17 +420,20 @@ namespace SynicSugar.MatchMake {
             Debug.Log($"Try Recconect with {LobbyID}");
     #endif
             isLooking = true;
+            SynicSugarManger.Instance.State.IsMatchmaking = true;
             try{
                 Result joinResult = await matchmakingCore.JoinLobbyBySavedLobbyId(LobbyID, token);
 
                 isLooking = false;
                 if(joinResult != Result.Success){
                     MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
+                    SynicSugarManger.Instance.State.IsMatchmaking = false;
                     return joinResult;
                 }
             }catch(OperationCanceledException){
                 MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
                 isLooking = false;
+                SynicSugarManger.Instance.State.IsMatchmaking = false;
                 return Result.Canceled;
             }         
 
@@ -436,6 +448,7 @@ namespace SynicSugar.MatchMake {
         /// <returns></returns>
         async UniTask TimeoutTimer(int timeoutSec, CancellationToken userToken){
             isLooking = true;
+            SynicSugarManger.Instance.State.IsMatchmaking = true;
             timeUntilTimeout = timeoutSec;
             try{
                 while(timeUntilTimeout > 0f && isLooking){
@@ -513,7 +526,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="token">token for this task</param>
         /// <returns></returns>
         public async UniTask<Result> ExitCurrentMatchMake(bool destroyManager = true, CancellationToken token = default(CancellationToken)){
-            if(!SynicSugarManger.Instance.State.IsMatchmaking){
+            if(!SynicSugarManger.Instance.State.IsMatchmaking || !isLooking){
             #if SYNICSUGAR_LOG
                 Debug.Log("ExitCurrentMatchMake: This user is not in matchmaking now.");
             #endif
@@ -543,7 +556,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="token">token for this task</param>
         /// <returns></returns>
         public async UniTask<Result> CloseCurrentMatchMake(bool destroyManager = true, CancellationToken token = default(CancellationToken)){
-            if(!SynicSugarManger.Instance.State.IsMatchmaking){
+            if(!SynicSugarManger.Instance.State.IsMatchmaking || !isLooking){
             #if SYNICSUGAR_LOG
                 Debug.Log("CloseCurrentMatchMake: This user is not in matchmaking now.");
             #endif
