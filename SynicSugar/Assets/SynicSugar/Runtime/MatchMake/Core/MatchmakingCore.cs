@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using SynicSugar.P2P;
 
-namespace SynicSugar.MatchMake {
+namespace SynicSugar.MatchMake.Base {
     public abstract class MatchmakingCore {
         protected uint MAX_SEARCH_RESULT;
         protected MatchmakingCore(uint maxSearch){

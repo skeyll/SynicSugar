@@ -9,6 +9,7 @@ using SynicSugar.P2P;
 using UnityEngine;
 using ResultE = Epic.OnlineServices.Result;
 using SynicSugar.RTC;
+using SynicSugar.MatchMake.Base;
 
 namespace SynicSugar.MatchMake {
     internal class EOSMatchmaking : MatchmakingCore {

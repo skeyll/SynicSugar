@@ -1,7 +1,7 @@
 using System.Threading;
 using Cysharp.Threading.Tasks;
 
-namespace SynicSugar.Auth {
+namespace SynicSugar.Auth.Base {
     public abstract class AuthenticationCore {
         /// <summary>
         /// Basic login function. Should be an anonymous way that does not require an email address or explicit login of the user.
