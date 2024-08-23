@@ -23,7 +23,7 @@ namespace SynicSugar.MatchMake {
                 Debug.Log("SynicSugar: All connections is ready.");
             #endif
             if(!p2pConfig.Instance.UseDisconnectedEarlyNotify){
-                p2pConfig.Instance.connectionManager.RemoveNotifyPeerConnectionnEstablished();
+                p2pConfig.Instance.sessionCore.RemoveNotifyPeerConnectionnEstablished();
             }
             if(!p2pInfo.Instance.ConnectionNotifier.completeConnectPreparetion){
                 await p2pConfig.Instance.GetNetworkCore().CloseSession(false, true, token);
@@ -91,7 +91,7 @@ namespace SynicSugar.MatchMake {
             SendPacketOptions options = new SendPacketOptions(){
                 LocalUserId = EOSManager.Instance.GetProductUserId(),
                 RemoteUserId = targetId.AsEpic,
-                SocketId = p2pConfig.Instance.connectionManager.SocketId,
+                SocketId = p2pConfig.Instance.sessionCore.SocketId,
                 Channel = ch,
                 AllowDelayedDelivery = true,
                 Reliability = PacketReliability.ReliableOrdered,

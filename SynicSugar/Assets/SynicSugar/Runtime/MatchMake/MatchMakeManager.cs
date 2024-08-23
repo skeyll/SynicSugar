@@ -661,7 +661,7 @@ namespace SynicSugar.MatchMake {
             #endif
                 return Result.InvalidAPICall;
             }
-            p2pConfig.Instance.connectionManager.rttTokenSource?.Cancel();
+            p2pConfig.Instance.sessionCore.rttTokenSource?.Cancel();
             await matchmakingCore.DestroyOfflineLobby();
             if(destroyManager){
                 Destroy(gameObject);

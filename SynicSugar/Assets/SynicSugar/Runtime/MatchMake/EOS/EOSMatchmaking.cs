@@ -1397,7 +1397,7 @@ namespace SynicSugar.MatchMake {
                 await UniTask.Delay((int)delay.FinishMatchmakingDelay, cancellationToken: token);
             }
             //Set User info
-            p2pConfig.Instance.connectionManager.ScoketName = "OFFLINEMODE";
+            p2pConfig.Instance.sessionCore.ScoketName = "OFFLINEMODE";
             p2pInfo.Instance.userIds.HostUserId = UserId.GetUserId(CurrentLobby.LobbyOwner);
             p2pInfo.Instance.userIds.AllUserIds.Add(p2pInfo.Instance.LocalUserId);
             p2pInfo.Instance.userIds.CurrentAllUserIds.Add(p2pInfo.Instance.LocalUserId);
@@ -1474,7 +1474,7 @@ namespace SynicSugar.MatchMake {
                 lobbyHandle.Release();
                 return (Result)result;
             }
-            p2pConfig.Instance.connectionManager.ScoketName = EOSLobbyExtensions.GenerateLobbyAttribute(socket).STRING;
+            p2pConfig.Instance.sessionCore.ScoketName = EOSLobbyExtensions.GenerateLobbyAttribute(socket).STRING;
             //For options
             userIds.HostUserId = UserId.GetUserId(CurrentLobby.LobbyOwner);
             lobbyHandle.Release();
@@ -1492,7 +1492,7 @@ namespace SynicSugar.MatchMake {
             }
             await p2pConfig.Instance.natRelayManager.Init();
             RemoveNotifyLobbyMemberUpdateReceived();
-            p2pConfig.Instance.connectionManager.OpenConnection(true);
+            p2pConfig.Instance.sessionCore.OpenConnection(true);
         #if SYNICSUGAR_LOG
             Debug.Log("OpenConnection: Open Connection.");
         #endif
