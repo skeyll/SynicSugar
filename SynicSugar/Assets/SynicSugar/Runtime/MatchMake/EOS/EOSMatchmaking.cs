@@ -11,7 +11,7 @@ using ResultE = Epic.OnlineServices.Result;
 using SynicSugar.RTC;
 
 namespace SynicSugar.MatchMake {
-    internal class EOSLobby : MatchmakingCore {
+    internal class EOSMatchmaking : MatchmakingCore {
         Lobby CurrentLobby { get; set; } = new Lobby();
         //User config
         bool useManualFinishMatchMake;
@@ -47,7 +47,7 @@ namespace SynicSugar.MatchMake {
             return userId == localUserId;
         }
 
-        public EOSLobby(uint maxSearch) : base(maxSearch) {
+        public EOSMatchmaking(uint maxSearch) : base(maxSearch) {
             localUserId = UserId.GetUserId(EOSManager.Instance.GetProductUserId());
             RTCManager.Instance.SetLobbyReference(CurrentLobby);
         }
