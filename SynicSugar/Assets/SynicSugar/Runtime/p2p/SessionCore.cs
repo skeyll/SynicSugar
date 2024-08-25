@@ -10,9 +10,8 @@ using SynicSugar.RTC;
 using ResultE = Epic.OnlineServices.Result;
 //We can't call the main-Assembly from own-assemblies.
 //So, use such processes through this assembly.
-//TODO: Change it so that this class can only be used from ConnectHub.
 namespace SynicSugar.P2P {
-    public sealed class ConnectionManager : INetworkCore, IGetPacket {
+    public sealed class SessionCore : INetworkCore, IGetPacket {
         /// <summary>
         /// Call from Start on NetworkManager 
         /// </summary>

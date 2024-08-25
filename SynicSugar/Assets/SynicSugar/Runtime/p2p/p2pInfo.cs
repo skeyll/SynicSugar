@@ -27,7 +27,7 @@ namespace SynicSugar.P2P {
             }
         }
 #endregion
-        ConnectionManager connectionManager;
+        SessionCore sessionCore;
         NatRelayManager natRelayManager;
         internal UserIds userIds;
         internal p2pPing pings;
@@ -40,10 +40,10 @@ namespace SynicSugar.P2P {
         /// <summary>
         /// Set reference of some manager classes.
         /// </summary>
-        /// <param name="connectionInstance"></param>
+        /// <param name="sessionInstance"></param>
         /// <param name="natrelayInstance"></param>
-        internal void SetDependency(ConnectionManager connectionInstance, NatRelayManager natrelayInstance){
-            connectionManager = connectionInstance;
+        internal void SetDependency(SessionCore sessionInstance, NatRelayManager natrelayInstance){
+            sessionCore = sessionInstance;
             natRelayManager = natrelayInstance;
         }
     #region UserId basic info
@@ -201,14 +201,14 @@ namespace SynicSugar.P2P {
         /// </summary>
         /// <returns></returns>
         public async UniTask RefreshPing(UserId target){
-            await pings.RefreshPing(target, connectionManager.rttTokenSource.Token);
+            await pings.RefreshPing(target, sessionCore.rttTokenSource.Token);
         }
         /// <summary>
         /// Manually update Pings data to latest.
         /// </summary>
         /// <returns></returns>
         public async UniTask RefreshPings(){
-            await pings.RefreshPings(connectionManager.rttTokenSource.Token);
+            await pings.RefreshPings(sessionCore.rttTokenSource.Token);
         }
     #endregion
         /// <summary>
@@ -240,14 +240,14 @@ namespace SynicSugar.P2P {
         /// </summary>
         /// <returns>True if the connection is open, false otherwise.</returns>
         public bool ConnectionIsValid(){
-            return connectionManager.IsConnected;
+            return sessionCore.IsConnected;
         }
         /// <summary>
         /// Gets the currently valid (active) packet receiver type.
         /// </summary>
         /// <returns>The active ReceiverType enum value</returns>
         public ReceiverType GetActiveReceiverType(){
-            return connectionManager.validReceiverType;
+            return sessionCore.validReceiverType;
         }
     }
 }

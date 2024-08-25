@@ -11,17 +11,17 @@ namespace SynicSugar.P2P {
                 return;
             }
             Instance = this;
-            connectionManager.InitConencter();
-            p2pInfo.Instance.SetDependency(connectionManager, natRelayManager);
+            sessionCore.InitConencter();
+            p2pInfo.Instance.SetDependency(sessionCore, natRelayManager);
         }
         void OnDestroy() {
             if( Instance == this ) {
-                connectionManager.Dispose();
+                sessionCore.Dispose();
                 Instance = null;
             }
         }
 #endregion
-        internal readonly ConnectionManager connectionManager = new ConnectionManager();
+        internal readonly SessionCore sessionCore = new SessionCore();
         internal readonly NatRelayManager natRelayManager = new NatRelayManager();
         /// <summary>
         /// Users with settings NoRelay and ForceRelays cannot connect.<br />
@@ -89,7 +89,7 @@ namespace SynicSugar.P2P {
         /// </summary>
         /// <returns></returns>
         public INetworkCore GetNetworkCore(){
-            return connectionManager;
+            return sessionCore;
         }
     }
 }

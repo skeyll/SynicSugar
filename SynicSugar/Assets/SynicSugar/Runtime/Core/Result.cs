@@ -1,5 +1,5 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
-//To relay Result
+// Some items are original to SynicSugar; if you implement your own Cores, these result must be able to convert from these.
 namespace SynicSugar {
  	public enum Result : int {
 		ConnectEstablishFailed = -4,
