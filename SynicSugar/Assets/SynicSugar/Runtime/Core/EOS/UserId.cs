@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using Epic.OnlineServices;
 
 namespace SynicSugar {
-    //MEMO: If we pass this with null in an argument, this will not be null. So, when we use AsEpic to that instance, this returns error.
     public class UserId {
     #region Cache
         static Dictionary<string, UserId> idCache = new();
@@ -14,7 +13,7 @@ namespace SynicSugar {
         readonly ProductUserId value;
         readonly string value_s;
         private UserId(ProductUserId id){
-            if(id is null){
+            if(id.IsValid()){
                 return;
             }
             value = id;
