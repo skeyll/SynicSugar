@@ -1,12 +1,11 @@
 using System.Collections.Generic;
 using Epic.OnlineServices;
 
-namespace SynicSugar.P2P {
-    //MEMO: If we pass this with null in an argument, this will not be null. So, when we use AsEpic to that instance, this returns error.
+namespace SynicSugar {
     public class UserId {
     #region Cache
-        static internal Dictionary<string, UserId> idCache = new();
-        static internal void CacheClear(){
+        static Dictionary<string, UserId> idCache = new();
+        internal static void CacheClear(){
             idCache.Clear();
         }
     #endregion
@@ -14,18 +13,18 @@ namespace SynicSugar.P2P {
         readonly ProductUserId value;
         readonly string value_s;
         private UserId(ProductUserId id){
-            if(id is null){
+            if(id.IsValid()){
                 return;
             }
-            this.value = id;
-            this.value_s = id.ToString();
+            value = id;
+            value_s = id.ToString();
         }
         /// <summary>
         /// Reconencter creates userid list 
         /// </summary>
         /// <param name="id">String to be got from Host.</param>
         /// <returns></returns>
-        static internal UserId GenerateFromStringForReconnecter(string id){
+        internal static UserId GenerateFromStringForReconnecter(string id){
             if(idCache.ContainsKey(id)){
                 return idCache[id];
             }
@@ -38,7 +37,7 @@ namespace SynicSugar.P2P {
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns> <summary>
-        static public UserId GetUserId(ProductUserId id){
+        internal static UserId GetUserId(ProductUserId id){
             string s = id.ToString();
             if(idCache.ContainsKey(s)){
                 return idCache[s];
@@ -47,20 +46,26 @@ namespace SynicSugar.P2P {
             idCache.Add(s, obj);
             return obj;
         }
-        static public UserId GetUserId(UserId id){
+        public static UserId GetUserId(UserId id){
             string s = id.ToString();
             if(idCache.ContainsKey(s)){
                 return idCache[s];
             }
             return null;
         }
-        static public UserId GetUserId(string id){
+        public static UserId GetUserId(string id){
             if(idCache.ContainsKey(id)){
                 return idCache[id];
             }
             return null;
         }
-        static private UserId ToUserId(ProductUserId id){
+        /// <summary>
+        /// For library user to use internal static UserId GetUserId(ProductUserId id). <br />
+        /// GetUserId(ProductUserId id) creates catch, so doesn't open as public.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns> 
+        public static UserId ToUserId(ProductUserId id){
             string key = id.ToString();
             if(idCache.ContainsKey(key)){
                 return idCache[key];
