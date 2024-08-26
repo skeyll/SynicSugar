@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using Epic.OnlineServices;
 
-namespace SynicSugar.P2P {
+namespace SynicSugar {
     //MEMO: If we pass this with null in an argument, this will not be null. So, when we use AsEpic to that instance, this returns error.
     public class UserId {
     #region Cache
-        internal static Dictionary<string, UserId> idCache = new();
+        static Dictionary<string, UserId> idCache = new();
         internal static void CacheClear(){
             idCache.Clear();
         }
@@ -17,8 +17,8 @@ namespace SynicSugar.P2P {
             if(id is null){
                 return;
             }
-            this.value = id;
-            this.value_s = id.ToString();
+            value = id;
+            value_s = id.ToString();
         }
         /// <summary>
         /// Reconencter creates userid list 
@@ -60,7 +60,13 @@ namespace SynicSugar.P2P {
             }
             return null;
         }
-        private static UserId ToUserId(ProductUserId id){
+        /// <summary>
+        /// For library user to use internal static UserId GetUserId(ProductUserId id). <br />
+        /// GetUserId(ProductUserId id) creates catch, so doesn't open as public.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns> 
+        public static UserId ToUserId(ProductUserId id){
             string key = id.ToString();
             if(idCache.ContainsKey(key)){
                 return idCache[key];
