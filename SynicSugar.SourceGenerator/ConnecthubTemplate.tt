@@ -54,7 +54,7 @@ namespace SynicSugar.P2P {
         /// </summary>
         /// <param name="receiveTiming">The timing that packet receiver gets packet from buffer.</param>
         /// <param name="maxBatchSize">How many times during 1 FPS are received</param>
-        public void StartPacketReceiver(PacketReceiveTiming receiveTiming = PacketReceiveTiming.Update, uint maxBatchSize = 1){
+        public Result StartPacketReceiver(PacketReceiveTiming receiveTiming = PacketReceiveTiming.Update, uint maxBatchSize = 1){
         #if SYNICSUGAR_PACKETINFO
             string chs = string.Empty;
             string[] chList = Enum.GetNames(typeof(ConnectHub.CHANNELLIST));
@@ -63,7 +63,7 @@ namespace SynicSugar.P2P {
             }
             Debug.Log($"ch info: amount {chList.Length} / {chs}");
         #endif
-            NetworkCore.StartPacketReceiver(this, receiveTiming, maxBatchSize);
+            return NetworkCore.StartPacketReceiver(this, receiveTiming, maxBatchSize);
         }
         
         /// <summary>
@@ -71,40 +71,45 @@ namespace SynicSugar.P2P {
         /// This cannot be called with other Receiver same time. If start the other Receiver, ConenctHub stop this Receiver automatically before start the new one.
         /// </summary>
         /// <param name="maxBatchSize">How many times during 1 FPS are received</param>
-        public void StartSynicReceiver(uint maxBatchSize = 1){
-            NetworkCore.StartSynicReceiver(this, maxBatchSize);
+        public Result StartSynicReceiver(uint maxBatchSize = 1){
+            return NetworkCore.StartSynicReceiver(this, maxBatchSize);
         }
         //Pause receiver
         /// <summary>
         /// Pause getting a packet from the buffer. To re-start, call StartPacketReceiver().<br />
         /// *Packet receiving to the buffer is continue. If the packet is over the buffer, subsequent packets are discarded.
         /// </summary>
-        public void PausePacketReceiver(){
-            NetworkCore.StopPacketReceiver();
+        [Obsolete("This is old. StopPacketReceiver is new one.")] 
+        public Result PausePacketReceiver(){
+            return NetworkCore.StopPacketReceiver();
+        }
+        //Stop receiver
+        /// <summary>
+        /// Stop getting a packet from the buffer. To re-start, call StartPacketReceiver().<br />
+        /// *Packet receiving to the buffer is continue. If the packet is over the buffer, subsequent packets are discarded.
+        /// </summary>
+        public Result StopPacketReceiver(){
+            return NetworkCore.StopPacketReceiver();
         }
 
         //Pause Reciving buffer
         /// <summary>
         /// Pause receiving a packet to the receive buffer. To re-start, call RestartConnections(). <br />
-        /// After call this, packets will have been discarded until connection will re-open.<br />
-        /// WARNING: This doesn't work as intended now. Can't stop receiving packets to buffer, so SynicSugar discard those packets before re-start.
+        /// After call this, packets will have been discarded until connection will re-open.
         /// </summary>
         /// <param name="isForced">If True, force to stop and clear current packet queue. <br />
         /// If false, process current queue, then stop it.</param>
-        public async UniTask PauseConnections(bool isForced = false, CancellationTokenSource cancelToken = default(CancellationTokenSource)){
-            if(cancelToken == default(CancellationTokenSource)){
-                cancelToken = new CancellationTokenSource();
-            }
+        public async UniTask<Result> PauseConnections(bool isForced = false, CancellationToken cancelToken = default(CancellationToken)){
             syncTokenSource.Cancel();
-            await NetworkCore.PauseConnections(isForced, cancelToken.Token);
+            return await NetworkCore.PauseConnections(isForced, cancelToken);
         }
         /// <summary>
         /// Prepare to receive packets in advance. If user sent a packet, it can also open connection to get packets without this.
         /// </summary>
-        public void RestartConnections(){
+        public Result RestartConnections(){
             NetworkCore.RestartConnections();
             syncTokenSource = new CancellationTokenSource();
-            StartPacketReceiver();
+            return StartPacketReceiver();
         }
         
         /// <summary>
@@ -116,10 +121,13 @@ namespace SynicSugar.P2P {
         /// <param name="cancelToken">Cancel token for this task</param>
         /// </summary>
         public async UniTask<Result> ExitSession(bool destroyManager = true, bool cleanupMemberCountChanged = false, CancellationToken cancelToken = default(CancellationToken)){
-            Result isSuccess = await NetworkCore.ExitSession(destroyManager, cleanupMemberCountChanged, cancelToken);
-            syncTokenSource.Cancel();
-            ClearReferenceDictionaries();
-            return isSuccess;
+            Result result = await NetworkCore.ExitSession(destroyManager, cleanupMemberCountChanged, cancelToken);
+            
+            if(result == Result.Success){
+                syncTokenSource.Cancel();
+                ClearReferenceDictionaries();
+            }
+            return result;
         }
         /// <summary>
         /// Stop receiver, close all connections and remove the notify events.
@@ -130,10 +138,13 @@ namespace SynicSugar.P2P {
         /// <param name="cancelToken">Cancel token for this task</param>
         /// </summary>
         public async UniTask<Result> CloseSession(bool destroyManager = true, bool cleanupMemberCountChanged = false, CancellationToken cancelToken = default(CancellationToken)){
-            Result isSuccess = await NetworkCore.CloseSession(destroyManager, cleanupMemberCountChanged, cancelToken);
-            syncTokenSource.Cancel();
-            ClearReferenceDictionaries();
-            return isSuccess;
+            Result result = await NetworkCore.CloseSession(destroyManager, cleanupMemberCountChanged, cancelToken);
+
+            if(result == Result.Success){
+                syncTokenSource.Cancel();
+                ClearReferenceDictionaries();
+            }
+            return result;
         }
 
         //(for elements)
@@ -155,7 +166,7 @@ namespace SynicSugar.P2P {
             synicBuffer.Clear();
             synicPacketInfo.Clear();
             largeBuffer.Clear();
-            largePacketInfo.Clear();
+            largePacketInfo.Clear();  
         }
 
         //Register(for class)<#= Register #>
