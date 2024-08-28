@@ -829,7 +829,7 @@ namespace SynicSugar.MatchMake {
             OnLobbyUpdated(info.LobbyId);
             
             //For MatchMaking
-            if(!SynicSugarManger.Instance.State.IsMatchmaking){
+            if(SynicSugarManger.Instance.State.IsMatchmaking){
                 // The notify about promote dosen't change member amount.
                 if(info.TargetUserId == productUserId){
                     if(info.CurrentStatus == LobbyMemberStatus.Promoted){

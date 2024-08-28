@@ -13,7 +13,7 @@ namespace SynicSugar {
         readonly ProductUserId value;
         readonly string value_s;
         private UserId(ProductUserId id){
-            if(id.IsValid()){
+            if(!id.IsValid()){
                 return;
             }
             value = id;
