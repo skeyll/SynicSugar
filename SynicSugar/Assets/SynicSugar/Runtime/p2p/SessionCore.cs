@@ -193,7 +193,7 @@ namespace SynicSugar.Base {
             #if SYNICSUGAR_LOG
                 Debug.Log("StartPacketReceiver: This local user is NOT in Session.");
             #endif
-                return Result.None;
+                return Result.InvalidAPICall;
             }
             if(validReceiverType != ReceiverType.None){
                 ((INetworkCore)this).StopPacketReceiver();
