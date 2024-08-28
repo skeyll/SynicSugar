@@ -20,12 +20,9 @@ namespace SynicSugar {
         }
 #endregion
         public readonly SynicSugarState State = new SynicSugarState();
-        SynicSugarCoreFactory coreFactory;
+        internal SynicSugarCoreFactory CoreFactory { get; private set; }
         void SetCoreFactory(){
-            coreFactory = new EOSCoreFactory();
-        }
-        internal SynicSugarCoreFactory GetCoreFactory(){
-            return coreFactory;
+            CoreFactory = new EOSCoreFactory();
         }
     }
 }
