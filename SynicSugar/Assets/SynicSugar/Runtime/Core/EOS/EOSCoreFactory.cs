@@ -1,9 +1,8 @@
-using SynicSugar.Auth;
-using SynicSugar.Auth.Base;
 using SynicSugar.Base;
+using SynicSugar.Auth;
 using SynicSugar.MatchMake;
-using SynicSugar.MatchMake.Base;
 using SynicSugar.P2P;
+
 namespace SynicSugar {
     internal sealed class EOSCoreFactory : SynicSugarCoreFactory {
         AuthenticationCore auth;

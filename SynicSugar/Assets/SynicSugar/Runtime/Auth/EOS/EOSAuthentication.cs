@@ -4,7 +4,7 @@ using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using SynicSugar.Auth.Base;
+using SynicSugar.Base;
 
 namespace SynicSugar.Auth {
     public class EOSAuthentication : AuthenticationCore {
