@@ -40,7 +40,7 @@ namespace SynicSugar.P2P {
                     Data = data
                 };
 
-                result = p2pConfig.Instance.sessionCore.P2PHandle.SendPacket(ref options);
+                result = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface().SendPacket(ref options);
                 if(result != ResultE.Success){
                     Debug.LogErrorFormat("Send Packet: can't send packet, code: {0}", result);
                     continue;
@@ -99,7 +99,7 @@ namespace SynicSugar.P2P {
                     Data = data
                 };
 
-                result = p2pConfig.Instance.sessionCore.P2PHandle.SendPacket(ref options);
+                result = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface().SendPacket(ref options);
                 if(result != ResultE.Success){
                     Debug.LogErrorFormat("Send Packet: can't send packet, code: {0}", result);
                     continue;
@@ -144,7 +144,7 @@ namespace SynicSugar.P2P {
                     Data = value
                 };
 
-                result = p2pConfig.Instance.sessionCore.P2PHandle.SendPacket(ref options);
+                result = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface().SendPacket(ref options);
                 if(result != ResultE.Success){
                     Debug.LogErrorFormat("Send Packet: can't send packet, code: {0}", result);
                     continue;
@@ -182,7 +182,7 @@ namespace SynicSugar.P2P {
         #if SYNICSUGAR_PACKETINFO
             Debug.Log($"SendPacket: ch {ch} / payload {ByteArrayToHexString(value)}");
         #endif
-            ResultE result = p2pConfig.Instance.sessionCore.P2PHandle.SendPacket(ref options);
+            ResultE result = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface().SendPacket(ref options);
 
             if(result != ResultE.Success){
                 Debug.LogErrorFormat("Send Packet: can't send packet, code: {0}", result);
@@ -216,7 +216,7 @@ namespace SynicSugar.P2P {
         #if SYNICSUGAR_PACKETINFO
             Debug.Log($"SendPacket: ch {ch} / payload {ByteArrayToHexString(value)}");
         #endif
-            ResultE result = p2pConfig.Instance.sessionCore.P2PHandle.SendPacket(ref options);
+            ResultE result = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface().SendPacket(ref options);
 
             if(result != ResultE.Success){
                 Debug.LogErrorFormat("Send Packet: can't send packet, code: {0}", result);
@@ -244,7 +244,7 @@ namespace SynicSugar.P2P {
         #if SYNICSUGAR_PACKETINFO
             Debug.Log($"SendPacket: ch {ch} / payload {ByteArrayToHexString(value)}");
         #endif
-            ResultE result = p2pConfig.Instance.sessionCore.P2PHandle.SendPacket(ref options);
+            ResultE result = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface().SendPacket(ref options);
 
             if(result != ResultE.Success){
                 Debug.LogErrorFormat("Send Packet: can't send packet, code: {0}", result);
@@ -348,7 +348,7 @@ namespace SynicSugar.P2P {
                 Data = new ArraySegment<byte>(payload.ToArray())
             };
 
-            ResultE result = p2pConfig.Instance.sessionCore.P2PHandle.SendPacket(ref options);
+            ResultE result = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface().SendPacket(ref options);
 
             if(result != ResultE.Success){
                 Debug.LogErrorFormat("Send Large Packet: can't send packet, code: {0}", result);
@@ -451,7 +451,7 @@ namespace SynicSugar.P2P {
                     Data = new ArraySegment<byte>(payload.ToArray())
                 };
 
-                ResultE result = p2pConfig.Instance.sessionCore.P2PHandle.SendPacket(ref options);
+                ResultE result = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface().SendPacket(ref options);
 
                 if(result != ResultE.Success){
                     Debug.LogErrorFormat("Send Large Packet: can't send packet, code: {0}", result);

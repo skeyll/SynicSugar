@@ -1,6 +1,7 @@
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using System.Collections.Generic;
+using SynicSugar.Base;
 
 namespace SynicSugar.P2P {
     public class p2pInfo : MonoBehaviour {

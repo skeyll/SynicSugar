@@ -1,6 +1,8 @@
 using Epic.OnlineServices.P2P;
 using UnityEngine;
 using System;
+using SynicSugar.Base;
+
 namespace SynicSugar.P2P {
     public class p2pConfig : MonoBehaviour {
 #region Singleton
@@ -11,7 +13,7 @@ namespace SynicSugar.P2P {
                 return;
             }
             Instance = this;
-            sessionCore.InitConencter();
+            sessionCore = SynicSugarManger.Instance.GetCoreFactory().GetSessionCore();
             p2pInfo.Instance.SetDependency(sessionCore, natRelayManager);
         }
         void OnDestroy() {
@@ -21,7 +23,7 @@ namespace SynicSugar.P2P {
             }
         }
 #endregion
-        internal readonly SessionCore sessionCore = new SessionCore();
+        internal SessionCore sessionCore;
         internal readonly NatRelayManager natRelayManager = new NatRelayManager();
         /// <summary>
         /// Users with settings NoRelay and ForceRelays cannot connect.<br />

@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using Epic.OnlineServices;
+
 namespace SynicSugar.P2P{
     public abstract class PacketReceiver : MonoBehaviour
     {
@@ -9,11 +10,11 @@ namespace SynicSugar.P2P{
         protected ArraySegment<byte> payload_r;
         protected uint maxBatchSize;
         protected IPacketConvert hub;
-        protected IGetPacket getPacket;
+        protected Base.SessionCore getPacket;
         void Awake(){
             enabled = false;
         }
-        public void SetGetPacket(IGetPacket instance){
+        public void SetGetPacket(Base.SessionCore instance){
             getPacket = instance;
         }
         /// <summary>
