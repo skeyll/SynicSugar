@@ -28,8 +28,22 @@ namespace SynicSugar {
         public string GetFactoryName(){
             return CoreFactory.CoreName;
         }
-        void SetCoreFactory(){
-            CoreFactory = new EOSCoreFactory();
+        /// <summary>
+        /// Change the process used as the core. Valid only if the local user is not logged in. <br />
+        /// Default core is for EOS.
+        /// </summary>
+        /// <param name="coreFactory"></param>
+        /// <returns></returns>
+        public Result SetCoreFactory(SynicSugarCoreFactory coreFactory){
+            if(State.IsLoggedIn){
+            #if SYNICSUGAR_LOG
+                Debug.Log("SetCoreFactory: Cannot change because this user are already logged in.");
+            #endif
+                return Result.InvalidAPICall;
+            }
+
+            CoreFactory = coreFactory.CreateInstance();
+            return Result.Success;
         }
     }
 }

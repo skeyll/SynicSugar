@@ -10,6 +10,9 @@ namespace SynicSugar {
         public EOSCoreFactory (){
             auth = new EOSAuthentication();
         }
+        public override SynicSugarCoreFactory CreateInstance(){
+            return new EOSCoreFactory();
+        }
         public override AuthenticationCore GetAuthenticationCore(){
             return auth;
         }
