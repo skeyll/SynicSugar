@@ -69,8 +69,8 @@ namespace SynicSugar.Login {
                 #if SYNICSUGAR_LOG
                     Debug.Log(result is Result.Success  ? "EOSConnect: Create new DeviceId" : "EOSConnect: Already have DeviceID in local");
                 #endif
+                    result = Result.Success;
                 }
-                result = Result.Success;
                 finishCallback = true;
             }
         }

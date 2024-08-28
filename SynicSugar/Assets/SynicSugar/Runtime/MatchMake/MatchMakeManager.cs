@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using SynicSugar.P2P;
-using SynicSugar.MatchMake.Base;
+using SynicSugar.Base;
 using UnityEngine;
 using UnityEngine.Events;
 namespace SynicSugar.MatchMake {
@@ -30,7 +30,7 @@ namespace SynicSugar.MatchMake {
             timeUntilTimeout = 0f;
         }
         void Start(){
-            matchmakingCore = SynicSugarManger.Instance.GetCoreFactory().GetMatchmakingCore(maxSearchResult);
+            matchmakingCore = SynicSugarManger.Instance.CoreFactory.GetMatchmakingCore(maxSearchResult);
         }
         void OnDestroy() {
             if( Instance == this ) {

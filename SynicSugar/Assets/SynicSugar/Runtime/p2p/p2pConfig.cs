@@ -13,7 +13,7 @@ namespace SynicSugar.P2P {
                 return;
             }
             Instance = this;
-            sessionCore = SynicSugarManger.Instance.GetCoreFactory().GetSessionCore();
+            sessionCore = SynicSugarManger.Instance.CoreFactory.GetSessionCore();
             p2pInfo.Instance.SetDependency(sessionCore, natRelayManager);
         }
         void OnDestroy() {

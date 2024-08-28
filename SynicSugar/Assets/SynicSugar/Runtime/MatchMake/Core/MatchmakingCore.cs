@@ -1,9 +1,9 @@
 using System.Threading;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using SynicSugar.P2P;
+using SynicSugar.MatchMake;
 
-namespace SynicSugar.MatchMake.Base {
+namespace SynicSugar.Base {
     public abstract class MatchmakingCore {
         protected uint MAX_SEARCH_RESULT;
         protected MatchmakingCore(uint maxSearch){

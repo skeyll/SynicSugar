@@ -11,7 +11,7 @@ namespace SynicSugar.Auth {
         /// <param name="token"></param>
         /// <returns></returns>
         public static async UniTask<Result> DeleteAccount(CancellationToken token = default(CancellationToken)){
-            return await SynicSugarManger.Instance.GetCoreFactory().GetAuthenticationCore().DeleteAccount(token);
+            return await SynicSugarManger.Instance.CoreFactory.GetAuthenticationCore().DeleteAccount(token);
         }
     }
 }

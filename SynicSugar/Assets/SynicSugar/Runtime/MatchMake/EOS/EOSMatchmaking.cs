@@ -6,10 +6,10 @@ using System.Threading;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using SynicSugar.P2P;
+using SynicSugar.RTC;
+using SynicSugar.Base;
 using UnityEngine;
 using ResultE = Epic.OnlineServices.Result;
-using SynicSugar.RTC;
-using SynicSugar.MatchMake.Base;
 
 namespace SynicSugar.MatchMake {
     internal class EOSMatchmaking : MatchmakingCore {
@@ -829,7 +829,7 @@ namespace SynicSugar.MatchMake {
             OnLobbyUpdated(info.LobbyId);
             
             //For MatchMaking
-            if(!SynicSugarManger.Instance.State.IsMatchmaking){
+            if(SynicSugarManger.Instance.State.IsMatchmaking){
                 // The notify about promote dosen't change member amount.
                 if(info.TargetUserId == productUserId){
                     if(info.CurrentStatus == LobbyMemberStatus.Promoted){
