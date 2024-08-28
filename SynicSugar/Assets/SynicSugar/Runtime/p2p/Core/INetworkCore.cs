@@ -10,12 +10,12 @@ namespace SynicSugar.P2P {
         /// <param name="isForced">If True, stop and clear current packet queue. <br />
         /// If false, process current queue, then stop it.</param>
         /// <param name="token">For this task</param>
-        UniTask PauseConnections(bool isForced, CancellationToken token);
+        UniTask<Result> PauseConnections(bool isForced, CancellationToken token);
 
         /// <summary>
         /// (Re)open connection.
         /// </summary>
-        void RestartConnections();
+        Result RestartConnections();
 
         /// <summary>
         /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll.<br />
@@ -45,7 +45,7 @@ namespace SynicSugar.P2P {
         /// <param name="hubInstance">ConnectHub instance</param>
         /// <param name="timing">The timing that packet receiver gets packet from buffer.</param>
         /// <param name="maxBatchSize">How many times during 1 FPS are received.</param>
-        void StartPacketReceiver(IPacketConvert hubInstance, PacketReceiveTiming timing, uint maxBatchSize);
+        Result StartPacketReceiver(IPacketConvert hubInstance, PacketReceiveTiming timing, uint maxBatchSize);
 
         /// <summary>
         /// To get only SynicPacket in update in burst FPS. Call after creating the Network Instance required for reception.<br />
@@ -53,13 +53,13 @@ namespace SynicSugar.P2P {
         /// </summary>
         /// <param name="hubInstance">ConnectHub instance</param>
         /// <param name="maxBatchSize">How many times during 1 FPS are received</param>
-        void StartSynicReceiver(IPacketConvert hubInstance, uint maxBatchSize);
+        Result StartSynicReceiver(IPacketConvert hubInstance, uint maxBatchSize);
 
         /// <summary>
         /// Pause getting a packet from the buffer. To re-start, call StartPacketReceiver().<br />
         /// *Packet receiving to the buffer is continue. If the packet is over the buffer, subsequent packets are discarded.
         /// </summary>
-        void StopPacketReceiver();
+        Result StopPacketReceiver();
 
         /// <summary>
         /// Update SyncedInfo, then Invoke SyncedSynic event.

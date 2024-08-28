@@ -23,7 +23,7 @@ namespace SynicSugar.MatchMake {
                 Debug.Log("SynicSugar: All connections is ready.");
             #endif
             if(!p2pConfig.Instance.UseDisconnectedEarlyNotify){
-                p2pConfig.Instance.sessionCore.RemoveNotifyPeerConnectionnEstablished();
+                ((EOSSessionManager)p2pConfig.Instance.sessionCore).RemoveNotifyPeerConnectionnEstablished();
             }
             if(!p2pInfo.Instance.ConnectionNotifier.completeConnectPreparetion){
                 await p2pConfig.Instance.GetNetworkCore().CloseSession(false, true, token);
