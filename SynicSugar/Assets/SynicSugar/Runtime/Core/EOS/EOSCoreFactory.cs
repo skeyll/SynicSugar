@@ -5,6 +5,7 @@ using SynicSugar.P2P;
 
 namespace SynicSugar {
     internal sealed class EOSCoreFactory : SynicSugarCoreFactory {
+        public override string CoreName { get; protected set; } = "EOSDefault";
         AuthenticationCore auth;
         public EOSCoreFactory (){
             auth = new EOSAuthentication();

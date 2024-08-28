@@ -10,7 +10,7 @@ namespace SynicSugar {
                 return;
             }
             Instance = this;
-            SetCoreFactory();
+            CoreFactory = new EOSCoreFactory();
             DontDestroyOnLoad(this);
         }
         void OnDestroy() {
@@ -21,6 +21,13 @@ namespace SynicSugar {
 #endregion
         public readonly SynicSugarState State = new SynicSugarState();
         internal SynicSugarCoreFactory CoreFactory { get; private set; }
+        /// <summary>
+        /// Get core name.
+        /// </summary>
+        /// <returns>Default factory is EOSDefault to use EOS.</returns>
+        public string GetFactoryName(){
+            return CoreFactory.CoreName;
+        }
         void SetCoreFactory(){
             CoreFactory = new EOSCoreFactory();
         }
