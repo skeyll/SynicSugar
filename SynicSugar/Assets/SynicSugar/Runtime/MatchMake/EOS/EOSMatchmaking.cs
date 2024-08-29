@@ -49,7 +49,7 @@ namespace SynicSugar.MatchMake {
         }
 
         public EOSMatchmaking(uint maxSearch) : base(maxSearch) {
-            localUserId = UserId.GetUserId(EOSManager.Instance.GetProductUserId());
+            localUserId = SynicSugarManger.Instance.LocalUserId;
             RTCManager.Instance.SetLobbyReference(CurrentLobby);
         }
 
@@ -1382,11 +1382,11 @@ namespace SynicSugar.MatchMake {
             CurrentLobby = lobbyCondition;
             CurrentLobby.LobbyId = "OFFLINEMODE";
             CurrentLobby.LobbyOwner = EOSManager.Instance.GetProductUserId();
-            CurrentLobby.Members.Add(UserId.GetUserId(EOSManager.Instance.GetProductUserId()).ToString(), new MemberState() { Attributes = userAttributes });
+            CurrentLobby.Members.Add(localUserId.ToString(), new MemberState() { Attributes = userAttributes });
             CurrentLobby.hasConnectedRTCRoom = false;
 
-            MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(UserId.GetUserId(EOSManager.Instance.GetProductUserId()), true);
-            MatchMakeManager.Instance.MemberUpdatedNotifier.MemberAttributesUpdated(UserId.GetUserId(EOSManager.Instance.GetProductUserId()));
+            MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(localUserId, true);
+            MatchMakeManager.Instance.MemberUpdatedNotifier.MemberAttributesUpdated(localUserId);
 
             if(delay.WaitForOpponentsDelay > 0){
                 MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Wait);
@@ -1398,10 +1398,10 @@ namespace SynicSugar.MatchMake {
             }
             //Set User info
             p2pConfig.Instance.sessionCore.ScoketName = "OFFLINEMODE";
-            p2pInfo.Instance.userIds.HostUserId = UserId.GetUserId(CurrentLobby.LobbyOwner);
-            p2pInfo.Instance.userIds.AllUserIds.Add(p2pInfo.Instance.LocalUserId);
-            p2pInfo.Instance.userIds.CurrentAllUserIds.Add(p2pInfo.Instance.LocalUserId);
-            p2pInfo.Instance.userIds.CurrentConnectedUserIds.Add(p2pInfo.Instance.LocalUserId);
+            p2pInfo.Instance.userIds.HostUserId = localUserId;
+            p2pInfo.Instance.userIds.AllUserIds.Add(localUserId);
+            p2pInfo.Instance.userIds.CurrentAllUserIds.Add(localUserId);
+            p2pInfo.Instance.userIds.CurrentConnectedUserIds.Add(localUserId);
             
             await MatchMakeManager.Instance.OnSaveLobbyID();
             if(delay.ReadyForConnectionDelay > 0){
