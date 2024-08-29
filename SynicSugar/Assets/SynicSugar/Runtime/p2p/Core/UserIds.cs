@@ -34,10 +34,10 @@ namespace SynicSugar.P2P {
         // For Anti-Cheat to rewrite other player data.
         internal bool isJustReconnected { get; private set; }
         internal UserIds(){
-            LocalUserId = UserId.GetUserId(EOSManager.Instance.GetProductUserId());
+            LocalUserId = SynicSugarManger.Instance.LocalUserId;
         }
         internal UserIds(bool isReconencter){
-            LocalUserId = UserId.GetUserId(EOSManager.Instance.GetProductUserId());
+            LocalUserId = SynicSugarManger.Instance.LocalUserId;
             if(isReconencter){
                 isJustReconnected = true;
             }
