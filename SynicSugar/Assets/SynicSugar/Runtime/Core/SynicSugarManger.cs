@@ -11,6 +11,7 @@ namespace SynicSugar {
             }
             Instance = this;
             CoreFactory = new EOSCoreFactory();
+            LocalUserId = UserId.GenerateOfflineUserId();
             DontDestroyOnLoad(this);
         }
         void OnDestroy() {
@@ -21,6 +22,7 @@ namespace SynicSugar {
 #endregion
         public readonly SynicSugarState State = new SynicSugarState();
         internal SynicSugarCoreFactory CoreFactory { get; private set; }
+        public UserId LocalUserId { get; private set; }
         /// <summary>
         /// Get core name.
         /// </summary>
@@ -37,13 +39,20 @@ namespace SynicSugar {
         public Result SetCoreFactory(SynicSugarCoreFactory coreFactory){
             if(State.IsLoggedIn){
             #if SYNICSUGAR_LOG
-                Debug.Log("SetCoreFactory: Cannot change because this user are already logged in.");
+                Debug.LogError("SetCoreFactory: This call is invalid. This function must be called before the local user logs in a server.");
             #endif
                 return Result.InvalidAPICall;
             }
 
             CoreFactory = coreFactory.CreateInstance();
             return Result.Success;
+        }
+        /// <summary>
+        /// Set formal ID　after log in.
+        /// </summary>
+        /// <param name="userId"></param>
+        internal void SetLocalUserId(UserId userId){
+            LocalUserId = userId;
         }
     }
 }

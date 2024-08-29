@@ -51,6 +51,12 @@ namespace SynicSugar.Auth {
                 return result;
             }
 
+            if(result == Result.Success){   
+                SynicSugarManger.Instance.SetLocalUserId(UserId.GetUserId(EOSManager.Instance.GetProductUserId()));
+                SynicSugarManger.Instance.State.IsLoggedIn = true;
+            }else{
+                SynicSugarManger.Instance.State.IsLoggedIn = false;
+            }
             return result;
 
             void OnCreateDeviceIdCallback(ref CreateDeviceIdCallbackInfo data){

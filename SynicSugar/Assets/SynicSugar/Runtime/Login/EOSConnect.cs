@@ -59,8 +59,12 @@ namespace SynicSugar.Login {
                 return result;
             }
             
-            SynicSugarManger.Instance.State.IsLoggedIn = result == Result.Success;
-
+            if(result == Result.Success){   
+                SynicSugarManger.Instance.SetLocalUserId(UserId.GetUserId(EOSManager.Instance.GetProductUserId()));
+                SynicSugarManger.Instance.State.IsLoggedIn = true;
+            }else{
+                SynicSugarManger.Instance.State.IsLoggedIn = false;
+            }
             return result;
 
             void OnCreateDeviceIdCallback(ref CreateDeviceIdCallbackInfo data){
@@ -119,8 +123,12 @@ namespace SynicSugar.Login {
                 return result;
             }
 
-            SynicSugarManger.Instance.State.IsLoggedIn = result == Result.Success;
-
+            if(result == Result.Success){   
+                SynicSugarManger.Instance.SetLocalUserId(UserId.GetUserId(EOSManager.Instance.GetProductUserId()));
+                SynicSugarManger.Instance.State.IsLoggedIn = true;
+            }else{
+                SynicSugarManger.Instance.State.IsLoggedIn = false;
+            }
             return result;
 
             void OnCreateDeviceIdCallback(ref CreateDeviceIdCallbackInfo data){
