@@ -100,9 +100,19 @@ namespace SynicSugar {
         public static explicit operator ProductUserId(UserId id) => GetUserId(id).value;
         public static explicit operator UserId(ProductUserId value) => ToUserId(value);
         #nullable enable
-        public bool Equals(UserId? other) => value is not null && other is not null && value.Equals(other.value);
+        public bool Equals(UserId? other){
+            if(other is null) { return false; }
+            if(ReferenceEquals(this, other)) { return true; }
+            if(value is not null && other.value is not null ) { return value.Equals(other.value); }
+
+            return value_s == other?.value_s;
+        }
         public override bool Equals(object? obj){
-            return value is not null && obj is not null && obj.GetType() == typeof(UserId) && Equals((UserId)obj);
+            if(obj is null){ return false; }
+            if(ReferenceEquals(this, obj)) { return true; }
+            if(obj.GetType() != typeof(UserId)){ return false; }
+
+            return Equals((UserId)obj);
         }
         public override int GetHashCode() => value.GetHashCode();
         /// <summary>
@@ -110,15 +120,39 @@ namespace SynicSugar {
         /// </summary>
         /// <returns></returns>
         public override string ToString() => value_s;
+
+        /// <summary>
+        /// Check whether UserId values are the same or not.
+        /// Basically, this is compared by the original ProductUserId, then for offline, the comparison is done with strings.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns>Return true when UserId is the same with other.</returns>
         public static bool operator ==(in UserId? x, in UserId? y){
-            if (x is null && y is null){ return true; }
+            if (ReferenceEquals(x, y)) { return true; }
+            if (x is null && y is null) { return true; }
             if (x is null || y is null) { return false; }
-            return x.value.Equals(y.value);
-        } 
+
+            if (x.value is not null && y.value is not null){ return x.value.Equals(y.value); }
+
+            return x.value_s == y.value_s;
+        }
+
+        /// <summary>
+        /// Check whether UserId values are the same or not.
+        /// Basically, this is compared by the original ProductUserId, then for offline, the comparison is done with strings.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns>Return true when UserId is NOT the same with other.</returns>
         public static bool operator !=(in UserId? x, in UserId? y){
+            if (ReferenceEquals(x, y)) { return false; }
             if (x is null && y is null) { return false; }
             if (x is null || y is null) { return true; }
-            return !x.value.Equals(y.value);
+
+            if (x.value is not null && y.value is not null){ return !x.value.Equals(y.value); }
+
+            return x.value_s != y.value_s;
         }
         #nullable disable
     }
