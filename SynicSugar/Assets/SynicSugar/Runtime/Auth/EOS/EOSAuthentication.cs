@@ -12,6 +12,8 @@ namespace SynicSugar.Auth {
         ulong ExpirationNotifyId;
         /// <summary>
         /// Login with DeviceID. If success, return true. <br />
+        /// For Success: EOS tokens expire every hour, but EOSAuthentication automatically refresh access tokens via Expiration notify.
+        /// In case of failure, an error log is called and the token is invalidated 10 minutes after the notification.<br />
         /// We can't use DeviceId directly for security. This id is saved secure pos like as Keystore.
         /// </summary>
         /// <param name="displayName"></param>
@@ -59,6 +61,7 @@ namespace SynicSugar.Auth {
                 AddNotifyAuthExpiration(displayName);
             }else{
                 SynicSugarManger.Instance.State.IsLoggedIn = false;
+                RemoveNotifyAuthExpiration();
             }
             return result;
 
