@@ -1,4 +1,5 @@
 using PlayEveryWare.EpicOnlineServices;
+using Epic.OnlineServices;
 using Epic.OnlineServices.Connect;
 using System;
 using System.Threading;
@@ -8,6 +9,7 @@ using SynicSugar.Base;
 
 namespace SynicSugar.Auth {
     public class EOSAuthentication : AuthenticationCore {
+        ulong ExpirationNotifyId;
         /// <summary>
         /// Login with DeviceID. If success, return true. <br />
         /// We can't use DeviceId directly for security. This id is saved secure pos like as Keystore.
@@ -54,6 +56,7 @@ namespace SynicSugar.Auth {
             if(result == Result.Success){   
                 SynicSugarManger.Instance.SetLocalUserId(UserId.GetUserId(EOSManager.Instance.GetProductUserId()));
                 SynicSugarManger.Instance.State.IsLoggedIn = true;
+                AddNotifyAuthExpiration(displayName);
             }else{
                 SynicSugarManger.Instance.State.IsLoggedIn = false;
             }
@@ -68,6 +71,66 @@ namespace SynicSugar.Auth {
                     result = Result.Success;
                 }
                 finishCallback = true;
+            }
+        }
+        /// <summary>
+        /// To receive upcoming authentication expiration notifications.
+        /// </summary>
+        /// <param name="userName"></param>
+        private void AddNotifyAuthExpiration(string userName){
+            if (ExpirationNotifyId != 0)
+            {
+                Debug.LogError("AddNotifyAuthExpiration: AuthExpirationNotify is already registered.");
+                return;
+            }
+            var connectInterface = EOSManager.Instance.GetEOSConnectInterface();
+            var addNotifyAuthExpirationOptions = new AddNotifyAuthExpirationOptions();
+
+            ExpirationNotifyId = connectInterface.AddNotifyAuthExpiration(ref addNotifyAuthExpirationOptions, null, OnAuthExpirationCallback);
+
+            if(ExpirationNotifyId != 0){
+            #if SYNICSUGAR_LOG
+                Debug.Log("AddNotifyAuthExpiration: Register success!.");
+            #endif
+            }
+
+            void OnAuthExpirationCallback(ref AuthExpirationCallbackInfo data){
+                if(data.LocalUserId != SynicSugarManger.Instance.LocalUserId.AsEpic){
+                    Debug.LogError("AuthExpirationCallback: AuthExpiration notify has something problem. This notify is not for this local user.");
+                    return;
+                }
+                ReLoginWithDeviceToken(userName);
+            }
+        }
+        /// <summary>
+        /// After login eos, SynicSugar manages access credentials with this.<br />
+        /// *Just for current plugin ver. These ver don't have relogin process.
+        /// </summary>
+        /// <param name="displayName"></param>
+        private void ReLoginWithDeviceToken(string displayName){
+            var connectInterface = EOSManager.Instance.GetEOSConnectInterface();
+
+            var loginOptions = new LoginOptions()
+            {
+                UserLoginInfo = new UserLoginInfo { DisplayName = displayName },
+                Credentials = new Credentials
+                {
+                    Token = null,
+                    Type = ExternalCredentialType.DeviceidAccessToken,
+                }
+            };
+
+            connectInterface.Login(ref loginOptions, null, OnLogin);
+
+            void OnLogin(ref LoginCallbackInfo info){
+                Result result = (Result)info.ResultCode;
+                if(result != Result.Success){
+                    Debug.LogError("ReLoginWithDeviceToken: Re-login failed. This user access credentials will become invalid after 10 minutes.");
+                    return;
+                }
+            #if SYNICSUGAR_LOG
+                Debug.Log("ReLoginWithDeviceToken: Re-login success!. The access credential has refreshed.");
+            #endif
             }
         }
         /// <summary>
