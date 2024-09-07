@@ -1,4 +1,7 @@
 using UnityEngine;
+#if UNITY_EDITOR
+using System; //For Cleanup event.
+#endif
 
 namespace SynicSugar {
     public sealed class SynicSugarManger : MonoBehaviour {
@@ -17,8 +20,18 @@ namespace SynicSugar {
         void OnDestroy() {
             if( Instance == this ) {
                 Instance = null;
+            #if UNITY_EDITOR
+                CleanupForEditor?.Invoke();
+                CleanupForEditor = null;
+            #endif
             }
         }
+    #if UNITY_EDITOR
+        /// <summary>
+        /// To clean up notify or event in Editor.
+        /// </summary>
+        public event Action CleanupForEditor;
+    #endif
 #endregion
         public readonly SynicSugarState State = new SynicSugarState();
         internal SynicSugarCoreFactory CoreFactory { get; private set; }
