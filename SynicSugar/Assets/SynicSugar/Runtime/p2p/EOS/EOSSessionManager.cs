@@ -57,7 +57,7 @@ namespace SynicSugar.P2P {
                 return Result.Success;
             }
             
-            CloseConnection();
+            RemoveNotifyAndCloseConnection();
             
             GetPacketQueueInfoOptions options = new GetPacketQueueInfoOptions();
             PacketQueueInfo info = new PacketQueueInfo();
@@ -242,7 +242,7 @@ namespace SynicSugar.P2P {
     protected override void ResetConnections(){
         ((INetworkCore)this).StopPacketReceiver();
         CancelRTTToken();
-        CloseConnection();
+        RemoveNotifyAndCloseConnection();
         ClearPacketQueue();
     }
     /// <summary>

@@ -43,8 +43,10 @@ namespace SynicSugar.P2P {
         /// *Can use just Destory(MatchMakeManager.Instance)　and delete LobbyID method without calling this.
         /// </summary>
         /// <param name="destroyManager">If true, destroy NetworkManager after cancel matchmake.</param>
+        /// <param name="cleanupMemberCountChanged">Need to call MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(id, false) after exit lobby?</param>
+        /// <param name="token">token for this task</param>
         /// <returns>Always return true. the LastResultCode becomes Success after return true.</returns>
-        UniTask<Result> DestoryOfflineLobby(bool destroyManager, CancellationToken token);
+        UniTask<Result> DestoryOfflineLobby(bool destroyManager, bool cleanupMemberCountChanged, CancellationToken token);
 
         /// <summary>
         /// Start standart packet receiver on each timing. Only one can be enabled, including Synic.<br />

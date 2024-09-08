@@ -63,18 +63,16 @@ namespace SynicSugar.Base {
         /// <summary>
         /// Cancel MatcgMaking and leave the lobby.
         /// </summary>
-        /// <param name="cleanupMemberCountChanged"></param>
         /// <param name="token"></param>
         /// <returns>If true, user can leave or destroy the lobby. </returns>
-        public abstract UniTask<Result> CancelMatchMaking(bool cleanupMemberCountChanged = false, CancellationToken token = default(CancellationToken));
+        public abstract UniTask<Result> CancelMatchMaking(CancellationToken token = default(CancellationToken));
         
         /// <summary>
         /// Host close matchmaking. Guest Cancel matchmaking.
         /// </summary>
-        /// <param name="cleanupMemberCountChanged"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        public abstract UniTask<Result> CloseMatchMaking(bool cleanupMemberCountChanged = false, CancellationToken token = default(CancellationToken));
+        public abstract UniTask<Result> CloseMatchMaking(CancellationToken token = default(CancellationToken));
        
         /// <summary>
         /// Currently preventing duplicate calls.
@@ -87,17 +85,15 @@ namespace SynicSugar.Base {
         /// Leave the Participating Lobby.<br />
         /// When a game is over, call DestroyLobby() instead of this.
         /// </summary>
-        /// <param name="cleanupMemberCountChanged"></param>
         /// <param name="token"></param>
-        public abstract UniTask<Result> LeaveLobby(bool cleanupMemberCountChanged = false, CancellationToken token = default(CancellationToken));
+        public abstract UniTask<Result> LeaveLobby(CancellationToken token);
 
         /// <summary>
         /// When a game is over, call this. Guest leaves Lobby by update notify.
         /// </summary>
-        /// <param name="cleanupMemberCountChanged"></param>
         /// <param name="token"></param>
         /// <returns>On destroy success, return true.</returns>
-        public abstract UniTask<Result> DestroyLobby(bool cleanupMemberCountChanged = false, CancellationToken token = default(CancellationToken));
+        public abstract UniTask<Result> DestroyLobby(CancellationToken token);
         
         /// <summary>
         /// Search for lobbies in backend and join in one to meet conditions.<br />

@@ -170,28 +170,6 @@ namespace SynicSugar.MatchMake {
 
             return Result.Success;
         }
-        /// <summary>
-        /// Wait for timeout. Leave Lobby, then the end of this task stop main task.
-        /// </summary>
-        /// <param name="token">Token for matchmaking to be passed from Main api.</param>
-        /// <returns></returns>
-        async UniTask<bool> TimeoutTimer(CancellationToken token){
-            try{
-                // await UniTask.Delay(timeoutMS, cancellationToken: token);
-            }
-            catch (OperationCanceledException){ // Cancel matchmaking process by user or library.
-                return false;
-            }
-            
-            Result canLeave = await LeaveLobby(true, token);
-    #if SYNICSUGAR_LOG
-            Debug.Log("Cancel matching by timeout");
-    #endif
-            if(canLeave == Result.Success){
-                MatchMakeManager.Instance.matchmakeTokenSource?.Cancel();
-            }
-            return true;
-        }
 //Host
 #region Create
         /// <summary>
@@ -207,7 +185,7 @@ namespace SynicSugar.MatchMake {
 #if SYNICSUGAR_LOG
                 Debug.LogWarningFormat("Create Lobby: Leaving Current Lobby '{0}'", CurrentLobby.LobbyId);
 #endif
-                await LeaveLobby(false, token);
+                await LeaveLobby(token);
             }
 
             //Lobby Option
@@ -433,9 +411,13 @@ namespace SynicSugar.MatchMake {
 
                 //Timeout or User cancels Matchmaking process from token.
                 if(MatchMakeManager.Instance.enableHostmigrationInMatchmaking){
-                    await CancelMatchMaking(true ,token);
+                    await CancelMatchMaking(token);
                 }else{
-                    await CloseMatchMaking(true, token);
+                    await CloseMatchMaking(token);
+                }
+                //Need to clear GUI state for Timeout.
+                foreach(var member in CurrentLobby.Members){
+                    MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(UserId.GetUserId(member.Key), false);
                 }
                 return Result.Canceled;
             }
@@ -704,7 +686,7 @@ namespace SynicSugar.MatchMake {
             async UniTask AddOptions(string lobbyId){
                 // If has joined in other lobby
                 if (CurrentLobby.isValid() && !string.Equals(CurrentLobby.LobbyId, lobbyId)){
-                    await LeaveLobby(false, token);
+                    await LeaveLobby(token);
                 }
 
                 CurrentLobby.InitFromLobbyHandle(lobbyId);
@@ -1187,14 +1169,14 @@ namespace SynicSugar.MatchMake {
     /// <param name="cleanupMemberCountChanged"></param>
     /// <param name="token"></param>
     /// <returns></returns>
-    public override async UniTask<Result> CloseMatchMaking(bool cleanupMemberCountChanged = false, CancellationToken token = default(CancellationToken)){
+    public override async UniTask<Result> CloseMatchMaking(CancellationToken token = default(CancellationToken)){
         if(!CurrentLobby.isValid()){
             Debug.LogError($"Cancel MatchMaking: this user has not participated a lobby.");
             return Result.InvalidAPICall;
         }
         //Destroy or Leave the current lobby.
         if(CurrentLobby.isHost()){
-            Result destroyResult = await DestroyLobby(cleanupMemberCountChanged, token);
+            Result destroyResult = await DestroyLobby(token);
             
             if(destroyResult != Result.Success){
                 Debug.LogError($"Cancel MatchMaking: has something problem when destroying the lobby");
@@ -1203,7 +1185,7 @@ namespace SynicSugar.MatchMake {
             return destroyResult;
         }
 
-        Result leaveResult = await LeaveLobby(cleanupMemberCountChanged, token);
+        Result leaveResult = await LeaveLobby(token);
         
         if(leaveResult != Result.Success){
             Debug.LogError($"Cancel MatchMaking: has something problem when leave from the lobby");
@@ -1216,7 +1198,7 @@ namespace SynicSugar.MatchMake {
     /// <param name="cleanupMemberCountChanged"></param>
     /// <param name="token"></param>
     /// <returns>If true, user can leave or destroy the lobby. </returns>
-    public override async UniTask<Result> CancelMatchMaking(bool cleanupMemberCountChanged = false, CancellationToken token = default(CancellationToken)){
+    public override async UniTask<Result> CancelMatchMaking(CancellationToken token = default(CancellationToken)){
         if(!CurrentLobby.isValid()){
             Debug.LogError($"Cancel MatchMaking: this user has not participated a lobby.");
             return Result.InvalidAPICall;
@@ -1224,7 +1206,7 @@ namespace SynicSugar.MatchMake {
         //Destroy or Leave the current lobby.
         if(CurrentLobby.isHost()){
             if(CurrentLobby.Members.Count == 1){
-                Result destroyResult = await DestroyLobby(cleanupMemberCountChanged, token);
+                Result destroyResult = await DestroyLobby(token);
                 
                 if(destroyResult != Result.Success){
                     Debug.LogError($"Cancel MatchMaking: has something problem when destroying the lobby");
@@ -1234,7 +1216,7 @@ namespace SynicSugar.MatchMake {
             }
         }
 
-        Result leaveResult = await LeaveLobby(cleanupMemberCountChanged, token);
+        Result leaveResult = await LeaveLobby(token);
         
         if(leaveResult != Result.Success){
             Debug.LogError($"Cancel MatchMaking: has something problem when leave from the lobby");
@@ -1253,7 +1235,7 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         /// <param name="cleanupMemberCountChanged"></param>
         /// <param name="token"></param>
-        public override async UniTask<Result> LeaveLobby(bool cleanupMemberCountChanged = false, CancellationToken token = default(CancellationToken)){
+        public override async UniTask<Result> LeaveLobby(CancellationToken token){
             if (CurrentLobby == null || string.IsNullOrEmpty(CurrentLobby.LobbyId) || !EOSManager.Instance.GetProductUserId().IsValid()){
                 Debug.LogWarning("Leave Lobby: user is not in a lobby.");
                 return Result.InvalidAPICall;
@@ -1294,12 +1276,6 @@ namespace SynicSugar.MatchMake {
                     finishLeave = true;
                     return;
                 }
-                if(cleanupMemberCountChanged){
-                    //To delete all member objects.
-                    foreach(var member in CurrentLobby.Members){
-                        MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(UserId.GetUserId(member.Key), false);
-                    }
-                }
                 CurrentLobby.Clear();
                 finishLeave = true;
             }
@@ -1312,7 +1288,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="cleanupMemberCountChanged"></param>
         /// <param name="token"></param>
         /// <returns>On destroy success, return true.</returns>
-        public override async UniTask<Result> DestroyLobby(bool cleanupMemberCountChanged = false, CancellationToken token = default(CancellationToken)){
+        public override async UniTask<Result> DestroyLobby(CancellationToken token){
             if(!CurrentLobby.isHost()){
                 Debug.LogError("Destroy Lobby: This user is not Host.");
                 return Result.InvalidAPICall;
@@ -1352,12 +1328,6 @@ namespace SynicSugar.MatchMake {
                     return;
                 }
                 
-                if(cleanupMemberCountChanged){
-                    //To delete member object.
-                    foreach(var member in CurrentLobby.Members){
-                        MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(UserId.GetUserId(member.Key), false);
-                    }
-                }
                 CurrentLobby.Clear();
                 finishDestory = true;
             }
@@ -1413,6 +1383,7 @@ namespace SynicSugar.MatchMake {
         }
         public override async UniTask<Result> DestroyOfflineLobby(CancellationToken token){
             await MatchMakeManager.Instance.OnDeleteLobbyID();
+
             CurrentLobby.Clear();
 
             return Result.Success;

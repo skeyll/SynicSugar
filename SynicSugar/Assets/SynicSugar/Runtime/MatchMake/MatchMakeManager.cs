@@ -533,7 +533,7 @@ namespace SynicSugar.MatchMake {
                 return Result.InvalidAPICall;
             }
             isLooking = false;
-            Result cancelResult = await matchmakingCore.CancelMatchMaking(false, token);
+            Result cancelResult = await matchmakingCore.CancelMatchMaking(token);
             
             if(cancelResult != Result.Success){
                 return cancelResult;
@@ -563,7 +563,7 @@ namespace SynicSugar.MatchMake {
                 return Result.InvalidAPICall;
             }
             isLooking = false;
-            Result closeResult = await matchmakingCore.CloseMatchMaking(false, token);
+            Result closeResult = await matchmakingCore.CloseMatchMaking(token);
             
             if(closeResult != Result.Success){
                 return closeResult;
@@ -592,7 +592,14 @@ namespace SynicSugar.MatchMake {
         /// <param name="cleanupMemberCountChanged">Need to call MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(id, false) after exit lobby?</param>
         /// <param name="token">Token for this task</param>
         internal async UniTask<Result> ExitCurrentLobby(bool cleanupMemberCountChanged, CancellationToken token){
-            Result canDestroy = await matchmakingCore.LeaveLobby(cleanupMemberCountChanged, token);
+            Result canDestroy = await matchmakingCore.LeaveLobby(token);
+
+            if(canDestroy == Result.Success && cleanupMemberCountChanged){
+                //To delete member object.
+                foreach(var id in p2pInfo.Instance.AllUserIds){
+                    MatchMakingGUIEvents.LobbyMemberCountChanged(id, false);
+                }
+            }
 
             return canDestroy;
         }
@@ -602,9 +609,15 @@ namespace SynicSugar.MatchMake {
         /// <param name="cleanupMemberCountChanged">Need to call MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(id, false) after exit lobby?</param>
         /// <param name="token">Token for this task</param>
         /// <returns>True on success. If user isn't host, return false.</returns>
-        internal async UniTask<Result> CloseCurrentLobby(bool cleanupMemberCountChanged = false, CancellationToken token = default(CancellationToken)){
-            Result canDestroy = await matchmakingCore.DestroyLobby(cleanupMemberCountChanged, token);
+        internal async UniTask<Result> CloseCurrentLobby(bool cleanupMemberCountChanged, CancellationToken token){
+            Result canDestroy = await matchmakingCore.DestroyLobby(token);
 
+            if(canDestroy == Result.Success && cleanupMemberCountChanged){
+                //To delete member object.
+                foreach(var id in p2pInfo.Instance.AllUserIds){
+                    MatchMakingGUIEvents.LobbyMemberCountChanged(id, false);
+                }
+            }
             return canDestroy;
         }
     #region Offline Mode
@@ -652,22 +665,15 @@ namespace SynicSugar.MatchMake {
         /// Just for solo mode like as tutorial. <br />
         /// Destory Lobby Instance. We can use just Destory(MatchMakeManager.Instance)　and delete LobbyID method without calling this.<br />
         /// </summary>
-        /// <param name="destroyManager">If true, destroy NetworkManager after cancel matchmake.</param>
+        /// <param name="cleanupMemberCountChanged">If true, destroy NetworkManager after cancel matchmake.</param>
         /// <returns>Always return true. the LastResultCode becomes Success after return true.</returns>
-        internal async UniTask<Result> DestoryOfflineLobby(bool destroyManager, CancellationToken token){
-            if(!SynicSugarManger.Instance.State.IsInSession || p2pInfo.Instance.userIds.AllUserIds.Count != 1){
-            #if SYNICSUGAR_LOG
-                Debug.Log("DestoryOfflineLobby: This user dosen't have OfflineLobby.");
-            #endif
-                return Result.InvalidAPICall;
-            }
-            p2pConfig.Instance.sessionCore.CancelRTTToken();
+        internal async UniTask<Result> DestoryOfflineLobby(bool cleanupMemberCountChanged, CancellationToken token){
             await matchmakingCore.DestroyOfflineLobby(token);
-            if(destroyManager){
-                Destroy(gameObject);
+
+            if(cleanupMemberCountChanged){
+                MatchMakingGUIEvents.LobbyMemberCountChanged(p2pInfo.Instance.LocalUserId, false);
             }
 
-            SynicSugarManger.Instance.State.IsInSession = false;
             return Result.Success;
         }
     #endregion

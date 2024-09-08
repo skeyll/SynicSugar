@@ -220,8 +220,10 @@ namespace SynicSugar.Base {
         /// Destory Lobby Instance. We can use just Destory(MatchMakeManager.Instance)　and delete LobbyID method without calling this.<br />
         /// </summary>
         /// <param name="destroyManager">If true, destroy NetworkManager after cancel matchmake.</param>
+        /// <param name="cleanupMemberCountChanged">Need to call MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(id, false) after exit lobby?</param>
+        /// <param name="token">token for this task</param>
         /// <returns>Always return true. the LastResultCode becomes Success after return true.</returns>
-        async UniTask<Result> INetworkCore.DestoryOfflineLobby(bool destroyManager, CancellationToken token){
+        async UniTask<Result> INetworkCore.DestoryOfflineLobby(bool destroyManager, bool cleanupMemberCountChanged, CancellationToken token){
             if(!SynicSugarManger.Instance.State.IsInSession || p2pInfo.Instance.userIds.AllUserIds.Count != 1){
             #if SYNICSUGAR_LOG
                 Debug.Log("DestoryOfflineLobby: This user dosen't have OfflineLobby.");
@@ -230,7 +232,7 @@ namespace SynicSugar.Base {
             }
             CancelRTTToken();
 
-            await MatchMakeManager.Instance.DestoryOfflineLobby(destroyManager, token);
+            await MatchMakeManager.Instance.DestoryOfflineLobby(cleanupMemberCountChanged, token);
 
             return Result.Success;
         }
@@ -358,7 +360,7 @@ namespace SynicSugar.Base {
         protected void RemoveNotifyAndCloseConnection (){
             Result result = CloseConnection();
 
-            if(result != Result.Success){
+            if(result == Result.Success){
                 IsConnected = false;
             }
         }
