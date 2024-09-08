@@ -1411,7 +1411,7 @@ namespace SynicSugar.MatchMake {
 
             return Result.Success;
         }
-        public override async UniTask<Result> DestroyOfflineLobby(){
+        public override async UniTask<Result> DestroyOfflineLobby(CancellationToken token){
             await MatchMakeManager.Instance.OnDeleteLobbyID();
             CurrentLobby.Clear();
 

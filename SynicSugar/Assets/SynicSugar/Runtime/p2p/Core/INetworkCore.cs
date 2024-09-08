@@ -39,6 +39,14 @@ namespace SynicSugar.P2P {
         UniTask<Result> CloseSession(bool destroyManager, bool cleanupMemberCountChanged, CancellationToken token);
 
         /// <summary>
+        /// Just for solo mode like as tutorial. Destory Lobby Instance. <br />
+        /// *Can use just Destory(MatchMakeManager.Instance)　and delete LobbyID method without calling this.
+        /// </summary>
+        /// <param name="destroyManager">If true, destroy NetworkManager after cancel matchmake.</param>
+        /// <returns>Always return true. the LastResultCode becomes Success after return true.</returns>
+        UniTask<Result> DestoryOfflineLobby(bool destroyManager, CancellationToken token);
+
+        /// <summary>
         /// Start standart packet receiver on each timing. Only one can be enabled, including Synic.<br />
         /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll. 
         /// </summary>
