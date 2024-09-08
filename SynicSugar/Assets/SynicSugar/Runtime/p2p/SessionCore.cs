@@ -5,6 +5,7 @@ using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using SynicSugar.P2P;
+using SynicSugar.MatchMake;
 //We can't call the main-Assembly from own-assemblies.
 //So, use such processes through this assembly.
 namespace SynicSugar.Base {
@@ -183,6 +184,26 @@ namespace SynicSugar.Base {
             return result;
         }
         protected abstract UniTask<Result> CloseSession(bool destroyManager, bool cleanupMemberCountChanged, CancellationToken token);
+
+        /// <summary>
+        /// Just for solo mode like as tutorial. <br />
+        /// Destory Lobby Instance. We can use just Destory(MatchMakeManager.Instance)　and delete LobbyID method without calling this.<br />
+        /// </summary>
+        /// <param name="destroyManager">If true, destroy NetworkManager after cancel matchmake.</param>
+        /// <returns>Always return true. the LastResultCode becomes Success after return true.</returns>
+        async UniTask<Result> INetworkCore.DestoryOfflineLobby(bool destroyManager, CancellationToken token){
+            if(!SynicSugarManger.Instance.State.IsInSession || p2pInfo.Instance.userIds.AllUserIds.Count != 1){
+            #if SYNICSUGAR_LOG
+                Debug.Log("DestoryOfflineLobby: This user dosen't have OfflineLobby.");
+            #endif
+                return Result.InvalidAPICall;
+            }
+            CancelRTTToken();
+
+            await MatchMakeManager.Instance.DestoryOfflineLobby(destroyManager);
+
+            return Result.Success;
+        }
 
         /// <summary>
         /// Start standart packet receiver on each timing. Only one can be enabled, including Synic.<br />

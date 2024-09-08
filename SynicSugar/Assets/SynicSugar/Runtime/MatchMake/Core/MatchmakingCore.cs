@@ -114,7 +114,7 @@ namespace SynicSugar.Base {
         /// Destroy Offline lobby that has created by CreateOfflineLobby.
         /// </summary>
         /// <returns></returns>
-        public abstract UniTask<Result> DestroyOfflineLobby();
+        public abstract UniTask<Result> DestroyOfflineLobby(CancellationToken token);
 
         /// <summary>
         /// Calling after the opponents are found and the lobby is closed. Establish communication and exchange UserID lists, then return results when the user is ready to communicate.

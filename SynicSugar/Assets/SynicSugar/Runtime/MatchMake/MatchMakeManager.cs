@@ -654,15 +654,15 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         /// <param name="destroyManager">If true, destroy NetworkManager after cancel matchmake.</param>
         /// <returns>Always return true. the LastResultCode becomes Success after return true.</returns>
-        public async UniTask<Result> DestoryOfflineLobby(bool destroyManager = true){
+        internal async UniTask<Result> DestoryOfflineLobby(bool destroyManager, CancellationToken token){
             if(!SynicSugarManger.Instance.State.IsInSession || p2pInfo.Instance.userIds.AllUserIds.Count != 1){
             #if SYNICSUGAR_LOG
                 Debug.Log("DestoryOfflineLobby: This user dosen't have OfflineLobby.");
             #endif
                 return Result.InvalidAPICall;
             }
-            p2pConfig.Instance.sessionCore.rttTokenSource?.Cancel();
-            await matchmakingCore.DestroyOfflineLobby();
+            p2pConfig.Instance.sessionCore.CancelRTTToken();
+            await matchmakingCore.DestroyOfflineLobby(token);
             if(destroyManager){
                 Destroy(gameObject);
             }
@@ -985,6 +985,29 @@ namespace SynicSugar.MatchMake {
                 return Result.Canceled;
             }
 
+            return Result.Success;
+        }
+
+        /// <summary>
+        /// Just for solo mode like as tutorial. <br />
+        /// Destory Lobby Instance. We can use just Destory(MatchMakeManager.Instance)　and delete LobbyID method without calling this.<br />
+        /// </summary>
+        /// <param name="destroyManager">If true, destroy NetworkManager after cancel matchmake.</param>
+        /// <returns>Always return true. the LastResultCode becomes Success after return true.</returns>
+        [Obsolete("This is old. ConnectHub.Instance.DestoryOfflineLobby is new one")]
+        public async UniTask<Result> DestoryOfflineLobby(bool destroyManager = true){
+            if(!SynicSugarManger.Instance.State.IsInSession || p2pInfo.Instance.userIds.AllUserIds.Count != 1){
+            #if SYNICSUGAR_LOG
+                Debug.Log("DestoryOfflineLobby: This user dosen't have OfflineLobby.");
+            #endif
+                return Result.InvalidAPICall;
+            }
+            p2pConfig.Instance.sessionCore.CancelRTTToken();
+            await matchmakingCore.DestroyOfflineLobby(this.GetCancellationTokenOnDestroy());
+            
+            Destroy(gameObject);
+
+            SynicSugarManger.Instance.State.IsInSession = false;
             return Result.Success;
         }
         #endregion

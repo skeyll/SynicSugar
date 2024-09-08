@@ -147,6 +147,22 @@ namespace SynicSugar.P2P {
             return result;
         }
 
+        /// <summary>
+        /// Just for solo mode like as tutorial. <br />
+        /// Destory Lobby Instance. We can use just Destory(MatchMakeManager.Instance)　and delete LobbyID method without calling this.<br />
+        /// </summary>
+        /// <param name="destroyManager">If true, destroy NetworkManager after cancel matchmake.</param>
+        /// <returns>Always return true. the LastResultCode becomes Success after return true.</returns>
+        public async UniTask<Result> DestoryOfflineLobby(bool destroyManager = true, CancellationToken cancelToken = default(CancellationToken)){
+            Result result = await NetworkCore.DestoryOfflineLobby(destroyManager, cancelToken);
+
+            if(result == Result.Success){
+                syncTokenSource.Cancel();
+                ClearReferenceDictionaries();
+            }
+            return result;
+        }
+
         //(for elements)
         public enum CHANNELLIST{
             <#= SyncList #>
@@ -204,7 +220,7 @@ namespace SynicSugar.P2P {
                         Debug.LogFormat("ConvertFormPacket: Restore packet is in progress. for {0}", id);
     #endif
                         return;
-                    }
+                    }  
                     SyncedSynic(id.ToString());
 
                     NetworkCore.UpdateSyncedState(id, synicPacketInfo[id].phase);
