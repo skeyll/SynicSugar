@@ -200,7 +200,7 @@ namespace SynicSugar.Base {
             }
             CancelRTTToken();
 
-            await MatchMakeManager.Instance.DestoryOfflineLobby(destroyManager);
+            await MatchMakeManager.Instance.DestoryOfflineLobby(destroyManager, token);
 
             return Result.Success;
         }
