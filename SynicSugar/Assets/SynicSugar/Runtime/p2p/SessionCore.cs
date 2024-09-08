@@ -165,6 +165,8 @@ namespace SynicSugar.Base {
             
             if(destroyManager){
                 Destroy(MatchMakeManager.Instance.gameObject);
+            }else{
+                p2pInfo.Instance.Reset();
             }
 
             return result;
@@ -210,6 +212,8 @@ namespace SynicSugar.Base {
 
             if(destroyManager){
                 Destroy(MatchMakeManager.Instance.gameObject);
+            }else{
+                p2pInfo.Instance.Reset();
             }
             
             return result;
@@ -233,6 +237,12 @@ namespace SynicSugar.Base {
             CancelRTTToken();
 
             await MatchMakeManager.Instance.DestoryOfflineLobby(cleanupMemberCountChanged, token);
+            
+            if(destroyManager){
+                Destroy(MatchMakeManager.Instance.gameObject);
+            }else{
+                p2pInfo.Instance.Reset();
+            }
 
             return Result.Success;
         }

@@ -27,6 +27,18 @@ namespace SynicSugar.P2P {
                 Instance = null;
             }
         }
+        /// <summary>
+        /// For the case not to destroy and play next match.
+        /// </summary>
+        internal void Reset(){
+            userIds = new ();
+            pings = new();
+            lastRpcInfo = new();
+            lastTargetRPCInfo = new();
+            UserId.CacheClear();
+            ConnectionNotifier.Clear();
+            SyncSnyicNotifier.Clear();
+        }
 #endregion
         SessionCore sessionCore;
         NatRelayManager natRelayManager;

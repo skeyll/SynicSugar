@@ -1,4 +1,3 @@
-using PlayEveryWare.EpicOnlineServices;
 using System.Collections.Generic;
 using Epic.OnlineServices;
 
