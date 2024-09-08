@@ -134,25 +134,41 @@ namespace SynicSugar.Base {
         /// <param name="cleanupMemberCountChanged">Need to call MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(id, false) after exit lobby?</param>
         /// <param name="token">token for this task</param>
         async UniTask<Result> INetworkCore.ExitSession(bool destroyManager, bool cleanupMemberCountChanged , CancellationToken token){
-            if(!SynicSugarManger.Instance.State.IsInSession){
+            if(!SynicSugarManger.Instance.State.IsInSession || p2pInfo.Instance.userIds.AllUserIds.Count == 1){
             #if SYNICSUGAR_LOG
                 Debug.Log("ExitSession: This local user is NOT in Session.");
             #endif
                 return Result.InvalidAPICall;
             }
+            //Stop connection
             bool tmpState = IsConnected;
             IsConnected = false;
-            CancelRTTToken();
-
-            Result result = await ExitSession(destroyManager, cleanupMemberCountChanged, token);
-
-            if(tmpState && result != Result.Success){
-                IsConnected = true;
-                rttTokenSource = new CancellationTokenSource();
+            ResetConnections();
+            //Then, destroy Lobby
+            Result result;
+            //The last user
+            if (p2pInfo.Instance.IsHost() && p2pInfo.Instance.CurrentConnectedUserIds.Count == 1){
+                result = await MatchMakeManager.Instance.CloseCurrentLobby(cleanupMemberCountChanged, token);
+            }else{
+                result = await MatchMakeManager.Instance.ExitCurrentLobby(cleanupMemberCountChanged, token);
             }
+            
+            if(result != Result.Success){
+                if(tmpState){
+                    IsConnected = true;
+                    rttTokenSource = new CancellationTokenSource();
+                }
+                return result;
+            }
+
+            SynicSugarManger.Instance.State.IsInSession = false;
+            
+            if(destroyManager){
+                Destroy(MatchMakeManager.Instance.gameObject);
+            }
+
             return result;
         }
-        protected abstract UniTask<Result> ExitSession(bool destroyManager, bool cleanupMemberCountChanged , CancellationToken token);
 
         /// <summary>
         /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll.<br />
@@ -164,26 +180,40 @@ namespace SynicSugar.Base {
         /// <param name="cleanupMemberCountChanged">Need to call MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(id, false) after exit lobby?</param>
         /// <param name="token">token for this task</param>
         async UniTask<Result> INetworkCore.CloseSession(bool destroyManager, bool cleanupMemberCountChanged, CancellationToken token){
-            if(!SynicSugarManger.Instance.State.IsInSession){
+            if(!SynicSugarManger.Instance.State.IsInSession || p2pInfo.Instance.userIds.AllUserIds.Count == 1){
             #if SYNICSUGAR_LOG
                 Debug.Log("CloseSession: This local user is NOT in Session.");
             #endif
                 return Result.InvalidAPICall;
             }
 
+            //Stop connection
             bool tmpState = IsConnected;
             IsConnected = false;
-            CancelRTTToken();
-
-            Result result = await CloseSession(destroyManager, cleanupMemberCountChanged, token);
-            
-            if(tmpState && result != Result.Success){
-                IsConnected = true;
-                rttTokenSource = new CancellationTokenSource();
+            ResetConnections();
+            //Then, destroy Lobby
+            Result result;
+            if(p2pInfo.Instance.IsHost()){
+                result = await MatchMakeManager.Instance.CloseCurrentLobby(cleanupMemberCountChanged, token);
+            }else{
+                result = await MatchMakeManager.Instance.ExitCurrentLobby(cleanupMemberCountChanged, token);
             }
+            if(result != Result.Success){
+                if(tmpState){
+                    IsConnected = true;
+                    rttTokenSource = new CancellationTokenSource();
+                }
+                return result;
+            }
+
+            SynicSugarManger.Instance.State.IsInSession = false;
+
+            if(destroyManager){
+                Destroy(MatchMakeManager.Instance.gameObject);
+            }
+            
             return result;
         }
-        protected abstract UniTask<Result> CloseSession(bool destroyManager, bool cleanupMemberCountChanged, CancellationToken token);
 
         /// <summary>
         /// Just for solo mode like as tutorial. <br />
@@ -334,6 +364,8 @@ namespace SynicSugar.Base {
         }
         protected abstract Result CloseConnection();
 #endregion
+
+        protected abstract void ResetConnections();
         /// <summary>
         /// Update SyncedInfo, then Invoke SyncedSynic event.
         /// </summary>
