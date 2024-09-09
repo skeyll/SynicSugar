@@ -18,6 +18,7 @@ namespace SynicSugar.MatchMake {
             Instance = this;
             DontDestroyOnLoad(gameObject);
             MemberUpdatedNotifier = new();
+            MatchMakingGUIEvents = new MatchMakingGUIEvents();
 
             if(lobbyIdSaveType == RecconectLobbyIdSaveType.CustomMethod){
                 if(customSaveLobbyID != null && customDeleteLobbyID != null){
@@ -104,7 +105,7 @@ namespace SynicSugar.MatchMake {
         /// This token manages the matching task, which is created internally when the API is called.  This cannot be touched from the outside.
         /// </summary>
         internal CancellationTokenSource matchmakeTokenSource;
-        public MatchMakingGUIEvents MatchMakingGUIEvents = new MatchMakingGUIEvents();
+        public MatchMakingGUIEvents MatchMakingGUIEvents;
         // Events
         public MemberUpdatedNotifier MemberUpdatedNotifier;
 
