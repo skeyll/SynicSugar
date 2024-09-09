@@ -140,7 +140,6 @@ namespace SynicSugar.Auth {
             #endif
             }
         }
-    #if UNITY_EDITOR
         /// <summary>
         /// When stop playing mode in editor, remove the notify via SynicSugarManager's OnDestory.
         /// </summary>
@@ -152,7 +151,6 @@ namespace SynicSugar.Auth {
             connectInterface.RemoveNotifyAuthExpiration(ExpirationNotifyId);
             ExpirationNotifyId = 0;
         }
-    #endif
         /// <summary>
         /// Delete any existing Device ID access credentials for the current user profile on the local device. <br />
         /// On Android and iOS devices, uninstalling the application will automatically delete any local Device ID credentials.<br />
