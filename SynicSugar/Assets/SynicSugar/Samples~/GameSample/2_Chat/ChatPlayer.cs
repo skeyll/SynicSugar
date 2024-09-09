@@ -22,7 +22,7 @@ namespace SynicSugar.Samples {
             GameObject chatCanvas = GameObject.Find("Chat");
             systemManager = chatCanvas.GetComponent<ChatSystemManager>();
             if(string.IsNullOrEmpty(Name)){
-                int userNumberInAllUserIds = p2pInfo.Instance.AllUserIds.FindIndex(id =>id == OwnerUserID);
+                int userNumberInAllUserIds = p2pInfo.Instance.GetUserIndex(OwnerUserID);
                 Name = $"Player{userNumberInAllUserIds}";
             }
             systemManager.GenerateVCStateObject(OwnerUserID);
@@ -52,9 +52,9 @@ namespace SynicSugar.Samples {
             if(p2pInfo.Instance.AllUserIds.Count > 1){ //Just for online mode
                 uiSets.transform.Find("StopReceiver").GetComponent<Button>().onClick.AddListener(() => StopReceiver());
                 uiSets.transform.Find("StartReceiver").GetComponent<Button>().onClick.AddListener(() => RestartReceiver());
-                uiSets.transform.Find("Pause").GetComponent<Button>().onClick.AddListener(() => PauseSession(false));
-                uiSets.transform.Find("PauseF").GetComponent<Button>().onClick.AddListener(() => PauseSession(true));
-                uiSets.transform.Find("Restart").GetComponent<Button>().onClick.AddListener(RestartSession);
+                uiSets.transform.Find("Pause").GetComponent<Button>().onClick.AddListener(() => PauseConnection(false));
+                uiSets.transform.Find("PauseF").GetComponent<Button>().onClick.AddListener(() => PauseConnection(true));
+                uiSets.transform.Find("Restart").GetComponent<Button>().onClick.AddListener(RestartConnection);
                 uiSets.transform.Find("StartVC").GetComponent<Button>().onClick.AddListener(StartVC);
                 uiSets.transform.Find("StopVC").GetComponent<Button>().onClick.AddListener(StopVC);
             }else{
@@ -93,10 +93,14 @@ namespace SynicSugar.Samples {
         public void UpdateName(string newName){
             Name = newName;
         }
-        //This main use is to send data when the disconnected user returns to session.
-        //So, we don't use LastTargetRPCPayload in local again, but if want use it, deserialize byte[] with MemoryPack.
+        //This main use is to send important data when the disconnected user returns to session.
+        //So, Resend process is NOT invoked in local if we call these.
+        //To use it as just send process, deserialize it's byte[] with MemoryPack and call original RPC or need write same process with the original.
         public void ResendPreContent(){
             ConnectHub.Instance.ResendLastRPC();
+            // or
+            //UpdateChatText(MemoryPack.MemoryPackSerializer.Deserialize<string>(p2pInfo.Instance.LastRPCPayload));
+            
             Debug.Log("SendLast Content!");
 
             string chat = $"{Name}: {MemoryPack.MemoryPackSerializer.Deserialize<string>(p2pInfo.Instance.LastRPCPayload)}{System.Environment.NewLine}";
@@ -188,25 +192,25 @@ namespace SynicSugar.Samples {
             UpdateName(systemManager.nameField.text);
         }
         public void ClearChat(){
-            systemManager.chatText.text = System.String.Empty;
+            systemManager.chatText.text = string.Empty;
         }
         public void StopReceiver(){
             SynicSugarDebug.Instance.Log("Chat Mode: StopReceiver");
-            ConnectHub.Instance.PausePacketReceiver();
+            ConnectHub.Instance.StopPacketReceiver();
         }
 
         public void RestartReceiver(){
             SynicSugarDebug.Instance.Log("Chat Mode: Restart");
-            ConnectHub.Instance.StartPacketReceiver();
+            ConnectHub.Instance.StartPacketReceiver(PacketReceiveTiming.FixedUpdate, 5);
         }
-        public void PauseSession(bool isForced){
+        public void PauseConnection(bool isForced){
             isStressTesting = false;
             SynicSugarDebug.Instance.Log("Chat Mode: Pause");
             ConnectHub.Instance.PauseConnections(isForced).Forget();
         }
-        public void RestartSession(){
+        public void RestartConnection(){
             SynicSugarDebug.Instance.Log("Chat Mode: Restart");
-            systemManager.chatText.text = System.String.Empty;
+            systemManager.chatText.text = string.Empty;
             ConnectHub.Instance.RestartConnections();
         }
 

@@ -2,6 +2,7 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 using SynicSugar.MatchMake;
+using SynicSugar.P2P;
 /// <summary>
 /// Awake: Prep for matchmaking (For basis of Events. This sample dosen't have condition for matchmaking)
 /// Start: Try to reconnect
@@ -13,7 +14,6 @@ namespace SynicSugar.Samples.Chat {
             NoneAndAfterStart, Standby, InMatchmaking, ReadyToStartGame
         }
 
-        [SerializeField] GameObject matchmakePrefab;
         /// <summary>
         /// Display matchmaking state on GUI.
         /// </summary>
@@ -25,9 +25,6 @@ namespace SynicSugar.Samples.Chat {
     #region Prep for matchmaking
         //At first, prep GUI events for matchmaking.
         void Awake(){
-            if(MatchMakeManager.Instance == null){
-                Instantiate(matchmakePrefab);
-            }
             //Prep matchmaking
             SetGUIEvents();
         }
@@ -151,7 +148,7 @@ namespace SynicSugar.Samples.Chat {
         }
         public async UniTask CancelMatchMaking(bool isOfflineMode){
             if(isOfflineMode){
-                await MatchMakeManager.Instance.DestoryOfflineLobby(false);
+                await ConnectHub.Instance.DestoryOfflineLobby(false);
             }else{
                 await MatchMakeManager.Instance.ExitCurrentMatchMake(false);
             }
@@ -164,7 +161,7 @@ namespace SynicSugar.Samples.Chat {
         }
         public async UniTask CanelMatchMakingAndReturnToMenu(bool isOfflineMode){
             if(isOfflineMode){
-                await MatchMakeManager.Instance.DestoryOfflineLobby();
+                await ConnectHub.Instance.DestoryOfflineLobby();
             }else{
                 await MatchMakeManager.Instance.ExitCurrentMatchMake(true);
             }

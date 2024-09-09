@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using SynicSugar.MatchMake;
-using SynicSugar.P2P;
 /// <summary>
 /// Awake: Prep for matchmaking (To register events for basis, detail and so on.)
 /// UserInputs: Matchmaking (Srandard, Create, Search)
@@ -123,6 +122,7 @@ namespace SynicSugar.Samples.Tank {
             if(isParticipated){
                 GameObject stateObj = Instantiate(memberStatePrefab, memberContentParent);
                 TankLobbyMemberState state = stateObj.GetComponent<TankLobbyMemberState>();
+                Debug.Log(target.ToString());
                 LobbyMemberStatus.Add(target.ToString(), state);
             }else{
                 Destroy(LobbyMemberStatus[target.ToString()].gameObject);
