@@ -292,7 +292,7 @@ namespace SynicSugar.P2P {
         //Users with young index send Heartbeat.
         if(p2pInfo.Instance.GetUserIndex(p2pInfo.Instance.LocalUserId) <= 2){
             p2pInfo.Instance.RefreshPing(UserId.GetUserId(data.RemoteUserId)).Forget();
-            MatchMakeManager.Instance.UpdateMemberAttributeAsHeartBeat(p2pInfo.Instance.GetUserIndex(UserId.GetUserId(data.RemoteUserId)));
+            HeartBeatToLobby(p2pInfo.Instance.GetUserIndex(UserId.GetUserId(data.RemoteUserId)));
         }
 
         p2pInfo.Instance.ConnectionNotifier.EarlyDisconnected(UserId.GetUserId(data.RemoteUserId), Reason.Interrupted);
@@ -368,7 +368,7 @@ namespace SynicSugar.P2P {
         if(p2pInfo.Instance.GetUserIndex(p2pInfo.Instance.LocalUserId) <= 2){
             //+100 is second's symbol.
             int disconnectedUserIndex = 100 + p2pInfo.Instance.GetUserIndex(UserId.GetUserId(data.RemoteUserId));
-            MatchMakeManager.Instance.UpdateMemberAttributeAsHeartBeat(disconnectedUserIndex);
+            HeartBeatToLobby(disconnectedUserIndex);
         }
     #if SYNICSUGAR_LOG
         Debug.Log("PeerConnectionClosedCallback: Connection lost now. with " +  data.RemoteUserId);

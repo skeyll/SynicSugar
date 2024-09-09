@@ -774,7 +774,7 @@ namespace SynicSugar.MatchMake {
         /// To check disconencted user's conenction state after p2p.
         /// </summary>
         /// <param name="disconenctedUserIndex"> UserIndex. For second Heart beat, +100</param>
-        internal void UpdateMemberAttributeAsHeartBeat(int disconenctedUserIndex){
+        internal void HeartBeatToLobby(int disconenctedUserIndex){
             matchmakingCore.UpdateMemberAttributeAsHeartBeat(disconenctedUserIndex);
         }
 

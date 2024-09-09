@@ -396,6 +396,13 @@ namespace SynicSugar.Base {
             
             AutoRefreshPings(token).Forget();
         }
+        /// <summary>
+        /// To check disconencted user's conenction state after p2p.
+        /// </summary>
+        /// <param name="disconenctedUserIndex"> UserIndex. For second Heart beat, +100</param>
+        protected void HeartBeatToLobby(int disconenctedUserIndex){
+            MatchMakeManager.Instance.HeartBeatToLobby(disconenctedUserIndex);
+        }
         internal void CancelRTTToken(){
             if(rttTokenSource == null || !rttTokenSource.Token.CanBeCanceled){
                 return;
