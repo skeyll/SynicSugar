@@ -1,5 +1,4 @@
 using Cysharp.Threading.Tasks;
-using SynicSugar.MatchMake;
 using SynicSugar.P2P;
 using SynicSugar.RTC;
 using UnityEngine;
@@ -40,7 +39,6 @@ namespace SynicSugar.Samples {
         }
         void RegisterButtonEvent(){
             uiSets.transform.Find("Submit").GetComponent<Button>().onClick.AddListener(DecideChat);
-            uiSets.transform.Find("Resend").GetComponent<Button>().onClick.AddListener(ResendPreContent);
             uiSets.transform.Find("Test").GetComponent<Button>().onClick.AddListener(DoStressTest);
             uiSets.transform.Find("Synic").GetComponent<Button>().onClick.AddListener(SendLargePacketViaSynic);
             uiSets.transform.Find("Large").GetComponent<Button>().onClick.AddListener(SetTextureWithNewColor);
@@ -50,6 +48,7 @@ namespace SynicSugar.Samples {
             uiSets.transform.Find("Close").GetComponent<Button>().onClick.AddListener(CloseSession);
 
             if(p2pInfo.Instance.AllUserIds.Count > 1){ //Just for online mode
+                uiSets.transform.Find("Resend").GetComponent<Button>().onClick.AddListener(ResendPreContent);
                 uiSets.transform.Find("StopReceiver").GetComponent<Button>().onClick.AddListener(() => StopReceiver());
                 uiSets.transform.Find("StartReceiver").GetComponent<Button>().onClick.AddListener(() => RestartReceiver());
                 uiSets.transform.Find("Pause").GetComponent<Button>().onClick.AddListener(() => PauseConnection(false));
@@ -227,7 +226,7 @@ namespace SynicSugar.Samples {
             if(p2pInfo.Instance.AllUserIds.Count > 1){
                 await ConnectHub.Instance.ExitSession();
             }else{
-                await MatchMakeManager.Instance.DestoryOfflineLobby();
+                await ConnectHub.Instance.DestoryOfflineLobby();
             }
             SceneChanger.ChangeGameScene(SCENELIST.MainMenu);
 
@@ -239,7 +238,7 @@ namespace SynicSugar.Samples {
             if(p2pInfo.Instance.AllUserIds.Count > 1){
                 await ConnectHub.Instance.CloseSession();
             }else{
-                await MatchMakeManager.Instance.DestoryOfflineLobby();
+                await ConnectHub.Instance.DestoryOfflineLobby();
             }
             SceneChanger.ChangeGameScene(SCENELIST.MainMenu);
         }

@@ -22,11 +22,20 @@ namespace SynicSugar.Samples.Chat {
                         cancelMatchMake, backtoMenu, startGame;
         [SerializeField] Text buttonText;
         [SerializeField] MatchMakeConditions matchConditions;
-    #region Prep for matchmaking
-        //At first, prep GUI events for matchmaking.
         void Awake(){
-            //Prep matchmaking
             SetGUIEvents();
+        }
+    #region Init and Reconnection
+        //Second,　check whether this player is a reconnector.
+        //In fact, you had better check id like this on the Title screen after user Login to EOS.
+        void Start(){
+            //Prep matchmaking
+            // SetGUIEvents();
+            SwitchButtonsActive(MATCHMAKEING_STATE.NoneAndAfterStart);
+            //Try recconect
+            //Sample projects use LobbyID save API of SynicSugar to save into Playerprefs for recconection.
+            string LobbyID = MatchMakeManager.Instance.GetReconnectLobbyID();
+            TryToreconnect(LobbyID).Forget();
         }
         /// <summary>
         /// Register tests and button events for in-matchmaking.
@@ -50,17 +59,6 @@ namespace SynicSugar.Samples.Chat {
         /// </summary>
         void OnEnableCancel(){
             SwitchButtonsActive(MATCHMAKEING_STATE.InMatchmaking);
-        }
-    #endregion
-    #region Reconnection
-        //Second,　check whether this player is a reconnector.
-        //In fact, you had better check id like this on the Title screen after user Login to EOS.
-        void Start(){
-            SwitchButtonsActive(MATCHMAKEING_STATE.NoneAndAfterStart);
-            //Try recconect
-            //Sample projects use LobbyID save API of SynicSugar to save into Playerprefs for recconection.
-            string LobbyID = MatchMakeManager.Instance.GetReconnectLobbyID();
-            TryToreconnect(LobbyID).Forget();
         }
         async UniTask TryToreconnect(string LobbyID){
             //On the default way, return Empty when there is no lobby data in local.
