@@ -144,22 +144,26 @@ namespace SynicSugar.P2P {
                 syncTokenSource.Cancel();
                 ClearReferenceDictionaries();
             }
+            
             return result;
         }
 
         /// <summary>
-        /// Just for solo mode like as tutorial. <br />
-        /// Destory Lobby Instance. We can use just Destory(MatchMakeManager.Instance)　and delete LobbyID method without calling this.<br />
+        /// Stop receiver, close all connections and remove the notify events.
+        /// Then, Host closes and Guest leaves the Lobby.<br />
+        /// When Host closes Lobby, Guests are automatically kicked out from the Lobby.
+        /// <param name="destroyManager">Destroy NetworkManager after exit lobby.</param>
+        /// <param name="cleanupMemberCountChanged">Need to call MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(id, false) after exit lobby?</param>
+        /// <param name="cancelToken">Cancel token for this task</param>
         /// </summary>
-        /// <param name="destroyManager">If true, destroy NetworkManager after cancel matchmake.</param>
-        /// <returns>Always return true. the LastResultCode becomes Success after return true.</returns>
-        public async UniTask<Result> DestoryOfflineLobby(bool destroyManager = true, CancellationToken cancelToken = default(CancellationToken)){
-            Result result = await NetworkCore.DestoryOfflineLobby(destroyManager, cancelToken);
+        public async UniTask<Result> DestoryOfflineLobby(bool destroyManager = true, bool cleanupMemberCountChanged = false, CancellationToken cancelToken = default(CancellationToken)){
+            Result result = await NetworkCore.DestoryOfflineLobby(destroyManager, cleanupMemberCountChanged, cancelToken);
 
             if(result == Result.Success){
                 syncTokenSource.Cancel();
                 ClearReferenceDictionaries();
             }
+            
             return result;
         }
 
@@ -220,7 +224,8 @@ namespace SynicSugar.P2P {
                         Debug.LogFormat("ConvertFormPacket: Restore packet is in progress. for {0}", id);
     #endif
                         return;
-                    }  
+                    }
+                    
                     SyncedSynic(id.ToString());
 
                     NetworkCore.UpdateSyncedState(id, synicPacketInfo[id].phase);

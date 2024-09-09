@@ -57,7 +57,7 @@ namespace SynicSugar.P2P {
                 return Result.Success;
             }
             
-            CloseConnection();
+            RemoveNotifyAndCloseConnection();
             
             GetPacketQueueInfoOptions options = new GetPacketQueueInfoOptions();
             PacketQueueInfo info = new PacketQueueInfo();
@@ -76,61 +76,6 @@ namespace SynicSugar.P2P {
         /// </summary>
         protected override Result RestartConnections(){
             return InitiateConnection();
-        }
-        /// <summary>
-        /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll.<br />
-        /// Stop connections, exit current lobby.<br />
-        /// The Last user closes lobby.
-        /// </summary>
-        /// <param name="destroyManager">If true, destroy NetworkManager after cancel matchmake.</param>
-        /// <param name="cleanupMemberCountChanged">Need to call MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(id, false) after exit lobby?</param>
-        /// <param name="token">token for this task</param>
-        protected override async UniTask<Result> ExitSession(bool destroyManager, bool cleanupMemberCountChanged , CancellationToken token){
-            ResetConnections();
-            Result  exitResult;
-            //The last user
-            if (p2pInfo.Instance.IsHost() && p2pInfo.Instance.CurrentConnectedUserIds.Count == 1){
-                exitResult = await MatchMakeManager.Instance.CloseCurrentLobby(cleanupMemberCountChanged, token);
-            }else{
-                exitResult = await MatchMakeManager.Instance.ExitCurrentLobby(cleanupMemberCountChanged, token);
-            }
-            
-            if(exitResult != Result.Success){
-                return exitResult;
-            }
-            if(destroyManager){
-                Destroy(MatchMakeManager.Instance.gameObject);
-            }
-
-            SynicSugarManger.Instance.State.IsInSession = false;
-            return Result.Success;
-        }
-        /// <summary>
-        /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll.<br />
-        /// Stop connections, exit current lobby.<br />
-        /// Host closes lobby. Guest leaves lobby. <br />
-        /// If host call this after the lobby has other users, Guests in this lobby are kicked out from the lobby.
-        /// </summary>
-        /// <param name="destroyManager">If true, destroy NetworkManager after cancel matchmake.</param>
-        /// <param name="cleanupMemberCountChanged">Need to call MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(id, false) after exit lobby?</param>
-        /// <param name="token">token for this task</param>
-        protected override async UniTask<Result> CloseSession(bool destroyManager, bool cleanupMemberCountChanged, CancellationToken token){
-            ResetConnections();
-            Result closeResult;
-            if(p2pInfo.Instance.IsHost()){
-                closeResult = await MatchMakeManager.Instance.CloseCurrentLobby(cleanupMemberCountChanged, token);
-            }else{
-                closeResult = await MatchMakeManager.Instance.ExitCurrentLobby(cleanupMemberCountChanged, token);
-            }
-            if(closeResult != Result.Success){
-                return closeResult;
-            }
-            if(destroyManager){
-                Destroy(MatchMakeManager.Instance.gameObject);
-            }
-
-            SynicSugarManger.Instance.State.IsInSession = false;
-            return Result.Success;
         }
         
         /// <summary>
@@ -162,7 +107,7 @@ namespace SynicSugar.P2P {
                 return false; //No packet
             }
         #if SYNICSUGAR_PACKETINFO
-            Debug.Log($"ReceivePacket: {ch.ToString()}({ch}) from {id} / packet size {bytesWritten} / payload {EOSp2p.ByteArrayToHexString(data)}");
+            Debug.Log($"ReceivePacket: ch: {ch} from {id} / packet size {bytesWritten} / payload {EOSp2p.ByteArrayToHexString(data)}");
         #endif
 
             return true;
@@ -196,7 +141,7 @@ namespace SynicSugar.P2P {
                 return false; //No packet
             }
         #if SYNICSUGAR_PACKETINFO
-            Debug.Log($"ReceivePacket(Synic): {ch.ToString()}({ch}) from {id} / packet size {bytesWritten} / payload {EOSp2p.ByteArrayToHexString(data)}");
+            Debug.Log($"ReceivePacket(Synic): ch: {ch}  from {id} / packet size {bytesWritten} / payload {EOSp2p.ByteArrayToHexString(data)}");
         #endif
 
             return true;
@@ -294,10 +239,10 @@ namespace SynicSugar.P2P {
     /// <summary>
     /// Stop packet reciver, clse connections, then clear PacketQueue(incoming and outgoing).
     /// </summary>
-    void ResetConnections(){
+    protected override void ResetConnections(){
         ((INetworkCore)this).StopPacketReceiver();
         CancelRTTToken();
-        CloseConnection();
+        RemoveNotifyAndCloseConnection();
         ClearPacketQueue();
     }
     /// <summary>
@@ -347,7 +292,7 @@ namespace SynicSugar.P2P {
         //Users with young index send Heartbeat.
         if(p2pInfo.Instance.GetUserIndex(p2pInfo.Instance.LocalUserId) <= 2){
             p2pInfo.Instance.RefreshPing(UserId.GetUserId(data.RemoteUserId)).Forget();
-            MatchMakeManager.Instance.UpdateMemberAttributeAsHeartBeat(p2pInfo.Instance.GetUserIndex(UserId.GetUserId(data.RemoteUserId)));
+            HeartBeatToLobby(p2pInfo.Instance.GetUserIndex(UserId.GetUserId(data.RemoteUserId)));
         }
 
         p2pInfo.Instance.ConnectionNotifier.EarlyDisconnected(UserId.GetUserId(data.RemoteUserId), Reason.Interrupted);
@@ -423,7 +368,7 @@ namespace SynicSugar.P2P {
         if(p2pInfo.Instance.GetUserIndex(p2pInfo.Instance.LocalUserId) <= 2){
             //+100 is second's symbol.
             int disconnectedUserIndex = 100 + p2pInfo.Instance.GetUserIndex(UserId.GetUserId(data.RemoteUserId));
-            MatchMakeManager.Instance.UpdateMemberAttributeAsHeartBeat(disconnectedUserIndex);
+            HeartBeatToLobby(disconnectedUserIndex);
         }
     #if SYNICSUGAR_LOG
         Debug.Log("PeerConnectionClosedCallback: Connection lost now. with " +  data.RemoteUserId);
