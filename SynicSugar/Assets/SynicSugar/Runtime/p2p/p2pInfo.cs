@@ -214,6 +214,12 @@ namespace SynicSugar.P2P {
         /// </summary>
         /// <returns></returns>
         public async UniTask RefreshPing(UserId target){
+            if(!SynicSugarManger.Instance.State.IsInSession){
+            #if SYNICSUGAR_LOG
+                Debug.Log("RefreshPing: This local user is not in session.");
+            #endif
+                return;
+            }
             await pings.RefreshPing(target, sessionCore.rttTokenSource.Token);
         }
         /// <summary>
@@ -221,6 +227,12 @@ namespace SynicSugar.P2P {
         /// </summary>
         /// <returns></returns>
         public async UniTask RefreshPings(){
+            if(!SynicSugarManger.Instance.State.IsInSession){
+            #if SYNICSUGAR_LOG
+                Debug.Log("RefreshPing: This local user is not in session.");
+            #endif
+                return;
+            }
             await pings.RefreshPings(sessionCore.rttTokenSource.Token);
         }
     #endregion

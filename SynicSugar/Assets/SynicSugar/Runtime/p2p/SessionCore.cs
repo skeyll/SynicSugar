@@ -51,7 +51,9 @@ namespace SynicSugar.Base {
         /// </summary>
         void GeneratePacketReceiver(){
             if(receiverObject != null){
-                Debug.Log("This manager has generated receivers already.");
+            #if SYNICSUGAR_LOG
+                Debug.LogError("This manager has generated receivers already.");
+            #endif
                 return;
             }
             receiverObject = new GameObject("SynicSugarReceiver");
@@ -313,7 +315,9 @@ namespace SynicSugar.Base {
                 return Result.InvalidAPICall;
             }
             if(validReceiverType is ReceiverType.None){
+            #if SYNICSUGAR_LOG
                 Debug.Log("StopPacketReceiver: PacketReciver is not working now.");
+            #endif
                 return Result.InvalidAPICall;
             }
             
