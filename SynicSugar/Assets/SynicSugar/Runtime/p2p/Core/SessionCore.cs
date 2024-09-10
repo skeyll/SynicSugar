@@ -7,7 +7,7 @@ using Cysharp.Threading.Tasks;
 using SynicSugar.P2P;
 using SynicSugar.MatchMake;
 //We can't call the main-Assembly from own-assemblies.
-//So, use such processes through this assembly.
+//So, use such processes through this script.
 namespace SynicSugar.Base {
     public abstract class SessionCore : INetworkCore {
         protected SessionCore(){
