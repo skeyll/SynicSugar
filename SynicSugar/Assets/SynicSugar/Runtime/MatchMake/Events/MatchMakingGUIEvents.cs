@@ -99,7 +99,7 @@ namespace SynicSugar.MatchMake {
         public string StartReconnection;
     #endregion
         public enum State {
-            Standby, Start, Wait, Conclude, Ready, Cancel, Reconnect
+            Standby, Start, Wait, SetupP2P, Ready, Cancel, Reconnect
         }
         internal void Clear(){
             DisableStart = null;
@@ -134,7 +134,7 @@ namespace SynicSugar.MatchMake {
                         SetText(WaitForOpponents);
                     }
                 break;
-                case State.Conclude:
+                case State.SetupP2P:
                     DisableCancelKickConclude?.Invoke();
                     canKick = false;
                     if(stateText != null){

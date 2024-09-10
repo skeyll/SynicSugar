@@ -429,7 +429,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="token">Token not related to timeout　token</param>
         /// <returns></returns>
         public override async UniTask<Result> SetupP2PConnection(ushort setupTimeoutSec, CancellationToken token){
-            MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Conclude);
+            MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.SetupP2P);
             Result result = InitConnectConfig(ref p2pInfo.Instance.userIds);
             if(result != Result.Success){
                 Debug.LogErrorFormat("InitConnectConfig :Not enough data to make the connection.: {0}", result);
@@ -1363,7 +1363,7 @@ namespace SynicSugar.MatchMake {
                 await UniTask.Delay((int)delay.WaitForOpponentsDelay, cancellationToken: token);
             }
             if(delay.FinishMatchmakingDelay > 0){
-                MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Conclude);
+                MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.SetupP2P);
                 await UniTask.Delay((int)delay.FinishMatchmakingDelay, cancellationToken: token);
             }
             //Set User info
