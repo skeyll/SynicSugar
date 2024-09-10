@@ -173,8 +173,8 @@ namespace SynicSugarGenerator {
             
             #line 185 ""
             this.Write("\n            synicBuffer.Clear();\n            synicPacketInfo.Clear();\n          " +
-                    "  largeBuffer.Clear();\n            largePacketInfo.Clear();  \n        }\n\n       " +
-                    " //Register(for class)");
+                    "  largeBuffer.Clear();\n            largePacketInfo.Clear();\n        }\n\n        /" +
+                    "/Register(for class)");
             
             #line default
             #line hidden

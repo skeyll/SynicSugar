@@ -186,7 +186,7 @@ namespace SynicSugar.P2P {
             synicBuffer.Clear();
             synicPacketInfo.Clear();
             largeBuffer.Clear();
-            largePacketInfo.Clear();  
+            largePacketInfo.Clear();
         }
 
         //Register(for class)<#= Register #>

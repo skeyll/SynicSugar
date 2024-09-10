@@ -1,7 +1,5 @@
 using Cysharp.Threading.Tasks;
 using SynicSugar.MatchMake;
-using System;
-using System.Threading;
 using UnityEngine;
 using UnityEngine.UI;
 /// <summary>
@@ -55,35 +53,12 @@ namespace  SynicSugar.Samples.ReadHearts {
         //So, register StartMatchMake() to Button instead of this.
         //Or, change this to async void StartMatchMakeEntity() at the expense of performance. We can pass async void to UnityEvents.
         async UniTask StartMatchMakeEntity(){
-            //We have two ways to call SearchAndCreateLobby.
-            //If pass self caneltoken, we should use Try-catch.
-            //If not, the API returns just result.
-            //Basically, we don't have to give token to SynicSugar APIs and should use SynicSugar APIs to cancel matchmaking.
-            bool selfTryCatch = false;
-
-            if(!selfTryCatch){ //Recommend
-                Result result = await MatchMakeManager.Instance.SearchAndCreateLobby(matchConditions.GetLobbyCondition(2));
-                    
-                if(result != Result.Success){
-                    SynicSugarDebug.Instance.Log("MatchMaking Failed.", result);
-                    SwitchButtonsActive(MATCHMAKEING_STATE.Standby);
-                    return;
-                }
-            }else{ //Sample for another way. To cancel via token in manual.
-                try{
-                    CancellationTokenSource matchCTS = new CancellationTokenSource();
-                    Result result = await MatchMakeManager.Instance.SearchAndCreateLobby(matchConditions.GetLobbyCondition(), token: matchCTS);
-
-                    if(result != Result.Success){
-                        SynicSugarDebug.Instance.Log("MatchMaking Failed.", result);
-                        SwitchButtonsActive(MATCHMAKEING_STATE.Standby);
-                        return;
-                    }
-                }catch(OperationCanceledException){
-                    SynicSugarDebug.Instance.Log("Cancel MatchMaking by CancelToken");
-                    SwitchButtonsActive(MATCHMAKEING_STATE.Standby);
-                    return;
-                }
+            Result result = await MatchMakeManager.Instance.SearchAndCreateLobby(matchConditions.GetLobbyCondition(2));
+                
+            if(result != Result.Success){
+                SynicSugarDebug.Instance.Log("MatchMaking Failed.", result);
+                SwitchButtonsActive(MATCHMAKEING_STATE.Standby);
+                return;
             }
 
             SynicSugarDebug.Instance.Log($"Success Matching! LobbyID:{MatchMakeManager.Instance.GetCurrentLobbyID()}");
