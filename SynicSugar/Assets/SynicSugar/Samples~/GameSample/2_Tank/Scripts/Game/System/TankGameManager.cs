@@ -120,7 +120,7 @@ namespace SynicSugar.Samples.Tank {
             //If the user is a reconnector, get synic packet before re-start a game.
             if(p2pInfo.Instance.IsReconnecter){
                 //If this user comes here by ReconnectAPI, them need receive all the SynicPackets before back to the game.
-                ConnectHub.Instance.StartSynicReceiver();
+                ConnectHub.Instance.StartSynicReceiver(5);
                 await UniTask.WaitUntil(() => p2pInfo.Instance.HasReceivedAllSyncSynic, cancellationToken: this.GetCancellationTokenOnDestroy());
             }
             //If the game had not yet started, the reconnector also (re)sends the data.
@@ -128,8 +128,9 @@ namespace SynicSugar.Samples.Tank {
                 SetLocalPlayerBasicData();
             }
 
-            //One packet receiving per frame is sufficient in this sample,　but just in case set max member count to backsize.
+            //One packet receiving per frame is sufficient in this sample,　but just in case set max member amount to the batch size.
             ConnectHub.Instance.StartPacketReceiver(PacketReceiveTiming.FixedUpdate, (byte)p2pInfo.Instance.AllUserIds.Count);
+            //If this local user is a reconnector, CurrentGameState has been overwritten via Synic to another State.
             CurrentGameState = CurrentGameState == GameState.PreparationForData ? GameState.Standby : CurrentGameState;
             //If not overwritten by Synic, move to the next State; if overwritten, move to the host’s State
             InvokeStateProcess(CurrentGameState);

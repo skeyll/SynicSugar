@@ -39,7 +39,7 @@ namespace SynicSugar.Samples.Tank {
         /// <param name="id"></param>
         void OnLeaved(UserId id){
             Debug.Log($"{GetPlayerName(id)}: Leaved");
-            GameObject.Destroy(ConnectHub.Instance.GetUserInstance<TankPlayer>(id).gameObject);
+            Object.Destroy(ConnectHub.Instance.GetUserInstance<TankPlayer>(id).gameObject);
         }
         /// <summary>
         /// If the target has not sent a heartbeat for some time, this function is called.
