@@ -146,7 +146,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="token"></param>
         public override async UniTask<Result> JoinLobbyBySavedLobbyId(string LobbyID, CancellationToken token){
             //Search
-            MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Recconect);
+            MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Reconnect);
             var retrieveResult = await RetriveLobbyByLobbyId(LobbyID, token);
 
             if(retrieveResult.result != Result.Success){

@@ -5,7 +5,6 @@ using UnityEngine;
 using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using SynicSugar.MatchMake;
 using SynicSugar.Base;
 using ResultE = Epic.OnlineServices.Result;
 //We can't call the main-Assembly from own-assemblies.
