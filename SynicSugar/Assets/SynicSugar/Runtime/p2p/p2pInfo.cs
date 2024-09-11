@@ -134,7 +134,9 @@ namespace SynicSugar.P2P {
         public SyncSnyicNotifier SyncSnyicNotifier = new SyncSnyicNotifier();
         /// <summary>
         /// Return True only once when this local user is received SyncSync from every other peers of the current session. <br />
-        /// After return true, all variable for this flag is initialized and returns False again.
+        /// EVERY here means p2pInfo.Instance.CurrentAllUserIds.Count if the host is also sending data for others who are disconnected, 
+        /// or p2pInfo.Instance. CurrentConnectedUserIds.Count.<br />
+        /// After return true, all variable about this flag is initialized and become returning False again.
         /// </summary>
         /// <returns></returns>
         public bool HasReceivedAllSyncSynic => SyncSnyicNotifier.ReceivedAllSyncSynic();
@@ -147,7 +149,7 @@ namespace SynicSugar.P2P {
         /// </summary>
         public UserId LastSyncedUserId { get { return SyncSnyicNotifier.LastSyncedUserId;} } 
         /// <summary>
-        /// Always return false. Just on reconnect, returns true until getting SyncSynic for SELF data from Host.
+        /// Always return false. Just on reconnect, returns true until getting SyncSynic about SELF data from Host.
         /// </summary>
         public bool IsReconnecter => userIds.isJustReconnected;
         
