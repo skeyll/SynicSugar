@@ -493,6 +493,7 @@ namespace SynicSugar.MatchMake {
 
             if(setupResult != Result.Success){
                 MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
+                SynicSugarManger.Instance.State.IsMatchmaking = false;
                 return setupResult;
             }
 
