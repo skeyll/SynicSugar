@@ -20,13 +20,13 @@ namespace SynicSugar.P2P {
         internal byte LastSyncedPhase { get; private set; }
         bool _receivedAllSyncSynic;
         List<string> ReceivedUsers = new List<string>();
-        bool isForAll;
+        bool includeDisconnectedData;
         internal bool ReceivedAllSyncSynic(){
             if(_receivedAllSyncSynic){
                 //Init
                 ReceivedUsers.Clear();
                 _receivedAllSyncSynic = false;
-                isForAll = false;
+                includeDisconnectedData = false;
 
                 return true;
             }
@@ -42,15 +42,16 @@ namespace SynicSugar.P2P {
                 ReceivedUsers.Add(id);
                 LastSyncedUserId = UserId.GetUserId(id);
                 LastSyncedPhase = phase;
-                
-                if(!isForAll && !p2pInfo.Instance.CurrentConnectedUserIds.Contains(UserId.GetUserId(id))){
-                    isForAll = true;
+                //If the data is not in connecter list, Host can send the disconnecter data.
+                //So, local user need extend the waiting condition.
+                if(!includeDisconnectedData && !p2pInfo.Instance.DisconnectedUserIds.Contains(UserId.GetUserId(id))){
+                    includeDisconnectedData = true;
                 }
             }
 
             OnSyncedSynic?.Invoke();
 
-            if(ReceivedUsers.Count == (isForAll ? p2pInfo.Instance.AllUserIds.Count : p2pInfo.Instance.CurrentConnectedUserIds.Count)){
+            if(ReceivedUsers.Count == (includeDisconnectedData ? p2pInfo.Instance.CurrentAllUserIds.Count : p2pInfo.Instance.CurrentConnectedUserIds.Count)){
                 _receivedAllSyncSynic = true;
             }
         }
