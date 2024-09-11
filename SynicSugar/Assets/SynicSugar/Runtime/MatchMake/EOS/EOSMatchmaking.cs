@@ -1394,6 +1394,7 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         /// <param name="userIds"></param>
         /// <returns></returns>
+        /// *UserIDs contains Internal, so other method must be need for scalability.
         Result InitConnectConfig(ref UserIds userIds){
             //Prep RTC(Voice Chat)
             RTCManager.Instance.AddNotifyParticipantUpdated();
