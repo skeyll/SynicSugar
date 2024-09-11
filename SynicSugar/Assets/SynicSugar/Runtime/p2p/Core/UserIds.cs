@@ -39,7 +39,7 @@ namespace SynicSugar.P2P {
         /// <summary>
         /// Make reconencter flag false.
         /// </summary>
-        internal void ReceivedocalUserSynic(){
+        internal void ReceivedLocalUserSynic(){
             isJustReconnected = false;
         }
         /// <summary>

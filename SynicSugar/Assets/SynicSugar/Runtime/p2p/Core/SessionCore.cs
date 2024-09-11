@@ -388,8 +388,8 @@ namespace SynicSugar.Base {
         /// <param name="id">target id</param>
         /// <param name="phase">Synic phase</param>
         /// <summary>
-        public void UpdateSyncedState(string id, byte phase){
-            p2pInfo.Instance.SyncSnyicNotifier.UpdateSyncedState(id, phase);
+        public void UpdateSynicStatus(string id, byte phase){
+            p2pInfo.Instance.SyncSnyicNotifier.UpdateSynicStatus(id, phase);
         }
         public async UniTask AutoRefreshPings(CancellationToken token){
             await UniTask.Delay(p2pConfig.Instance.PingAutoRefreshRateSec * 1000, cancellationToken: token);
@@ -416,8 +416,8 @@ namespace SynicSugar.Base {
         /// <summary>
         /// Change AcceptHostsSynic to false. Call from ConnectHub
         /// </summary>
-        void INetworkCore.CloseHostSynic(){
-            p2pInfo.Instance.userIds.ReceivedocalUserSynic();
+        void INetworkCore.StopOverwritingLocalUserData(){
+            p2pInfo.Instance.userIds.ReceivedLocalUserSynic();
         }
         /// <summary>
         /// Return pong to calculate RTT. Call from ConnectHub

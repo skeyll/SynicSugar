@@ -32,8 +32,12 @@ namespace SynicSugar.P2P {
             }
             return false;
         }
-        //Access this from public method in p2pAssembleXXX.　We can move this to that for calling cast.
-        internal void UpdateSyncedState(string id, byte phase){
+        /// <summary>
+        /// Manage information about users who have received data and whether or not all of it has been received
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="phase"></param>
+        internal void UpdateSynicStatus(string id, byte phase){
             if (!ReceivedUsers.Contains(id)){
                 ReceivedUsers.Add(id);
                 LastSyncedUserId = UserId.GetUserId(id);

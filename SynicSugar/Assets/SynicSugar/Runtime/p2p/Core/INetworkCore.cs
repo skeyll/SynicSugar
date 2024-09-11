@@ -77,12 +77,12 @@ namespace SynicSugar.P2P {
         /// <param name="id">target id</param>
         /// <param name="phase">Synic phase</param>
         /// <summary>
-        void UpdateSyncedState(string id, byte phase);
+        void UpdateSynicStatus(string id, byte phase);
 
         /// <summary>
         /// Change AcceptHostsSynic to false. Call from ConnectHub
         /// </summary>
-        void CloseHostSynic();
+        void StopOverwritingLocalUserData();
         
         /// <summary>
         /// Return pong to calculate RTT. Call from ConnectHub

@@ -248,39 +248,40 @@ namespace SynicSugarGenerator {
                     "LOG \n                        Debug.LogFormat(\"ConvertFormPacket: Restore packet " +
                     "is in progress. for {0}\", id);\n    #endif\n                        return;\n      " +
                     "              }\n                    \n                    SyncedSynic(id.ToString" +
-                    "());\n\n                    NetworkCore.UpdateSyncedState(id, synicPacketInfo[id]." +
+                    "());\n\n                    NetworkCore.UpdateSynicStatus(id, synicPacketInfo[id]." +
                     "phase);\n\n                    //Init\n                    synicBuffer.Remove(id.To" +
                     "String());\n                    synicPacketInfo.Remove(id.ToString());\n\n         " +
-                    "           //Change AcceptHostsSynic flag.\n                    if(p2pInfo.Instan" +
-                    "ce.IsLoaclUser(id)){\n                        NetworkCore.CloseHostSynic();\n     " +
-                    "               }\n                    \n                return;\n            }\n    " +
-                    "    }\n\n        /// <summary>\n        /// Re-Send RPC with last recorded informat" +
-                    "ion.<br />\n        /// To send disconnected peers after some time. SynicSugar re" +
-                    "transmit to connecting-peers.<br />\n        /// To record, pass true to attribut" +
-                    "e.\n        /// </summary>\n        public void ResendLastRPC(){\n            if(p2" +
-                    "pInfo.Instance.LastRPCIsLargePacket){\n                EOSp2p.SendLargePacketsToA" +
-                    "ll(p2pInfo.Instance.LastRPCch, p2pInfo.Instance.LastRPCPayload).Forget();\n      " +
-                    "          return;\n            }\n            EOSp2p.SendPacketToAll(p2pInfo.Insta" +
-                    "nce.LastRPCch, p2pInfo.Instance.LastRPCPayload).Forget();\n        }\n        /// " +
-                    "<summary>\n        /// Re-Send RPC to the specific target with last recorded info" +
-                    "rmation.<br />\n        /// In order to send disconnected peers after the some ti" +
-                    "me. SynicSugar has retransmission to connecting-peers for the reliability.<br />" +
-                    "\n        /// To record, pass true to attribute.\n        /// </summary>\n        /" +
-                    "// <param name=\"target\"></param>\n        public void ResendLastRPCToTarget(UserI" +
-                    "d target){\n            if(p2pInfo.Instance.LastRPCIsLargePacket){\n              " +
-                    "  EOSp2p.SendLargePackets(p2pInfo.Instance.LastRPCch, p2pInfo.Instance.LastRPCPa" +
-                    "yload, target).Forget();\n                return;\n            }\n            EOSp2" +
-                    "p.SendPacket(p2pInfo.Instance.LastRPCch, p2pInfo.Instance.LastRPCPayload, target" +
-                    ");\n        }\n        /// <summary>\n        /// Re-Send TargetRPC with last recor" +
-                    "ded information.<br />\n        /// In order to send disconnected peers after the" +
-                    " some time. SynicSugar has retransmission to connecting-peers for the reliabilit" +
-                    "y.<br />\n        /// To record, pass true to attribute.\n        /// </summary>\n " +
-                    "       public void ResendLastTargetRPC(){\n            if(p2pInfo.Instance.LastTa" +
-                    "rgetRPCIsLargePacket){\n                EOSp2p.SendLargePackets(p2pInfo.Instance." +
-                    "LastTargetRPCch, p2pInfo.Instance.LastTargetRPCPayload, p2pInfo.Instance.LastTar" +
-                    "getRPCUserId).Forget();\n                return;\n            }\n            EOSp2p" +
-                    ".SendPacket(p2pInfo.Instance.LastTargetRPCch, p2pInfo.Instance.LastTargetRPCPayl" +
-                    "oad, p2pInfo.Instance.LastTargetRPCUserId);\n        }\n\n        ");
+                    "           //Stop overwriting localuser data with host data.\n                   " +
+                    " if(p2pInfo.Instance.IsLoaclUser(id)){\n                        NetworkCore.StopO" +
+                    "verwritingLocalUserData();\n                    }\n                    \n          " +
+                    "      return;\n            }\n        }\n\n        /// <summary>\n        /// Re-Send" +
+                    " RPC with last recorded information.<br />\n        /// To send disconnected peer" +
+                    "s after some time. SynicSugar retransmit to connecting-peers.<br />\n        /// " +
+                    "To record, pass true to attribute.\n        /// </summary>\n        public void Re" +
+                    "sendLastRPC(){\n            if(p2pInfo.Instance.LastRPCIsLargePacket){\n          " +
+                    "      EOSp2p.SendLargePacketsToAll(p2pInfo.Instance.LastRPCch, p2pInfo.Instance." +
+                    "LastRPCPayload).Forget();\n                return;\n            }\n            EOSp" +
+                    "2p.SendPacketToAll(p2pInfo.Instance.LastRPCch, p2pInfo.Instance.LastRPCPayload)." +
+                    "Forget();\n        }\n        /// <summary>\n        /// Re-Send RPC to the specifi" +
+                    "c target with last recorded information.<br />\n        /// In order to send disc" +
+                    "onnected peers after the some time. SynicSugar has retransmission to connecting-" +
+                    "peers for the reliability.<br />\n        /// To record, pass true to attribute.\n" +
+                    "        /// </summary>\n        /// <param name=\"target\"></param>\n        public " +
+                    "void ResendLastRPCToTarget(UserId target){\n            if(p2pInfo.Instance.LastR" +
+                    "PCIsLargePacket){\n                EOSp2p.SendLargePackets(p2pInfo.Instance.LastR" +
+                    "PCch, p2pInfo.Instance.LastRPCPayload, target).Forget();\n                return;" +
+                    "\n            }\n            EOSp2p.SendPacket(p2pInfo.Instance.LastRPCch, p2pInfo" +
+                    ".Instance.LastRPCPayload, target);\n        }\n        /// <summary>\n        /// R" +
+                    "e-Send TargetRPC with last recorded information.<br />\n        /// In order to s" +
+                    "end disconnected peers after the some time. SynicSugar has retransmission to con" +
+                    "necting-peers for the reliability.<br />\n        /// To record, pass true to att" +
+                    "ribute.\n        /// </summary>\n        public void ResendLastTargetRPC(){\n      " +
+                    "      if(p2pInfo.Instance.LastTargetRPCIsLargePacket){\n                EOSp2p.Se" +
+                    "ndLargePackets(p2pInfo.Instance.LastTargetRPCch, p2pInfo.Instance.LastTargetRPCP" +
+                    "ayload, p2pInfo.Instance.LastTargetRPCUserId).Forget();\n                return;\n" +
+                    "            }\n            EOSp2p.SendPacket(p2pInfo.Instance.LastTargetRPCch, p2" +
+                    "pInfo.Instance.LastTargetRPCPayload, p2pInfo.Instance.LastTargetRPCUserId);\n    " +
+                    "    }\n\n        ");
             
             #line default
             #line hidden

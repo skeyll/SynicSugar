@@ -228,15 +228,15 @@ namespace SynicSugar.P2P {
                     
                     SyncedSynic(id.ToString());
 
-                    NetworkCore.UpdateSyncedState(id, synicPacketInfo[id].phase);
+                    NetworkCore.UpdateSynicStatus(id, synicPacketInfo[id].phase);
 
                     //Init
                     synicBuffer.Remove(id.ToString());
                     synicPacketInfo.Remove(id.ToString());
 
-                    //Change AcceptHostsSynic flag.
+                    //Stop overwriting localuser data with host data.
                     if(p2pInfo.Instance.IsLoaclUser(id)){
-                        NetworkCore.CloseHostSynic();
+                        NetworkCore.StopOverwritingLocalUserData();
                     }
                     
                 return;
