@@ -562,9 +562,11 @@ namespace SynicSugar.MatchMake {
 
             void OnLobbySearchCompleted(ref LobbySearchFindCallbackInfo info){
                 result = (Result)info.ResultCode;
+            #if SYNICSUGAR_LOG
                 if (info.ResultCode != ResultE.Success) {
                     Debug.LogErrorFormat("Search Lobby: error code: {0}", info.ResultCode);
                 }
+            #endif
                 finishFound = true;
             }
         }
