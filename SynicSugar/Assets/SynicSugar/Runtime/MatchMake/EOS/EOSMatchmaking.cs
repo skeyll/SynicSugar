@@ -151,7 +151,7 @@ namespace SynicSugar.MatchMake {
 
             if(retrieveResult.result != Result.Success){
                 #if SYNICSUGAR_LOG
-                    Debug.LogErrorFormat("JoinLobbyBySavedLobbyId: RetriveLobbyByLobbyId is failer.: {0}.", retrieveResult);
+                    Debug.LogFormat("JoinLobbyBySavedLobbyId: RetriveLobbyByLobbyId is failer.: {0}.", retrieveResult);
                 #endif
                 await MatchMakeManager.Instance.OnDeleteLobbyID();
                 ReleaseLobbySearch(retrieveResult.lobbySerach);
@@ -564,7 +564,7 @@ namespace SynicSugar.MatchMake {
                 result = (Result)info.ResultCode;
             #if SYNICSUGAR_LOG
                 if (info.ResultCode != ResultE.Success) {
-                    Debug.LogErrorFormat("Search Lobby: error code: {0}", info.ResultCode);
+                    Debug.LogFormat("Search Lobby: error code: {0}", info.ResultCode);
                 }
             #endif
                 finishFound = true;
@@ -873,6 +873,9 @@ namespace SynicSugar.MatchMake {
                 // Send Id list.
                 if(p2pInfo.Instance.IsHost()){
                     ConnectPreparation.SendUserList(UserId.GetUserId(info.TargetUserId));
+                #if SYNICSUGAR_LOG
+                    Debug.Log($"MemberStatusNotyfy: Send user list to {info.TargetUserId}.");
+                #endif
                 }
             }
         }
