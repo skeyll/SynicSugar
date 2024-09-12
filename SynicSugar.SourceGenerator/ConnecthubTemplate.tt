@@ -27,7 +27,7 @@ namespace SynicSugar.P2P {
         private static Lazy<ConnectHub> instance = new Lazy<ConnectHub>();
         public static ConnectHub Instance => instance.Value;
 
-        public ConnectHub(){
+        private ConnectHub(){
             syncTokenSource = new CancellationTokenSource();
         }
         INetworkCore _networkCore;
@@ -238,7 +238,6 @@ namespace SynicSugar.P2P {
                     if(p2pInfo.Instance.IsLoaclUser(id)){
                         NetworkCore.StopOverwritingLocalUserData();
                     }
-                    
                 return;
             }
         }
@@ -302,6 +301,7 @@ namespace SynicSugar.P2P {
             if(type == SynicType.OnlySelf || !p2pInfo.Instance.IsHost()){
                 return;
             }
+            
             if(type == SynicType.WithOthers){
                 foreach(var id in p2pInfo.Instance.DisconnectedUserIds){
                     synicContainer = GenerateSynicContainer(id, syncedPhase, syncSinglePhase);
@@ -310,7 +310,6 @@ namespace SynicSugar.P2P {
                     MemoryPackSerializer.Serialize(targetCompressor, synicContainer);
 
                     EOSp2p.SendSynicPackets((byte)CHANNELLIST.Synic, targetCompressor.ToArray(), targetId, id, syncedPhase, syncSinglePhase);
-                    
                     await UniTask.Yield();
                 }
             }
