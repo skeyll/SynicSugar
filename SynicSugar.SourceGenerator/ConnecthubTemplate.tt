@@ -24,7 +24,7 @@ using SynicSugar.RTC;
 namespace SynicSugar.P2P {
     internal sealed class ConnectHub : IPacketConvert {
         //Singleton
-        private static Lazy<ConnectHub> instance = new Lazy<ConnectHub>();
+        private static Lazy<ConnectHub> instance = new Lazy<ConnectHub>(() => new ConnectHub());
         public static ConnectHub Instance => instance.Value;
 
         private ConnectHub(){
@@ -208,8 +208,10 @@ namespace SynicSugar.P2P {
             return default(T);
         }
 
-        //SendPacket(for elements)
-        public void ConvertFromPacket(ref byte ch, string id, ref ArraySegment<byte> payload){
+        /// <summary>
+        /// Remote RPC is invoked with received value.
+        /// </summary>
+        void IPacketConvert.ConvertFromPacket(ref byte ch, string id, ref ArraySegment<byte> payload){
             switch((CHANNELLIST)ch){<#= PacketConvert #>
                 case CHANNELLIST.ObtainPing:
                     EOSp2p.SendPacket((byte)CHANNELLIST.ReturnPong, payload, UserId.GetUserId(id));
