@@ -42,9 +42,9 @@ namespace SynicSugar.P2P {
                 ReceivedUsers.Add(id);
                 LastSyncedUserId = UserId.GetUserId(id);
                 LastSyncedPhase = phase;
-                //If the data is not in connecter list, Host can send the disconnecter data.
+                //If the id of data owner is in disconnecter list, Host has send the data of disconnecter.
                 //So, local user need extend the waiting condition.
-                if(!includeDisconnectedData && !p2pInfo.Instance.DisconnectedUserIds.Contains(UserId.GetUserId(id))){
+                if(!includeDisconnectedData && p2pInfo.Instance.DisconnectedUserIds.Contains(UserId.GetUserId(id))){
                     includeDisconnectedData = true;
                 }
             }
