@@ -295,8 +295,8 @@
         public {GetFullName(nameSpace, param)} {variable};";
         }
         internal string CreateSyncSynicContent(string variableName, string className, bool isPlayerClass) {
-            string id = isPlayerClass ? "[id.ToString()]" : System.String.Empty;
-            return $@" {variableName} = {className}{id}.{variableName},";
+            string assignment = isPlayerClass ? $"{className}.ContainsKey(id) ? {className}[id]?.{variableName} ?? default : default" : $"{className} != null ? {className}?.{variableName} ?? default : default";
+            return $@" {variableName} = {assignment},";
         }
         internal (string text, bool needData) AddSyncSynicFrame(int index, string playerContent, string commonsContent) {
             string getPart = string.IsNullOrEmpty(playerContent) && string.IsNullOrEmpty(commonsContent) ? System.String.Empty :$@"
@@ -324,18 +324,42 @@
         }
 
         internal string CreateSyncedContent(string variableName, string className, bool isPlayerClass) {
-            string id = isPlayerClass ? "[id]" : System.String.Empty;
-            string indent = isPlayerClass ? System.String.Empty : "    ";
+            string id = isPlayerClass ? "[id]" : string.Empty;
+            string indent = isPlayerClass ? string.Empty : "    ";
+            string condition = isPlayerClass ? $"{className}.ContainsKey(id)" : $"{className} != null";
+
+            string itemName = $"\"{className}.{variableName}, \"";
+
             return $@"
-            {indent}{className}{id}.{variableName} = synicItem.{variableName};";
+            {indent}if({condition}) {{
+            #if SYNICSUGAR_LOG
+                {indent}items += {itemName};
+                {indent}itemCount++;
+            #endif
+                {indent}{className}{id}.{variableName} = synicItem.{variableName}; 
+            }}";
         }
+
         internal string CreateSyncedItem(int index, string playerContent, string commonsContent){
+            string logContent = $"$\"SyncedItem{index}: overwrited {{itemCount}} Synics ({{items}}) by {{id}}\"";
+            string tt = "\"SyncedItemisEnd\"";
+
             return $@"
-        void SyncedItem{index}(string id, SynicItem{index} synicItem){{ {playerContent}
+        void SyncedItem{index}(string id, SynicItem{index} synicItem){{
+            #if SYNICSUGAR_LOG
+                string items = string.Empty;
+                int itemCount = 0;
+            #endif
+            //Player
+            {playerContent}
+
             if(p2pInfo.Instance.IsHost(id)){{
                 //Commons
                 {commonsContent}
             }}
+            #if SYNICSUGAR_LOG
+                Debug.Log({logContent});
+            #endif
         }}";
         }
 

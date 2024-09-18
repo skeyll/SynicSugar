@@ -309,29 +309,29 @@ namespace SynicSugarGenerator {
                     ", send only variables in syncedPhase.</param>\n        public async void SyncSyni" +
                     "c(UserId targetId, SynicType type, byte syncedPhase = 9, bool syncSinglePhase = " +
                     "false){\n            //Sync local data to target local\n            SynicContainer" +
-                    " synicContainer = GenerateSynicContainer(p2pInfo.Instance.LocalUserId, syncedPha" +
-                    "se, syncSinglePhase);\n\n            using var selfCompressor  = new BrotliCompres" +
-                    "sor();\n            MemoryPackSerializer.Serialize(selfCompressor, synicContainer" +
-                    ");\n\n            EOSp2p.SendSynicPackets((byte)CHANNELLIST.Synic, selfCompressor." +
-                    "ToArray(), targetId, p2pInfo.Instance.LocalUserId, syncedPhase, syncSinglePhase)" +
-                    ";\n\n            if(type == SynicType.OnlySelf || !p2pInfo.Instance.IsHost()){\n   " +
-                    "             return;\n            }\n            \n            if(type == SynicType" +
-                    ".WithOthers){\n                foreach(var id in p2pInfo.Instance.DisconnectedUse" +
-                    "rIds){\n                    synicContainer = GenerateSynicContainer(id, syncedPha" +
-                    "se, syncSinglePhase);\n\n                    using var targetCompressor  = new Bro" +
-                    "tliCompressor();\n                    MemoryPackSerializer.Serialize(targetCompre" +
-                    "ssor, synicContainer);\n\n                    EOSp2p.SendSynicPackets((byte)CHANNE" +
-                    "LLIST.Synic, targetCompressor.ToArray(), targetId, id, syncedPhase, syncSinglePh" +
-                    "ase);\n                    await UniTask.Yield();\n                }\n            }" +
-                    "\n            \n            //Sync target data in local to target local\n          " +
-                    "  synicContainer = GenerateSynicContainer(targetId, syncedPhase, syncSinglePhase" +
-                    ");\n\n            using var reconnecterCompressor  = new BrotliCompressor();\n     " +
-                    "       MemoryPackSerializer.Serialize(reconnecterCompressor, synicContainer);\n\n " +
-                    "           EOSp2p.SendSynicPackets((byte)CHANNELLIST.Synic, reconnecterCompresso" +
-                    "r.ToArray(), targetId, targetId, syncedPhase, syncSinglePhase);\n        }\n      " +
-                    "  \n        SynicContainer GenerateSynicContainer(UserId id, byte syncedPhase, bo" +
-                    "ol syncSinglePhase){\n            SynicContainer synicContainer = new SynicContai" +
-                    "ner();\n            switch(syncedPhase){");
+                    " synicContainer = GenerateSynicContainer(p2pInfo.Instance.LocalUserId.ToString()" +
+                    ", syncedPhase, syncSinglePhase);\n\n            using var selfCompressor  = new Br" +
+                    "otliCompressor();\n            MemoryPackSerializer.Serialize(selfCompressor, syn" +
+                    "icContainer);\n\n            EOSp2p.SendSynicPackets((byte)CHANNELLIST.Synic, self" +
+                    "Compressor.ToArray(), targetId, p2pInfo.Instance.LocalUserId, syncedPhase, syncS" +
+                    "inglePhase);\n\n            if(type == SynicType.OnlySelf || !p2pInfo.Instance.IsH" +
+                    "ost()){\n                return;\n            }\n            \n            if(type =" +
+                    "= SynicType.WithOthers){\n                foreach(var id in p2pInfo.Instance.Disc" +
+                    "onnectedUserIds){\n                    synicContainer = GenerateSynicContainer(id" +
+                    ".ToString(), syncedPhase, syncSinglePhase);\n\n                    using var targe" +
+                    "tCompressor  = new BrotliCompressor();\n                    MemoryPackSerializer." +
+                    "Serialize(targetCompressor, synicContainer);\n\n                    EOSp2p.SendSyn" +
+                    "icPackets((byte)CHANNELLIST.Synic, targetCompressor.ToArray(), targetId, id, syn" +
+                    "cedPhase, syncSinglePhase);\n                    await UniTask.Yield();\n         " +
+                    "       }\n            }\n            \n            //Sync target data in local to t" +
+                    "arget local\n            synicContainer = GenerateSynicContainer(targetId.ToStrin" +
+                    "g(), syncedPhase, syncSinglePhase);\n\n            using var reconnecterCompressor" +
+                    "  = new BrotliCompressor();\n            MemoryPackSerializer.Serialize(reconnect" +
+                    "erCompressor, synicContainer);\n\n            EOSp2p.SendSynicPackets((byte)CHANNE" +
+                    "LLIST.Synic, reconnecterCompressor.ToArray(), targetId, targetId, syncedPhase, s" +
+                    "yncSinglePhase);\n        }\n        \n        SynicContainer GenerateSynicContaine" +
+                    "r(string id, byte syncedPhase, bool syncSinglePhase){\n            SynicContainer" +
+                    " synicContainer = new SynicContainer();\n            switch(syncedPhase){");
             
             #line default
             #line hidden
