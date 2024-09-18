@@ -229,6 +229,7 @@ namespace SynicSugar.P2P {
         }
         if(p2pConfig.Instance.UseDisconnectedEarlyNotify){
             AddNotifyPeerConnectionInterrupted();
+        }else{
             AddNotifyPeerConnectionClosed();
         }
         return Result.Success;
@@ -363,15 +364,17 @@ namespace SynicSugar.P2P {
             Debug.LogError("ClosedCallback: unknown socket id. This peer should be no lobby member.");
             return;
         }
-        //Users with young index send Heartbeat.
-        if(p2pInfo.Instance.GetUserIndex(p2pInfo.Instance.LocalUserId) <= 2){
-            //+100 is second's symbol.
-            int disconnectedUserIndex = 100 + p2pInfo.Instance.GetUserIndex(UserId.GetUserId(data.RemoteUserId));
-            HeartBeatToLobby(disconnectedUserIndex);
+        if(data.Reason is not ConnectionClosedReason.ClosedByLocalUser or ConnectionClosedReason.ClosedByPeer){
+            //Users with young index send Heartbeat.
+            if(p2pInfo.Instance.GetUserIndex(p2pInfo.Instance.LocalUserId) <= 2){
+                //+100 is second's symbol.
+                int disconnectedUserIndex = 100 + p2pInfo.Instance.GetUserIndex(UserId.GetUserId(data.RemoteUserId));
+                HeartBeatToLobby(disconnectedUserIndex);
+            }
+        #if SYNICSUGAR_LOG
+            Debug.LogFormat("PeerConnectionClosedCallback: Connection lost now with {0}. Reason {1}", data.RemoteUserId, data.Reason);
+        #endif
         }
-    #if SYNICSUGAR_LOG
-        Debug.Log("PeerConnectionClosedCallback: Connection lost now. with " +  data.RemoteUserId);
-    #endif
     }
     internal void RemoveNotifyPeerConnectionnClosed(){
         P2PHandle.RemoveNotifyPeerConnectionClosed(ClosedNotify);
@@ -384,6 +387,7 @@ namespace SynicSugar.P2P {
             if(p2pConfig.Instance.UseDisconnectedEarlyNotify){
                 RemoveNotifyPeerConnectionInterrupted();
                 RemoveNotifyPeerConnectionnEstablished();
+            }else{
                 RemoveNotifyPeerConnectionnClosed();
             }
 
