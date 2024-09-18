@@ -388,7 +388,7 @@ namespace SynicSugar.Base {
         /// <param name="id">target id</param>
         /// <param name="phase">Synic phase</param>
         /// <summary>
-        public void UpdateSynicStatus(string id, byte phase){
+        void INetworkCore.UpdateSynicStatus(string id, byte phase){
             p2pInfo.Instance.SyncSnyicNotifier.UpdateSynicStatus(id, phase);
         }
         public async UniTask AutoRefreshPings(CancellationToken token){
