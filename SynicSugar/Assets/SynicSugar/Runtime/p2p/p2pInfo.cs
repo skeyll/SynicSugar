@@ -17,6 +17,8 @@ namespace SynicSugar.P2P {
             pings = new();
             lastRpcInfo = new();
             lastTargetRPCInfo = new();
+            ConnectionNotifier = new ConnectionNotifier();
+            SyncSnyicNotifier = new SyncSnyicNotifier();
         }
         void OnDestroy() {
             if( Instance == this ) {
@@ -115,7 +117,7 @@ namespace SynicSugar.P2P {
         /// <summary>
         /// The notify events for connection and disconection on current session.
         /// </summary>
-        public ConnectionNotifier ConnectionNotifier = new ConnectionNotifier();
+        public ConnectionNotifier ConnectionNotifier;
         /// <summary>
         /// Reason of the user disconnected from p2p.
         /// </summary>
@@ -131,7 +133,7 @@ namespace SynicSugar.P2P {
         /// <summary>
         /// The notify events for SyncSynic for recconecter and large packet.
         /// </summary>
-        public SyncSnyicNotifier SyncSnyicNotifier = new SyncSnyicNotifier();
+        public SyncSnyicNotifier SyncSnyicNotifier;
         /// <summary>
         /// Return True only once when this local user is received SyncSync from every other peers of the current session. <br />
         /// EVERY here means p2pInfo.Instance.CurrentAllUserIds.Count if the host is also sending data for others who are disconnected, 
