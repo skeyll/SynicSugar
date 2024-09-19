@@ -22,11 +22,17 @@ namespace SynicSugar.P2P{
         /// </summary>
         /// <param name="ReceivingBatchSize"></param>
         public virtual void StartPacketReceiver(IPacketConvert hubInstance, uint ReceivingBatchSize = 1){
+            #if SYNICSUGAR_LOG
+                Debug.Log($"StartPacketReceiver: Activated {this.GetType()}.");
+            #endif
             hub = hubInstance;
             maxBatchSize = ReceivingBatchSize;
             this.enabled = true;
         }
-        public virtual void  StopPacketReceiver(){
+        public virtual void StopPacketReceiver(){
+            #if SYNICSUGAR_LOG
+                Debug.Log($"StartPacketReceiver: Stop {this.GetType()}.");
+            #endif
             this.enabled = false;
             maxBatchSize = 0;
         }
