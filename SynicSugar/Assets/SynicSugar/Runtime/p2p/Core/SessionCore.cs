@@ -62,10 +62,10 @@ namespace SynicSugar.Base {
             receiverObject.AddComponent<PacketReceiverOnLateUpdate>();
             receiverObject.AddComponent<PacketReceiverForSynic>();
 
-            FixedUpdateReceiver = receiverObject.GetComponent<PacketReceiver>();
-            UpdateReceiver = receiverObject.GetComponent<PacketReceiver>();
-            LateUpdateReceiver = receiverObject.GetComponent<PacketReceiver>();
-            SynicReceiver = receiverObject.GetComponent<PacketReceiver>();
+            FixedUpdateReceiver = receiverObject.GetComponent<PacketReceiverOnFixedUpdate>();
+            UpdateReceiver = receiverObject.GetComponent<PacketReceiverOnUpdate>();
+            LateUpdateReceiver = receiverObject.GetComponent<PacketReceiverOnLateUpdate>();
+            SynicReceiver = receiverObject.GetComponent<PacketReceiverForSynic>();
 
             FixedUpdateReceiver.SetGetPacket(this);
             UpdateReceiver.SetGetPacket(this);

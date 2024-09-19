@@ -79,7 +79,7 @@ namespace SynicSugar.P2P {
         
         /// <summary>
         /// To get Packetｓ.
-        /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll.
+        /// Use this from hub. In Unity, we can not call methods in Main-Assembly from SynicSugar.dll.
         /// </summary>
         public override bool GetPacketFromBuffer(ref byte ch, ref ProductUserId id, ref ArraySegment<byte> payload){
             ResultE existPacket = P2PHandle.GetNextReceivedPacketSize(ref standardPacketSizeOptions, out uint nextPacketSizeBytes);
