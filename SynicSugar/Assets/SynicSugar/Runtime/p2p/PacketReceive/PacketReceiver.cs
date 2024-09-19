@@ -1,12 +1,11 @@
 using System;
 using UnityEngine;
-using Epic.OnlineServices;
 
 namespace SynicSugar.P2P{
     public abstract class PacketReceiver : MonoBehaviour
     {
         protected byte ch_r;
-        protected ProductUserId id_r;
+        protected UserId id_r;
         protected ArraySegment<byte> payload_r;
         protected uint maxBatchSize;
         protected IPacketConvert hub;

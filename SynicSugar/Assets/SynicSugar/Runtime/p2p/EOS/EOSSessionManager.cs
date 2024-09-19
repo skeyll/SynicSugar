@@ -41,7 +41,7 @@ namespace SynicSugar.P2P {
         /// To get packets
         /// </summary>
         GetNextReceivedPacketSizeOptions standardPacketSizeOptions, synicPacketSizeOptions;
-
+        ProductUserId productUserId;
         
     #region INetworkCore
         /// <summary>
@@ -81,7 +81,7 @@ namespace SynicSugar.P2P {
         /// To get Packetｓ.
         /// Use this from hub. In Unity, we can not call methods in Main-Assembly from SynicSugar.dll.
         /// </summary>
-        public override bool GetPacketFromBuffer(ref byte ch, ref ProductUserId id, ref ArraySegment<byte> payload){
+        public override bool GetPacketFromBuffer(ref byte ch, ref UserId id, ref ArraySegment<byte> payload){
             ResultE existPacket = P2PHandle.GetNextReceivedPacketSize(ref standardPacketSizeOptions, out uint nextPacketSizeBytes);
             if(existPacket != ResultE.Success){
                 return false;
@@ -95,7 +95,7 @@ namespace SynicSugar.P2P {
 
             byte[] data = new byte[nextPacketSizeBytes];
             payload = new ArraySegment<byte>(data);
-            ResultE result = P2PHandle.ReceivePacket(ref options, ref id, ref ReferenceSocketId, out ch, payload, out uint bytesWritten);
+            ResultE result = P2PHandle.ReceivePacket(ref options, ref productUserId, ref ReferenceSocketId, out ch, payload, out uint bytesWritten);
             
             if (result != ResultE.Success){
 #if SYNICSUGAR_LOG //This range is for performance since this is called every frame.
@@ -108,14 +108,14 @@ namespace SynicSugar.P2P {
         #if SYNICSUGAR_PACKETINFO
             Debug.Log($"ReceivePacket: ch: {ch} from {id} / packet size {bytesWritten} / payload {EOSp2p.ByteArrayToHexString(data)}");
         #endif
-
+            id = UserId.GetUserId(productUserId);
             return true;
         }
         /// <summary>
         /// To get only SynicPacket.
         /// Use this from ConenctHub not to call some methods in Main-Assembly from SynicSugar.dll.
         /// </summary>
-        public override bool GetSynicPacketFromBuffer(ref byte ch, ref ProductUserId id, ref ArraySegment<byte> payload){
+        public override bool GetSynicPacketFromBuffer(ref byte ch, ref UserId id, ref ArraySegment<byte> payload){
             ResultE existPacket = P2PHandle.GetNextReceivedPacketSize(ref synicPacketSizeOptions, out uint nextPacketSizeBytes);
             if(existPacket != ResultE.Success){
                 return false;
@@ -129,7 +129,7 @@ namespace SynicSugar.P2P {
 
             byte[] data = new byte[nextPacketSizeBytes];
             payload = new ArraySegment<byte>(data);
-            ResultE result = P2PHandle.ReceivePacket(ref options, ref id, ref ReferenceSocketId, out ch, payload, out uint bytesWritten);
+            ResultE result = P2PHandle.ReceivePacket(ref options, ref productUserId, ref ReferenceSocketId, out ch, payload, out uint bytesWritten);
             
             if (result != ResultE.Success){
 #if SYNICSUGAR_LOG //This range is for performance since this is called every frame.
@@ -142,7 +142,7 @@ namespace SynicSugar.P2P {
         #if SYNICSUGAR_PACKETINFO
             Debug.Log($"ReceivePacket(Synic): ch: {ch}  from {id} / packet size {bytesWritten} / payload {EOSp2p.ByteArrayToHexString(data)}");
         #endif
-
+            id = UserId.GetUserId(productUserId);
             return true;
         }
     

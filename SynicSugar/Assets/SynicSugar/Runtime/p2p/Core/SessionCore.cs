@@ -346,12 +346,12 @@ namespace SynicSugar.Base {
         /// To get Packets.
         /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll.
         /// </summary>
-        public abstract bool GetPacketFromBuffer(ref byte ch, ref ProductUserId id, ref ArraySegment<byte> payload);
+        public abstract bool GetPacketFromBuffer(ref byte ch, ref UserId id, ref ArraySegment<byte> payload);
         /// <summary>
         /// To get only SynicPacket.
         /// Use this from ConenctHub not to call some methods in Main-Assembly from SynicSugar.dll.
         /// </summary>
-        public abstract bool GetSynicPacketFromBuffer(ref byte ch, ref ProductUserId id, ref ArraySegment<byte> payload);
+        public abstract bool GetSynicPacketFromBuffer(ref byte ch, ref UserId id, ref ArraySegment<byte> payload);
     #endregion
 #region Connect
     /// <summary>
