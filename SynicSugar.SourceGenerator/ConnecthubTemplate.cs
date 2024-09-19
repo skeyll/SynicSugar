@@ -250,54 +250,56 @@ namespace SynicSugarGenerator {
                     " return;\n                case CHANNELLIST.ReturnPong:\n                    Networ" +
                     "kCore.GetPong(id, payload);\n                return;\n                case CHANNEL" +
                     "LIST.Synic:\n                    bool restoredPacket = RestoreSynicPackets(ref ch" +
-                    ", id, ref payload);\n                    if(!restoredPacket){\n    #if SYNICSUGAR_" +
-                    "LOG \n                        Debug.LogFormat(\"ConvertFormPacket: Restore packet " +
-                    "is in progress. for {0}\", id);\n    #endif\n                        return;\n      " +
-                    "              }\n                    \n                    SyncedSynic(id.ToString" +
-                    "());\n\n                    NetworkCore.UpdateSynicStatus(id, synicPacketInfo[id]." +
-                    "phase);\n\n                    //Init\n                    synicBuffer.Remove(id.To" +
-                    "String());\n                    synicPacketInfo.Remove(id.ToString());\n\n         " +
-                    "           //Stop overwriting localuser data with host data.\n                   " +
-                    " if(p2pInfo.Instance.IsLoaclUser(id)){\n                        NetworkCore.StopO" +
-                    "verwritingLocalUserData();\n                    }\n                return;\n       " +
-                    "     }\n        }\n\n        /// <summary>\n        /// Re-Send RPC with last record" +
-                    "ed information.<br />\n        /// To send disconnected peers after some time. Sy" +
-                    "nicSugar retransmit to connecting-peers.<br />\n        /// To record, pass true " +
-                    "to attribute.\n        /// </summary>\n        public void ResendLastRPC(){\n      " +
-                    "      if(p2pInfo.Instance.LastRPCIsLargePacket){\n                EOSp2p.SendLarg" +
-                    "ePacketsToAll(p2pInfo.Instance.LastRPCch, p2pInfo.Instance.LastRPCPayload).Forge" +
-                    "t();\n                return;\n            }\n            EOSp2p.SendPacketToAll(p2" +
-                    "pInfo.Instance.LastRPCch, p2pInfo.Instance.LastRPCPayload).Forget();\n        }\n " +
-                    "       /// <summary>\n        /// Re-Send RPC to the specific target with last re" +
-                    "corded information.<br />\n        /// In order to send disconnected peers after " +
-                    "the some time. SynicSugar has retransmission to connecting-peers for the reliabi" +
-                    "lity.<br />\n        /// To record, pass true to attribute.\n        /// </summary" +
-                    ">\n        /// <param name=\"target\"></param>\n        public void ResendLastRPCToT" +
-                    "arget(UserId target){\n            if(p2pInfo.Instance.LastRPCIsLargePacket){\n   " +
-                    "             EOSp2p.SendLargePackets(p2pInfo.Instance.LastRPCch, p2pInfo.Instanc" +
-                    "e.LastRPCPayload, target).Forget();\n                return;\n            }\n      " +
-                    "      EOSp2p.SendPacket(p2pInfo.Instance.LastRPCch, p2pInfo.Instance.LastRPCPayl" +
-                    "oad, target);\n        }\n        /// <summary>\n        /// Re-Send TargetRPC with" +
-                    " last recorded information.<br />\n        /// In order to send disconnected peer" +
-                    "s after the some time. SynicSugar has retransmission to connecting-peers for the" +
-                    " reliability.<br />\n        /// To record, pass true to attribute.\n        /// <" +
-                    "/summary>\n        public void ResendLastTargetRPC(){\n            if(p2pInfo.Inst" +
-                    "ance.LastTargetRPCIsLargePacket){\n                EOSp2p.SendLargePackets(p2pInf" +
-                    "o.Instance.LastTargetRPCch, p2pInfo.Instance.LastTargetRPCPayload, p2pInfo.Insta" +
-                    "nce.LastTargetRPCUserId).Forget();\n                return;\n            }\n       " +
-                    "     EOSp2p.SendPacket(p2pInfo.Instance.LastTargetRPCch, p2pInfo.Instance.LastTa" +
-                    "rgetRPCPayload, p2pInfo.Instance.LastTargetRPCUserId);\n        }\n\n        ");
+                    ", ref id, ref payload);\n                    if(!restoredPacket){\n    #if SYNICSU" +
+                    "GAR_LOG \n                        Debug.LogFormat(\"ConvertFormPacket: Restore pac" +
+                    "ket is in progress. for {0}\", id);\n    #endif\n                        return;\n  " +
+                    "                  }\n                    \n                    OverwrittenSynicWit" +
+                    "hRemoteData(id);\n\n                    NetworkCore.UpdateSynicStatus(id, synicPac" +
+                    "ketInfo[id].phase);\n\n                    //Init\n                    synicBuffer." +
+                    "Remove(id);\n                    synicPacketInfo.Remove(id);\n\n                   " +
+                    " //Stop overwriting localuser data with host data.\n                    if(p2pInf" +
+                    "o.Instance.IsLoaclUser(id)){\n                        NetworkCore.StopOverwriting" +
+                    "LocalUserData();\n                    }\n                #if SYNICSUGAR_LOG \n     " +
+                    "               Debug.LogFormat(\"ConvertFormPacket: Success overwriting {0}\'s dat" +
+                    "a\", id);\n                #endif\n                return;\n            }\n        }\n" +
+                    "\n        /// <summary>\n        /// Re-Send RPC with last recorded information.<b" +
+                    "r />\n        /// To send disconnected peers after some time. SynicSugar retransm" +
+                    "it to connecting-peers.<br />\n        /// To record, pass true to attribute.\n   " +
+                    "     /// </summary>\n        public void ResendLastRPC(){\n            if(p2pInfo." +
+                    "Instance.LastRPCIsLargePacket){\n                EOSp2p.SendLargePacketsToAll(p2p" +
+                    "Info.Instance.LastRPCch, p2pInfo.Instance.LastRPCPayload).Forget();\n            " +
+                    "    return;\n            }\n            EOSp2p.SendPacketToAll(p2pInfo.Instance.La" +
+                    "stRPCch, p2pInfo.Instance.LastRPCPayload).Forget();\n        }\n        /// <summa" +
+                    "ry>\n        /// Re-Send RPC to the specific target with last recorded informatio" +
+                    "n.<br />\n        /// In order to send disconnected peers after the some time. Sy" +
+                    "nicSugar has retransmission to connecting-peers for the reliability.<br />\n     " +
+                    "   /// To record, pass true to attribute.\n        /// </summary>\n        /// <pa" +
+                    "ram name=\"target\"></param>\n        public void ResendLastRPCToTarget(UserId targ" +
+                    "et){\n            if(p2pInfo.Instance.LastRPCIsLargePacket){\n                EOSp" +
+                    "2p.SendLargePackets(p2pInfo.Instance.LastRPCch, p2pInfo.Instance.LastRPCPayload," +
+                    " target).Forget();\n                return;\n            }\n            EOSp2p.Send" +
+                    "Packet(p2pInfo.Instance.LastRPCch, p2pInfo.Instance.LastRPCPayload, target);\n   " +
+                    "     }\n        /// <summary>\n        /// Re-Send TargetRPC with last recorded in" +
+                    "formation.<br />\n        /// In order to send disconnected peers after the some " +
+                    "time. SynicSugar has retransmission to connecting-peers for the reliability.<br " +
+                    "/>\n        /// To record, pass true to attribute.\n        /// </summary>\n       " +
+                    " public void ResendLastTargetRPC(){\n            if(p2pInfo.Instance.LastTargetRP" +
+                    "CIsLargePacket){\n                EOSp2p.SendLargePackets(p2pInfo.Instance.LastTa" +
+                    "rgetRPCch, p2pInfo.Instance.LastTargetRPCPayload, p2pInfo.Instance.LastTargetRPC" +
+                    "UserId).Forget();\n                return;\n            }\n            EOSp2p.SendP" +
+                    "acket(p2pInfo.Instance.LastTargetRPCch, p2pInfo.Instance.LastTargetRPCPayload, p" +
+                    "2pInfo.Instance.LastTargetRPCUserId);\n        }\n\n        ");
             
             #line default
             #line hidden
             
-            #line 285 ""
+            #line 288 ""
  if (needSyncSynic) { 
             
             #line default
             #line hidden
             
-            #line 286 ""
+            #line 289 ""
             this.Write("        \n        /// <summary>\n        /// Sync all Synic variables. This is very" +
                     " heavy because it handles multiple data and repeats compression and serializatio" +
                     "n.\n        /// </summary>\n        /// <param name=\"targetId\">Target to be synced" +
@@ -336,26 +338,26 @@ namespace SynicSugarGenerator {
             #line default
             #line hidden
             
-            #line 330 ""
+            #line 333 ""
             this.Write(this.ToStringHelper.ToStringWithCulture( GenerateSynicContainer ));
             
             #line default
             #line hidden
             
-            #line 330 ""
+            #line 333 ""
             this.Write("\n                default:\n                goto case 9;\n            }\n            " +
                     "return synicContainer;\n        }\n        ");
             
             #line default
             #line hidden
             
-            #line 336 ""
+            #line 339 ""
  } 
             
             #line default
             #line hidden
             
-            #line 337 ""
+            #line 340 ""
             this.Write("        \n        //Synced 0 = index, 1 = additional packet amount\n        bool Re" +
                     "storeLargePackets(ref byte ch, string id, ref ArraySegment<byte> payload){\n     " +
                     "       //Prep\n            if(!largeBuffer.ContainsKey(id)){\n                larg" +
@@ -378,46 +380,45 @@ namespace SynicSugarGenerator {
                     " == 0 || largePacketInfo[id][ch].currentSize + EOSp2p.MAX_LARGEPACKET_PAYLOADSIZ" +
                     "E > largeBuffer[id][ch].Length ? true : false;\n        }\n\n        // 0-packet in" +
                     "dex, 1-additional packet amount, 2-complex data[1bit-isOnly, 4bits-phase, 3bits " +
-                    "userType], 3-data\'s user index\n        bool RestoreSynicPackets(ref byte ch, str" +
-                    "ing id, ref ArraySegment<byte> payload){\n            //Set target id\n           " +
-                    " int userDataType = (int)(payload[2] & 0x07);\n            if(userDataType == 0){" +
-                    "\n                if(p2pInfo.Instance.IsHost(id) && p2pInfo.Instance.IsReconnecte" +
-                    "r){\n                    id = p2pInfo.Instance.LocalUserId.ToString();\n          " +
-                    "      }else{\n                    return false;\n                }\n            }el" +
-                    "se if(userDataType == 2){\n                if(p2pInfo.Instance.IsHost(id) && p2pI" +
-                    "nfo.Instance.IsReconnecter){\n                    id = p2pInfo.Instance.AllUserId" +
-                    "s[payload[3]].ToString();\n                }else{\n                    return fals" +
-                    "e;\n                }\n            }\n\n            if(!synicBuffer.ContainsKey(id))" +
-                    "{\n                synicPacketInfo.Add(id, new SynicPacketInfomation(){  basis = " +
-                    "new (){ additionalPacketsAmount = payload[1]}, \n                                " +
-                    "                                            phase = (byte)((payload[2] >> 3) & 0" +
-                    "x0F), \n                                                                         " +
-                    "   isSinglePhase = (payload[2] & 0x80) != 0 });\n                //Prep enough by" +
-                    "te[]\n                synicBuffer.Add(id, new byte[(payload[1] + 1) * EOSp2p.MAX_" +
-                    "LARGEPACKET_PAYLOADSIZE]);\n            }\n            int packetIndex = payload[0" +
-                    "];\n            int offset = packetIndex * EOSp2p.MAX_LARGEPACKET_PAYLOADSIZE;\n\n " +
-                    "   #if SYNICSUGAR_PACKETINFO\n            Debug.Log($\"RestoreSynicPacket(Synic): " +
-                    "ch {ch}({(CHANNELLIST)ch}) / Data\'s userID {id} / packet index {payload[0]}/{pay" +
-                    "load[1]}\");\n    #endif\n            //Remove header\n            Span<byte> packet" +
-                    "Payload = payload.Slice(4);\n            synicPacketInfo[id].basis.currentSize +=" +
-                    " packetPayload.Length;\n            //Copy Byte from what come in\n            Buf" +
-                    "fer.BlockCopy(packetPayload.ToArray(), 0, synicBuffer[id], offset, packetPayload" +
-                    ".Length);\n            //Comming all?\n            //We don\'t know real packet siz" +
-                    "e. So we need + 1166.\n            //This first conditon for empty packet.\n      " +
-                    "      return synicPacketInfo[id].basis.additionalPacketsAmount == 0 || synicPack" +
-                    "etInfo[id].basis.currentSize + EOSp2p.MAX_LARGEPACKET_PAYLOADSIZE > synicBuffer[" +
-                    "id].Length ? true : false;\n        }\n\n        /// <summary>\n        /// Call fro" +
-                    "m ConvertFormPacket.\n        /// </summary>\n        void SyncedSynic(string over" +
-                    "writerUserId){\n            //Deserialize packet\n            using var decompress" +
-                    "or = new BrotliDecompressor();\n            Span<byte> transmittedPaylaod = new S" +
-                    "pan<byte>(synicBuffer[overwriterUserId]);\n\n            var decompressedBuffer = " +
-                    "decompressor.Decompress(transmittedPaylaod.Slice(0, synicPacketInfo[overwriterUs" +
-                    "erId].basis.currentSize));\n            SynicContainer container = MemoryPackSeri" +
-                    "alizer.Deserialize<SynicContainer>(decompressedBuffer);\n#if SYNICSUGAR_LOG\n     " +
-                    "       Debug.Log($\"SyncedSynic: Deserialize is Success for {overwriterUserId}\");" +
-                    "\n    #endif\n\n            //Packet data\n            int phase = synicPacketInfo[o" +
-                    "verwriterUserId].phase;\n            bool syncSinglePhase = synicPacketInfo[overw" +
-                    "riterUserId].isSinglePhase;\n\n            switch(phase){");
+                    "userType], 3-data\'s user index\n        bool RestoreSynicPackets(ref byte ch, ref" +
+                    " string id, ref ArraySegment<byte> payload){\n            //Set target id\n       " +
+                    "     int userDataType = (int)(payload[2] & 0x07);\n            if(userDataType ==" +
+                    " 0){\n                if(p2pInfo.Instance.IsHost(id) && p2pInfo.Instance.IsReconn" +
+                    "ecter){\n                    id = p2pInfo.Instance.LocalUserId.ToString();\n      " +
+                    "          }else{\n                    return false;\n                }\n           " +
+                    " }else if(userDataType == 2){\n                if(p2pInfo.Instance.IsHost(id) && " +
+                    "p2pInfo.Instance.IsReconnecter){\n                    id = p2pInfo.Instance.AllUs" +
+                    "erIds[payload[3]].ToString();\n                }else{\n                    return " +
+                    "false;\n                }\n            }\n\n            if(!synicBuffer.ContainsKey(" +
+                    "id)){\n                synicPacketInfo.Add(id, new SynicPacketInfomation(){  basi" +
+                    "s = new (){ additionalPacketsAmount = payload[1]}, \n                            " +
+                    "                                                phase = (byte)((payload[2] >> 3)" +
+                    " & 0x0F), \n                                                                     " +
+                    "       isSinglePhase = (payload[2] & 0x80) != 0 });\n                //Prep enoug" +
+                    "h byte[]\n                synicBuffer.Add(id, new byte[(payload[1] + 1) * EOSp2p." +
+                    "MAX_LARGEPACKET_PAYLOADSIZE]);\n            }\n            int packetIndex = paylo" +
+                    "ad[0];\n            int offset = packetIndex * EOSp2p.MAX_LARGEPACKET_PAYLOADSIZE" +
+                    ";\n\n    #if SYNICSUGAR_PACKETINFO\n            Debug.Log($\"RestoreSynicPacket(Syni" +
+                    "c): ch {ch}({(CHANNELLIST)ch}) / Data\'s userID {id} / packet index {payload[0]}/" +
+                    "{payload[1]}\");\n    #endif\n            //Remove header\n            Span<byte> pa" +
+                    "cketPayload = payload.Slice(4);\n            synicPacketInfo[id].basis.currentSiz" +
+                    "e += packetPayload.Length;\n            //Copy Byte from what come in\n           " +
+                    " Buffer.BlockCopy(packetPayload.ToArray(), 0, synicBuffer[id], offset, packetPay" +
+                    "load.Length);\n            //Comming all?\n            //We don\'t know real packet" +
+                    " size. So we need + 1166.\n            //This first conditon for empty packet.\n  " +
+                    "          return synicPacketInfo[id].basis.additionalPacketsAmount == 0 || synic" +
+                    "PacketInfo[id].basis.currentSize + EOSp2p.MAX_LARGEPACKET_PAYLOADSIZE > synicBuf" +
+                    "fer[id].Length ? true : false;\n        }\n\n        /// <summary>\n        /// Call" +
+                    " from ConvertFormPacket.\n        /// </summary>\n        void OverwrittenSynicWit" +
+                    "hRemoteData(string overwriterUserId){\n            //Deserialize packet\n         " +
+                    "   using var decompressor = new BrotliDecompressor();\n            Span<byte> tra" +
+                    "nsmittedPaylaod = new Span<byte>(synicBuffer[overwriterUserId]);\n\n            va" +
+                    "r decompressedBuffer = decompressor.Decompress(transmittedPaylaod.Slice(0, synic" +
+                    "PacketInfo[overwriterUserId].basis.currentSize));\n            SynicContainer con" +
+                    "tainer = MemoryPackSerializer.Deserialize<SynicContainer>(decompressedBuffer);\n\n" +
+                    "            //Packet data\n            int phase = synicPacketInfo[overwriterUser" +
+                    "Id].phase;\n            bool syncSinglePhase = synicPacketInfo[overwriterUserId]." +
+                    "isSinglePhase;\n\n            switch(phase){");
             
             #line default
             #line hidden

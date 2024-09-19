@@ -1,4 +1,3 @@
-using Epic.OnlineServices;
 using Epic.OnlineServices.P2P;
 using UnityEngine;
 using System;
@@ -335,7 +334,7 @@ namespace SynicSugar.Base {
                     SynicReceiver.StopPacketReceiver();
                 break;
             }
-            
+     
             validReceiverType = ReceiverType.None;
             return Result.Success;
         }

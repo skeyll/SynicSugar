@@ -289,7 +289,7 @@
             isLocalCall = true;
         }}";
         }
-        //SyncSynic
+        //SyncSynicWithLocalData
         internal string CreateSynicItemVariable(string variable, string nameSpace, string param) {
             return $@"
         public {GetFullName(nameSpace, param)} {variable};";
@@ -309,7 +309,7 @@
                 case {index}: {getPart}
                 {footer}", !string.IsNullOrEmpty(getPart));
         }
-        //SyncedSynic
+        //OverwrittenSynicWithRemoteData
         internal string CreateSyncedInvoker(int index) {
             string footer = index == 0 ? @"
                 break;" : $@"
@@ -342,7 +342,6 @@
 
         internal string CreateSyncedItem(int index, string playerContent, string commonsContent){
             string logContent = $"$\"SyncedItem{index}: overwrited {{itemCount}} Synics ({{items}}) by {{id}}\"";
-            string tt = "\"SyncedItemisEnd\"";
 
             return $@"
         void SyncedItem{index}(string id, SynicItem{index} synicItem){{
@@ -352,7 +351,6 @@
             #endif
             //Player
             {playerContent}
-
             if(p2pInfo.Instance.IsHost(id)){{
                 //Commons
                 {commonsContent}

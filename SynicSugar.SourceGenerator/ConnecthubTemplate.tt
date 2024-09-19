@@ -220,7 +220,7 @@ namespace SynicSugar.P2P {
                     NetworkCore.GetPong(id, payload);
                 return;
                 case CHANNELLIST.Synic:
-                    bool restoredPacket = RestoreSynicPackets(ref ch, id, ref payload);
+                    bool restoredPacket = RestoreSynicPackets(ref ch, ref id, ref payload);
                     if(!restoredPacket){
     #if SYNICSUGAR_LOG 
                         Debug.LogFormat("ConvertFormPacket: Restore packet is in progress. for {0}", id);
@@ -228,22 +228,21 @@ namespace SynicSugar.P2P {
                         return;
                     }
                     
-                    SyncedSynic(id);
+                    OverwrittenSynicWithRemoteData(id);
 
-                    Debug.Log("ConvertFromPacket0");
                     NetworkCore.UpdateSynicStatus(id, synicPacketInfo[id].phase);
 
-                    Debug.Log("ConvertFromPacket1");
                     //Init
                     synicBuffer.Remove(id);
                     synicPacketInfo.Remove(id);
-
-                    Debug.Log("ConvertFromPacket2");
 
                     //Stop overwriting localuser data with host data.
                     if(p2pInfo.Instance.IsLoaclUser(id)){
                         NetworkCore.StopOverwritingLocalUserData();
                     }
+                #if SYNICSUGAR_LOG 
+                    Debug.LogFormat("ConvertFormPacket: Success overwriting {0}'s data", id);
+                #endif
                 return;
             }
         }
@@ -371,7 +370,7 @@ namespace SynicSugar.P2P {
         }
 
         // 0-packet index, 1-additional packet amount, 2-complex data[1bit-isOnly, 4bits-phase, 3bits userType], 3-data's user index
-        bool RestoreSynicPackets(ref byte ch, string id, ref ArraySegment<byte> payload){
+        bool RestoreSynicPackets(ref byte ch, ref string id, ref ArraySegment<byte> payload){
             //Set target id
             int userDataType = (int)(payload[2] & 0x07);
             if(userDataType == 0){
@@ -415,16 +414,13 @@ namespace SynicSugar.P2P {
         /// <summary>
         /// Call from ConvertFormPacket.
         /// </summary>
-        void SyncedSynic(string overwriterUserId){
+        void OverwrittenSynicWithRemoteData(string overwriterUserId){
             //Deserialize packet
             using var decompressor = new BrotliDecompressor();
             Span<byte> transmittedPaylaod = new Span<byte>(synicBuffer[overwriterUserId]);
 
             var decompressedBuffer = decompressor.Decompress(transmittedPaylaod.Slice(0, synicPacketInfo[overwriterUserId].basis.currentSize));
             SynicContainer container = MemoryPackSerializer.Deserialize<SynicContainer>(decompressedBuffer);
-    #if SYNICSUGAR_LOG
-            Debug.Log($"SyncedSynic: Deserialize is Success for {overwriterUserId}");
-    #endif
 
             //Packet data
             int phase = synicPacketInfo[overwriterUserId].phase;
@@ -434,9 +430,6 @@ namespace SynicSugar.P2P {
                 default:
                 goto case 9;
             }
-        #if SYNICSUGAR_LOG
-            Debug.Log("SyncedSynic: End");
-        #endif
         }
         <#= SyncedItems #>
     }
