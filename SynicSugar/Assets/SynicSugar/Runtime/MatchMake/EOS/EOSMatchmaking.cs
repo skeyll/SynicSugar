@@ -161,7 +161,7 @@ namespace SynicSugar.MatchMake {
             //Join when lobby has members than more one.
             Result joinResult = await TryJoinSearchResults(retrieveResult.lobbySerach, null, true, token);
         #if SYNICSUGAR_LOG
-            Debug.LogFormat("JoinLobbyBySavedLobbyId: TryJoinSearchResults is '{0}'.", joinResult);
+            Debug.LogFormat("JoinLobbyBySavedLobbyId: The result is {0}", joinResult);
         #endif
             if(joinResult != Result.Success){
                 await MatchMakeManager.Instance.OnDeleteLobbyID();
@@ -1471,7 +1471,7 @@ namespace SynicSugar.MatchMake {
             RemoveNotifyLobbyMemberUpdateReceived();
             p2pConfig.Instance.sessionCore.OpenConnection(true);
         #if SYNICSUGAR_LOG
-            Debug.Log("OpenConnection: Open Connection.");
+            Debug.Log("OpenConnection: Send connect request.");
         #endif
             Result canConnect = await ConnectPreparation.WaitConnectPreparation(token, setupTimeoutSec * 1000); //Pass time as ms.
             if(canConnect != Result.Success){

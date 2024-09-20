@@ -418,7 +418,7 @@ namespace SynicSugar.MatchMake {
                 return Result.InvalidParameters;
             }
     #if SYNICSUGAR_LOG
-            Debug.Log($"Try Recconect with {LobbyID}");
+            Debug.Log($"ReconnectLobby: Try to join lobby. LobbyId: {LobbyID}");
     #endif
             isLooking = true;
             SynicSugarManger.Instance.State.IsMatchmaking = true;

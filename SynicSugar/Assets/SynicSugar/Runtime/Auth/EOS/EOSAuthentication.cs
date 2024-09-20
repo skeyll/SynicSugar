@@ -93,7 +93,7 @@ namespace SynicSugar.Auth {
 
             if(ExpirationNotifyId != 0){
             #if SYNICSUGAR_LOG
-                Debug.Log("AddNotifyAuthExpiration: Register success!.");
+                Debug.Log("AddNotifyAuthExpiration: Register success!");
             #endif
             
             #if UNITY_EDITOR
