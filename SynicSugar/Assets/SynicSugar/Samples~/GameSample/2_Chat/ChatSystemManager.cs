@@ -31,7 +31,7 @@ namespace SynicSugar.Samples {
                 //To get SynicPacket.
                 ConnectHub.Instance.StartSynicReceiver(5);
                 //This flag(HasReceivedAllSyncSynic) cannot be used at the same time. Once it returns True, it returns False again.
-                await UniTask.WaitUntil(() => p2pInfo.Instance.HasReceivedAllSyncSynic);
+                await UniTask.WaitUntil(() => p2pInfo.Instance.HasReceivedAllSyncSynic, cancellationToken: this.GetCancellationTokenOnDestroy());
                 UpdateChatCount();
             }
             
