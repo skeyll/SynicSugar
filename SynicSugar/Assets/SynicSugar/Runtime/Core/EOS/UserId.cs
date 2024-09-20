@@ -8,7 +8,7 @@ namespace SynicSugar {
         internal static void CacheClear(){
             idCache.Clear();
         #if UNITY_EDITOR
-            if(!UnityEngine.Application.isPlaying){
+            if(SynicSugarManger.Instance?.LocalUserId == null){
                 return;
             }
         #endif
