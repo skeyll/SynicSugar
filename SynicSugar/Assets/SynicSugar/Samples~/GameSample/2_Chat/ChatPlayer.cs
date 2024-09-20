@@ -170,6 +170,8 @@ namespace SynicSugar.Samples {
 
             systemManager.ForLargePacket.texture = texture;
         }
+        //This use is generally not recommended due to that poor performance.
+        //But if you don't need the performance, you can easily synchronize large packet.
         public void SendLargePacketViaSynic(){
             var sample = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
             var array = new char[4000];

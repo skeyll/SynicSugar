@@ -32,7 +32,7 @@ namespace SynicSugar.Samples.Tank {
         /// </summary>
         /// <param name="newState"></param>
         internal void InvokeStateProcess(GameState newState){
-            Debug.Log(newState);
+            Debug.Log("TankGameManager: CurrentState is" + newState);
             switch(newState){
                 case GameState.PreparationForObjects:
                     PreparationForObjectsProcess();
@@ -159,7 +159,7 @@ namespace SynicSugar.Samples.Tank {
             padGUI.SwitchGUISState(PadState.OnlyMove);
             SwitchSystemUIsState(GameState.Standby);
             ConnectHub.Instance.GetInstance<TankRoundTimer>().SetTimer();
-            MonitorGameState().Forget();
+            WaitForTheUsersReady().Forget();
         }
         /// <summary>
         /// From call system button
@@ -171,7 +171,7 @@ namespace SynicSugar.Samples.Tank {
         /// <summary>
         /// Monitor isReady flag by everyoneIsReady.
         /// </summary>
-        async UniTask MonitorGameState(){
+        async UniTask WaitForTheUsersReady(){
             await UniTask.WaitUntil(() => everyoneIsReady, cancellationToken: this.GetCancellationTokenOnDestroy());
             CurrentGameState = GameState.InGame;
             InvokeStateProcess(CurrentGameState);

@@ -143,7 +143,6 @@ namespace SynicSugar.Samples.Tank {
             if(isParticipated){
                 GameObject stateObj = Instantiate(memberStatePrefab, memberContentParent);
                 TankLobbyMemberState state = stateObj.GetComponent<TankLobbyMemberState>();
-                Debug.Log(target.ToString());
                 LobbyMemberStatus.Add(target.ToString(), state);
             }else{
                 Destroy(LobbyMemberStatus[target.ToString()].gameObject);
