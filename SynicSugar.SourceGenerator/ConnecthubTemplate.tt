@@ -220,28 +220,29 @@ namespace SynicSugar.P2P {
                     NetworkCore.GetPong(id, payload);
                 return;
                 case CHANNELLIST.Synic:
-                    bool restoredPacket = RestoreSynicPackets(ref ch, ref id, ref payload);
+                    string userId = id;
+                    bool restoredPacket = RestoreSynicPackets(ref ch, ref userId, ref payload);
                     if(!restoredPacket){
     #if SYNICSUGAR_LOG 
-                        Debug.LogFormat("ConvertFormPacket: Restore packet is in progress. for {0}", id);
+                        Debug.LogFormat("ConvertFormPacket: Restore packet is in progress for {0} from {1}.", userId, id);
     #endif
                         return;
                     }
                     
-                    OverwrittenSynicWithRemoteData(id);
+                    OverwrittenSynicWithRemoteData(userId);
 
-                    NetworkCore.UpdateSynicStatus(id, synicPacketInfo[id].phase);
+                    NetworkCore.UpdateSynicStatus(userId, synicPacketInfo[userId].phase);
 
                     //Init
-                    synicBuffer.Remove(id);
-                    synicPacketInfo.Remove(id);
+                    synicBuffer.Remove(userId);
+                    synicPacketInfo.Remove(userId);
 
                     //Stop overwriting localuser data with host data.
-                    if(p2pInfo.Instance.IsLoaclUser(id)){
+                    if(p2pInfo.Instance.IsLoaclUser(userId)){
                         NetworkCore.StopOverwritingLocalUserData();
                     }
                 #if SYNICSUGAR_LOG 
-                    Debug.LogFormat("ConvertFormPacket: Success overwriting {0}'s data", id);
+                    Debug.LogFormat("ConvertFormPacket: Success overwriting {0}'s data by {1}"!, userId, id);
                 #endif
                 return;
             }

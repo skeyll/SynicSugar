@@ -341,7 +341,7 @@
         }
 
         internal string CreateSyncedItem(int index, string playerContent, string commonsContent){
-            string logContent = $"$\"SyncedItem{index}: overwrited {{itemCount}} Synics ({{items}}) by {{id}}\"";
+            string logContent = $"$\"SyncedItem{index}: {{itemCount}} Synics is overwritten by {{id}}. The List: ({{items}}) \"";
 
             return $@"
         void SyncedItem{index}(string id, SynicItem{index} synicItem){{

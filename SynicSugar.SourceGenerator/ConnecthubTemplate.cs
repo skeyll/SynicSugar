@@ -249,57 +249,58 @@ namespace SynicSugarGenerator {
                     "et((byte)CHANNELLIST.ReturnPong, payload, UserId.GetUserId(id));\n               " +
                     " return;\n                case CHANNELLIST.ReturnPong:\n                    Networ" +
                     "kCore.GetPong(id, payload);\n                return;\n                case CHANNEL" +
-                    "LIST.Synic:\n                    bool restoredPacket = RestoreSynicPackets(ref ch" +
-                    ", ref id, ref payload);\n                    if(!restoredPacket){\n    #if SYNICSU" +
-                    "GAR_LOG \n                        Debug.LogFormat(\"ConvertFormPacket: Restore pac" +
-                    "ket is in progress. for {0}\", id);\n    #endif\n                        return;\n  " +
-                    "                  }\n                    \n                    OverwrittenSynicWit" +
-                    "hRemoteData(id);\n\n                    NetworkCore.UpdateSynicStatus(id, synicPac" +
-                    "ketInfo[id].phase);\n\n                    //Init\n                    synicBuffer." +
-                    "Remove(id);\n                    synicPacketInfo.Remove(id);\n\n                   " +
-                    " //Stop overwriting localuser data with host data.\n                    if(p2pInf" +
-                    "o.Instance.IsLoaclUser(id)){\n                        NetworkCore.StopOverwriting" +
-                    "LocalUserData();\n                    }\n                #if SYNICSUGAR_LOG \n     " +
-                    "               Debug.LogFormat(\"ConvertFormPacket: Success overwriting {0}\'s dat" +
-                    "a\", id);\n                #endif\n                return;\n            }\n        }\n" +
-                    "\n        /// <summary>\n        /// Re-Send RPC with last recorded information.<b" +
-                    "r />\n        /// To send disconnected peers after some time. SynicSugar retransm" +
-                    "it to connecting-peers.<br />\n        /// To record, pass true to attribute.\n   " +
-                    "     /// </summary>\n        public void ResendLastRPC(){\n            if(p2pInfo." +
-                    "Instance.LastRPCIsLargePacket){\n                EOSp2p.SendLargePacketsToAll(p2p" +
-                    "Info.Instance.LastRPCch, p2pInfo.Instance.LastRPCPayload).Forget();\n            " +
-                    "    return;\n            }\n            EOSp2p.SendPacketToAll(p2pInfo.Instance.La" +
-                    "stRPCch, p2pInfo.Instance.LastRPCPayload).Forget();\n        }\n        /// <summa" +
-                    "ry>\n        /// Re-Send RPC to the specific target with last recorded informatio" +
-                    "n.<br />\n        /// In order to send disconnected peers after the some time. Sy" +
-                    "nicSugar has retransmission to connecting-peers for the reliability.<br />\n     " +
-                    "   /// To record, pass true to attribute.\n        /// </summary>\n        /// <pa" +
-                    "ram name=\"target\"></param>\n        public void ResendLastRPCToTarget(UserId targ" +
-                    "et){\n            if(p2pInfo.Instance.LastRPCIsLargePacket){\n                EOSp" +
-                    "2p.SendLargePackets(p2pInfo.Instance.LastRPCch, p2pInfo.Instance.LastRPCPayload," +
-                    " target).Forget();\n                return;\n            }\n            EOSp2p.Send" +
-                    "Packet(p2pInfo.Instance.LastRPCch, p2pInfo.Instance.LastRPCPayload, target);\n   " +
-                    "     }\n        /// <summary>\n        /// Re-Send TargetRPC with last recorded in" +
-                    "formation.<br />\n        /// In order to send disconnected peers after the some " +
-                    "time. SynicSugar has retransmission to connecting-peers for the reliability.<br " +
-                    "/>\n        /// To record, pass true to attribute.\n        /// </summary>\n       " +
-                    " public void ResendLastTargetRPC(){\n            if(p2pInfo.Instance.LastTargetRP" +
-                    "CIsLargePacket){\n                EOSp2p.SendLargePackets(p2pInfo.Instance.LastTa" +
-                    "rgetRPCch, p2pInfo.Instance.LastTargetRPCPayload, p2pInfo.Instance.LastTargetRPC" +
-                    "UserId).Forget();\n                return;\n            }\n            EOSp2p.SendP" +
-                    "acket(p2pInfo.Instance.LastTargetRPCch, p2pInfo.Instance.LastTargetRPCPayload, p" +
-                    "2pInfo.Instance.LastTargetRPCUserId);\n        }\n\n        ");
-            
-            #line default
-            #line hidden
-            
-            #line 288 ""
- if (needSyncSynic) { 
+                    "LIST.Synic:\n                    string userId = id;\n                    bool res" +
+                    "toredPacket = RestoreSynicPackets(ref ch, ref userId, ref payload);\n            " +
+                    "        if(!restoredPacket){\n    #if SYNICSUGAR_LOG \n                        Deb" +
+                    "ug.LogFormat(\"ConvertFormPacket: Restore packet is in progress for {0} from {1}." +
+                    "\", userId, id);\n    #endif\n                        return;\n                    }" +
+                    "\n                    \n                    OverwrittenSynicWithRemoteData(userId)" +
+                    ";\n\n                    NetworkCore.UpdateSynicStatus(userId, synicPacketInfo[use" +
+                    "rId].phase);\n\n                    //Init\n                    synicBuffer.Remove(" +
+                    "userId);\n                    synicPacketInfo.Remove(userId);\n\n                  " +
+                    "  //Stop overwriting localuser data with host data.\n                    if(p2pIn" +
+                    "fo.Instance.IsLoaclUser(userId)){\n                        NetworkCore.StopOverwr" +
+                    "itingLocalUserData();\n                    }\n                #if SYNICSUGAR_LOG \n" +
+                    "                    Debug.LogFormat(\"ConvertFormPacket: Success overwriting {0}\'" +
+                    "s data by {1}\"!, userId, id);\n                #endif\n                return;\n   " +
+                    "         }\n        }\n\n        /// <summary>\n        /// Re-Send RPC with last re" +
+                    "corded information.<br />\n        /// To send disconnected peers after some time" +
+                    ". SynicSugar retransmit to connecting-peers.<br />\n        /// To record, pass t" +
+                    "rue to attribute.\n        /// </summary>\n        public void ResendLastRPC(){\n  " +
+                    "          if(p2pInfo.Instance.LastRPCIsLargePacket){\n                EOSp2p.Send" +
+                    "LargePacketsToAll(p2pInfo.Instance.LastRPCch, p2pInfo.Instance.LastRPCPayload).F" +
+                    "orget();\n                return;\n            }\n            EOSp2p.SendPacketToAl" +
+                    "l(p2pInfo.Instance.LastRPCch, p2pInfo.Instance.LastRPCPayload).Forget();\n       " +
+                    " }\n        /// <summary>\n        /// Re-Send RPC to the specific target with las" +
+                    "t recorded information.<br />\n        /// In order to send disconnected peers af" +
+                    "ter the some time. SynicSugar has retransmission to connecting-peers for the rel" +
+                    "iability.<br />\n        /// To record, pass true to attribute.\n        /// </sum" +
+                    "mary>\n        /// <param name=\"target\"></param>\n        public void ResendLastRP" +
+                    "CToTarget(UserId target){\n            if(p2pInfo.Instance.LastRPCIsLargePacket){" +
+                    "\n                EOSp2p.SendLargePackets(p2pInfo.Instance.LastRPCch, p2pInfo.Ins" +
+                    "tance.LastRPCPayload, target).Forget();\n                return;\n            }\n  " +
+                    "          EOSp2p.SendPacket(p2pInfo.Instance.LastRPCch, p2pInfo.Instance.LastRPC" +
+                    "Payload, target);\n        }\n        /// <summary>\n        /// Re-Send TargetRPC " +
+                    "with last recorded information.<br />\n        /// In order to send disconnected " +
+                    "peers after the some time. SynicSugar has retransmission to connecting-peers for" +
+                    " the reliability.<br />\n        /// To record, pass true to attribute.\n        /" +
+                    "// </summary>\n        public void ResendLastTargetRPC(){\n            if(p2pInfo." +
+                    "Instance.LastTargetRPCIsLargePacket){\n                EOSp2p.SendLargePackets(p2" +
+                    "pInfo.Instance.LastTargetRPCch, p2pInfo.Instance.LastTargetRPCPayload, p2pInfo.I" +
+                    "nstance.LastTargetRPCUserId).Forget();\n                return;\n            }\n   " +
+                    "         EOSp2p.SendPacket(p2pInfo.Instance.LastTargetRPCch, p2pInfo.Instance.La" +
+                    "stTargetRPCPayload, p2pInfo.Instance.LastTargetRPCUserId);\n        }\n\n        ");
             
             #line default
             #line hidden
             
             #line 289 ""
+ if (needSyncSynic) { 
+            
+            #line default
+            #line hidden
+            
+            #line 290 ""
             this.Write("        \n        /// <summary>\n        /// Sync all Synic variables. This is very" +
                     " heavy because it handles multiple data and repeats compression and serializatio" +
                     "n.\n        /// </summary>\n        /// <param name=\"targetId\">Target to be synced" +
@@ -338,26 +339,26 @@ namespace SynicSugarGenerator {
             #line default
             #line hidden
             
-            #line 333 ""
+            #line 334 ""
             this.Write(this.ToStringHelper.ToStringWithCulture( GenerateSynicContainer ));
             
             #line default
             #line hidden
             
-            #line 333 ""
+            #line 334 ""
             this.Write("\n                default:\n                goto case 9;\n            }\n            " +
                     "return synicContainer;\n        }\n        ");
             
             #line default
             #line hidden
             
-            #line 339 ""
+            #line 340 ""
  } 
             
             #line default
             #line hidden
             
-            #line 340 ""
+            #line 341 ""
             this.Write("        \n        //Synced 0 = index, 1 = additional packet amount\n        bool Re" +
                     "storeLargePackets(ref byte ch, string id, ref ArraySegment<byte> payload){\n     " +
                     "       //Prep\n            if(!largeBuffer.ContainsKey(id)){\n                larg" +
@@ -423,26 +424,26 @@ namespace SynicSugarGenerator {
             #line default
             #line hidden
             
-            #line 429 ""
+            #line 430 ""
             this.Write(this.ToStringHelper.ToStringWithCulture( SyncedInvoker ));
             
             #line default
             #line hidden
             
-            #line 429 ""
+            #line 430 ""
             this.Write("\n                default:\n                goto case 9;\n            }\n        }\n  " +
                     "      ");
             
             #line default
             #line hidden
             
-            #line 434 ""
+            #line 435 ""
             this.Write(this.ToStringHelper.ToStringWithCulture( SyncedItems ));
             
             #line default
             #line hidden
             
-            #line 434 ""
+            #line 435 ""
             this.Write("\n    }\n}");
             
             #line default
