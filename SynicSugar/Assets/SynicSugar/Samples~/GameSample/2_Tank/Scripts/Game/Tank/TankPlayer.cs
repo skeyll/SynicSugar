@@ -2,6 +2,7 @@ using UnityEngine;
 using SynicSugar.P2P;
 using Cysharp.Threading.Tasks;
 using UnityEngine.UI;
+
 namespace  SynicSugar.Samples.Tank {
     [NetworkPlayer(true)]
     [RequireComponent(typeof(Rigidbody))]
@@ -28,7 +29,29 @@ namespace  SynicSugar.Samples.Tank {
         [Rpc]
         public void SetPlayerStatus(TankPlayerStatus status){
             this.status = status;
-            this.transform.position = status.RespawnPos;
+            this.transform.position = status.RespawnPosition;
+            this.transform.rotation = status.RespawnQuaternion;
+
+            PlayerName.text = status.Name;
+            movement.SetSpeed(status.Speed);
+        }
+        [Rpc]
+        /// <summary>
+        /// Invoke via this process after reconnection. <br />
+        /// The reconnected player calls this process to re-set the positions of all players, but is only called as Rpc if the player calls own process.
+        /// </summary>
+        public void ReflectDataAfterReconnection(){
+            GameState state = ConnectHub.Instance.GetInstance<TankGameManager>().CurrentGameState;
+            
+            //Synic is not a process that reverts to the state at the time of disconnection, 
+            //but just synchronizes the current session data (include local user's data) to the local data.
+            //So we have to do it ourselves to reflect it in the gameobjects.
+            //Synic is deserialize via the MemoryPack constructor, so we can also do it inside the constructor.
+            if(state > GameState.PreparationForData){
+                this.transform.position = status.RespawnPosition;
+                //回転の動機も必要
+            }
+
 
             PlayerName.text = status.Name;
             movement.SetSpeed(status.Speed);
@@ -127,6 +150,14 @@ namespace  SynicSugar.Samples.Tank {
         }
         internal void ActivateClown(){
             Crown.SetActive(true);
+        }
+        /// <summary>
+        /// Update position and rotation data for Synic.
+        /// </summary>
+        /// <returns>Local player transform info</returns> 
+        internal void UpdateRespawnTransfomData(){
+            status.RespawnPosition = movement.truePlayerPosition;
+            status.RespawnQuaternion = movement.truePlayerQuaternion;
         }
     }
 }

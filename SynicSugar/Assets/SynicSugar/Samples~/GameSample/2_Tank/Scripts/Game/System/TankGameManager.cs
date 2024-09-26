@@ -145,10 +145,17 @@ namespace SynicSugar.Samples.Tank {
                 MaxHP = 100,
                 Speed = 12f,
                 Attack = 20,
-                RespawnPos = spawners[p2pInfo.Instance.GetUserIndex()].transform.position
+                RespawnPosition = spawners[p2pInfo.Instance.GetUserIndex()].transform.position, 
+                RespawnQuaternion = spawners[p2pInfo.Instance.GetUserIndex()].transform.rotation
             };
             //Call RPC process to sync status.
             ConnectHub.Instance.GetUserInstance<TankPlayer>(p2pInfo.Instance.LocalUserId).SetPlayerStatus(status);
+        }
+        /// <summary>
+        /// Set synics to player object.
+        /// </summary>
+        void ReflectParametersToPlayers(){
+
         }
     #endregion
     #region Standby
