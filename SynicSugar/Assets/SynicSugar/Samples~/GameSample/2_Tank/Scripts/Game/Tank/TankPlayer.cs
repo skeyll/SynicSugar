@@ -32,7 +32,6 @@ namespace  SynicSugar.Samples.Tank {
             this.transform.position = status.RespawnPosition;
             this.transform.rotation = status.RespawnQuaternion;
 
-
             PlayerName.text = status.Name;
             movement.SetSpeed(status.Speed);
         }
@@ -89,7 +88,6 @@ namespace  SynicSugar.Samples.Tank {
             }else{
                 Turn(new TankMoveData(direction, transform));
             }
-
         }
         [Rpc]
         public void Move(TankMoveData data){

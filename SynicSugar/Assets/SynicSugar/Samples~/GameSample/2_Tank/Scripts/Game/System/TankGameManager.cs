@@ -175,7 +175,8 @@ namespace SynicSugar.Samples.Tank {
         /// From call system button
         /// </summary>
         public void ReadyToPlayBattle(){
-            SwitchSystemUIsState(GameState.InGame);
+            //To deactivate all GUI.
+            SwitchSystemUIsState(GameState.PreparationForObjects);
             ConnectHub.Instance.GetUserInstance<TankPlayer>(p2pInfo.Instance.LocalUserId).Ready();
         }
         /// <summary>
@@ -208,11 +209,13 @@ namespace SynicSugar.Samples.Tank {
     #endregion
     #region InGame
         async UniTask InGameProcess(){
+            SwitchSystemUIsState(GameState.InGame);
             //p2pInfo.Instance.IsReconnecter　is valid until a SynicPacket is received once.
             //So, we have to use others for reconnecter flag.
             if(ConnectHub.Instance.GetInstance<TankRoundTimer>().RemainingIsMax()){
                 await GameStarting();
             }
+
             padGUI.SwitchGUISState(PadState.ALL);
 
             await ConnectHub.Instance.GetInstance<TankRoundTimer>().StartTimer();
