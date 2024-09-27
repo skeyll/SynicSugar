@@ -355,9 +355,11 @@
                 //Commons
                 {commonsContent}
             }}
-            #if SYNICSUGAR_LOG
+        #if SYNICSUGAR_LOG
+            if(itemCount > 0){{
                 Debug.Log({logContent});
-            #endif
+            }}
+        #endif
         }}";
         }
 
