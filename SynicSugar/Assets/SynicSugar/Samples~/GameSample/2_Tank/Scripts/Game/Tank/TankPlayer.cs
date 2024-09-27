@@ -47,14 +47,14 @@ namespace  SynicSugar.Samples.Tank {
             //Synic is not a process that reverts to the state at the time of disconnection, 
             //but just synchronizes the current session data (include local user's data) to the local data.
             //So we have to do it ourselves to reflect it in the gameobjects.
-            if(state > GameState.PreparationForData){
+            if(state >= GameState.PreparationForData){
                 this.transform.position = status.RespawnPosition;
                 this.transform.rotation = status.RespawnQuaternion;
                 PlayerName.text = status.Name;
                 movement.SetSpeed(status.Speed);
             }
 
-            if(state > GameState.InGame){
+            if(state >= GameState.InGame){
                 InitStatus(false);
             }
             gameObject.SetActive(status.CurrentHP > 0);
