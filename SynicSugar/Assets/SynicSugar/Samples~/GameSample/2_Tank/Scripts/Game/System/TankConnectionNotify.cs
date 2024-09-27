@@ -88,7 +88,6 @@ namespace SynicSugar.Samples.Tank {
             }
 
             ConnectHub.Instance.SyncSynic(id, SynicType.WithOthers);
-            ConnectHub.Instance.GetUserInstance<TankPlayer>(id).gameObject.SetActive(true);
         }
         string GetPlayerName(UserId id){
             return $"{ConnectHub.Instance.GetUserInstance<TankPlayer>(id).status.Name}({id})";

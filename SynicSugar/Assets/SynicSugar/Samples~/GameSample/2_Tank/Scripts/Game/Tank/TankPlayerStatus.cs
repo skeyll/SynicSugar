@@ -2,7 +2,9 @@ using UnityEngine;
 using MemoryPack;
 
 namespace SynicSugar.Samples.Tank {
-    [MemoryPackable]
+    //If the Class is sent as Synic, System.Serializable must be added.
+    //Put MemoryPackIgnore on data that dosen't need to be send.
+    [System.Serializable, MemoryPackable]
     public partial class TankPlayerStatus {
         public string Name;
         public int MaxHP;

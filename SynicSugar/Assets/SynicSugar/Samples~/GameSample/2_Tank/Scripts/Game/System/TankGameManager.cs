@@ -122,6 +122,7 @@ namespace SynicSugar.Samples.Tank {
                 //If this user comes here by ReconnectAPI, them need receive all the SynicPackets before back to the game.
                 ConnectHub.Instance.StartSynicReceiver(5);
                 await UniTask.WaitUntil(() => p2pInfo.Instance.HasReceivedAllSyncSynic, cancellationToken: this.GetCancellationTokenOnDestroy());
+                SetSynicsToObject();
             }
             //If the game had not yet started, the reconnector also (re)sends the data.
             if(CurrentGameState == GameState.PreparationForData){
@@ -152,10 +153,12 @@ namespace SynicSugar.Samples.Tank {
             ConnectHub.Instance.GetUserInstance<TankPlayer>(p2pInfo.Instance.LocalUserId).SetPlayerStatus(status);
         }
         /// <summary>
-        /// Set synics to player object.
+        /// Reflect synics to player object.
         /// </summary>
-        void ReflectParametersToPlayers(){
-
+        void SetSynicsToObject(){
+            foreach(var id in p2pInfo.Instance.CurrentConnectedUserIds){
+                ConnectHub.Instance.GetUserInstance<TankPlayer>(id).SetDataAfterReconnect();
+            }
         }
     #endregion
     #region Standby

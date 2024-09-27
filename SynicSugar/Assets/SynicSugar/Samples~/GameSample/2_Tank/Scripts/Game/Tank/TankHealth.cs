@@ -25,11 +25,10 @@ namespace SynicSugar.Samples.Tank {
         }
 
 
-        internal void SetHealth(TankPlayerStatus playerStatus, int maxHP){
+        internal void SetHealth(TankPlayerStatus playerStatus){
             status = playerStatus;
             // When the tank is enabled, reset the tank's health and whether or not it's dead.
-            status.CurrentHP = maxHP;
-            m_Dead = false;
+            m_Dead = status.CurrentHP <= 0;
 
             // Update the health slider's value and color.
             SetHealthUI();
