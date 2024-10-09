@@ -10,7 +10,8 @@ namespace SynicSugar.MatchMake {
     {
         private string filePath;
         const string fileName = "ss_sessiondata.dat";
-        internal SessionDataManager(){
+        internal SessionDataManager()
+        {
             filePath = Path.Combine(Application.persistentDataPath, fileName);
         }
 
@@ -26,17 +27,17 @@ namespace SynicSugar.MatchMake {
             }
             catch (UnauthorizedAccessException e)
             {
-                Debug.Log($"SaveSessionData: Don't have access permission. This user cannot come back to game as reconnecter. {e.Message}");
+                Debug.LogError($"SaveSessionData: Don't have access permission. {e.Message}");
                 return false;
             }
             catch (IOException e)
             {
-                Debug.Log($"SaveSessionData: An error occurred during file operation. This user cannot come back to game as reconnecter. {e.Message}");
+                Debug.LogError($"SaveSessionData: An error occurred during file operation. {e.Message}");
                 return false;
             }
             catch (Exception e)
             {
-                Debug.Log($"SaveSessionData: An unexpected error has occurred. This user cannot come back to game as reconnecter. {e.Message}");
+                Debug.LogError($"SaveSessionData: An unexpected error has occurred. {e.Message}");
                 return false;
             }
 
@@ -59,7 +60,8 @@ namespace SynicSugar.MatchMake {
 
                 SessionData data = MemoryPackSerializer.Deserialize<SessionData>(binaryData);
 
-                if(lobbyId != data.LobbyID){
+                if(lobbyId != data.LobbyID)
+                {
                     Debug.Log($"LoadSessionData: Failed to load SessionData. This data is not for {lobbyId}.");
                     return null;
                 }
