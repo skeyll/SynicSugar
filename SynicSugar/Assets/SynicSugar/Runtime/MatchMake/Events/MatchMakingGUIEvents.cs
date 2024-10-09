@@ -1,6 +1,5 @@
 #pragma warning disable CS0414 //The field is assigned but its value is never used
 using System;
-using SynicSugar.P2P;
 #if SYNICSUGAR_TMP
 using TMPro;
 #else
@@ -99,8 +98,8 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         public string StartReconnection;
     #endregion
-        internal enum State {
-            Standby, Start, Wait, Conclude, Ready, Cancel, Recconect
+        public enum State {
+            Standby, Start, Wait, SetupP2P, Ready, Cancel, Reconnect
         }
         internal void Clear(){
             DisableStart = null;
@@ -135,7 +134,7 @@ namespace SynicSugar.MatchMake {
                         SetText(WaitForOpponents);
                     }
                 break;
-                case State.Conclude:
+                case State.SetupP2P:
                     DisableCancelKickConclude?.Invoke();
                     canKick = false;
                     if(stateText != null){

@@ -74,7 +74,7 @@ namespace SynicSugar.P2P {
             if(recordPacketInfo){
                 p2pInfo.Instance.lastRpcInfo.ch = ch;
                 p2pInfo.Instance.lastRpcInfo.payload = value;
-                p2pInfo.Instance.lastRpcInfo.isLargePacket = true;
+                p2pInfo.Instance.lastRpcInfo.isLargePacket = false;
                 // Current byte[] value is serialize just before call RPC, so we don't need to create new byte[] for this process.
                 // No one can't use this "value" from elsewhere.
                 // For readability and extensibility, we should create new array.

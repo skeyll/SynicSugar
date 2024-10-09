@@ -30,103 +30,103 @@ namespace SynicSugarGenerator {
                     " Cysharp.Threading.Tasks;\nusing Epic.OnlineServices;\nusing SynicSugar.RTC;\nnames" +
                     "pace SynicSugar.P2P {\n    internal sealed class ConnectHub : IPacketConvert {\n  " +
                     "      //Singleton\n        private static Lazy<ConnectHub> instance = new Lazy<Co" +
-                    "nnectHub>();\n        public static ConnectHub Instance => instance.Value;\n\n     " +
-                    "   public ConnectHub(){\n            syncTokenSource = new CancellationTokenSourc" +
-                    "e();\n        }\n        INetworkCore _networkCore;\n        INetworkCore NetworkCo" +
-                    "re { \n            get { \n                if(_networkCore == null){\n             " +
-                    "       _networkCore = p2pConfig.Instance.GetNetworkCore();\n                }\n   " +
-                    "             return _networkCore;\n            }\n        }\n        /// <summary>\n" +
-                    "        /// SyncToken is managed with the connection\'s valid state.\n        /// " +
-                    "</summary>\n        CancellationTokenSource syncTokenSource;\n\n        public Canc" +
-                    "ellationToken GetSyncToken(){\n            return syncTokenSource.Token;\n        " +
-                    "}\n        //Start\n        /// <summary>\n        /// Start the packet receiver. C" +
-                    "all after creating the Network Instance required for reception.<br />\n        //" +
-                    "/ This cannot be called with other Receiver same time. If start the other Receiv" +
-                    "er, ConenctHub stop this Receiver automatically before start the new one.\n      " +
-                    "  /// </summary>\n        /// <param name=\"receiveTiming\">The timing that packet " +
-                    "receiver gets packet from buffer.</param>\n        /// <param name=\"maxBatchSize\"" +
-                    ">How many times during 1 FPS are received</param>\n        public Result StartPac" +
-                    "ketReceiver(PacketReceiveTiming receiveTiming = PacketReceiveTiming.Update, uint" +
-                    " maxBatchSize = 1){\n        #if SYNICSUGAR_PACKETINFO\n            string chs = s" +
-                    "tring.Empty;\n            string[] chList = Enum.GetNames(typeof(ConnectHub.CHANN" +
-                    "ELLIST));\n            foreach(var l in chList){\n                chs += l.ToStrin" +
-                    "g() + \", \";\n            }\n            Debug.Log($\"ch info: amount {chList.Length" +
-                    "} / {chs}\");\n        #endif\n            return NetworkCore.StartPacketReceiver(t" +
-                    "his, receiveTiming, maxBatchSize);\n        }\n        \n        /// <summary>\n    " +
-                    "    /// To get only SynicPacket in burst FPS. Call after creating the Network In" +
-                    "stance required for reception.<br />\n        /// This cannot be called with othe" +
-                    "r Receiver same time. If start the other Receiver, ConenctHub stop this Receiver" +
-                    " automatically before start the new one.\n        /// </summary>\n        /// <par" +
-                    "am name=\"maxBatchSize\">How many times during 1 FPS are received</param>\n        " +
-                    "public Result StartSynicReceiver(uint maxBatchSize = 1){\n            return Netw" +
-                    "orkCore.StartSynicReceiver(this, maxBatchSize);\n        }\n        //Pause receiv" +
-                    "er\n        /// <summary>\n        /// Pause getting a packet from the buffer. To " +
-                    "re-start, call StartPacketReceiver().<br />\n        /// *Packet receiving to the" +
-                    " buffer is continue. If the packet is over the buffer, subsequent packets are di" +
-                    "scarded.\n        /// </summary>\n        [Obsolete(\"This is old. StopPacketReceiv" +
-                    "er is new one.\")] \n        public Result PausePacketReceiver(){\n            retu" +
-                    "rn NetworkCore.StopPacketReceiver();\n        }\n        //Stop receiver\n        /" +
-                    "// <summary>\n        /// Stop getting a packet from the buffer. To re-start, cal" +
-                    "l StartPacketReceiver().<br />\n        /// *Packet receiving to the buffer is co" +
-                    "ntinue. If the packet is over the buffer, subsequent packets are discarded.\n    " +
-                    "    /// </summary>\n        public Result StopPacketReceiver(){\n            retur" +
-                    "n NetworkCore.StopPacketReceiver();\n        }\n\n        //Pause Reciving buffer\n " +
-                    "       /// <summary>\n        /// Pause receiving a packet to the receive buffer." +
-                    " To re-start, call RestartConnections(). <br />\n        /// After call this, pac" +
-                    "kets will have been discarded until connection will re-open.\n        /// </summa" +
-                    "ry>\n        /// <param name=\"isForced\">If True, force to stop and clear current " +
-                    "packet queue. <br />\n        /// If false, process current queue, then stop it.<" +
-                    "/param>\n        public async UniTask<Result> PauseConnections(bool isForced = fa" +
-                    "lse, CancellationToken cancelToken = default(CancellationToken)){\n            sy" +
-                    "ncTokenSource.Cancel();\n            return await NetworkCore.PauseConnections(is" +
-                    "Forced, cancelToken);\n        }\n        /// <summary>\n        /// Prepare to rec" +
-                    "eive packets in advance. If user sent a packet, it can also open connection to g" +
-                    "et packets without this.\n        /// </summary>\n        public Result RestartCon" +
-                    "nections(){\n            NetworkCore.RestartConnections();\n            syncTokenS" +
-                    "ource = new CancellationTokenSource();\n            return StartPacketReceiver();" +
-                    "\n        }\n        \n        /// <summary>\n        /// Stop receiver, close all c" +
-                    "onnections and remove the notify events.\n        /// Then, the user leave the lo" +
-                    "bby.<br />\n        /// The last user closes the lobby in Backend.\n        /// <p" +
-                    "aram name=\"destroyManager\">Destroy NetworkManager after exit lobby.</param>\n    " +
-                    "    /// <param name=\"cleanupMemberCountChanged\">Need to call MatchMakeManager.In" +
-                    "stance.MatchMakingGUIEvents.LobbyMemberCountChanged(id, false) after exit lobby?" +
-                    "</param>\n        /// <param name=\"cancelToken\">Cancel token for this task</param" +
-                    ">\n        /// </summary>\n        public async UniTask<Result> ExitSession(bool d" +
-                    "estroyManager = true, bool cleanupMemberCountChanged = false, CancellationToken " +
-                    "cancelToken = default(CancellationToken)){\n            Result result = await Net" +
-                    "workCore.ExitSession(destroyManager, cleanupMemberCountChanged, cancelToken);\n  " +
-                    "          \n            if(result == Result.Success){\n                syncTokenSo" +
-                    "urce.Cancel();\n                ClearReferenceDictionaries();\n            }\n     " +
-                    "       return result;\n        }\n        /// <summary>\n        /// Stop receiver," +
-                    " close all connections and remove the notify events.\n        /// Then, Host clos" +
-                    "es and Guest leaves the Lobby.<br />\n        /// When Host closes Lobby, Guests " +
-                    "are automatically kicked out from the Lobby.\n        /// <param name=\"destroyMan" +
-                    "ager\">Destroy NetworkManager after exit lobby.</param>\n        /// <param name=\"" +
-                    "cleanupMemberCountChanged\">Need to call MatchMakeManager.Instance.MatchMakingGUI" +
-                    "Events.LobbyMemberCountChanged(id, false) after exit lobby?</param>\n        /// " +
-                    "<param name=\"cancelToken\">Cancel token for this task</param>\n        /// </summa" +
-                    "ry>\n        public async UniTask<Result> CloseSession(bool destroyManager = true" +
-                    ", bool cleanupMemberCountChanged = false, CancellationToken cancelToken = defaul" +
-                    "t(CancellationToken)){\n            Result result = await NetworkCore.CloseSessio" +
-                    "n(destroyManager, cleanupMemberCountChanged, cancelToken);\n\n            if(resul" +
-                    "t == Result.Success){\n                syncTokenSource.Cancel();\n                " +
-                    "ClearReferenceDictionaries();\n            }\n            \n            return resu" +
-                    "lt;\n        }\n\n        /// <summary>\n        /// Stop receiver, close all connec" +
-                    "tions and remove the notify events.\n        /// Then, Host closes and Guest leav" +
-                    "es the Lobby.<br />\n        /// When Host closes Lobby, Guests are automatically" +
-                    " kicked out from the Lobby.\n        /// <param name=\"destroyManager\">Destroy Net" +
-                    "workManager after exit lobby.</param>\n        /// <param name=\"cleanupMemberCoun" +
-                    "tChanged\">Need to call MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMembe" +
-                    "rCountChanged(id, false) after exit lobby?</param>\n        /// <param name=\"canc" +
-                    "elToken\">Cancel token for this task</param>\n        /// </summary>\n        publi" +
-                    "c async UniTask<Result> DestoryOfflineLobby(bool destroyManager = true, bool cle" +
-                    "anupMemberCountChanged = false, CancellationToken cancelToken = default(Cancella" +
-                    "tionToken)){\n            Result result = await NetworkCore.DestoryOfflineLobby(d" +
-                    "estroyManager, cleanupMemberCountChanged, cancelToken);\n\n            if(result =" +
-                    "= Result.Success){\n                syncTokenSource.Cancel();\n                Cle" +
-                    "arReferenceDictionaries();\n            }\n            \n            return result;" +
-                    "\n        }\n\n        //(for elements)\n        public enum CHANNELLIST{\n          " +
-                    "  ");
+                    "nnectHub>(() => new ConnectHub());\n        public static ConnectHub Instance => " +
+                    "instance.Value;\n\n        private ConnectHub(){\n            syncTokenSource = new" +
+                    " CancellationTokenSource();\n        }\n        INetworkCore _networkCore;\n       " +
+                    " INetworkCore NetworkCore { \n            get { \n                if(_networkCore " +
+                    "== null){\n                    _networkCore = p2pConfig.Instance.GetNetworkCore()" +
+                    ";\n                }\n                return _networkCore;\n            }\n        }" +
+                    "\n        /// <summary>\n        /// SyncToken is managed with the connection\'s va" +
+                    "lid state.\n        /// </summary>\n        CancellationTokenSource syncTokenSourc" +
+                    "e;\n\n        public CancellationToken GetSyncToken(){\n            return syncToke" +
+                    "nSource.Token;\n        }\n        //Start\n        /// <summary>\n        /// Start" +
+                    " the packet receiver. Call after creating the Network Instance required for rece" +
+                    "ption.<br />\n        /// This cannot be called with other Receiver same time. If" +
+                    " start the other Receiver, ConenctHub stop this Receiver automatically before st" +
+                    "art the new one.\n        /// </summary>\n        /// <param name=\"receiveTiming\">" +
+                    "The timing that packet receiver gets packet from buffer.</param>\n        /// <pa" +
+                    "ram name=\"maxBatchSize\">How many times during 1 FPS are received</param>\n       " +
+                    " public Result StartPacketReceiver(PacketReceiveTiming receiveTiming = PacketRec" +
+                    "eiveTiming.Update, uint maxBatchSize = 1){\n        #if SYNICSUGAR_PACKETINFO\n   " +
+                    "         string chs = string.Empty;\n            string[] chList = Enum.GetNames(" +
+                    "typeof(ConnectHub.CHANNELLIST));\n            foreach(var l in chList){\n         " +
+                    "       chs += l.ToString() + \", \";\n            }\n            Debug.Log($\"ch info" +
+                    ": amount {chList.Length} / {chs}\");\n        #endif\n            return NetworkCor" +
+                    "e.StartPacketReceiver(this, receiveTiming, maxBatchSize);\n        }\n        \n   " +
+                    "     /// <summary>\n        /// To get only SynicPacket in burst FPS. Call after " +
+                    "creating the Network Instance required for reception.<br />\n        /// This can" +
+                    "not be called with other Receiver same time. If start the other Receiver, Conenc" +
+                    "tHub stop this Receiver automatically before start the new one.\n        /// </su" +
+                    "mmary>\n        /// <param name=\"maxBatchSize\">How many times during 1 FPS are re" +
+                    "ceived</param>\n        public Result StartSynicReceiver(uint maxBatchSize = 1){\n" +
+                    "            return NetworkCore.StartSynicReceiver(this, maxBatchSize);\n        }" +
+                    "\n        //Pause receiver\n        /// <summary>\n        /// Pause getting a pack" +
+                    "et from the buffer. To re-start, call StartPacketReceiver().<br />\n        /// *" +
+                    "Packet receiving to the buffer is continue. If the packet is over the buffer, su" +
+                    "bsequent packets are discarded.\n        /// </summary>\n        [Obsolete(\"This i" +
+                    "s old. StopPacketReceiver is new one.\")] \n        public Result PausePacketRecei" +
+                    "ver(){\n            return NetworkCore.StopPacketReceiver();\n        }\n        //" +
+                    "Stop receiver\n        /// <summary>\n        /// Stop getting a packet from the b" +
+                    "uffer. To re-start, call StartPacketReceiver().<br />\n        /// *Packet receiv" +
+                    "ing to the buffer is continue. If the packet is over the buffer, subsequent pack" +
+                    "ets are discarded.\n        /// </summary>\n        public Result StopPacketReceiv" +
+                    "er(){\n            return NetworkCore.StopPacketReceiver();\n        }\n\n        //" +
+                    "Pause Reciving buffer\n        /// <summary>\n        /// Pause receiving a packet" +
+                    " to the receive buffer. To re-start, call RestartConnections(). <br />\n        /" +
+                    "// After call this, packets will have been discarded until connection will re-op" +
+                    "en.\n        /// </summary>\n        /// <param name=\"isForced\">If True, force to " +
+                    "stop and clear current packet queue. <br />\n        /// If false, process curren" +
+                    "t queue, then stop it.</param>\n        public async UniTask<Result> PauseConnect" +
+                    "ions(bool isForced = false, CancellationToken cancelToken = default(Cancellation" +
+                    "Token)){\n            syncTokenSource.Cancel();\n            return await NetworkC" +
+                    "ore.PauseConnections(isForced, cancelToken);\n        }\n        /// <summary>\n   " +
+                    "     /// Prepare to receive packets in advance. If user sent a packet, it can al" +
+                    "so open connection to get packets without this.\n        /// </summary>\n        p" +
+                    "ublic Result RestartConnections(){\n            NetworkCore.RestartConnections();" +
+                    "\n            syncTokenSource = new CancellationTokenSource();\n            return" +
+                    " StartPacketReceiver();\n        }\n        \n        /// <summary>\n        /// Sto" +
+                    "p receiver, close all connections and remove the notify events.\n        /// Then" +
+                    ", the user leave the lobby.<br />\n        /// The last user closes the lobby in " +
+                    "Backend.\n        /// <param name=\"destroyManager\">Destroy NetworkManager after e" +
+                    "xit lobby.</param>\n        /// <param name=\"cleanupMemberCountChanged\">Need to c" +
+                    "all MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(id, f" +
+                    "alse) after exit lobby?</param>\n        /// <param name=\"cancelToken\">Cancel tok" +
+                    "en for this task</param>\n        /// </summary>\n        public async UniTask<Res" +
+                    "ult> ExitSession(bool destroyManager = true, bool cleanupMemberCountChanged = fa" +
+                    "lse, CancellationToken cancelToken = default(CancellationToken)){\n            Re" +
+                    "sult result = await NetworkCore.ExitSession(destroyManager, cleanupMemberCountCh" +
+                    "anged, cancelToken);\n            \n            if(result == Result.Success){\n    " +
+                    "            syncTokenSource.Cancel();\n                ClearReferenceDictionaries" +
+                    "();\n            }\n            return result;\n        }\n        /// <summary>\n   " +
+                    "     /// Stop receiver, close all connections and remove the notify events.\n    " +
+                    "    /// Then, Host closes and Guest leaves the Lobby.<br />\n        /// When Hos" +
+                    "t closes Lobby, Guests are automatically kicked out from the Lobby.\n        /// " +
+                    "<param name=\"destroyManager\">Destroy NetworkManager after exit lobby.</param>\n  " +
+                    "      /// <param name=\"cleanupMemberCountChanged\">Need to call MatchMakeManager." +
+                    "Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(id, false) after exit lobb" +
+                    "y?</param>\n        /// <param name=\"cancelToken\">Cancel token for this task</par" +
+                    "am>\n        /// </summary>\n        public async UniTask<Result> CloseSession(boo" +
+                    "l destroyManager = true, bool cleanupMemberCountChanged = false, CancellationTok" +
+                    "en cancelToken = default(CancellationToken)){\n            Result result = await " +
+                    "NetworkCore.CloseSession(destroyManager, cleanupMemberCountChanged, cancelToken)" +
+                    ";\n\n            if(result == Result.Success){\n                syncTokenSource.Can" +
+                    "cel();\n                ClearReferenceDictionaries();\n            }\n            \n" +
+                    "            return result;\n        }\n\n        /// <summary>\n        /// Stop rec" +
+                    "eiver, close all connections and remove the notify events.\n        /// Then, Hos" +
+                    "t closes and Guest leaves the Lobby.<br />\n        /// When Host closes Lobby, G" +
+                    "uests are automatically kicked out from the Lobby.\n        /// <param name=\"dest" +
+                    "royManager\">Destroy NetworkManager after exit lobby.</param>\n        /// <param " +
+                    "name=\"cleanupMemberCountChanged\">Need to call MatchMakeManager.Instance.MatchMak" +
+                    "ingGUIEvents.LobbyMemberCountChanged(id, false) after exit lobby?</param>\n      " +
+                    "  /// <param name=\"cancelToken\">Cancel token for this task</param>\n        /// <" +
+                    "/summary>\n        public async UniTask<Result> DestoryOfflineLobby(bool destroyM" +
+                    "anager = true, bool cleanupMemberCountChanged = false, CancellationToken cancelT" +
+                    "oken = default(CancellationToken)){\n            Result result = await NetworkCor" +
+                    "e.DestoryOfflineLobby(destroyManager, cleanupMemberCountChanged, cancelToken);\n\n" +
+                    "            if(result == Result.Success){\n                syncTokenSource.Cancel" +
+                    "();\n                ClearReferenceDictionaries();\n            }\n            \n   " +
+                    "         return result;\n        }\n\n        //(for elements)\n        public enum " +
+                    "CHANNELLIST{\n            ");
             
             #line default
             #line hidden
@@ -173,8 +173,8 @@ namespace SynicSugarGenerator {
             
             #line 185 ""
             this.Write("\n            synicBuffer.Clear();\n            synicPacketInfo.Clear();\n          " +
-                    "  largeBuffer.Clear();\n            largePacketInfo.Clear();  \n        }\n\n       " +
-                    " //Register(for class)");
+                    "  largeBuffer.Clear();\n            largePacketInfo.Clear();\n        }\n\n        /" +
+                    "/Register(for class)");
             
             #line default
             #line hidden
@@ -225,73 +225,82 @@ namespace SynicSugarGenerator {
             #line hidden
             
             #line 207 ""
-            this.Write("\n            return default(T);\n        }\n\n        //SendPacket(for elements)\n   " +
-                    "     public void ConvertFromPacket(ref byte ch, string id, ref ArraySegment<byte" +
-                    "> payload){\n            switch((CHANNELLIST)ch){");
+            this.Write(@"
+            return default(T);
+        }
+
+        /// <summary>
+        /// Remote RPC is invoked with received value.
+        /// </summary>
+        void IPacketConvert.ConvertFromPacket(ref byte ch, string id, ref ArraySegment<byte> payload){
+            switch((CHANNELLIST)ch){");
             
             #line default
             #line hidden
             
-            #line 213 ""
+            #line 215 ""
             this.Write(this.ToStringHelper.ToStringWithCulture( PacketConvert ));
             
             #line default
             #line hidden
             
-            #line 213 ""
+            #line 215 ""
             this.Write("\n                case CHANNELLIST.ObtainPing:\n                    EOSp2p.SendPack" +
                     "et((byte)CHANNELLIST.ReturnPong, payload, UserId.GetUserId(id));\n               " +
                     " return;\n                case CHANNELLIST.ReturnPong:\n                    Networ" +
                     "kCore.GetPong(id, payload);\n                return;\n                case CHANNEL" +
-                    "LIST.Synic:\n                    bool restoredPacket = RestoreSynicPackets(ref ch" +
-                    ", id, ref payload);\n                    if(!restoredPacket){\n    #if SYNICSUGAR_" +
-                    "LOG \n                        Debug.LogFormat(\"ConvertFormPacket: Restore packet " +
-                    "is in progress. for {0}\", id);\n    #endif\n                        return;\n      " +
-                    "              }\n                    \n                    SyncedSynic(id.ToString" +
-                    "());\n\n                    NetworkCore.UpdateSyncedState(id, synicPacketInfo[id]." +
-                    "phase);\n\n                    //Init\n                    synicBuffer.Remove(id.To" +
-                    "String());\n                    synicPacketInfo.Remove(id.ToString());\n\n         " +
-                    "           //Change AcceptHostsSynic flag.\n                    if(p2pInfo.Instan" +
-                    "ce.IsLoaclUser(id)){\n                        NetworkCore.CloseHostSynic();\n     " +
-                    "               }\n                    \n                return;\n            }\n    " +
-                    "    }\n\n        /// <summary>\n        /// Re-Send RPC with last recorded informat" +
-                    "ion.<br />\n        /// To send disconnected peers after some time. SynicSugar re" +
-                    "transmit to connecting-peers.<br />\n        /// To record, pass true to attribut" +
-                    "e.\n        /// </summary>\n        public void ResendLastRPC(){\n            if(p2" +
-                    "pInfo.Instance.LastRPCIsLargePacket){\n                EOSp2p.SendLargePacketsToA" +
-                    "ll(p2pInfo.Instance.LastRPCch, p2pInfo.Instance.LastRPCPayload).Forget();\n      " +
-                    "          return;\n            }\n            EOSp2p.SendPacketToAll(p2pInfo.Insta" +
-                    "nce.LastRPCch, p2pInfo.Instance.LastRPCPayload).Forget();\n        }\n        /// " +
-                    "<summary>\n        /// Re-Send RPC to the specific target with last recorded info" +
-                    "rmation.<br />\n        /// In order to send disconnected peers after the some ti" +
-                    "me. SynicSugar has retransmission to connecting-peers for the reliability.<br />" +
-                    "\n        /// To record, pass true to attribute.\n        /// </summary>\n        /" +
-                    "// <param name=\"target\"></param>\n        public void ResendLastRPCToTarget(UserI" +
-                    "d target){\n            if(p2pInfo.Instance.LastRPCIsLargePacket){\n              " +
-                    "  EOSp2p.SendLargePackets(p2pInfo.Instance.LastRPCch, p2pInfo.Instance.LastRPCPa" +
-                    "yload, target).Forget();\n                return;\n            }\n            EOSp2" +
-                    "p.SendPacket(p2pInfo.Instance.LastRPCch, p2pInfo.Instance.LastRPCPayload, target" +
-                    ");\n        }\n        /// <summary>\n        /// Re-Send TargetRPC with last recor" +
-                    "ded information.<br />\n        /// In order to send disconnected peers after the" +
-                    " some time. SynicSugar has retransmission to connecting-peers for the reliabilit" +
-                    "y.<br />\n        /// To record, pass true to attribute.\n        /// </summary>\n " +
-                    "       public void ResendLastTargetRPC(){\n            if(p2pInfo.Instance.LastTa" +
-                    "rgetRPCIsLargePacket){\n                EOSp2p.SendLargePackets(p2pInfo.Instance." +
-                    "LastTargetRPCch, p2pInfo.Instance.LastTargetRPCPayload, p2pInfo.Instance.LastTar" +
-                    "getRPCUserId).Forget();\n                return;\n            }\n            EOSp2p" +
-                    ".SendPacket(p2pInfo.Instance.LastTargetRPCch, p2pInfo.Instance.LastTargetRPCPayl" +
-                    "oad, p2pInfo.Instance.LastTargetRPCUserId);\n        }\n\n        ");
+                    "LIST.Synic:\n                    string userId = id;\n                    bool res" +
+                    "toredPacket = RestoreSynicPackets(ref ch, ref userId, ref payload);\n            " +
+                    "        if(!restoredPacket){\n    #if SYNICSUGAR_LOG \n                        Deb" +
+                    "ug.LogFormat(\"ConvertFormPacket: Restore packet is in progress for {0} from {1}." +
+                    "\", userId, id);\n    #endif\n                        return;\n                    }" +
+                    "\n                    \n                    OverwrittenSynicWithRemoteData(userId)" +
+                    ";\n\n                    NetworkCore.UpdateSynicStatus(userId, synicPacketInfo[use" +
+                    "rId].phase);\n\n                    //Init\n                    synicBuffer.Remove(" +
+                    "userId);\n                    synicPacketInfo.Remove(userId);\n\n                  " +
+                    "  //Stop overwriting localuser data with host data.\n                    if(p2pIn" +
+                    "fo.Instance.IsLoaclUser(userId)){\n                        NetworkCore.StopOverwr" +
+                    "itingLocalUserData();\n                    }\n                #if SYNICSUGAR_LOG \n" +
+                    "                    Debug.LogFormat(\"ConvertFormPacket: Success overwriting {0}\'" +
+                    "s data by {1}\"!, userId, id);\n                #endif\n                return;\n   " +
+                    "         }\n        }\n\n        /// <summary>\n        /// Re-Send RPC with last re" +
+                    "corded information.<br />\n        /// To send disconnected peers after some time" +
+                    ". SynicSugar retransmit to connecting-peers.<br />\n        /// To record, pass t" +
+                    "rue to attribute.\n        /// </summary>\n        public void ResendLastRPC(){\n  " +
+                    "          if(p2pInfo.Instance.LastRPCIsLargePacket){\n                EOSp2p.Send" +
+                    "LargePacketsToAll(p2pInfo.Instance.LastRPCch, p2pInfo.Instance.LastRPCPayload).F" +
+                    "orget();\n                return;\n            }\n            EOSp2p.SendPacketToAl" +
+                    "l(p2pInfo.Instance.LastRPCch, p2pInfo.Instance.LastRPCPayload).Forget();\n       " +
+                    " }\n        /// <summary>\n        /// Re-Send RPC to the specific target with las" +
+                    "t recorded information.<br />\n        /// In order to send disconnected peers af" +
+                    "ter the some time. SynicSugar has retransmission to connecting-peers for the rel" +
+                    "iability.<br />\n        /// To record, pass true to attribute.\n        /// </sum" +
+                    "mary>\n        /// <param name=\"target\"></param>\n        public void ResendLastRP" +
+                    "CToTarget(UserId target){\n            if(p2pInfo.Instance.LastRPCIsLargePacket){" +
+                    "\n                EOSp2p.SendLargePackets(p2pInfo.Instance.LastRPCch, p2pInfo.Ins" +
+                    "tance.LastRPCPayload, target).Forget();\n                return;\n            }\n  " +
+                    "          EOSp2p.SendPacket(p2pInfo.Instance.LastRPCch, p2pInfo.Instance.LastRPC" +
+                    "Payload, target);\n        }\n        /// <summary>\n        /// Re-Send TargetRPC " +
+                    "with last recorded information.<br />\n        /// In order to send disconnected " +
+                    "peers after the some time. SynicSugar has retransmission to connecting-peers for" +
+                    " the reliability.<br />\n        /// To record, pass true to attribute.\n        /" +
+                    "// </summary>\n        public void ResendLastTargetRPC(){\n            if(p2pInfo." +
+                    "Instance.LastTargetRPCIsLargePacket){\n                EOSp2p.SendLargePackets(p2" +
+                    "pInfo.Instance.LastTargetRPCch, p2pInfo.Instance.LastTargetRPCPayload, p2pInfo.I" +
+                    "nstance.LastTargetRPCUserId).Forget();\n                return;\n            }\n   " +
+                    "         EOSp2p.SendPacket(p2pInfo.Instance.LastTargetRPCch, p2pInfo.Instance.La" +
+                    "stTargetRPCPayload, p2pInfo.Instance.LastTargetRPCUserId);\n        }\n\n        ");
             
             #line default
             #line hidden
             
-            #line 284 ""
+            #line 289 ""
  if (needSyncSynic) { 
             
             #line default
             #line hidden
             
-            #line 285 ""
+            #line 290 ""
             this.Write("        \n        /// <summary>\n        /// Sync all Synic variables. This is very" +
                     " heavy because it handles multiple data and repeats compression and serializatio" +
                     "n.\n        /// </summary>\n        /// <param name=\"targetId\">Target to be synced" +
@@ -303,53 +312,53 @@ namespace SynicSugarGenerator {
                     ", send only variables in syncedPhase.</param>\n        public async void SyncSyni" +
                     "c(UserId targetId, SynicType type, byte syncedPhase = 9, bool syncSinglePhase = " +
                     "false){\n            //Sync local data to target local\n            SynicContainer" +
-                    " synicContainer = GenerateSynicContainer(p2pInfo.Instance.LocalUserId, syncedPha" +
-                    "se, syncSinglePhase);\n\n            using var selfCompressor  = new BrotliCompres" +
-                    "sor();\n            MemoryPackSerializer.Serialize(selfCompressor, synicContainer" +
-                    ");\n\n            EOSp2p.SendSynicPackets((byte)CHANNELLIST.Synic, selfCompressor." +
-                    "ToArray(), targetId, p2pInfo.Instance.LocalUserId, syncedPhase, syncSinglePhase)" +
-                    ";\n\n            if(type == SynicType.OnlySelf || !p2pInfo.Instance.IsHost()){\n   " +
-                    "             return;\n            }\n            if(type == SynicType.WithOthers){" +
-                    "\n                foreach(var id in p2pInfo.Instance.DisconnectedUserIds){\n      " +
-                    "              synicContainer = GenerateSynicContainer(id, syncedPhase, syncSingl" +
-                    "ePhase);\n\n                    using var targetCompressor  = new BrotliCompressor" +
-                    "();\n                    MemoryPackSerializer.Serialize(targetCompressor, synicCo" +
-                    "ntainer);\n\n                    EOSp2p.SendSynicPackets((byte)CHANNELLIST.Synic, " +
-                    "targetCompressor.ToArray(), targetId, id, syncedPhase, syncSinglePhase);\n       " +
-                    "             \n                    await UniTask.Yield();\n                }\n     " +
-                    "       }\n            \n            //Sync target data in local to target local\n  " +
-                    "          synicContainer = GenerateSynicContainer(targetId, syncedPhase, syncSin" +
-                    "glePhase);\n\n            using var reconnecterCompressor  = new BrotliCompressor(" +
-                    ");\n            MemoryPackSerializer.Serialize(reconnecterCompressor, synicContai" +
-                    "ner);\n\n            EOSp2p.SendSynicPackets((byte)CHANNELLIST.Synic, reconnecterC" +
-                    "ompressor.ToArray(), targetId, targetId, syncedPhase, syncSinglePhase);\n        " +
-                    "}\n        \n        SynicContainer GenerateSynicContainer(UserId id, byte syncedP" +
-                    "hase, bool syncSinglePhase){\n            SynicContainer synicContainer = new Syn" +
-                    "icContainer();\n            switch(syncedPhase){");
+                    " synicContainer = GenerateSynicContainer(p2pInfo.Instance.LocalUserId.ToString()" +
+                    ", syncedPhase, syncSinglePhase);\n\n            using var selfCompressor  = new Br" +
+                    "otliCompressor();\n            MemoryPackSerializer.Serialize(selfCompressor, syn" +
+                    "icContainer);\n\n            EOSp2p.SendSynicPackets((byte)CHANNELLIST.Synic, self" +
+                    "Compressor.ToArray(), targetId, p2pInfo.Instance.LocalUserId, syncedPhase, syncS" +
+                    "inglePhase);\n\n            if(type == SynicType.OnlySelf || !p2pInfo.Instance.IsH" +
+                    "ost()){\n                return;\n            }\n            \n            if(type =" +
+                    "= SynicType.WithOthers){\n                foreach(var id in p2pInfo.Instance.Disc" +
+                    "onnectedUserIds){\n                    synicContainer = GenerateSynicContainer(id" +
+                    ".ToString(), syncedPhase, syncSinglePhase);\n\n                    using var targe" +
+                    "tCompressor  = new BrotliCompressor();\n                    MemoryPackSerializer." +
+                    "Serialize(targetCompressor, synicContainer);\n\n                    EOSp2p.SendSyn" +
+                    "icPackets((byte)CHANNELLIST.Synic, targetCompressor.ToArray(), targetId, id, syn" +
+                    "cedPhase, syncSinglePhase);\n                    await UniTask.Yield();\n         " +
+                    "       }\n            }\n            \n            //Sync target data in local to t" +
+                    "arget local\n            synicContainer = GenerateSynicContainer(targetId.ToStrin" +
+                    "g(), syncedPhase, syncSinglePhase);\n\n            using var reconnecterCompressor" +
+                    "  = new BrotliCompressor();\n            MemoryPackSerializer.Serialize(reconnect" +
+                    "erCompressor, synicContainer);\n\n            EOSp2p.SendSynicPackets((byte)CHANNE" +
+                    "LLIST.Synic, reconnecterCompressor.ToArray(), targetId, targetId, syncedPhase, s" +
+                    "yncSinglePhase);\n        }\n        \n        SynicContainer GenerateSynicContaine" +
+                    "r(string id, byte syncedPhase, bool syncSinglePhase){\n            SynicContainer" +
+                    " synicContainer = new SynicContainer();\n            switch(syncedPhase){");
             
             #line default
             #line hidden
             
-            #line 329 ""
+            #line 334 ""
             this.Write(this.ToStringHelper.ToStringWithCulture( GenerateSynicContainer ));
             
             #line default
             #line hidden
             
-            #line 329 ""
+            #line 334 ""
             this.Write("\n                default:\n                goto case 9;\n            }\n            " +
                     "return synicContainer;\n        }\n        ");
             
             #line default
             #line hidden
             
-            #line 335 ""
+            #line 340 ""
  } 
             
             #line default
             #line hidden
             
-            #line 336 ""
+            #line 341 ""
             this.Write("        \n        //Synced 0 = index, 1 = additional packet amount\n        bool Re" +
                     "storeLargePackets(ref byte ch, string id, ref ArraySegment<byte> payload){\n     " +
                     "       //Prep\n            if(!largeBuffer.ContainsKey(id)){\n                larg" +
@@ -372,70 +381,69 @@ namespace SynicSugarGenerator {
                     " == 0 || largePacketInfo[id][ch].currentSize + EOSp2p.MAX_LARGEPACKET_PAYLOADSIZ" +
                     "E > largeBuffer[id][ch].Length ? true : false;\n        }\n\n        // 0-packet in" +
                     "dex, 1-additional packet amount, 2-complex data[1bit-isOnly, 4bits-phase, 3bits " +
-                    "userType], 3-data\'s user index\n        bool RestoreSynicPackets(ref byte ch, str" +
-                    "ing id, ref ArraySegment<byte> payload){\n            //Set target id\n           " +
-                    " int userDataType = (int)(payload[2] & 0x07);\n            if(userDataType == 0){" +
-                    "\n                if(p2pInfo.Instance.IsHost(id) && p2pInfo.Instance.IsReconnecte" +
-                    "r){\n                    id = p2pInfo.Instance.LocalUserId.ToString();\n          " +
-                    "      }else{\n                    return false;\n                }\n            }el" +
-                    "se if(userDataType == 2){\n                if(p2pInfo.Instance.IsHost(id) && p2pI" +
-                    "nfo.Instance.IsReconnecter){\n                    id = p2pInfo.Instance.AllUserId" +
-                    "s[payload[3]].ToString();\n                }else{\n                    return fals" +
-                    "e;\n                }\n            }\n\n            if(!synicBuffer.ContainsKey(id))" +
-                    "{\n                synicPacketInfo.Add(id, new SynicPacketInfomation(){  basis = " +
-                    "new (){ additionalPacketsAmount = payload[1]}, \n                                " +
-                    "                                            phase = (byte)((payload[2] >> 3) & 0" +
-                    "x0F), \n                                                                         " +
-                    "   isSinglePhase = (payload[2] & 0x80) != 0 });\n                //Prep enough by" +
-                    "te[]\n                synicBuffer.Add(id, new byte[(payload[1] + 1) * EOSp2p.MAX_" +
-                    "LARGEPACKET_PAYLOADSIZE]);\n            }\n            int packetIndex = payload[0" +
-                    "];\n            int offset = packetIndex * EOSp2p.MAX_LARGEPACKET_PAYLOADSIZE;\n\n " +
-                    "   #if SYNICSUGAR_PACKETINFO\n            Debug.Log($\"RestoreSynicPacket(Synic): " +
-                    "ch {ch}({(CHANNELLIST)ch}) / Data\'s userID {id} / packet index {payload[0]}/{pay" +
-                    "load[1]}\");\n    #endif\n            //Remove header\n            Span<byte> packet" +
-                    "Payload = payload.Slice(4);\n            synicPacketInfo[id].basis.currentSize +=" +
-                    " packetPayload.Length;\n            //Copy Byte from what come in\n            Buf" +
-                    "fer.BlockCopy(packetPayload.ToArray(), 0, synicBuffer[id], offset, packetPayload" +
-                    ".Length);\n            //Comming all?\n            //We don\'t know real packet siz" +
-                    "e. So we need + 1166.\n            //This first conditon for empty packet.\n      " +
-                    "      return synicPacketInfo[id].basis.additionalPacketsAmount == 0 || synicPack" +
-                    "etInfo[id].basis.currentSize + EOSp2p.MAX_LARGEPACKET_PAYLOADSIZE > synicBuffer[" +
-                    "id].Length ? true : false;\n        }\n\n        /// <summary>\n        /// Call fro" +
-                    "m ConvertFormPacket.\n        /// </summary>\n        void SyncedSynic(string over" +
-                    "writerUserId){\n            //Deserialize packet\n            using var decompress" +
-                    "or = new BrotliDecompressor();\n            Span<byte> transmittedPaylaod = new S" +
-                    "pan<byte>(synicBuffer[overwriterUserId]);\n\n            var decompressedBuffer = " +
-                    "decompressor.Decompress(transmittedPaylaod.Slice(0, synicPacketInfo[overwriterUs" +
-                    "erId].basis.currentSize));\n            SynicContainer container = MemoryPackSeri" +
-                    "alizer.Deserialize<SynicContainer>(decompressedBuffer);\n#if SYNICSUGAR_LOG\n     " +
-                    "       Debug.Log($\"SyncedSynic: Deserialize is Success for {overwriterUserId}\");" +
-                    "\n    #endif\n\n            //Packet data\n            int phase = synicPacketInfo[o" +
-                    "verwriterUserId].phase;\n            bool syncSinglePhase = synicPacketInfo[overw" +
-                    "riterUserId].isSinglePhase;\n\n            switch(phase){");
+                    "userType], 3-data\'s user index\n        bool RestoreSynicPackets(ref byte ch, ref" +
+                    " string id, ref ArraySegment<byte> payload){\n            //Set target id\n       " +
+                    "     int userDataType = (int)(payload[2] & 0x07);\n            if(userDataType ==" +
+                    " 0){\n                if(p2pInfo.Instance.IsHost(id) && p2pInfo.Instance.IsReconn" +
+                    "ecter){\n                    id = p2pInfo.Instance.LocalUserId.ToString();\n      " +
+                    "          }else{\n                    return false;\n                }\n           " +
+                    " }else if(userDataType == 2){\n                if(p2pInfo.Instance.IsHost(id) && " +
+                    "p2pInfo.Instance.IsReconnecter){\n                    id = p2pInfo.Instance.AllUs" +
+                    "erIds[payload[3]].ToString();\n                }else{\n                    return " +
+                    "false;\n                }\n            }\n\n            if(!synicBuffer.ContainsKey(" +
+                    "id)){\n                synicPacketInfo.Add(id, new SynicPacketInfomation(){  basi" +
+                    "s = new (){ additionalPacketsAmount = payload[1]}, \n                            " +
+                    "                                                phase = (byte)((payload[2] >> 3)" +
+                    " & 0x0F), \n                                                                     " +
+                    "       isSinglePhase = (payload[2] & 0x80) != 0 });\n                //Prep enoug" +
+                    "h byte[]\n                synicBuffer.Add(id, new byte[(payload[1] + 1) * EOSp2p." +
+                    "MAX_LARGEPACKET_PAYLOADSIZE]);\n            }\n            int packetIndex = paylo" +
+                    "ad[0];\n            int offset = packetIndex * EOSp2p.MAX_LARGEPACKET_PAYLOADSIZE" +
+                    ";\n\n    #if SYNICSUGAR_PACKETINFO\n            Debug.Log($\"RestoreSynicPacket(Syni" +
+                    "c): ch {ch}({(CHANNELLIST)ch}) / Data\'s userID {id} / packet index {payload[0]}/" +
+                    "{payload[1]}\");\n    #endif\n            //Remove header\n            Span<byte> pa" +
+                    "cketPayload = payload.Slice(4);\n            synicPacketInfo[id].basis.currentSiz" +
+                    "e += packetPayload.Length;\n            //Copy Byte from what come in\n           " +
+                    " Buffer.BlockCopy(packetPayload.ToArray(), 0, synicBuffer[id], offset, packetPay" +
+                    "load.Length);\n            //Comming all?\n            //We don\'t know real packet" +
+                    " size. So we need + 1166.\n            //This first conditon for empty packet.\n  " +
+                    "          return synicPacketInfo[id].basis.additionalPacketsAmount == 0 || synic" +
+                    "PacketInfo[id].basis.currentSize + EOSp2p.MAX_LARGEPACKET_PAYLOADSIZE > synicBuf" +
+                    "fer[id].Length ? true : false;\n        }\n\n        /// <summary>\n        /// Call" +
+                    " from ConvertFormPacket.\n        /// </summary>\n        void OverwrittenSynicWit" +
+                    "hRemoteData(string overwriterUserId){\n            //Deserialize packet\n         " +
+                    "   using var decompressor = new BrotliDecompressor();\n            Span<byte> tra" +
+                    "nsmittedPaylaod = new Span<byte>(synicBuffer[overwriterUserId]);\n\n            va" +
+                    "r decompressedBuffer = decompressor.Decompress(transmittedPaylaod.Slice(0, synic" +
+                    "PacketInfo[overwriterUserId].basis.currentSize));\n            SynicContainer con" +
+                    "tainer = MemoryPackSerializer.Deserialize<SynicContainer>(decompressedBuffer);\n\n" +
+                    "            //Packet data\n            int phase = synicPacketInfo[overwriterUser" +
+                    "Id].phase;\n            bool syncSinglePhase = synicPacketInfo[overwriterUserId]." +
+                    "isSinglePhase;\n\n            switch(phase){");
             
             #line default
             #line hidden
             
-            #line 428 ""
+            #line 430 ""
             this.Write(this.ToStringHelper.ToStringWithCulture( SyncedInvoker ));
             
             #line default
             #line hidden
             
-            #line 428 ""
+            #line 430 ""
             this.Write("\n                default:\n                goto case 9;\n            }\n        }\n  " +
                     "      ");
             
             #line default
             #line hidden
             
-            #line 433 ""
+            #line 435 ""
             this.Write(this.ToStringHelper.ToStringWithCulture( SyncedItems ));
             
             #line default
             #line hidden
             
-            #line 433 ""
+            #line 435 ""
             this.Write("\n    }\n}");
             
             #line default

@@ -7,6 +7,11 @@ namespace SynicSugar {
         static Dictionary<string, UserId> idCache = new();
         internal static void CacheClear(){
             idCache.Clear();
+        #if UNITY_EDITOR
+            if(SynicSugarManger.Instance?.LocalUserId == null){
+                return;
+            }
+        #endif
             //Set LocalUserid to the cache.
             string localUserIdString = SynicSugarManger.Instance.LocalUserId.ToString();
             if(localUserIdString != OFFLINE_USERID){

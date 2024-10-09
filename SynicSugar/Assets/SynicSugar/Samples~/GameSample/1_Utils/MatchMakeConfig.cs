@@ -1,5 +1,4 @@
 using SynicSugar.MatchMake;
-using System.Collections.Generic;
 
 namespace  SynicSugar.Samples {
     public class MatchMakeConfig {

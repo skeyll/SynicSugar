@@ -1,4 +1,3 @@
-using System.Threading;
 using SynicSugar.P2P;
 using UnityEngine;
 using UnityEngine.UI;
@@ -45,7 +44,7 @@ namespace  SynicSugar.Samples {
             //Set UserID to sync
             SetUserId();
             //After the all objects for Sync have been prepared, call StartPacketReceiver() to get packets.
-            ConnectHub.Instance.StartPacketReceiver();
+            ConnectHub.Instance.StartPacketReceiver(PacketReceiveTiming.Update, 3);
         }
         void SetUserId(){
             //We can set UserID in by ourself in or after "Start".

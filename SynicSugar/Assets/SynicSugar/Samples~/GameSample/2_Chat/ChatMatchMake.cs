@@ -2,6 +2,7 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 using SynicSugar.MatchMake;
+using SynicSugar.P2P;
 /// <summary>
 /// Awake: Prep for matchmaking (For basis of Events. This sample dosen't have condition for matchmaking)
 /// Start: Try to reconnect
@@ -13,7 +14,6 @@ namespace SynicSugar.Samples.Chat {
             NoneAndAfterStart, Standby, InMatchmaking, ReadyToStartGame
         }
 
-        [SerializeField] GameObject matchmakePrefab;
         /// <summary>
         /// Display matchmaking state on GUI.
         /// </summary>
@@ -22,14 +22,20 @@ namespace SynicSugar.Samples.Chat {
                         cancelMatchMake, backtoMenu, startGame;
         [SerializeField] Text buttonText;
         [SerializeField] MatchMakeConditions matchConditions;
-    #region Prep for matchmaking
-        //At first, prep GUI events for matchmaking.
         void Awake(){
-            if(MatchMakeManager.Instance == null){
-                Instantiate(matchmakePrefab);
-            }
-            //Prep matchmaking
             SetGUIEvents();
+        }
+    #region Init and Reconnection
+        //Second,　check whether this player is a reconnector.
+        //In fact, you had better check id like this on the Title screen after user Login to EOS.
+        void Start(){
+            //Prep matchmaking
+            // SetGUIEvents();
+            SwitchButtonsActive(MATCHMAKEING_STATE.NoneAndAfterStart);
+            //Try recconect
+            //Sample projects use LobbyID save API of SynicSugar to save into Playerprefs for recconection.
+            string LobbyID = MatchMakeManager.Instance.GetReconnectLobbyID();
+            TryToreconnect(LobbyID).Forget();
         }
         /// <summary>
         /// Register tests and button events for in-matchmaking.
@@ -53,17 +59,6 @@ namespace SynicSugar.Samples.Chat {
         /// </summary>
         void OnEnableCancel(){
             SwitchButtonsActive(MATCHMAKEING_STATE.InMatchmaking);
-        }
-    #endregion
-    #region Reconnection
-        //Second,　check whether this player is a reconnector.
-        //In fact, you had better check id like this on the Title screen after user Login to EOS.
-        void Start(){
-            SwitchButtonsActive(MATCHMAKEING_STATE.NoneAndAfterStart);
-            //Try recconect
-            //Sample projects use LobbyID save API of SynicSugar to save into Playerprefs for recconection.
-            string LobbyID = MatchMakeManager.Instance.GetReconnectLobbyID();
-            TryToreconnect(LobbyID).Forget();
         }
         async UniTask TryToreconnect(string LobbyID){
             //On the default way, return Empty when there is no lobby data in local.
@@ -151,7 +146,7 @@ namespace SynicSugar.Samples.Chat {
         }
         public async UniTask CancelMatchMaking(bool isOfflineMode){
             if(isOfflineMode){
-                await MatchMakeManager.Instance.DestoryOfflineLobby(false);
+                await ConnectHub.Instance.DestoryOfflineLobby(false);
             }else{
                 await MatchMakeManager.Instance.ExitCurrentMatchMake(false);
             }
@@ -164,7 +159,7 @@ namespace SynicSugar.Samples.Chat {
         }
         public async UniTask CanelMatchMakingAndReturnToMenu(bool isOfflineMode){
             if(isOfflineMode){
-                await MatchMakeManager.Instance.DestoryOfflineLobby();
+                await ConnectHub.Instance.DestoryOfflineLobby();
             }else{
                 await MatchMakeManager.Instance.ExitCurrentMatchMake(true);
             }

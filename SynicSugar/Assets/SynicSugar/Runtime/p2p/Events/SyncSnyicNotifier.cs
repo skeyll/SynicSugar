@@ -20,33 +20,38 @@ namespace SynicSugar.P2P {
         internal byte LastSyncedPhase { get; private set; }
         bool _receivedAllSyncSynic;
         List<string> ReceivedUsers = new List<string>();
-        bool isForAll;
+        bool includeDisconnectedData;
         internal bool ReceivedAllSyncSynic(){
             if(_receivedAllSyncSynic){
                 //Init
                 ReceivedUsers.Clear();
                 _receivedAllSyncSynic = false;
-                isForAll = false;
+                includeDisconnectedData = false;
 
                 return true;
             }
             return false;
         }
-        //Access this from public method in p2pAssembleXXX.　We can move this to that for calling cast.
-        internal void UpdateSyncedState(string id, byte phase){
+        /// <summary>
+        /// Manage information about users who have received data and whether or not all of it has been received
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="phase"></param>
+        internal void UpdateSynicStatus(string id, byte phase){
             if (!ReceivedUsers.Contains(id)){
                 ReceivedUsers.Add(id);
                 LastSyncedUserId = UserId.GetUserId(id);
                 LastSyncedPhase = phase;
-                
-                if(!isForAll && !p2pInfo.Instance.CurrentConnectedUserIds.Contains(UserId.GetUserId(id))){
-                    isForAll = true;
+                //If the id of data owner is in disconnecter list, Host has send the data of disconnecter.
+                //So, local user need extend the waiting condition.
+                if(!includeDisconnectedData && p2pInfo.Instance.DisconnectedUserIds.Contains(UserId.GetUserId(id))){
+                    includeDisconnectedData = true;
                 }
             }
 
             OnSyncedSynic?.Invoke();
 
-            if(ReceivedUsers.Count == (isForAll ? p2pInfo.Instance.AllUserIds.Count : p2pInfo.Instance.CurrentConnectedUserIds.Count)){
+            if(ReceivedUsers.Count == (includeDisconnectedData ? p2pInfo.Instance.CurrentAllUserIds.Count : p2pInfo.Instance.CurrentConnectedUserIds.Count)){
                 _receivedAllSyncSynic = true;
             }
         }

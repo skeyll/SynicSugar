@@ -31,7 +31,7 @@ namespace  SynicSugar.Samples {
     
             if(result == Result.Success){
                 modeSelectCanvas.SetActive(true);
-                SynicSugarDebug.Instance.Log("SUCCESS EOS AUTHENTHICATION!.");
+                SynicSugarDebug.Instance.Log("SUCCESS EOS AUTHENTHICATION!. id: " + SynicSugarManger.Instance.LocalUserId.ToString());
                 return;
             }
 

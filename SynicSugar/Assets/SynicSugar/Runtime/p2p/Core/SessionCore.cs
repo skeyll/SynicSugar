@@ -1,4 +1,3 @@
-using Epic.OnlineServices;
 using Epic.OnlineServices.P2P;
 using UnityEngine;
 using System;
@@ -7,7 +6,7 @@ using Cysharp.Threading.Tasks;
 using SynicSugar.P2P;
 using SynicSugar.MatchMake;
 //We can't call the main-Assembly from own-assemblies.
-//So, use such processes through this assembly.
+//So, use such processes through this script.
 namespace SynicSugar.Base {
     public abstract class SessionCore : INetworkCore {
         protected SessionCore(){
@@ -62,10 +61,10 @@ namespace SynicSugar.Base {
             receiverObject.AddComponent<PacketReceiverOnLateUpdate>();
             receiverObject.AddComponent<PacketReceiverForSynic>();
 
-            FixedUpdateReceiver = receiverObject.GetComponent<PacketReceiver>();
-            UpdateReceiver = receiverObject.GetComponent<PacketReceiver>();
-            LateUpdateReceiver = receiverObject.GetComponent<PacketReceiver>();
-            SynicReceiver = receiverObject.GetComponent<PacketReceiver>();
+            FixedUpdateReceiver = receiverObject.GetComponent<PacketReceiverOnFixedUpdate>();
+            UpdateReceiver = receiverObject.GetComponent<PacketReceiverOnUpdate>();
+            LateUpdateReceiver = receiverObject.GetComponent<PacketReceiverOnLateUpdate>();
+            SynicReceiver = receiverObject.GetComponent<PacketReceiverForSynic>();
 
             FixedUpdateReceiver.SetGetPacket(this);
             UpdateReceiver.SetGetPacket(this);
@@ -335,7 +334,7 @@ namespace SynicSugar.Base {
                     SynicReceiver.StopPacketReceiver();
                 break;
             }
-            
+     
             validReceiverType = ReceiverType.None;
             return Result.Success;
         }
@@ -346,12 +345,12 @@ namespace SynicSugar.Base {
         /// To get Packets.
         /// Use this from hub not to call some methods in Main-Assembly from SynicSugar.dll.
         /// </summary>
-        public abstract bool GetPacketFromBuffer(ref byte ch, ref ProductUserId id, ref ArraySegment<byte> payload);
+        public abstract bool GetPacketFromBuffer(ref byte ch, ref UserId id, ref ArraySegment<byte> payload);
         /// <summary>
         /// To get only SynicPacket.
         /// Use this from ConenctHub not to call some methods in Main-Assembly from SynicSugar.dll.
         /// </summary>
-        public abstract bool GetSynicPacketFromBuffer(ref byte ch, ref ProductUserId id, ref ArraySegment<byte> payload);
+        public abstract bool GetSynicPacketFromBuffer(ref byte ch, ref UserId id, ref ArraySegment<byte> payload);
     #endregion
 #region Connect
     /// <summary>
@@ -388,8 +387,8 @@ namespace SynicSugar.Base {
         /// <param name="id">target id</param>
         /// <param name="phase">Synic phase</param>
         /// <summary>
-        public void UpdateSyncedState(string id, byte phase){
-            p2pInfo.Instance.SyncSnyicNotifier.UpdateSyncedState(id, phase);
+        void INetworkCore.UpdateSynicStatus(string id, byte phase){
+            p2pInfo.Instance.SyncSnyicNotifier.UpdateSynicStatus(id, phase);
         }
         public async UniTask AutoRefreshPings(CancellationToken token){
             await UniTask.Delay(p2pConfig.Instance.PingAutoRefreshRateSec * 1000, cancellationToken: token);
@@ -416,8 +415,8 @@ namespace SynicSugar.Base {
         /// <summary>
         /// Change AcceptHostsSynic to false. Call from ConnectHub
         /// </summary>
-        void INetworkCore.CloseHostSynic(){
-            p2pInfo.Instance.userIds.ReceivedocalUserSynic();
+        void INetworkCore.StopOverwritingLocalUserData(){
+            p2pInfo.Instance.userIds.ReceivedLocalUserSynic();
         }
         /// <summary>
         /// Return pong to calculate RTT. Call from ConnectHub

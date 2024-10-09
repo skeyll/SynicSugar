@@ -5,7 +5,6 @@ using SynicSugar.P2P;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
-using SynicSugar.MatchMake;
 
 namespace SynicSugar.Samples.Tank {
     [NetworkCommons(true)]
@@ -33,7 +32,7 @@ namespace SynicSugar.Samples.Tank {
         /// </summary>
         /// <param name="newState"></param>
         internal void InvokeStateProcess(GameState newState){
-            Debug.Log(newState);
+            Debug.Log("TankGameManager: CurrentState is" + newState);
             switch(newState){
                 case GameState.PreparationForObjects:
                     PreparationForObjectsProcess();
@@ -121,16 +120,18 @@ namespace SynicSugar.Samples.Tank {
             //If the user is a reconnector, get synic packet before re-start a game.
             if(p2pInfo.Instance.IsReconnecter){
                 //If this user comes here by ReconnectAPI, them need receive all the SynicPackets before back to the game.
-                ConnectHub.Instance.StartSynicReceiver();
+                ConnectHub.Instance.StartSynicReceiver(5);
                 await UniTask.WaitUntil(() => p2pInfo.Instance.HasReceivedAllSyncSynic, cancellationToken: this.GetCancellationTokenOnDestroy());
+                SetSynicsToObject();
             }
             //If the game had not yet started, the reconnector also (re)sends the data.
             if(CurrentGameState == GameState.PreparationForData){
                 SetLocalPlayerBasicData();
             }
 
-            //One packet receiving per frame is sufficient in this sample,　but just in case set max member count to backsize.
+            //One packet receiving per frame is sufficient in this sample,　but just in case set max member amount to the batch size.
             ConnectHub.Instance.StartPacketReceiver(PacketReceiveTiming.FixedUpdate, (byte)p2pInfo.Instance.AllUserIds.Count);
+            //If this local user is a reconnector, CurrentGameState has been overwritten via Synic to another State.
             CurrentGameState = CurrentGameState == GameState.PreparationForData ? GameState.Standby : CurrentGameState;
             //If not overwritten by Synic, move to the next State; if overwritten, move to the host’s State
             InvokeStateProcess(CurrentGameState);
@@ -145,10 +146,19 @@ namespace SynicSugar.Samples.Tank {
                 MaxHP = 100,
                 Speed = 12f,
                 Attack = 20,
-                RespawnPos = spawners[p2pInfo.Instance.GetUserIndex()].transform.position
+                RespawnPosition = spawners[p2pInfo.Instance.GetUserIndex()].transform.position, 
+                RespawnQuaternion = spawners[p2pInfo.Instance.GetUserIndex()].transform.rotation
             };
             //Call RPC process to sync status.
             ConnectHub.Instance.GetUserInstance<TankPlayer>(p2pInfo.Instance.LocalUserId).SetPlayerStatus(status);
+        }
+        /// <summary>
+        /// Reflect synics to player object.
+        /// </summary>
+        void SetSynicsToObject(){
+            foreach(var id in p2pInfo.Instance.CurrentConnectedUserIds){
+                ConnectHub.Instance.GetUserInstance<TankPlayer>(id).SetDataAfterReconnect();
+            }
         }
     #endregion
     #region Standby
@@ -159,19 +169,20 @@ namespace SynicSugar.Samples.Tank {
             padGUI.SwitchGUISState(PadState.OnlyMove);
             SwitchSystemUIsState(GameState.Standby);
             ConnectHub.Instance.GetInstance<TankRoundTimer>().SetTimer();
-            MonitorGameState().Forget();
+            WaitForTheUsersReady().Forget();
         }
         /// <summary>
         /// From call system button
         /// </summary>
         public void ReadyToPlayBattle(){
-            SwitchSystemUIsState(GameState.InGame);
+            //To deactivate all GUI.
+            SwitchSystemUIsState(GameState.PreparationForObjects);
             ConnectHub.Instance.GetUserInstance<TankPlayer>(p2pInfo.Instance.LocalUserId).Ready();
         }
         /// <summary>
         /// Monitor isReady flag by everyoneIsReady.
         /// </summary>
-        async UniTask MonitorGameState(){
+        async UniTask WaitForTheUsersReady(){
             await UniTask.WaitUntil(() => everyoneIsReady, cancellationToken: this.GetCancellationTokenOnDestroy());
             CurrentGameState = GameState.InGame;
             InvokeStateProcess(CurrentGameState);
@@ -198,11 +209,13 @@ namespace SynicSugar.Samples.Tank {
     #endregion
     #region InGame
         async UniTask InGameProcess(){
+            SwitchSystemUIsState(GameState.InGame);
             //p2pInfo.Instance.IsReconnecter　is valid until a SynicPacket is received once.
             //So, we have to use others for reconnecter flag.
             if(ConnectHub.Instance.GetInstance<TankRoundTimer>().RemainingIsMax()){
                 await GameStarting();
             }
+
             padGUI.SwitchGUISState(PadState.ALL);
 
             await ConnectHub.Instance.GetInstance<TankRoundTimer>().StartTimer();
@@ -319,8 +332,8 @@ namespace SynicSugar.Samples.Tank {
         }
         async UniTask AsyncReturnToTitle(){
             Result closeResult;
-            if(p2pInfo.Instance.AllUserIds.Count == 1 || MatchMakeManager.Instance.GetCurrentLobbyID() == "OFFLINEMODE"){ //This always is the same result.
-                closeResult = await MatchMakeManager.Instance.DestoryOfflineLobby();
+            if(p2pInfo.Instance.AllUserIds.Count == 1){ //or MatchMakeManager.Instance.GetCurrentLobbyID() == "OFFLINEMODE"
+                closeResult = await ConnectHub.Instance.DestoryOfflineLobby();
             }else if(p2pInfo.Instance.CurrentConnectedUserIds.Count == 1){ //If the room is alone, close the room.
                 closeResult = await ConnectHub.Instance.CloseSession();
             }else{

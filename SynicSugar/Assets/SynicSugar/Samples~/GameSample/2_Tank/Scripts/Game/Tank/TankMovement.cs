@@ -13,10 +13,10 @@ namespace SynicSugar.Samples.Tank {
 
         // Movement is managed by Move and Stop and calculated locally.
         // Periodically, this value is sent to correct the actual position.
-        [SyncVar(2000)] public Vector3 truePlayerPosition;
+        [SyncVar(2000)] public Vector3 correctedPlayerPosition;
         // Movement is managed by Move and Stop and calculated locally.
         // Periodically, this value is sent to correct the actual position.
-        [SyncVar(1000)] public Quaternion truePlayerQuaternion;
+        [SyncVar(1000)] public Quaternion correctedPlayerQuaternion;
         /// Movement is managed by UniTask.
         /// </summary>
         CancellationTokenSource moveTokenSource;
@@ -48,10 +48,10 @@ namespace SynicSugar.Samples.Tank {
             while(!moveTokenSource.Token.IsCancellationRequested){
                 //Fix the pos by true pos.
                 //The actual pos data is sent every 2 seconds from each local.
-                m_Rigidbody.MovePosition(truePlayerPosition + movement * Time.deltaTime);
+                m_Rigidbody.MovePosition(correctedPlayerPosition + movement * Time.deltaTime);
                 m_Rigidbody.angularVelocity = Vector3.zero;
                 
-                truePlayerPosition = m_Rigidbody.position;
+                correctedPlayerPosition = m_Rigidbody.position;
                 await UniTask.Yield(PlayerLoopTiming.FixedUpdate, moveTokenSource.Token);
             }
         }
@@ -68,10 +68,10 @@ namespace SynicSugar.Samples.Tank {
 
             while (!moveTokenSource.Token.IsCancellationRequested){
                 Quaternion turn = Quaternion.Euler(0f, turnSpeed * Time.deltaTime, 0f);
-                m_Rigidbody.MoveRotation(truePlayerQuaternion * turn);
+                m_Rigidbody.MoveRotation(correctedPlayerQuaternion * turn);
                 m_Rigidbody.velocity = Vector3.zero;
 
-                truePlayerQuaternion = m_Rigidbody.rotation;
+                correctedPlayerQuaternion = m_Rigidbody.rotation;
                 await UniTask.Yield(PlayerLoopTiming.FixedUpdate, moveTokenSource.Token);
             }
         }
@@ -87,8 +87,8 @@ namespace SynicSugar.Samples.Tank {
             }
         }
         void SetTransformData(TankMoveData data){
-            truePlayerPosition = data.currentPosition;
-            truePlayerQuaternion = data.currentQuaternion;
+            correctedPlayerPosition = data.currentPosition;
+            correctedPlayerQuaternion = data.currentQuaternion;
         }
         void GenerateNewToken(){
             Stop();

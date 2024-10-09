@@ -32,19 +32,14 @@ namespace SynicSugar.P2P {
         // If not, only the local user can manipulate the local user's data.
         // For Anti-Cheat to rewrite other player data.
         internal bool isJustReconnected { get; private set; }
-        internal UserIds(){
+        internal UserIds(bool isReconencter = false){
             LocalUserId = SynicSugarManger.Instance.LocalUserId;
-        }
-        internal UserIds(bool isReconencter){
-            LocalUserId = SynicSugarManger.Instance.LocalUserId;
-            if(isReconencter){
-                isJustReconnected = true;
-            }
+            isJustReconnected = isReconencter;
         }
         /// <summary>
         /// Make reconencter flag false.
         /// </summary>
-        internal void ReceivedocalUserSynic(){
+        internal void ReceivedLocalUserSynic(){
             isJustReconnected = false;
         }
         /// <summary>

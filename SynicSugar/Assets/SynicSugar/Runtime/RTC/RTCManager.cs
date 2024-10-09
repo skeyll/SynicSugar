@@ -209,7 +209,9 @@ namespace SynicSugar.RTC {
         /// </summary>
         public void StartVoiceSending(){
             if(!CurrentLobby.bEnableRTCRoom){
-                Debug.LogError("StartVoiceSending: This lobby doesn't have RTC room.");
+            #if SYNICSUGAR_LOG
+                Debug.Log("StartVoiceSending: This lobby doesn't have RTC room.");
+            #endif
                 return;
             }
             if(UseOpenVC){
@@ -224,7 +226,9 @@ namespace SynicSugar.RTC {
         /// </summary>
         public void StopVoiceSending(){
             if(!CurrentLobby.bEnableRTCRoom){
-                Debug.LogError("StartVoiceSending: This lobby doesn't have RTC room.");
+            #if SYNICSUGAR_LOG
+                Debug.Log("StartVoiceSending: This lobby doesn't have RTC room.");
+            #endif
                 return;
             }
             if(UseOpenVC){

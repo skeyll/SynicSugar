@@ -9,9 +9,16 @@ It also includes a process to revive the game with Syinc if it disconnected, and
 The components edited in SynicSugar are under the MIT license of SynicSugar. However, please note that other components are subject to the Unity EULA.
 
 
-Tutorail
+Known issue (as the game)
+ - Player is able to slip through obstacle object.
+(*This can be reduced if the movement process is changed to Update. Maybe need more detection of the Hit.)
+- Sometimes objects on the ground make player movement strange.
+
+
+Tutorial
 https://learn.unity.com/project/tanks-tutorial
 Assets
 https://assetstore.unity.com/packages/essentials/tutorial-projects/tanks-tutorial-46209
 Unity Asset Store EULA
 https://unity.com/legal/as-terms
+

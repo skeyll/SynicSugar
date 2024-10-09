@@ -146,12 +146,12 @@ namespace SynicSugar.MatchMake {
         /// <param name="token"></param>
         public override async UniTask<Result> JoinLobbyBySavedLobbyId(string LobbyID, CancellationToken token){
             //Search
-            MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Recconect);
+            MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Reconnect);
             var retrieveResult = await RetriveLobbyByLobbyId(LobbyID, token);
 
             if(retrieveResult.result != Result.Success){
                 #if SYNICSUGAR_LOG
-                    Debug.LogErrorFormat("JoinLobbyBySavedLobbyId: RetriveLobbyByLobbyId is failer.: {0}.", retrieveResult);
+                    Debug.LogFormat("JoinLobbyBySavedLobbyId: RetriveLobbyByLobbyId is failer.: {0}.", retrieveResult);
                 #endif
                 await MatchMakeManager.Instance.OnDeleteLobbyID();
                 ReleaseLobbySearch(retrieveResult.lobbySerach);
@@ -161,7 +161,7 @@ namespace SynicSugar.MatchMake {
             //Join when lobby has members than more one.
             Result joinResult = await TryJoinSearchResults(retrieveResult.lobbySerach, null, true, token);
         #if SYNICSUGAR_LOG
-            Debug.LogFormat("JoinLobbyBySavedLobbyId: TryJoinSearchResults is '{0}'.", joinResult);
+            Debug.LogFormat("JoinLobbyBySavedLobbyId: The result is {0}", joinResult);
         #endif
             if(joinResult != Result.Success){
                 await MatchMakeManager.Instance.OnDeleteLobbyID();
@@ -429,7 +429,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="token">Token not related to timeout　token</param>
         /// <returns></returns>
         public override async UniTask<Result> SetupP2PConnection(ushort setupTimeoutSec, CancellationToken token){
-            MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Conclude);
+            MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.SetupP2P);
             Result result = InitConnectConfig(ref p2pInfo.Instance.userIds);
             if(result != Result.Success){
                 Debug.LogErrorFormat("InitConnectConfig :Not enough data to make the connection.: {0}", result);
@@ -562,9 +562,11 @@ namespace SynicSugar.MatchMake {
 
             void OnLobbySearchCompleted(ref LobbySearchFindCallbackInfo info){
                 result = (Result)info.ResultCode;
+            #if SYNICSUGAR_LOG
                 if (info.ResultCode != ResultE.Success) {
-                    Debug.LogErrorFormat("Search Lobby: error code: {0}", info.ResultCode);
+                    Debug.LogFormat("Search Lobby: error code: {0}", info.ResultCode);
                 }
+            #endif
                 finishFound = true;
             }
         }
@@ -871,6 +873,9 @@ namespace SynicSugar.MatchMake {
                 // Send Id list.
                 if(p2pInfo.Instance.IsHost()){
                     ConnectPreparation.SendUserList(UserId.GetUserId(info.TargetUserId));
+                #if SYNICSUGAR_LOG
+                    Debug.Log($"MemberStatusNotyfy: Send user list to {info.TargetUserId}.");
+                #endif
                 }
             }
         }
@@ -1363,7 +1368,7 @@ namespace SynicSugar.MatchMake {
                 await UniTask.Delay((int)delay.WaitForOpponentsDelay, cancellationToken: token);
             }
             if(delay.FinishMatchmakingDelay > 0){
-                MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Conclude);
+                MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.SetupP2P);
                 await UniTask.Delay((int)delay.FinishMatchmakingDelay, cancellationToken: token);
             }
             //Set User info
@@ -1394,6 +1399,7 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         /// <param name="userIds"></param>
         /// <returns></returns>
+        /// *UserIDs contains Internal, so other method must be need for scalability.
         Result InitConnectConfig(ref UserIds userIds){
             //Prep RTC(Voice Chat)
             RTCManager.Instance.AddNotifyParticipantUpdated();
@@ -1465,7 +1471,7 @@ namespace SynicSugar.MatchMake {
             RemoveNotifyLobbyMemberUpdateReceived();
             p2pConfig.Instance.sessionCore.OpenConnection(true);
         #if SYNICSUGAR_LOG
-            Debug.Log("OpenConnection: Open Connection.");
+            Debug.Log("OpenConnection: Send connect request.");
         #endif
             Result canConnect = await ConnectPreparation.WaitConnectPreparation(token, setupTimeoutSec * 1000); //Pass time as ms.
             if(canConnect != Result.Success){
