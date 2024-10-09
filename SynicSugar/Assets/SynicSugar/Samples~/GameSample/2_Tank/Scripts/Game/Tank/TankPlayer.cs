@@ -160,8 +160,8 @@ namespace  SynicSugar.Samples.Tank {
         /// </summary>
         /// <returns>Local player transform info</returns> 
         internal void UpdateRespawnTransfomData(){
-            status.RespawnPosition = movement.truePlayerPosition;
-            status.RespawnQuaternion = movement.truePlayerQuaternion;
+            status.RespawnPosition = movement.correctedPlayerPosition;
+            status.RespawnQuaternion = movement.correctedPlayerQuaternion;
         }
     }
 }
