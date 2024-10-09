@@ -73,10 +73,11 @@ namespace SynicSugar.Samples.Tank {
         /// </summary>
         /// <param name="id"></param>
         void OnConnected(UserId id){
+            Debug.Log($"{GetPlayerName(id)}: Connected");
             //In this sample, the initial position is synchronized via RespawnPos of Synic, so each player needs to update Respawn data before SyncSuynic.
             //Of course, we can update these value as player transform position when player moves, but player don't need these value except for Synic, 
             //so it is updated when it is needed.
-            ConnectHub.Instance.GetUserInstance<TankPlayer>(id).UpdateRespawnTransfomData();
+            ConnectHub.Instance.GetUserInstance<TankPlayer>(p2pInfo.Instance.LocalUserId).UpdateRespawnTransfomData();
 
             if(p2pInfo.Instance.IsHost()){
                 ConnectHub.Instance.GetUserInstance<TankPlayer>(id).UpdateRespawnTransfomData();
