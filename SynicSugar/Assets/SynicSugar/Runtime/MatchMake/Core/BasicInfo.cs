@@ -8,11 +8,13 @@ namespace SynicSugar.P2P {
     [MemoryPackable]
     public partial class BasicInfo {
         public List<string> userIds = new List<string>();
-        public List<int> disconnectedUserIndexes = new List<int>();
+        public List<byte> disconnectedUserIndexes = new List<byte>();
+        public uint ElapsedSecSinceStart = 0;
         [MemoryPackConstructor]
-        public BasicInfo(List<string> userids, List<int> disconnecteduserindexes){
+        public BasicInfo(List<string> userids, List<byte> disconnecteduserindexes, uint elapsedSecSinceStart){
             userIds = userids;
             disconnectedUserIndexes = disconnecteduserindexes;
+            ElapsedSecSinceStart = elapsedSecSinceStart;
         }
         public BasicInfo(){}
     }

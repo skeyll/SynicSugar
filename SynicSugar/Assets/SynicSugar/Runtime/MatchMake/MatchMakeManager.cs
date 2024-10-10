@@ -498,6 +498,21 @@ namespace SynicSugar.MatchMake {
             }
 
             MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Ready);
+            
+            SessionDataManager sessionDataManager = new SessionDataManager();
+            if(isReconencter){
+                SessionData localData = await sessionDataManager.LoadSessionData(matchmakingCore.GetCurrentLobbyID());
+                //Overwrite host's timestamp data by local data.
+                //If no data in local, use estimated timestamps based on data sent by the host.
+                if(localData != null){
+                    p2pInfo.Instance.CurrentSessionStartUTC = localData.SessionStartTimestamp;
+                }
+            }else{
+                p2pInfo.Instance.CurrentSessionStartUTC = DateTime.UtcNow;
+            }
+            if(lobbyIdSaveType != RecconectLobbyIdSaveType.NoReconnection){
+                sessionDataManager.SaveSessionData(new SessionData(matchmakingCore.GetCurrentLobbyID(), p2pInfo.Instance.CurrentSessionStartUTC)).Forget();
+            }
 
             SynicSugarManger.Instance.State.IsMatchmaking = false;
             SynicSugarManger.Instance.State.IsInSession = true;

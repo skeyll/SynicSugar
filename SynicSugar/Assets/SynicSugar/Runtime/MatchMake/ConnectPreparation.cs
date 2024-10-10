@@ -36,6 +36,7 @@ namespace SynicSugar.MatchMake {
         /// So must not use the same ch for what SynicSugar may receive at the same time.
         /// </summary>
         const byte USERLISTCH = 252;
+        const int SendBatchSize = 8;
         byte ch;
         ProductUserId id;
         ArraySegment<byte> payload;
@@ -50,9 +51,10 @@ namespace SynicSugar.MatchMake {
             
             if(p2pInfo.Instance.DisconnectedUserIds.Count > 0){
                 for(int i = 0; i < p2pInfo.Instance.DisconnectedUserIds.Count; i++){
-                    basicInfo.disconnectedUserIndexes.Add(p2pInfo.Instance.AllUserIds.IndexOf(p2pInfo.Instance.DisconnectedUserIds[i]));
+                    basicInfo.disconnectedUserIndexes.Add((byte)p2pInfo.Instance.AllUserIds.IndexOf(p2pInfo.Instance.DisconnectedUserIds[i]));
                 }
             }
+            basicInfo.ElapsedSecSinceStart = p2pInfo.Instance.GetSessionTimestamp();
 
             using var compressor  = new BrotliCompressor();
             MemoryPackSerializer.Serialize(compressor, basicInfo);
@@ -68,7 +70,7 @@ namespace SynicSugar.MatchMake {
             using var compressor  = new BrotliCompressor();
             MemoryPackSerializer.Serialize(compressor, basicInfo);
             
-            int count = p2pConfig.Instance.RPCBatchSize;
+            int count = SendBatchSize;
             var compressorArray = compressor.ToArray();
             foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
                 SendPacket(USERLISTCH, compressorArray, id);
@@ -82,7 +84,7 @@ namespace SynicSugar.MatchMake {
                 #endif
                         break;
                     }
-                    count = p2pConfig.Instance.RPCBatchSize;
+                    count = SendBatchSize;
                 }
             }
         }
@@ -94,7 +96,7 @@ namespace SynicSugar.MatchMake {
                 SocketId = p2pConfig.Instance.sessionCore.SocketId,
                 Channel = ch,
                 AllowDelayedDelivery = true,
-                Reliability = PacketReliability.ReliableOrdered,
+                Reliability = PacketReliability.ReliableUnordered,
                 Data = new ArraySegment<byte>(value)
             };
 
@@ -109,8 +111,14 @@ namespace SynicSugar.MatchMake {
         #endregion
         #region Receive
         internal async UniTask ReciveUserIdsPacket(CancellationToken token){
+            P2PInterface p2pInterface = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface();
+            //Next packet size
+            var getNextReceivedPacketSizeOptions = new GetNextReceivedPacketSizeOptions {
+                LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
+                RequestedChannel = USERLISTCH
+            };
             while(!token.IsCancellationRequested){
-                bool recivePacket = GetPacketFromBuffer(ref ch, ref id, ref payload);
+                bool recivePacket = GetPacketFromBuffer(ref p2pInterface, ref getNextReceivedPacketSizeOptions, ref ch, ref id, ref payload);
 
                 if(recivePacket){
                     ConvertFromPacket();
@@ -126,18 +134,11 @@ namespace SynicSugar.MatchMake {
         /// <param name="id"></param>
         /// <param name="payload"></param>
         /// <returns></returns>
-        bool GetPacketFromBuffer(ref byte ch, ref ProductUserId id, ref ArraySegment<byte> payload){
-            //Next packet size
-            var getNextReceivedPacketSizeOptions = new GetNextReceivedPacketSizeOptions {
-                LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
-                RequestedChannel = USERLISTCH
-            };
+        bool GetPacketFromBuffer(ref P2PInterface p2pInterface,ref GetNextReceivedPacketSizeOptions sizeOptions, ref byte ch, ref ProductUserId id, ref ArraySegment<byte> payload){
+            ResultE result = p2pInterface.GetNextReceivedPacketSize(ref sizeOptions, out uint nextPacketSizeBytes);
 
-            P2PInterface P2PHandle = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface();
-
-            P2PHandle.GetNextReceivedPacketSize(ref getNextReceivedPacketSizeOptions, out uint nextPacketSizeBytes);
-            if(nextPacketSizeBytes == 0){
-                return false;
+            if(result != ResultE.Success){
+                return false; //No packet
             }
 
             //Set options
@@ -149,7 +150,7 @@ namespace SynicSugar.MatchMake {
 
             byte[] data = new byte[nextPacketSizeBytes];
             var dataSegment = new ArraySegment<byte>(data);
-            ResultE result = P2PHandle.ReceivePacket(ref options, ref id, ref ReferenceSocketId, out byte outChannel, dataSegment, out uint bytesWritten);
+            result = p2pInterface.ReceivePacket(ref options, ref id, ref ReferenceSocketId, out byte outChannel, dataSegment, out uint bytesWritten);
             
             if (result != ResultE.Success){
                 return false; //No packet
