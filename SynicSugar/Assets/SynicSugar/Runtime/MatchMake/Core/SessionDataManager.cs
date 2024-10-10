@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using MemoryPack;
 using SynicSugar.P2P;
+using Cysharp.Threading.Tasks;
 
 namespace SynicSugar.MatchMake {
 
@@ -19,32 +20,28 @@ namespace SynicSugar.MatchMake {
         /// Save LobbyId and DataTime on starting session.
         /// </summary>
         /// <param name="data"></param>
-        internal bool SaveSessionData(SessionData data)
+        internal async UniTaskVoid SaveSessionData(SessionData data)
         {
             try
             {
-                File.WriteAllBytes(filePath, MemoryPackSerializer.Serialize(data));
+                await File.WriteAllBytesAsync(filePath, MemoryPackSerializer.Serialize(data));
             }
             catch (UnauthorizedAccessException e)
             {
                 Debug.LogError($"SaveSessionData: Don't have access permission. {e.Message}");
-                return false;
             }
             catch (IOException e)
             {
                 Debug.LogError($"SaveSessionData: An error occurred during file operation. {e.Message}");
-                return false;
             }
             catch (Exception e)
             {
                 Debug.LogError($"SaveSessionData: An unexpected error has occurred. {e.Message}");
-                return false;
             }
 
         #if SYNICSUGAR_LOG
             Debug.Log($"SaveSessionData: Save SessionData to {filePath}.");
         #endif
-            return true;
         }
 
         /// <summary>
@@ -52,11 +49,11 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         /// <param name="lobbyId"></param>
         /// <returns></returns>
-        internal SessionData LoadSessionData(string lobbyId)
+        internal async UniTask<SessionData> LoadSessionData(string lobbyId)
         {
             if (File.Exists(filePath))
             {
-                byte[] binaryData = File.ReadAllBytes(filePath);
+                byte[] binaryData = await File.ReadAllBytesAsync(filePath);
 
                 SessionData data = MemoryPackSerializer.Deserialize<SessionData>(binaryData);
 

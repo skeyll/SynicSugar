@@ -13,16 +13,5 @@ namespace SynicSugar.P2P {
             LobbyID = lobbyId;
             SessionStartTimestamp = sessionStartTimestamp;
         }
-
-        internal static byte[] SaveSessionData(SessionData data)
-        {
-            return MemoryPackSerializer.Serialize(data);
-        }
-
-        internal static SessionData LoadSessionData(byte[] bytes)
-        {
-            return MemoryPackSerializer.Deserialize<SessionData>(bytes);
-        }
-
     }
 }

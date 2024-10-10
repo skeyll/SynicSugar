@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using System;
 using System.Collections.Generic;
 using SynicSugar.Base;
 
@@ -52,6 +53,18 @@ namespace SynicSugar.P2P {
         /// Whether matching has been completed and the game has started.
         /// </summary>
         internal bool IsConnecting;
+        /// <summary>
+        /// Date time when this LOCAL user starts current session.
+        /// </summary>
+        /// <value></value>
+        public DateTime CurrentSessionStartUTC { get; internal set; }
+        /// <summary>
+        /// Get sec since start current session.
+        /// </summary>
+        /// <returns></returns>
+        public uint GetSessionTimestamp() {
+            return (uint)DateTime.UtcNow.Subtract(CurrentSessionStartUTC).TotalSeconds;
+        }
         /// <summary>
         /// Set reference of some manager classes.
         /// </summary>

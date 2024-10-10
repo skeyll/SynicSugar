@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Epic.OnlineServices;
 
@@ -64,6 +65,9 @@ namespace SynicSugar.P2P {
             foreach(var id in DisconnectedUserIds){
                 CurrentAllUserIds.Add(id);
             }
+            //For the case this user did not have data of CurrentSessionStartUTC.
+            //Thanks for this users can play even in other platform, although the time accuracy(for lag) is low.
+            p2pInfo.Instance.CurrentSessionStartUTC = DateTime.UtcNow.Subtract(TimeSpan.FromSeconds(data.ElapsedSecSinceStart));
         }
         /// <summary>
         /// Remove user ID when the user leaves lobby.<br />
