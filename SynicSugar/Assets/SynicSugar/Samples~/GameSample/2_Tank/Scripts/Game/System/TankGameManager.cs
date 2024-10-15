@@ -16,6 +16,7 @@ namespace SynicSugar.Samples.Tank {
         [SerializeField] List<Transform> spawners;
         [SerializeField] Button ReadyGame, PlayAgainGame, QuitGame;
         [Synic(0), HideInInspector] public GameState CurrentGameState;
+        
         bool everyoneIsReady;
         //Time
         [SerializeField] Text timerText, systemText;
@@ -168,7 +169,11 @@ namespace SynicSugar.Samples.Tank {
         void StandbyProcess(){
             padGUI.SwitchGUISState(PadState.OnlyMove);
             SwitchSystemUIsState(GameState.Standby);
-            ConnectHub.Instance.GetInstance<TankRoundTimer>().SetTimer();
+            if(isHost){
+                uint roomForLag = 3;
+                uint startTimestamp = p2pInfo.Instance.GetSessionTimestamp() + roomForLag;
+                ConnectHub.Instance.GetInstance<TankRoundTimer>().SetTimestamp(startTimestamp);
+            }
             WaitForTheUsersReady().Forget();
         }
         /// <summary>
@@ -210,10 +215,11 @@ namespace SynicSugar.Samples.Tank {
     #region InGame
         async UniTask InGameProcess(){
             SwitchSystemUIsState(GameState.InGame);
+            uint waitingTime = ConnectHub.Instance.GetInstance<TankRoundTimer>().SetTimer();
             //p2pInfo.Instance.IsReconnecter　is valid until a SynicPacket is received once.
             //So, we have to use others for reconnecter flag.
-            if(ConnectHub.Instance.GetInstance<TankRoundTimer>().RemainingIsMax()){
-                await GameStarting();
+            if(waitingTime > 0){
+                await GameStarting(waitingTime);
             }
 
             padGUI.SwitchGUISState(PadState.ALL);
@@ -254,10 +260,17 @@ namespace SynicSugar.Samples.Tank {
             }
             return survivorCount == 1;
         }
-        async UniTask GameStarting(){
+        async UniTask GameStarting(uint waitingTime){
+            int countTime = (int)waitingTime;
+            //More than 3 do not count.
+            if(countTime > 3){
+                countTime -= 3;
+                int timeUntilCountdown = countTime * 1000;
+                await UniTask.Delay(timeUntilCountdown);
+            }
             padGUI.SwitchGUISState(PadState.None);
-            //Count 3
-            for(int i = 3; i > 0; i--){
+            //Count 3　- 1
+            for(int i = countTime; i > 0; i--){
                 systemText.text = i.ToString();
                 await UniTask.Delay(1000);
             }

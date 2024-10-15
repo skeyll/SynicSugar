@@ -8,7 +8,8 @@ namespace SynicSugar.Samples.Tank {
     [NetworkCommons(true)]
     public partial class TankRoundTimer {
         int MaxRoundTime = 120;
-        [Synic] public float reamingTime;
+        float reamingTime;
+        [Synic(0)] uint startTimestamp;
         Text timerText;
         CancellationTokenSource timerTokenSource;
         
@@ -17,8 +18,28 @@ namespace SynicSugar.Samples.Tank {
             MaxRoundTime = roundTime;
             timerText = text;
         }
-        internal void SetTimer(){
-            reamingTime = MaxRoundTime;
+        /// <summary>
+        /// Host decide this value
+        /// </summary>
+        /// <param name="startTimeStampOfThisRound">Host's timestamp + some room for lag</param>
+        [Rpc]
+        public void SetTimestamp(uint startTimeStampOfThisRound){
+            startTimestamp = startTimeStampOfThisRound;
+        }
+        /// <summary>
+        /// Calculate reamingtime by startTimestamp and SesstionTimeStamp.
+        /// </summary>
+        /// <returns>The time until starting this round</returns>
+        internal uint SetTimer(){
+            uint currentTimeStamp = p2pInfo.Instance.GetSessionTimestamp();
+            //If there is still time to start, set MaxTime and return the waiting time.
+            if(currentTimeStamp < startTimestamp){
+                reamingTime = MaxRoundTime;
+                return startTimestamp - currentTimeStamp;
+            }
+
+            reamingTime = startTimestamp + 120 - currentTimeStamp;
+            return 0;
         }
         /// <summary>
         /// Count Round time
@@ -27,6 +48,8 @@ namespace SynicSugar.Samples.Tank {
         internal async UniTask StartTimer(){
             timerTokenSource = new CancellationTokenSource();
             try {
+
+                uint currentTimeStamp = p2pInfo.Instance.GetSessionTimestamp();
                 await CountTimer(timerTokenSource.Token);
             } catch (OperationCanceledException) {
                 reamingTime = 0f;
