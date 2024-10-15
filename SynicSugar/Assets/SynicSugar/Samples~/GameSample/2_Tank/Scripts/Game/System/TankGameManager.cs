@@ -29,6 +29,19 @@ namespace SynicSugar.Samples.Tank {
             InvokeStateProcess(GameState.PreparationForObjects);
         }
         /// <summary>
+        /// When the game restart from the pause, reset the time .
+        /// </summary>
+        /// <param name="pauseStatus"></param>
+        void OnApplicationPause(bool pauseStatus){
+            if(CurrentGameState != GameState.InGame){
+                return;
+            }
+            
+            if (!pauseStatus){
+                ConnectHub.Instance.GetInstance<TankRoundTimer>().SetTimer();
+            }
+        }
+        /// <summary>
         /// Manage game processes by State machine in this sample.
         /// </summary>
         /// <param name="newState"></param>

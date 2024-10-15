@@ -48,17 +48,20 @@ namespace SynicSugar.Samples.Tank {
         internal async UniTask StartTimer(){
             timerTokenSource = new CancellationTokenSource();
             try {
-
-                uint currentTimeStamp = p2pInfo.Instance.GetSessionTimestamp();
                 await CountTimer(timerTokenSource.Token);
             } catch (OperationCanceledException) {
                 reamingTime = 0f;
             } 
         }
         async UniTask CountTimer(CancellationToken token){
+            int currentTime = (int)reamingTime;
             while(reamingTime > 0f){
                 reamingTime -= Time.deltaTime;
-                timerText.text = ((int)reamingTime).ToString();
+
+                if((int)reamingTime < currentTime){
+                    currentTime = (int)(startTimestamp - p2pInfo.Instance.GetSessionTimestamp()) + 120;
+                    timerText.text = currentTime.ToString();
+                }
 
                 await UniTask.Yield(token);
             }
@@ -71,13 +74,6 @@ namespace SynicSugar.Samples.Tank {
             if(timerTokenSource != null && timerTokenSource.Token.CanBeCanceled){
                 timerTokenSource.Cancel();
             }
-        }
-        /// <summary>
-        /// Use as Reconnecter flag.
-        /// </summary>
-        /// <returns></returns>
-        internal bool RemainingIsMax(){
-            return (int)reamingTime == MaxRoundTime;
         }
         internal float GetCurrentTime(){
             return reamingTime;
