@@ -87,8 +87,8 @@ namespace SynicSugar.Samples.Tank {
                     ConnectHub.Instance.GetUserInstance<TankPlayer>(disconenctedId).UpdateRespawnTransfomData();
                 }
             }
-
-            ConnectHub.Instance.SyncSynic(id, SynicType.WithOthers);
+            //Can be sent without setting Phase, but performance is better with 2nd, 3rd args.
+            ConnectHub.Instance.SyncSynic(id, SynicType.WithOthers, syncedPhase: 0, true);
         }
         string GetPlayerName(UserId id){
             return $"{ConnectHub.Instance.GetUserInstance<TankPlayer>(id).status.Name}({id})";
