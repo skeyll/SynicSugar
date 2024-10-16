@@ -137,6 +137,10 @@ namespace SynicSugar.Samples.Tank {
                 ConnectHub.Instance.StartSynicReceiver(5);
                 await UniTask.WaitUntil(() => p2pInfo.Instance.HasReceivedAllSyncSynic, cancellationToken: this.GetCancellationTokenOnDestroy());
                 SetSynicsToObject();
+                //If the state is InGame and the player is dead, change the camera position.
+                if(CurrentGameState == GameState.InGame && !ConnectHub.Instance.GetUserInstance<TankPlayer>(p2pInfo.Instance.LocalUserId).gameObject.activeSelf){
+                    cameraControl.SwitchTargetToNextSurvivor(p2pInfo.Instance.GetUserIndex());
+                }
             }
             //If the game had not yet started, the reconnector also (re)sends the data.
             if(CurrentGameState == GameState.PreparationForData){
@@ -182,11 +186,9 @@ namespace SynicSugar.Samples.Tank {
         void StandbyProcess(){
             padGUI.SwitchGUISState(PadState.OnlyMove);
             SwitchSystemUIsState(GameState.Standby);
-            if(isHost){
-                uint roomForLag = 3;
-                uint startTimestamp = p2pInfo.Instance.GetSessionTimestamp() + roomForLag;
-                ConnectHub.Instance.GetInstance<TankRoundTimer>().SetTimestamp(startTimestamp);
-            }
+            
+            ConnectHub.Instance.GetInstance<TankRoundTimer>().ResetTimestamp();
+
             WaitForTheUsersReady().Forget();
         }
         /// <summary>
@@ -201,15 +203,25 @@ namespace SynicSugar.Samples.Tank {
         /// Monitor isReady flag by everyoneIsReady.
         /// </summary>
         async UniTask WaitForTheUsersReady(){
+            //Wait for Ready
             await UniTask.WaitUntil(() => everyoneIsReady, cancellationToken: this.GetCancellationTokenOnDestroy());
-            CurrentGameState = GameState.InGame;
-            InvokeStateProcess(CurrentGameState);
-            
-            //reset flag
+            //Host decide the start time of this round.
+            if(isHost){
+                uint roomForLag = 3;
+                uint startTimestamp = p2pInfo.Instance.GetSessionTimestamp() + roomForLag;
+                ConnectHub.Instance.GetInstance<TankRoundTimer>().SetTimestamp(startTimestamp);
+            }
+            //reset flag while waiting for getting the start timestamp.
             foreach(var id in p2pInfo.Instance.CurrentAllUserIds){
                 ConnectHub.Instance.GetUserInstance<TankPlayer>(id).status.isReady = false;
             }
             everyoneIsReady = false;
+            //Wait for Timestamp
+            await UniTask.WaitUntil(() => ConnectHub.Instance.GetInstance<TankRoundTimer>().startTimestamp != 0, cancellationToken: this.GetCancellationTokenOnDestroy());
+
+            CurrentGameState = GameState.InGame;
+            InvokeStateProcess(CurrentGameState);
+            
         }
         /// <summary>
         /// Go to InGame state after all users are ready. <br />
@@ -263,7 +275,7 @@ namespace SynicSugar.Samples.Tank {
             foreach(var id in p2pInfo.Instance.CurrentAllUserIds){
                 TankPlayer player = ConnectHub.Instance.GetUserInstance<TankPlayer>(id);
                 // A player who has disconnected is also considered dead.
-                if(player.gameObject.activeSelf || player.status.CurrentHP > 0f){
+                if(player.gameObject.activeSelf && player.status.CurrentHP > 0f){
                     survivorCount++;
                 }
                 // If not alone, stop counting.
