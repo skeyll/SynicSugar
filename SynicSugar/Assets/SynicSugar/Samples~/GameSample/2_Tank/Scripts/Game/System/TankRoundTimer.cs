@@ -9,7 +9,7 @@ namespace SynicSugar.Samples.Tank {
     public partial class TankRoundTimer {
         int MaxRoundTime = 120;
         float reamingTime;
-        [Synic(0)] uint startTimestamp;
+        [Synic(0)] public uint startTimestamp;
         Text timerText;
         CancellationTokenSource timerTokenSource;
         
@@ -17,6 +17,12 @@ namespace SynicSugar.Samples.Tank {
             ConnectHub.Instance.RegisterInstance(this);
             MaxRoundTime = roundTime;
             timerText = text;
+        }
+        /// <summary>
+        /// Reset timestamp value before set value for this round.
+        /// </summary>
+        internal void ResetTimestamp(){
+            startTimestamp = 0;
         }
         /// <summary>
         /// Host decide this value
@@ -59,7 +65,7 @@ namespace SynicSugar.Samples.Tank {
                 reamingTime -= Time.deltaTime;
 
                 if((int)reamingTime < currentTime){
-                    currentTime = (int)(startTimestamp - p2pInfo.Instance.GetSessionTimestamp()) + 120;
+                    currentTime = (int)reamingTime;
                     timerText.text = currentTime.ToString();
                 }
 
