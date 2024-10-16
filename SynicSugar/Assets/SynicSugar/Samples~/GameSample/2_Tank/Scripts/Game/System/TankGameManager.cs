@@ -137,6 +137,10 @@ namespace SynicSugar.Samples.Tank {
                 ConnectHub.Instance.StartSynicReceiver(5);
                 await UniTask.WaitUntil(() => p2pInfo.Instance.HasReceivedAllSyncSynic, cancellationToken: this.GetCancellationTokenOnDestroy());
                 SetSynicsToObject();
+                //If the state is InGame and the player is dead, change the camera position.
+                if(CurrentGameState == GameState.InGame && !ConnectHub.Instance.GetUserInstance<TankPlayer>(p2pInfo.Instance.LocalUserId).gameObject.activeSelf){
+                    cameraControl.SwitchTargetToNextSurvivor(p2pInfo.Instance.GetUserIndex());
+                }
             }
             //If the game had not yet started, the reconnector also (re)sends the data.
             if(CurrentGameState == GameState.PreparationForData){
