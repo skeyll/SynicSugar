@@ -42,6 +42,15 @@ namespace SynicSugar.P2P {
             ConnectionNotifier.Clear();
             SyncSnyicNotifier.Clear();
         }
+        /// <summary>
+        /// Set reference of some manager classes.
+        /// </summary>
+        /// <param name="sessionInstance"></param>
+        /// <param name="natrelayInstance"></param>
+        internal void SetDependency(SessionCore sessionInstance, NatRelayManager natrelayInstance){
+            sessionCore = sessionInstance;
+            natRelayManager = natrelayInstance;
+        }
 #endregion
         SessionCore sessionCore;
         NatRelayManager natRelayManager;
@@ -66,13 +75,11 @@ namespace SynicSugar.P2P {
             return (uint)DateTime.UtcNow.Subtract(CurrentSessionStartUTC).TotalSeconds;
         }
         /// <summary>
-        /// Set reference of some manager classes.
+        /// Get micro sec since start current session for the case need precision.
         /// </summary>
-        /// <param name="sessionInstance"></param>
-        /// <param name="natrelayInstance"></param>
-        internal void SetDependency(SessionCore sessionInstance, NatRelayManager natrelayInstance){
-            sessionCore = sessionInstance;
-            natRelayManager = natrelayInstance;
+        /// <returns></returns>
+        public double GetSessionTimestampInMs() {
+            return DateTime.UtcNow.Subtract(CurrentSessionStartUTC).TotalMilliseconds;
         }
     #region UserId basic info
         /// <summary>
