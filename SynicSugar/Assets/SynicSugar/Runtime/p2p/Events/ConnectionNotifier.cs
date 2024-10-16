@@ -58,21 +58,38 @@ namespace SynicSugar.P2P {
             establishedMemberCounts = 0;
             completeConnectPreparetion = false;
         }
+        /// <summary>
+        /// Invoked when someone leaves the lobby for reasons other than Leave.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="reason"></param>
         internal void Disconnected(UserId id, Reason reason){
             ClosedReason = reason;
             CloseUserId = id;
             OnTargetDisconnected?.Invoke(id);
         }
+        /// <summary>
+        /// Invoked when someone come back to the lobby.
+        /// </summary>
+        /// <param name="id"></param>
         internal void Connected(UserId id){
             ConnectUserId = id;
             OnTargetConnected?.Invoke(id);
         }
-        
+        /// <summary>
+        /// For AddNotifyPeerConnectionInterrupted
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="reason"></param>
         internal void EarlyDisconnected(UserId id, Reason reason){
             ClosedReason = reason;
             CloseUserId = id;
             OnTargetEarlyDisconnected?.Invoke(id);
         }
+        /// <summary>
+        /// For AddNotifyPeerConnectionInterrupted and Restored
+        /// </summary>
+        /// <param name="id"></param>
         internal void Restored(UserId id){
             ConnectUserId = id;
             OnTargetRestored?.Invoke(id);

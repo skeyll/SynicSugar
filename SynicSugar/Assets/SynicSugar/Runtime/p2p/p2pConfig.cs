@@ -44,6 +44,17 @@ namespace SynicSugar.P2P {
         /// MEMO: Can't change this in game for performance now.
         /// </summary>
         public bool AllowDelayedDelivery = false;
+        /// <summary>
+        /// If true, use NotifyPeerConnectionInterrupted. Events: EarlyDisconnected, Restored, Disconnected<br />
+        /// When a connection with someone becomes unstable, an event is triggered and EarlyDisconnected is invoked.  <br />
+        /// Someones(Host + 2 peers) in the lobby will check anyone has been disconnected by sending a heartbeat to the lobby. 
+        /// A reconnection attempt will be made, and if connection is restored, Restored will be invoked.
+        /// When that user's connection with the lobby has also been lost, Disconnected will be called.<br />
+        /// If false, use　NotifyPeerConnectionClosed. Events: Disconnected<br />
+        /// When a connection becomes unstable, attempts to reconnect are made in the back. <br />
+        /// If reconnection fails, a heartbeat to the lobby is send to the lobby within p2p's NotifyPeerConnectionClosed. <br />
+        /// When that user's connection with the lobby has also been lost, Disconnected will be called.
+        /// </summary>
         public bool UseDisconnectedEarlyNotify;
 
         /// <summary>

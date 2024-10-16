@@ -267,7 +267,7 @@ namespace SynicSugar.P2P {
         }
     }
 #endregion
-#region Early Connected Notify
+#region Early Disconnected Notify
     void AddNotifyPeerConnectionInterrupted(){
         if (InterruptedNotify == 0){
             AddNotifyPeerConnectionInterruptedOptions options = new AddNotifyPeerConnectionInterruptedOptions(){
@@ -283,7 +283,6 @@ namespace SynicSugar.P2P {
         }
     }
     // Call from SubscribeToConnectionRequest.
-    // This function will only be called if the connection has not been accepted yet.
     void OnPeerConnectionInterruptedCallback(ref OnPeerConnectionInterruptedInfo data){
         if (!(bool)data.SocketId?.SocketName.Equals(ScoketName)){
             Debug.LogError("InterruptedCallback: unknown socket id. This peer should be no lobby member.");
@@ -319,7 +318,6 @@ namespace SynicSugar.P2P {
         }
     }
     // Call from SubscribeToConnectionRequest.
-    // This function will only be called if the connection has not been accepted yet.
     void OnPeerConnectionEstablishedCallback(ref OnPeerConnectionEstablishedInfo data){
         if (!(bool)data.SocketId?.SocketName.Equals(ScoketName)){
             Debug.LogError("EstablishedCallback: unknown socket id. This peer should be no lobby member.");
@@ -358,7 +356,6 @@ namespace SynicSugar.P2P {
         }
     }
     // Call from SubscribeToConnectionRequest.
-    // This function will only be called if the connection has not been accepted yet.
     void OnPeerConnectionClosedCallback(ref OnRemoteConnectionClosedInfo data){
         if (!(bool)data.SocketId?.SocketName.Equals(ScoketName)){
             Debug.LogError("ClosedCallback: unknown socket id. This peer should be no lobby member.");
