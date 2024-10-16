@@ -271,7 +271,7 @@ namespace SynicSugar.Samples.Tank {
             foreach(var id in p2pInfo.Instance.CurrentAllUserIds){
                 TankPlayer player = ConnectHub.Instance.GetUserInstance<TankPlayer>(id);
                 // A player who has disconnected is also considered dead.
-                if(player.gameObject.activeSelf || player.status.CurrentHP > 0f){
+                if(player.gameObject.activeSelf && player.status.CurrentHP > 0f){
                     survivorCount++;
                 }
                 // If not alone, stop counting.

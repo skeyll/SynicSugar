@@ -148,7 +148,9 @@ namespace  SynicSugar.Samples.Tank {
         }
         internal void ResetObjectState(){
             Crown.SetActive(false);
-            gameObject.SetActive(true);
+            if(!p2pInfo.Instance.DisconnectedUserIds.Contains(OwnerUserID)){
+                gameObject.SetActive(true);
+            }
             actions.Init();
             movement.Stop();
         }
