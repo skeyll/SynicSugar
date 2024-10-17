@@ -9,36 +9,39 @@ using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.Events;
 using Object = UnityEngine.Object;
-namespace SynicSugar.Samples {
+namespace SynicSugar.Samples 
+{
     /// <summary>
     /// Mark a method with an integer argument with this to display the argument as an enum popup in the UnityEvent
     /// drawer. Use: [EnumAction(typeof(SomeEnumType))]
     /// From https://forum.unity.com/threads/ability-to-add-enum-argument-to-button-functions.270817
     /// </summary>
     [CustomPropertyDrawer(typeof(UnityEvent), true)]
-    public class UnityEventDrawer : PropertyDrawer {
-        readonly Dictionary<string, State> _mStates = new Dictionary<string, State>();
+    public class UnityEventDrawer : PropertyDrawer 
+    {
+        private readonly Dictionary<string, State> _mStates = new Dictionary<string, State>();
 
         // Find internal methods with reflection
-        static readonly MethodInfo FindMethod = typeof(UnityEventBase).GetMethod("FindMethod",
+        private static readonly MethodInfo FindMethod = typeof(UnityEventBase).GetMethod("FindMethod",
             BindingFlags.NonPublic | BindingFlags.Instance, null, CallingConventions.Standard,
             new[] { typeof(string), typeof(Type), typeof(PersistentListenerMode), typeof(Type) }, null);
 
-        static readonly MethodInfo Temp = typeof(GUIContent).GetMethod("Temp",
+        private static readonly MethodInfo Temp = typeof(GUIContent).GetMethod("Temp",
             BindingFlags.NonPublic | BindingFlags.Static, null, CallingConventions.Standard, new[] { typeof(string) },
             null);
 
-        static readonly PropertyInfo MixedValueContent = typeof(EditorGUI).GetProperty("mixedValueContent", BindingFlags.NonPublic | BindingFlags.Static);
+        private static readonly PropertyInfo MixedValueContent = typeof(EditorGUI).GetProperty("mixedValueContent", BindingFlags.NonPublic | BindingFlags.Static);
 
-        Styles _mStyles;
-        string _mText;
-        UnityEventBase _mDummyEvent;
-        SerializedProperty _mProp;
-        SerializedProperty _mListenersArray;
-        ReorderableList _mReorderableList;
-        int _mLastSelectedIndex;
+        private Styles _mStyles;
+        private string _mText;
+        private UnityEventBase _mDummyEvent;
+        private SerializedProperty _mProp;
+        private SerializedProperty _mListenersArray;
+        private ReorderableList _mReorderableList;
+        private int _mLastSelectedIndex;
 
-        static string GetEventParams(UnityEventBase evt) {
+        private static string GetEventParams(UnityEventBase evt) 
+        {
             var method = (MethodInfo)FindMethod.Invoke(evt,
                 new object[] { "Invoke", evt.GetType(), PersistentListenerMode.EventDefined, null });
             var stringBuilder = new StringBuilder();
@@ -55,7 +58,7 @@ namespace SynicSugar.Samples {
             return stringBuilder.ToString();
         }
 
-        State GetState(SerializedProperty prop)
+        private State GetState(SerializedProperty prop)
         {
             var propertyPath = prop.propertyPath;
             _mStates.TryGetValue(propertyPath, out var state);
@@ -77,7 +80,7 @@ namespace SynicSugar.Samples {
             return state;
         }
 
-        State RestoreState(SerializedProperty property)
+        private State RestoreState(SerializedProperty property)
         {
             var state = GetState(property);
             _mListenersArray = state.MReorderableList.serializedProperty;
@@ -105,7 +108,7 @@ namespace SynicSugar.Samples {
             return num;
         }
 
-        void OnGUI(Rect position)
+        private void OnGUI(Rect position)
         {
             if (_mListenersArray is not { isArray: true })
                 return;
@@ -128,10 +131,10 @@ namespace SynicSugar.Samples {
             GUI.Label(headerRect, text);
         }
 
-        static PersistentListenerMode GetMode(SerializedProperty mode) =>
+        private static PersistentListenerMode GetMode(SerializedProperty mode) =>
             (PersistentListenerMode)mode.enumValueIndex;
 
-        void DrawEventListener(Rect rect, int index, bool isActive, bool isFocused)
+        private void DrawEventListener(Rect rect, int index, bool isActive, bool isFocused)
         {
             var arrayElementAtIndex = _mListenersArray.GetArrayElementAtIndex(index);
             ++rect.y;
@@ -244,7 +247,7 @@ namespace SynicSugar.Samples {
             GUI.backgroundColor = backgroundColor;
         }
 
-        static Rect[] GetRowRects(Rect rect)
+        private static Rect[] GetRowRects(Rect rect)
         {
             var rectArray = new Rect[4];
             rect.height = 16f;
@@ -264,13 +267,13 @@ namespace SynicSugar.Samples {
             return rectArray;
         }
 
-        void RemoveButton(ReorderableList list)
+        private void RemoveButton(ReorderableList list)
         {
             ReorderableList.defaultBehaviours.DoRemoveButton(list);
             _mLastSelectedIndex = list.index;
         }
 
-        void AddEventListener(ReorderableList list)
+        private void AddEventListener(ReorderableList list)
         {
             if (_mListenersArray.hasMultipleDifferentValues)
             {
@@ -306,13 +309,13 @@ namespace SynicSugar.Samples {
             propertyRelative5.FindPropertyRelative("m_ObjectArgumentAssemblyTypeName").stringValue = null;
         }
 
-        void SelectEventListener(ReorderableList list) => _mLastSelectedIndex = list.index;
+        private void SelectEventListener(ReorderableList list) => _mLastSelectedIndex = list.index;
 
-        void EndDragChild(ReorderableList list) => _mLastSelectedIndex = list.index;
+        private void EndDragChild(ReorderableList list) => _mLastSelectedIndex = list.index;
 
-        static UnityEventBase GetDummyEvent(SerializedProperty _) => new UnityEvent();
+        private static UnityEventBase GetDummyEvent(SerializedProperty _) => new UnityEvent();
 
-        static IEnumerable<ValidMethodMap> CalculateMethodMap(Object target, IReadOnlyList<Type> t,
+        private static IEnumerable<ValidMethodMap> CalculateMethodMap(Object target, IReadOnlyList<Type> t,
             bool allowSubclasses)
         {
             var validMethodMapList = new List<ValidMethodMap>();
@@ -363,11 +366,11 @@ namespace SynicSugar.Samples {
             return GetMethod(dummyEvent, methodName, uObject, modeEnum, argumentType) != null;
         }
 
-        static MethodInfo GetMethod(UnityEventBase dummyEvent, string methodName, Object uObject,
+        private static MethodInfo GetMethod(UnityEventBase dummyEvent, string methodName, Object uObject,
             PersistentListenerMode modeEnum, Type argumentType) => (MethodInfo)FindMethod.Invoke(dummyEvent,
             new object[] { methodName, uObject.GetType(), modeEnum, argumentType });
 
-        static GenericMenu BuildPopupList(Object target, UnityEventBase dummyEvent, SerializedProperty listener)
+        private static GenericMenu BuildPopupList(Object target, UnityEventBase dummyEvent, SerializedProperty listener)
         {
             var target1 = target;
             if (target1 is Component targetComp)
@@ -396,7 +399,7 @@ namespace SynicSugar.Samples {
             return menu;
         }
 
-        static void GeneratePopUpForType(GenericMenu menu, Object target, bool useFullTargetName,
+        private static void GeneratePopUpForType(GenericMenu menu, Object target, bool useFullTargetName,
             SerializedProperty listener, Type[] delegateArgumentsTypes)
         {
             var methods = new List<ValidMethodMap>();
@@ -441,7 +444,7 @@ namespace SynicSugar.Samples {
                 AddFunctionsForScript(menu, listener, method, targetName);
         }
 
-        static void GetMethodsForTargetAndMode(Object target, Type[] delegateArgumentsTypes,
+        private static void GetMethodsForTargetAndMode(Object target, Type[] delegateArgumentsTypes,
             List<ValidMethodMap> methods, PersistentListenerMode mode, bool allowSubclasses = false)
         {
             var methodMaps = CalculateMethodMap(target, delegateArgumentsTypes, allowSubclasses).ToArray();
@@ -452,7 +455,7 @@ namespace SynicSugar.Samples {
             }
         }
 
-        static void AddFunctionsForScript(GenericMenu menu, SerializedProperty listener, ValidMethodMap method,
+        private static void AddFunctionsForScript(GenericMenu menu, SerializedProperty listener, ValidMethodMap method,
             string targetName)
         {
             var mode1 = method.Mode;
@@ -482,7 +485,7 @@ namespace SynicSugar.Samples {
                 new UnityEventFunction(listener, method.Target, method.MethodInfo, mode1));
         }
 
-        static string GetTypeName(Type t)
+        private static string GetTypeName(Type t)
         {
             if (t == typeof(int))
                 return "int";
@@ -495,7 +498,7 @@ namespace SynicSugar.Samples {
             return t.Name;
         }
 
-        static string GetFormattedMethodName(string targetName, string methodName, string args, bool dynamic)
+        private static string GetFormattedMethodName(string targetName, string methodName, string args, bool dynamic)
         {
             if (dynamic)
             {
@@ -509,9 +512,9 @@ namespace SynicSugar.Samples {
                 : $"{targetName}/{methodName} ({args})";
         }
 
-        static void SetEventFunction(object source) => ((UnityEventFunction)source).Assign();
+        private static void SetEventFunction(object source) => ((UnityEventFunction)source).Assign();
 
-        static void ClearEventFunction(object source) => ((UnityEventFunction)source).Clear();
+        private static void ClearEventFunction(object source) => ((UnityEventFunction)source).Clear();
 
         protected class State
         {
@@ -519,21 +522,21 @@ namespace SynicSugar.Samples {
             public int LastSelectedIndex;
         }
 
-        class Styles
+        private class Styles
         {
             public readonly GUIContent IconToolbarMinus = EditorGUIUtility.IconContent("Toolbar Minus");
             public readonly GUIStyle GenericFieldStyle = EditorStyles.label;
             public readonly GUIStyle RemoveButton = "InvisibleButton";
         }
 
-        struct ValidMethodMap
+        private struct ValidMethodMap
         {
             public Object Target;
             public MethodInfo MethodInfo;
             public PersistentListenerMode Mode;
         }
 
-        readonly struct UnityEventFunction
+        private readonly struct UnityEventFunction
         {
             readonly SerializedProperty _mListener;
             readonly Object _mTarget;
@@ -572,7 +575,7 @@ namespace SynicSugar.Samples {
                 _mListener.serializedObject.ApplyModifiedProperties();
             }
 
-            static void ValidateObjectParameter(SerializedProperty arguments, PersistentListenerMode mode)
+            private static void ValidateObjectParameter(SerializedProperty arguments, PersistentListenerMode mode)
             {
                 var propertyRelative1 = arguments.FindPropertyRelative("m_ObjectArgumentAssemblyTypeName");
                 var propertyRelative2 = arguments.FindPropertyRelative("m_ObjectArgument");
