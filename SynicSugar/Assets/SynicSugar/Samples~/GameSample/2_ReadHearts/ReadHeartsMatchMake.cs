@@ -3,25 +3,30 @@ using SynicSugar.MatchMake;
 using UnityEngine;
 using UnityEngine.UI;
 /// <summary>
-/// This sample is　Minimum sample.
+/// This sample is Minimum sample.
 /// Awake: Prep for matchmaking (For basis of Events. This sample dosen't have condition for matchmaking)
 /// Start: Try to reconnect
 /// UserInputs: Matchmaking or OfflineMode
-namespace  SynicSugar.Samples.ReadHearts {
-    public class ReadHeartsMatchMake : MonoBehaviour {
-        enum MATCHMAKEING_STATE {
+namespace  SynicSugar.Samples.ReadHearts 
+{
+    public class ReadHeartsMatchMake : MonoBehaviour 
+    {
+        private enum MatchmakingState
+        {
             NoneAndAfterStart, Standby, InMatchmaking, ReadyToStartGame
         }
-        [SerializeField] GameObject matchmakePrefab;
-        [SerializeField] Button startMatchMake, closeLobby, startGame;
-        [SerializeField] MatchMakeConditions matchConditions;
-        [SerializeField] Text buttonText;
-        [SerializeField] Text matchmakeState;
+        [SerializeField] private GameObject matchmakePrefab;
+        [SerializeField] private Button startMatchMake, closeLobby, startGame;
+        [SerializeField] private MatchMakeConditions matchConditions;
+        [SerializeField] private Text buttonText;
+        [SerializeField] private Text matchmakeState;
 
     #region Prep for matchmaking
         //At first, prep GUI events for matchmaking.
-        void Awake(){
-            if(MatchMakeManager.Instance == null){
+        private void Awake()
+        {
+            if(MatchMakeManager.Instance == null)
+            {
                 Instantiate(matchmakePrefab);
             }
             //Prep matchmaking
@@ -30,60 +35,69 @@ namespace  SynicSugar.Samples.ReadHearts {
         /// <summary>
         /// Register tests and button events for in-matchmaking.
         /// </summary>
-        void SetGUIEvents(){
+        private void SetGUIEvents()
+        {
             MatchMakeManager.Instance.MatchMakingGUIEvents = MatchMakeConfig.SetMatchingText(MatchMakeConfig.Langugage.EN);
             MatchMakeManager.Instance.MatchMakingGUIEvents.stateText = matchmakeState;
 
             MatchMakeManager.Instance.MatchMakingGUIEvents.DisableStart += OnDisableStart;
             MatchMakeManager.Instance.MatchMakingGUIEvents.EnableCancelKick += OnEnableCancel;
         }
-        void OnDisableStart(){
-            SwitchButtonsActive(MATCHMAKEING_STATE.NoneAndAfterStart);
+        private void OnDisableStart()
+        {
+            SwitchButtonsActive(MatchmakingState.NoneAndAfterStart);
         }
-        void OnEnableCancel(){
-            SwitchButtonsActive(MATCHMAKEING_STATE.InMatchmaking);
+        private void OnEnableCancel()
+        {
+            SwitchButtonsActive(MatchmakingState.InMatchmaking);
         }
     #endregion
         //Register MatchMaking button
-        public void StartMatchMake(){
+        public void StartMatchMake()
+        {
             SynicSugarDebug.Instance.Log("Start MatchMake.");
             StartMatchMakeEntity().Forget();
         }
         //We can't set NOT void process to Unity Event.
         //So, register StartMatchMake() to Button instead of this.
         //Or, change this to async void StartMatchMakeEntity() at the expense of performance. We can pass async void to UnityEvents.
-        async UniTask StartMatchMakeEntity(){
+        private async UniTask StartMatchMakeEntity()
+        {
             Result result = await MatchMakeManager.Instance.SearchAndCreateLobby(matchConditions.GetLobbyCondition(2));
                 
-            if(result != Result.Success){
+            if(result != Result.Success)
+            {
                 SynicSugarDebug.Instance.Log("MatchMaking Failed.", result);
-                SwitchButtonsActive(MATCHMAKEING_STATE.Standby);
+                SwitchButtonsActive(MatchmakingState.Standby);
                 return;
             }
 
             SynicSugarDebug.Instance.Log($"Success Matching! LobbyID:{MatchMakeManager.Instance.GetCurrentLobbyID()}");
-            SwitchButtonsActive(MATCHMAKEING_STATE.ReadyToStartGame);
+            SwitchButtonsActive(MatchmakingState.ReadyToStartGame);
         }
         /// <summary>
         /// For button. Just cancel matchmaking.
         /// </summary>
-        public void CancelMatchMaking(){
+        public void CancelMatchMaking()
+        {
             AsyncCancelMatchMaking().Forget();
         }
-        public async UniTaskVoid AsyncCancelMatchMaking(){
+        public async UniTaskVoid AsyncCancelMatchMaking()
+        {
             await MatchMakeManager.Instance.ExitCurrentMatchMake(false);
         }
         /// <summary>
         /// Switch button active
         /// </summary>
         /// <param name="state"></param>
-        void SwitchButtonsActive(MATCHMAKEING_STATE state){
+        private void SwitchButtonsActive(MatchmakingState state)
+        {
             //To start matchmake
-            startMatchMake.gameObject.SetActive(state == MATCHMAKEING_STATE.Standby);
+            startMatchMake.gameObject.SetActive(state == MatchmakingState.Standby);
             //To cancel matchmake
-            closeLobby.gameObject.SetActive(state == MATCHMAKEING_STATE.InMatchmaking);
+            closeLobby.gameObject.SetActive(state == MatchmakingState.InMatchmaking);
             //To start game
-            startGame.gameObject.SetActive(state == MATCHMAKEING_STATE.ReadyToStartGame);
+            startGame.gameObject.SetActive(state == MatchmakingState.ReadyToStartGame);
         }
     }
 }
