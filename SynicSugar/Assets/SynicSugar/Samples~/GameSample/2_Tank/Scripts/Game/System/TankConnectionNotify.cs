@@ -1,12 +1,15 @@
 using SynicSugar.P2P;
 using UnityEngine;
 
-namespace SynicSugar.Samples.Tank {
-    public class TankConnectionNotify {
+namespace SynicSugar.Samples.Tank
+{
+    public class TankConnectionNotify
+    {
         /// <summary>
         /// Register events to get notifies about connection.
         /// </summary>
-        internal void RegisterConnectionNotifyEvents(){
+        internal void RegisterConnectionNotifyEvents()
+        {
             p2pInfo.Instance.ConnectionNotifier.OnTargetDisconnected += OnDisconnected;
 
             p2pInfo.Instance.ConnectionNotifier.OnTargetEarlyDisconnected += OnEarlyDisconnected;
@@ -20,11 +23,13 @@ namespace SynicSugar.Samples.Tank {
         /// Completely disconnected
         /// </summary>
         /// <param name="id"></param>
-        void OnDisconnected(UserId id){
+        private void OnDisconnected(UserId id)
+        {
             Debug.Log($"{GetPlayerName(id)}: Disconencted");
             TankGameManager gameManager = ConnectHub.Instance.GetInstance<TankGameManager>();
             //If there are users who disconnected during Stanby, check the ready flag with the remaining players.
-            switch(gameManager.CurrentGameState){
+            switch(gameManager.CurrentGameState)
+            {
                 case GameState.Standby:
                     gameManager.CheckReadyState();
                 break;
@@ -37,7 +42,8 @@ namespace SynicSugar.Samples.Tank {
         /// Intentionally left the room　by Close or Exit Session.
         /// </summary>
         /// <param name="id"></param>
-        void OnLeaved(UserId id){
+        private void OnLeaved(UserId id)
+        {
             Debug.Log($"{GetPlayerName(id)}: Leaved");
             Object.Destroy(ConnectHub.Instance.GetUserInstance<TankPlayer>(id).gameObject);
         }
@@ -45,7 +51,8 @@ namespace SynicSugar.Samples.Tank {
         /// If the target has not sent a heartbeat for some time, this function is called.
         /// </summary>
         /// <param name="id"></param>
-        void OnEarlyDisconnected(UserId id){
+        private void OnEarlyDisconnected(UserId id)
+        {
             Debug.Log($"{GetPlayerName(id)}: EarlyDisconnected");
             ConnectHub.Instance.GetUserInstance<TankPlayer>(id).gameObject.SetActive(false);
         }
@@ -53,17 +60,22 @@ namespace SynicSugar.Samples.Tank {
         /// Called when after　EarlyDisconnected is invoked connection is re-established.
         /// </summary>
         /// <param name="id"></param>
-        void OnRestored(UserId id){
+        private void OnRestored(UserId id)
+        {
             Debug.Log($"{GetPlayerName(id)}: Restored");
             TankPlayer player = ConnectHub.Instance.GetUserInstance<TankPlayer>(id);
-            if(ConnectHub.Instance.GetInstance<TankGameManager>().CurrentGameState != GameState.InGame){
+            if(ConnectHub.Instance.GetInstance<TankGameManager>().CurrentGameState != GameState.InGame)
+            {
                 player.ActivatePlayer();
                 return;
             }
 
-            if(player.status.CurrentHP > 0){
+            if(player.status.CurrentHP > 0)
+            {
                 player.ActivatePlayer();
-            }else{
+            }
+            else
+            {
                 //To switch camera to survivor.
                 ConnectHub.Instance.GetInstance<TankGameManager>().CheckReadyState();
             }
@@ -72,7 +84,8 @@ namespace SynicSugar.Samples.Tank {
         /// Called when the target reconnects after Disconnected.
         /// </summary>
         /// <param name="id"></param>
-        void OnConnected(UserId id){
+        private void OnConnected(UserId id)
+        {
             Debug.Log($"{GetPlayerName(id)}: Connected");
             //In this sample, the initial position is synchronized via RespawnPos of Synic, so each player needs to update Respawn data before SyncSuynic.
             //Of course, we can update these value as player transform position when player moves, but player don't need these value except for Synic, 
@@ -90,7 +103,8 @@ namespace SynicSugar.Samples.Tank {
             //Can be sent without setting Phase, but performance is better with 2nd, 3rd args.
             ConnectHub.Instance.SyncSynic(id, SynicType.WithOthers, syncedPhase: 0, true);
         }
-        string GetPlayerName(UserId id){
+        private string GetPlayerName(UserId id)
+        {
             return $"{ConnectHub.Instance.GetUserInstance<TankPlayer>(id).status.Name}({id})";
         }
     }

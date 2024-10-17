@@ -1,61 +1,77 @@
 
 using UnityEngine;
-namespace SynicSugar.Samples.Tank {
-    internal enum TankClips {
+namespace SynicSugar.Samples.Tank
+{
+    internal enum TankClips
+    {
         Idling, Driving, Explosion
     }
-    internal enum ShootingClips{
+    internal enum ShootingClips
+    {
         Charge, Fire, Explosion
     }
-    public class TankAudioManager : MonoBehaviour {
+    public class TankAudioManager : MonoBehaviour
+    {
     #region Singleton
-        public static TankAudioManager Instance {
+        public static TankAudioManager Instance
+        {
             get; private set;
         }
         void Awake(){
-            if (Instance != null) {
+            if (Instance != null)
+            {
                 Destroy (this.gameObject);
                 return;
             }
             Instance = this;
         }
-        void OnDestroy(){
-            if(Instance == this){
+        void OnDestroy()
+        {
+            if(Instance == this)
+            {
                 Instance = null;
             }
         }
     #endregion
-        [SerializeField] AudioSource movementSource, shootingSource;
-        [SerializeField] Clips clips;
+        [SerializeField] private AudioSource movementSource, shootingSource;
+        [SerializeField] private Clips clips;
         //Detailed calculation process is too cumbersome, so it is omitted.
-        internal void PlayTankClip(TankClips clip){
+        internal void PlayTankClip(TankClips clip)
+        {
             // Change the clip and play it.
             movementSource.clip = clips.GetClip(clip);
             movementSource.Play();
         }
-        internal void StopTankSource(){
+        internal void StopTankSource()
+        {
             movementSource.Stop();
         }
-        internal void PlayTankClipOneshot(TankClips clip){
+        internal void PlayTankClipOneshot(TankClips clip)
+        {
             movementSource.PlayOneShot(clips.GetClip(clip));
         }
 
-        internal void PlayShootingClip(ShootingClips clip){
+        internal void PlayShootingClip(ShootingClips clip)
+        {
             shootingSource.clip = clips.GetClip(clip);
             shootingSource.Play();
         }
-        internal void StopShootingSource(){
+        internal void StopShootingSource()
+        {
             shootingSource.Stop();
         }
-        internal void PlayShootingClipOneshot(ShootingClips clip){
+        internal void PlayShootingClipOneshot(ShootingClips clip)
+        {
             shootingSource.PlayOneShot(clips.GetClip(clip));
         }
     }
     [System.Serializable]
-    public sealed class Clips{
-        [SerializeField] AudioClip Idling, Driving, TankExplosion, Charge, Fire, ShellExplosion;
+    public sealed class Clips
+    {
+        [SerializeField] private AudioClip Idling, Driving, TankExplosion, Charge, Fire, ShellExplosion;
 
-        internal AudioClip GetClip(TankClips clip){
+        internal AudioClip GetClip(TankClips clip)
+        {
             switch(clip){
                 case TankClips.Idling:
                     return Idling;
@@ -66,7 +82,8 @@ namespace SynicSugar.Samples.Tank {
             }
             return null;
         }
-        internal AudioClip GetClip(ShootingClips clip){
+        internal AudioClip GetClip(ShootingClips clip)
+        {
             switch(clip){
                 case ShootingClips.Charge:
                     return Charge;
@@ -77,7 +94,5 @@ namespace SynicSugar.Samples.Tank {
             }
             return null;
         }
-
-
     }
 }
