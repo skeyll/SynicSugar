@@ -11,6 +11,13 @@ Probably not. As long as you're not using it in extreme use, it should be fine.<
 
 </details>
 
+
+<details>
+<summary><b>Can the transport of p2p be changed?</b></summary>
+Currently, it cannot be changed. It's only EOS (Epic Online Services).<br>
+However,  SyicSugar will make it possible to change the backend server and the transport by modifying the Core before logging into the server. This feature is not implemented in v0.8.1.<br><br>
+</details>
+
 <details>
 <summary><b>Where can I find the DevTool for DebugLogin?</b></summary>
 It's included in the SDK, which can be downloaded from the "Download and configure EOS SDK" section after creating a product page in the Developer portal.<br>
