@@ -16,7 +16,7 @@
             string assignment = isPublic ? $"MemoryPackSerializer.Deserialize<{GetFullName(nameSpace, param)}>(payload, ref {name}[id].{variable});" :
               $"{name}[id].SetLocal{variable}(MemoryPackSerializer.Deserialize<{GetFullName(nameSpace, param)}>(payload));";
             return $@"
-                case CHANNELLIST.{variable}:
+                case Channels.{variable}:
                     {assignment}
                 return;";
         }
@@ -26,7 +26,7 @@
                     {name}.SetLocal{variable}(MemoryPackSerializer.Deserialize<{GetFullName(nameSpace, param)}>(payload));
                     {name}.isLocalCall = true;";
             return $@"
-                case CHANNELLIST.{variable}:
+                case Channels.{variable}:
                     {assignment}
                 return;";
         }
@@ -59,7 +59,7 @@
                 return; }}" : "return; ";
 
             return $@"
-                case CHANNELLIST.{method}:{largepacketHeader}
+                case Channels.{method}:{largepacketHeader}
                     {rootName}[id].{method}(UserId.GetUserId(id){paramName});
                 {footer}";
         }
@@ -94,7 +94,7 @@
                 return; }}" : "return;";
 
             return $@"
-                case CHANNELLIST.{method}:{largepacketHeader}
+                case Channels.{method}:{largepacketHeader}
                     {rootName}[id].{method}({paramName});
                 {footer}";
         }
@@ -128,7 +128,7 @@
                 return; }}" : "return;";
 
             return $@"
-                case CHANNELLIST.{method}:{largepacketHeader}
+                case Channels.{method}:{largepacketHeader}
                     {rootName}.isLocalCall = false;
                     {rootName}.{method}({paramName});
                 {footer}";
@@ -215,7 +215,7 @@
         async UniTask Synic{name}(){{
             var preValue = {name};
 
-            EOSp2p.SendPacketToAll((byte)ConnectHub.CHANNELLIST.{name}, MemoryPack.MemoryPackSerializer.Serialize({name})).Forget();
+            EOSp2p.SendPacketToAll((byte)ConnectHub.Channels.{name}, MemoryPack.MemoryPackSerializer.Serialize({name})).Forget();
             await UniTask.Delay({intervalTime}, cancellationToken: ConnectHub.Instance.GetSyncToken());
             
             if(ConnectHub.Instance.GetSyncToken().IsCancellationRequested){{
@@ -245,7 +245,7 @@
             return $@"
         void SynicSugarRpc_{fnName}({arg}) {{
             if(isLocal){{{largepacketCompresser}
-                EOSp2p.{methodType}((byte)ConnectHub.CHANNELLIST.{fnName}, {serializer}{recordOption}).Forget();
+                EOSp2p.{methodType}((byte)ConnectHub.Channels.{fnName}, {serializer}{recordOption}).Forget();
             }}
         }}";
         }
@@ -265,7 +265,7 @@
             return $@"
         void SynicSugarRpc_{fnName}(UserId id{arg}) {{
             if(isLocal){{{largepacketCompresser}
-                EOSp2p.{methodType}((byte)ConnectHub.CHANNELLIST.{fnName}, {serializer}, id{recordOption}){forget};
+                EOSp2p.{methodType}((byte)ConnectHub.Channels.{fnName}, {serializer}, id{recordOption}){forget};
             }}
         }}";
         }
@@ -284,7 +284,7 @@
             return $@"
         void SynicSugarRpc_{fnName}({arg}) {{
             if(isLocalCall){{{largepacketCompresser}
-                EOSp2p.{methodType}((byte)ConnectHub.CHANNELLIST.{fnName}, {serializer}{recordOption}).Forget();
+                EOSp2p.{methodType}((byte)ConnectHub.Channels.{fnName}, {serializer}{recordOption}).Forget();
             }}
             isLocalCall = true;
         }}";
