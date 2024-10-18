@@ -1,18 +1,22 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-namespace SynicSugar.Samples.Tank {
-    public class TankGameResult : MonoBehaviour {
-        [SerializeField] Text textPrefab;
-        [SerializeField] Transform resultsParent;
-        List<Text> results;
+namespace SynicSugar.Samples.Tank 
+{
+    public class TankGameResult : MonoBehaviour 
+    {
+        [SerializeField] private Text textPrefab;
+        [SerializeField] private Transform resultsParent;
+        private List<Text> results;
         /// <summary>
         /// Generate texts to display game result
         /// </summary>
         /// <param name="playerAmount"></param> 
-        internal void GenerateResultsText(int playerAmount){
+        internal void GenerateResultsText(int playerAmount)
+        {
             results = new List<Text>();
-            for(int i = 0; i < playerAmount; i++){
+            for(int i = 0; i < playerAmount; i++)
+            {
                 var text = Instantiate(textPrefab, resultsParent);
                 results.Add(text);
             }
@@ -22,8 +26,10 @@ namespace SynicSugar.Samples.Tank {
         /// Insert result and activate result panel.
         /// </summary>
         /// <param name="resultData"></param>
-        internal void DisplayResult(List<TankResultData> resultData){
-            for(int i = 0; i < resultData.Count; i++){
+        internal void DisplayResult(List<TankResultData> resultData)
+        {
+            for(int i = 0; i < resultData.Count; i++)
+            {
                 results[i].text = $"{i}: {resultData[i].Name}({resultData[i].RemainHP})";
             }
 
@@ -32,10 +38,12 @@ namespace SynicSugar.Samples.Tank {
         /// <summary>
         /// Deactivate result panel and reset text.
         /// </summary>
-        internal void DeactivateResult(){
+        internal void DeactivateResult()
+        {
             gameObject.SetActive(false);
 
-            foreach(var text in results){
+            foreach(var text in results)
+            {
                 text.text = string.Empty;
             }
         }

@@ -57,7 +57,7 @@ namespace SynicSugar.P2P {
         public Result StartPacketReceiver(PacketReceiveTiming receiveTiming = PacketReceiveTiming.Update, uint maxBatchSize = 1){
         #if SYNICSUGAR_PACKETINFO
             string chs = string.Empty;
-            string[] chList = Enum.GetNames(typeof(ConnectHub.CHANNELLIST));
+            string[] chList = Enum.GetNames(typeof(ConnectHub.Channels));
             foreach(var l in chList){
                 chs += l.ToString() + ", ";
             }
@@ -167,8 +167,15 @@ namespace SynicSugar.P2P {
             return result;
         }
 
+        [Obsolete("This is old. Channels is new one")]
+        public enum CHANNELLIST {
+            <#= SyncList #>
+        }
         //(for elements)
-        public enum CHANNELLIST{
+        /// <summary>
+        /// Ch's list allocated for SendPacket.
+        /// </summary>
+        public enum Channels {
             <#= SyncList #>
         }
         //For Synic(UserId, value)
@@ -212,14 +219,14 @@ namespace SynicSugar.P2P {
         /// Remote RPC is invoked with received value.
         /// </summary>
         void IPacketConvert.ConvertFromPacket(ref byte ch, string id, ref ArraySegment<byte> payload){
-            switch((CHANNELLIST)ch){<#= PacketConvert #>
-                case CHANNELLIST.ObtainPing:
-                    EOSp2p.SendPacket((byte)CHANNELLIST.ReturnPong, payload, UserId.GetUserId(id));
+            switch((Channels)ch){<#= PacketConvert #>
+                case Channels.ObtainPing:
+                    EOSp2p.SendPacket((byte)Channels.ReturnPong, payload, UserId.GetUserId(id));
                 return;
-                case CHANNELLIST.ReturnPong:
+                case Channels.ReturnPong:
                     NetworkCore.GetPong(id, payload);
                 return;
-                case CHANNELLIST.Synic:
+                case Channels.Synic:
                     string userId = id;
                     bool restoredPacket = RestoreSynicPackets(ref ch, ref userId, ref payload);
                     if(!restoredPacket){
@@ -244,7 +251,7 @@ namespace SynicSugar.P2P {
                 #if SYNICSUGAR_LOG 
                     Debug.LogFormat("ConvertFormPacket: Success overwriting {0}'s data by {1}"!, userId, id);
                 #endif
-                return;
+                return;           
             }
         }
 
@@ -302,7 +309,7 @@ namespace SynicSugar.P2P {
             using var selfCompressor  = new BrotliCompressor();
             MemoryPackSerializer.Serialize(selfCompressor, synicContainer);
 
-            EOSp2p.SendSynicPackets((byte)CHANNELLIST.Synic, selfCompressor.ToArray(), targetId, p2pInfo.Instance.LocalUserId, syncedPhase, syncSinglePhase);
+            EOSp2p.SendSynicPackets((byte)Channels.Synic, selfCompressor.ToArray(), targetId, p2pInfo.Instance.LocalUserId, syncedPhase, syncSinglePhase);
 
             if(type == SynicType.OnlySelf || !p2pInfo.Instance.IsHost()){
                 return;
@@ -315,7 +322,7 @@ namespace SynicSugar.P2P {
                     using var targetCompressor  = new BrotliCompressor();
                     MemoryPackSerializer.Serialize(targetCompressor, synicContainer);
 
-                    EOSp2p.SendSynicPackets((byte)CHANNELLIST.Synic, targetCompressor.ToArray(), targetId, id, syncedPhase, syncSinglePhase);
+                    EOSp2p.SendSynicPackets((byte)Channels.Synic, targetCompressor.ToArray(), targetId, id, syncedPhase, syncSinglePhase);
                     await UniTask.Yield();
                 }
             }
@@ -326,7 +333,7 @@ namespace SynicSugar.P2P {
             using var reconnecterCompressor  = new BrotliCompressor();
             MemoryPackSerializer.Serialize(reconnecterCompressor, synicContainer);
 
-            EOSp2p.SendSynicPackets((byte)CHANNELLIST.Synic, reconnecterCompressor.ToArray(), targetId, targetId, syncedPhase, syncSinglePhase);
+            EOSp2p.SendSynicPackets((byte)Channels.Synic, reconnecterCompressor.ToArray(), targetId, targetId, syncedPhase, syncSinglePhase);
         }
         
         SynicContainer GenerateSynicContainer(string id, byte syncedPhase, bool syncSinglePhase){
@@ -356,7 +363,7 @@ namespace SynicSugar.P2P {
             int offset = packetIndex * EOSp2p.MAX_LARGEPACKET_PAYLOADSIZE;
 
     #if SYNICSUGAR_PACKETINFO
-            Debug.Log($"RestoreLargePackets: ch {ch}({(CHANNELLIST)ch}) from {id} / packet index {payload[0]}/{payload[1]}");
+            Debug.Log($"RestoreLargePackets: ch {ch}({(Channels)ch}) from {id} / packet index {payload[0]}/{payload[1]}");
     #endif
             //Remove header
             Span<byte> packetPayload = payload.Slice(2);
@@ -399,7 +406,7 @@ namespace SynicSugar.P2P {
             int offset = packetIndex * EOSp2p.MAX_LARGEPACKET_PAYLOADSIZE;
 
     #if SYNICSUGAR_PACKETINFO
-            Debug.Log($"RestoreSynicPacket(Synic): ch {ch}({(CHANNELLIST)ch}) / Data's userID {id} / packet index {payload[0]}/{payload[1]}");
+            Debug.Log($"RestoreSynicPacket(Synic): ch {ch}({(Channels)ch}) / Data's userID {id} / packet index {payload[0]}/{payload[1]}");
     #endif
             //Remove header
             Span<byte> packetPayload = payload.Slice(4);

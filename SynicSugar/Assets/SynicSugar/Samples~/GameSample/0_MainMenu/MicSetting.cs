@@ -3,13 +3,16 @@ using SynicSugar.RTC;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
-namespace SynicSugar.Samples{
+namespace SynicSugar.Samples
+{
     //This setting just for chat scene (having VC).
-    public class MicSetting : MonoBehaviour {
-        [SerializeField] Dropdown inputDevices, outputDevices;
-        List<AudioInputDeviceInfo> inputs;
-        List<AudioOutputDeviceInfo> outputs;
-        void Start(){
+    public class MicSetting : MonoBehaviour 
+    {
+        [SerializeField] private Dropdown inputDevices, outputDevices;
+        private List<AudioInputDeviceInfo> inputs;
+        private List<AudioOutputDeviceInfo> outputs;
+        private void Start()
+        {
             inputs = RTCConfig.GetInputDeviceInformation();
             outputs = RTCConfig.GetOutputDeviceInformation();
 
@@ -21,37 +24,43 @@ namespace SynicSugar.Samples{
             //To remove notify by scene.
             RTCConfig.Instance.AddNotifyAudioDevicesChanged(SceneManager.GetActiveScene().name, () => RefreshShownValue());
         }
-        public void RefreshShownValue(){
+        public void RefreshShownValue()
+        {
             inputDevices.options.Clear();
             outputDevices.options.Clear();
-            for(int i = 0; i < inputs.Count; i++){
+            for(int i = 0; i < inputs.Count; i++)
+            {
                 string defaultText = inputs[i].DefaultDevice ? "(Default)" : System.String.Empty;
                 string name = $"{defaultText} {inputs[i].DeviceName}";
                 
                 inputDevices.options.Add(new Dropdown.OptionData { text = name });
-                if(inputs[i].DefaultDevice){
+                if(inputs[i].DefaultDevice)
+                {
                     inputDevices.value = i;
                 }
             }
 
-            for(int i = 0; i < outputs.Count; i++){
+            for(int i = 0; i < outputs.Count; i++)
+            {
                 string defaultText = outputs[i].DefaultDevice ? "(Default)" : System.String.Empty;
                 string name = $"{defaultText} {outputs[i].DeviceName}";
                 
                 outputDevices.options.Add(new Dropdown.OptionData { text = name });
-                if(outputs[i].DefaultDevice){
+                if(outputs[i].DefaultDevice)
+                {
                     outputDevices.value = i;
                 }
             }
             inputDevices.RefreshShownValue();
             outputDevices.RefreshShownValue();
         }
-        void OnInputSelected(int index){
+        private void OnInputSelected(int index)
+        {
             RTCConfig.SetAudioInputDevice(inputs[index]);
         }
-        void OnOutputSelected(int index){
+        private void OnOutputSelected(int index)
+        {
             RTCConfig.SetAudioOutputDevice(outputs[index]);
         }
     }
 }
-

@@ -8,30 +8,35 @@ using SynicSugar.P2P;
 /// Start: Try to reconnect
 /// UserInputs: Matchmaking or OfflineMode
 /// </summary>
-namespace SynicSugar.Samples.Chat {
-    public class ChatMatchMake : MonoBehaviour {
-        enum MATCHMAKEING_STATE { 
+namespace SynicSugar.Samples.Chat 
+{
+    public class ChatMatchMake : MonoBehaviour 
+    {
+        private enum MatchmakingState 
+        { 
             NoneAndAfterStart, Standby, InMatchmaking, ReadyToStartGame
         }
 
         /// <summary>
         /// Display matchmaking state on GUI.
         /// </summary>
-        [SerializeField] Text matchmakeState;
-        [SerializeField] Button startMatchMake, startOfflineMode, 
+        [SerializeField] private Text matchmakeState;
+        [SerializeField] private Button startMatchMake, startOfflineMode, 
                         cancelMatchMake, backtoMenu, startGame;
-        [SerializeField] Text buttonText;
-        [SerializeField] MatchMakeConditions matchConditions;
-        void Awake(){
+        [SerializeField] private Text buttonText;
+        [SerializeField] private MatchMakeConditions matchConditions;
+        private void Awake()
+        {
             SetGUIEvents();
         }
     #region Init and Reconnection
         //Second,　check whether this player is a reconnector.
         //In fact, you had better check id like this on the Title screen after user Login to EOS.
-        void Start(){
+        private void Start()
+        {
             //Prep matchmaking
             // SetGUIEvents();
-            SwitchButtonsActive(MATCHMAKEING_STATE.NoneAndAfterStart);
+            SwitchButtonsActive(MatchmakingState.NoneAndAfterStart);
             //Try recconect
             //Sample projects use LobbyID save API of SynicSugar to save into Playerprefs for recconection.
             string LobbyID = MatchMakeManager.Instance.GetReconnectLobbyID();
@@ -40,7 +45,8 @@ namespace SynicSugar.Samples.Chat {
         /// <summary>
         /// Register tests and button events for in-matchmaking.
         /// </summary>
-        void SetGUIEvents(){
+        private void SetGUIEvents()
+        {
             MatchMakeManager.Instance.MatchMakingGUIEvents = MatchMakeConfig.SetMatchingText(MatchMakeConfig.Langugage.EN);
             MatchMakeManager.Instance.MatchMakingGUIEvents.stateText = matchmakeState;
 
@@ -50,54 +56,61 @@ namespace SynicSugar.Samples.Chat {
         /// <summary>
         /// Just after starting matchmaking
         /// </summary>
-        void OnDisableStart(){
+        private void OnDisableStart()
+        {
             //Cancel action need be disable when creating or joining lobby.
-            SwitchButtonsActive(MATCHMAKEING_STATE.NoneAndAfterStart);
+            SwitchButtonsActive(MatchmakingState.NoneAndAfterStart);
         }
         /// <summary>
         /// Finish to create or join a lobby, and accept canceling process.
         /// </summary>
-        void OnEnableCancel(){
-            SwitchButtonsActive(MATCHMAKEING_STATE.InMatchmaking);
+        private void OnEnableCancel()
+        {
+            SwitchButtonsActive(MatchmakingState.InMatchmaking);
         }
-        async UniTask TryToreconnect(string LobbyID){
+        private async UniTask TryToreconnect(string LobbyID)
+        {
             //On the default way, return Empty when there is no lobby data in local.
-            if(string.IsNullOrEmpty(LobbyID)){
+            if(string.IsNullOrEmpty(LobbyID))
+            {
                 SynicSugarDebug.Instance.Log($"This user is not Reconnecter.");
-                SwitchButtonsActive(MATCHMAKEING_STATE.Standby);
+                SwitchButtonsActive(MatchmakingState.Standby);
                 return;
             }
 
             Result result = await MatchMakeManager.Instance.ReconnectLobby(LobbyID);
 
-            if(result != Result.Success){
+            if(result != Result.Success)
+            {
                 SynicSugarDebug.Instance.Log("Fail to Re-Connect Lobby.", result);
-                SwitchButtonsActive(MATCHMAKEING_STATE.Standby);
+                SwitchButtonsActive(MatchmakingState.Standby);
                 return;
             }
             SynicSugarDebug.Instance.Log($"Success Recconect! LobbyID:{MatchMakeManager.Instance.GetCurrentLobbyID()}");
-            SwitchButtonsActive(MATCHMAKEING_STATE.ReadyToStartGame);
+            SwitchButtonsActive(MatchmakingState.ReadyToStartGame);
         }
     #endregion
         /// <summary>
         /// Switch button active
         /// </summary>
         /// <param name="state"></param>
-        void SwitchButtonsActive(MATCHMAKEING_STATE state){
+        private void SwitchButtonsActive(MatchmakingState state)
+        {
             //To start matchmake
-            startMatchMake.gameObject.SetActive(state == MATCHMAKEING_STATE.Standby);
-            startOfflineMode.gameObject.SetActive(state == MATCHMAKEING_STATE.Standby);
+            startMatchMake.gameObject.SetActive(state == MatchmakingState.Standby);
+            startOfflineMode.gameObject.SetActive(state == MatchmakingState.Standby);
             //To cancel matchmake
-            cancelMatchMake.gameObject.SetActive(state == MATCHMAKEING_STATE.InMatchmaking);
-            backtoMenu.gameObject.SetActive(state == MATCHMAKEING_STATE.InMatchmaking);
+            cancelMatchMake.gameObject.SetActive(state == MatchmakingState.InMatchmaking);
+            backtoMenu.gameObject.SetActive(state == MatchmakingState.InMatchmaking);
             //To start game
-            startGame.gameObject.SetActive(state == MATCHMAKEING_STATE.ReadyToStartGame);
+            startGame.gameObject.SetActive(state == MatchmakingState.ReadyToStartGame);
         }
     #region Matchmaking and Offlinemode
         /// <summary>
         /// Basis way to start matchmaking.
         /// </summary>
-        public void StartMatchMake(){
+        public void StartMatchMake()
+        {
             SynicSugarDebug.Instance.Log("Start MatchMake.");
             StartMatchMakeEntity().Forget();
         }
@@ -106,23 +119,25 @@ namespace SynicSugar.Samples.Chat {
         /// </summary>
         /// <returns></returns>
         internal async UniTask StartMatchMakeEntity(){
-            SwitchButtonsActive(MATCHMAKEING_STATE.NoneAndAfterStart);
+            SwitchButtonsActive(MatchmakingState.NoneAndAfterStart);
             Result result = await MatchMakeManager.Instance.SearchAndCreateLobby(matchConditions.GetLobbyCondition(2));
                 
-            if(result != Result.Success){
+            if(result != Result.Success)
+            {
                 SynicSugarDebug.Instance.Log("MatchMaking Failed.", result);
-                SwitchButtonsActive(MATCHMAKEING_STATE.Standby);
+                SwitchButtonsActive(MatchmakingState.Standby);
                 return;
             }
 
             SynicSugarDebug.Instance.Log($"Success Matching! LobbyID:{MatchMakeManager.Instance.GetCurrentLobbyID()}");
-            SwitchButtonsActive(MATCHMAKEING_STATE.ReadyToStartGame);
+            SwitchButtonsActive(MatchmakingState.ReadyToStartGame);
         }
         /// <summary>
         /// You can register NON-UniTask async process to Unity button.
         /// I implement everything the same way as StartMatchMake in my-own project for the performance, though.
         /// </summary>
-        public async void StartOfflineMode(){
+        public async void StartOfflineMode()
+        {
             SynicSugarDebug.Instance.Log("Start Offline Mode.");
             //To　simulate matchmaking
             // OfflineMatchmakingDelay delay = new OfflineMatchmakingDelay(2000, 1000, 1000, 1000);
@@ -130,37 +145,45 @@ namespace SynicSugar.Samples.Chat {
             //This is always true.
             Result result = await MatchMakeManager.Instance.CreateOfflineLobby(matchConditions.GetLobbyCondition(2), delay);
 
-            if(result != Result.Success){
-                //CreateOfflineLobby always returns Success. So this is no point.
-                return;
-            }
+            //CreateOfflineLobby always returns Success. So this is no point.
+            if(result != Result.Success) return; 
 
             SynicSugarDebug.Instance.Log($"Success Matching! LobbyID:{MatchMakeManager.Instance.GetCurrentLobbyID()}");
-            SwitchButtonsActive(MATCHMAKEING_STATE.ReadyToStartGame);
+            SwitchButtonsActive(MatchmakingState.ReadyToStartGame);
         }
         /// <summary>
         /// For button. Just cancel matchmaking.
         /// </summary>
-        public void CancelMatchMaking(){
+        public void CancelMatchMaking()
+        {
             CancelMatchMaking(isOfflineMode()).Forget();
         }
-        public async UniTask CancelMatchMaking(bool isOfflineMode){
-            if(isOfflineMode){
+        public async UniTask CancelMatchMaking(bool isOfflineMode)
+        {
+            if(isOfflineMode)
+            {
                 await ConnectHub.Instance.DestoryOfflineLobby(false);
-            }else{
+            }
+            else
+            {
                 await MatchMakeManager.Instance.ExitCurrentMatchMake(false);
             }
         }
         /// <summary>
         /// For button. Cancel matchmaking, and then return to Menu.
         /// </summary>
-        public void CanelMatchMakingAndReturnToMenu(){
+        public void CanelMatchMakingAndReturnToMenu()
+        {
             CanelMatchMakingAndReturnToMenu(isOfflineMode()).Forget();
         }
-        public async UniTask CanelMatchMakingAndReturnToMenu(bool isOfflineMode){
-            if(isOfflineMode){
+        public async UniTask CanelMatchMakingAndReturnToMenu(bool isOfflineMode)
+        {
+            if(isOfflineMode)
+            {
                 await ConnectHub.Instance.DestoryOfflineLobby();
-            }else{
+            }
+            else
+            {
                 await MatchMakeManager.Instance.ExitCurrentMatchMake(true);
             }
             SceneChanger.ChangeGameScene(SCENELIST.MainMenu);
@@ -169,7 +192,8 @@ namespace SynicSugar.Samples.Chat {
         /// Offline lobby id is "OFFLINEMODE"
         /// </summary>
         /// <returns></returns>
-        bool isOfflineMode(){
+        private bool isOfflineMode()
+        {
             return MatchMakeManager.Instance.GetCurrentLobbyID() == "OFFLINEMODE";
         }
     #endregion

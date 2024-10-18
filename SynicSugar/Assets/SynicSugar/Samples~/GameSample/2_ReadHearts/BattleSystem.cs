@@ -2,40 +2,45 @@ using SynicSugar.P2P;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace  SynicSugar.Samples {
+namespace SynicSugar.Samples.ReadHearts
+{
     [NetworkCommons(true)]
-    public partial class BattleSystem : MonoBehaviour {
+    public partial class BattleSystem : MonoBehaviour
+    {
 #region UI
-        [SerializeField] GameObject matchmakeCanvas, inGameObjects, resultObjects, chatCanvas, gamestartButton;
-        [SerializeField] Text turnState, battleResult, timeText;
+        [SerializeField] private GameObject matchmakeCanvas, inGameObjects, resultObjects, chatCanvas, gamestartButton;
+        [SerializeField] private Text turnState, battleResult, timeText;
         public Text sliderValue, chatText;
-        [SerializeField] Slider attackSlider;
+        [SerializeField] private Slider attackSlider;
 #endregion
 #region State
-        enum GameState{
+        private enum GameState
+        {
             InGame, Result
         }
-        GameState gameState;
+        private GameState gameState;
         [HideInInspector] public Player player, opponent;
-        int _currentTurn;
-        public int currentTurn { 
+        private int _currentTurn;
+        public int currentTurn 
+        { 
             get { return _currentTurn; }
-            set {
-                if(player.currentTurn < currentTurn || opponent.currentTurn < currentTurn){
-                    return;
-                }
+            set 
+            {
+                if(player.currentTurn < currentTurn || opponent.currentTurn < currentTurn) return;
+                
                 StartEndphaseProcess();
             }
         }
-        [SyncVar(true, 1000)]
-        float currentTime;
+        [SyncVar(true, 1000)] private float currentTime;
 #endregion
 #region Prep
-        public void ActivateGameCanvas(){
+        public void ActivateGameCanvas()
+        {
             this.gameObject.SetActive(true);
             matchmakeCanvas.SetActive(false);
         }
-        void Start(){
+        private void Start()
+        {
             ConnectHub.Instance.RegisterInstance(this);
             ChangeUIActive(GameState.Result);
             gamestartButton.SetActive(isHost);
@@ -46,7 +51,8 @@ namespace  SynicSugar.Samples {
             //After the all objects for Sync have been prepared, call StartPacketReceiver() to get packets.
             ConnectHub.Instance.StartPacketReceiver(PacketReceiveTiming.Update, 3);
         }
-        void SetUserId(){
+        private void SetUserId()
+        {
             //We can set UserID in by ourself in or after "Start".
             GameObject playerObject = this.transform.Find("PlayerHP").gameObject;
             player = playerObject.GetComponent<Player>();
@@ -58,28 +64,37 @@ namespace  SynicSugar.Samples {
         }
 #endregion
 #region In GameSystem
-        void StartEndphaseProcess(){
+        private void StartEndphaseProcess()
+        {
             _currentTurn++;
             CalculateDamage();
             ReflectResultToUI();
 
-            if(currentTurn == 5 || player.status.CurrentHP <= 0 || opponent.status.CurrentHP <= 0){
+            if(currentTurn == 5 || player.status.CurrentHP <= 0 || opponent.status.CurrentHP <= 0)
+            {
                 JudgeBattleResult();
                 return;
             }
         }
-        void CalculateDamage(){
-            if(player.status.AttackDamage == opponent.status.AttackDamage){ //shuffle
+        private void CalculateDamage()
+        {
+            if(player.status.AttackDamage == opponent.status.AttackDamage) //shuffle
+            { 
                 int tmpHP = player.status.CurrentHP;
                 player.status.CurrentHP = opponent.status.CurrentHP;
                 opponent.status.CurrentHP = tmpHP;
-            }else if(player.status.AttackDamage < opponent.status.AttackDamage){
+            }
+            else if(player.status.AttackDamage < opponent.status.AttackDamage)
+            {
                 opponent.status.CurrentHP -= player.status.AttackDamage;
-            }else{
+            }
+            else
+            {
                 player.status.CurrentHP -= opponent.status.AttackDamage;
             }
         }
-        void ReflectResultToUI(){
+        private void ReflectResultToUI()
+        {
             player.hpText.text = player.status.CurrentHP.ToString();
 
             opponent.damageText.text = opponent.status.AttackDamage.ToString();
@@ -87,20 +102,29 @@ namespace  SynicSugar.Samples {
 
             turnState.text = currentTurn == 5 ? "LAST" : currentTurn.ToString();
         }
-        void JudgeBattleResult(){
+        private void JudgeBattleResult()
+        {
             ChangeUIActive(GameState.Result);
+
             string result = System.String.Empty;
-            if(player.status.CurrentHP == opponent.status.CurrentHP){
+
+            if(player.status.CurrentHP == opponent.status.CurrentHP)
+            {
                 result = "DRAW";
-            }else if(player.status.CurrentHP < opponent.status.CurrentHP){
+            }
+            else if(player.status.CurrentHP < opponent.status.CurrentHP)
+            {
                 result = "LOSE";
-            }else{
+            }
+            else
+            {
                 result = "WIN";
             }
             battleResult.text = result;
         }
         [Rpc]
-        public void StartNewGame(){
+        public void StartNewGame()
+        {
             _currentTurn = 1;
             turnState.text = currentTurn.ToString();
             player.InitPlayerStatus();
@@ -108,28 +132,35 @@ namespace  SynicSugar.Samples {
 
             ChangeUIActive(GameState.InGame);
 
-            if(p2pInfo.Instance.IsHost()){
+            if(p2pInfo.Instance.IsHost())
+            {
                 currentTime = 0;
             }
         }
-        void ChangeUIActive(GameState state){
+        private void ChangeUIActive(GameState state)
+        {
             gameState = state;
             inGameObjects.SetActive(state == GameState.InGame);
             resultObjects.SetActive(state == GameState.Result);
         }
 #endregion
-        public void OnChangeSliderValue(){
+        public void OnChangeSliderValue()
+        {
             sliderValue.text = ((int)attackSlider.value).ToString();
         }
-        void Update() {
-            if(gameState == GameState.InGame){
-                if(isHost){
+        private void Update()
+        {
+            if(gameState == GameState.InGame)
+            {
+                if(isHost)
+                {
                     currentTime += Time.deltaTime;
                 }
                 timeText.text = ((int)currentTime).ToString();
             }
         }
-        public async void ExitGame(){
+        public async void ExitGame()
+        {
             await ConnectHub.Instance.CloseSession();
             
             SceneChanger.ChangeGameScene(SCENELIST.MainMenu); 
@@ -137,7 +168,8 @@ namespace  SynicSugar.Samples {
     }
 
     [System.Serializable]
-    public class Status {
+    public class Status
+    {
         public int CurrentHP;
         public int AttackDamage;
     }

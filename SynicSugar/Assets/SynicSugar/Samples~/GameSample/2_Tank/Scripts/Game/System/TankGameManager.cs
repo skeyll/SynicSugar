@@ -6,23 +6,26 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-namespace SynicSugar.Samples.Tank {
+namespace SynicSugar.Samples.Tank
+{
     [NetworkCommons(true)]
-    public partial class TankGameManager : MonoBehaviour{
-        [SerializeField] Transform tankParent;
-        TankCameraControl cameraControl;
-        TankConnectionNotify connectionNotify;
-        [SerializeField] TankGameResult gameResult;
-        [SerializeField] List<Transform> spawners;
-        [SerializeField] Button ReadyGame, PlayAgainGame, QuitGame;
+    public partial class TankGameManager : MonoBehaviour
+    {
+        [SerializeField] private Transform tankParent; //For clarity, all Players are created as children of this single object.
+        private TankCameraControl cameraControl;
+        private TankConnectionNotify connectionNotify;
+        [SerializeField] private TankGameResult gameResult;
+        [SerializeField] private List<Transform> spawners;
+        [SerializeField] private Button ReadyGame, PlayAgainGame, QuitGame;
         [Synic(0), HideInInspector] public GameState CurrentGameState;
         
-        bool everyoneIsReady;
+        private bool everyoneIsReady;
         //Time
-        [SerializeField] Text timerText, systemText;
-        TankPadGUI padGUI;
+        [SerializeField] private Text timerText, systemText;
+        private TankPadGUI padGUI;
 
-        void Start(){
+        private void Start()
+        {
             cameraControl = GetComponent<TankCameraControl>();
             SwitchSystemUIsState(GameState.PreparationForObjects);
             CurrentGameState = GameState.PreparationForObjects;
@@ -32,12 +35,13 @@ namespace SynicSugar.Samples.Tank {
         /// When the game restart from the pause, reset the time .
         /// </summary>
         /// <param name="pauseStatus"></param>
-        void OnApplicationPause(bool pauseStatus){
-            if(CurrentGameState != GameState.InGame){
+        private void OnApplicationPause(bool pauseStatus)
+        {
+            if(CurrentGameState != GameState.InGame)
                 return;
-            }
             
-            if (!pauseStatus){
+            if (!pauseStatus)
+            {
                 ConnectHub.Instance.GetInstance<TankRoundTimer>().SetTimer();
             }
         }
@@ -45,9 +49,12 @@ namespace SynicSugar.Samples.Tank {
         /// Manage game processes by State machine in this sample.
         /// </summary>
         /// <param name="newState"></param>
-        internal void InvokeStateProcess(GameState newState){
+        internal void InvokeStateProcess(GameState newState)
+        {
             Debug.Log("TankGameManager: CurrentState is" + newState);
-            switch(newState){
+
+            switch(newState)
+            {
                 case GameState.PreparationForObjects:
                     PreparationForObjectsProcess();
                 break;
@@ -69,7 +76,8 @@ namespace SynicSugar.Samples.Tank {
         /// Manage ui active.
         /// </summary>
         /// <param name="newState"></param>
-        void SwitchSystemUIsState(GameState newState){
+        private void SwitchSystemUIsState(GameState newState)
+        {
             ReadyGame.gameObject.SetActive(newState == GameState.Standby);
             PlayAgainGame.gameObject.SetActive(newState == GameState.Result);
             QuitGame.gameObject.SetActive(newState == GameState.Result);
@@ -79,7 +87,8 @@ namespace SynicSugar.Samples.Tank {
         /// <summary>
         /// Generate User Instance to sync data, then StartPacketReceiver and Send Packet.
         /// </summary>
-        void PreparationForObjectsProcess(){
+        private void PreparationForObjectsProcess()
+        {
             GeneratePlayers();
             RegisterConnectionNotifies();
             cameraControl.SetFollowLocalTarget();
@@ -96,18 +105,20 @@ namespace SynicSugar.Samples.Tank {
             CurrentGameState = GameState.PreparationForData;
             InvokeStateProcess(CurrentGameState);
         }
-        void GeneratePlayers(){
+        private void GeneratePlayers()
+        {
             GameObject playerPrefab = (GameObject)Resources.Load("Tank/Tank");
             // SynicSugar sync data via each instance.
             // So, we need to instanctiate the object before send or receive packets.
             SynicObject.AllSpawn(playerPrefab, tankParent);
         }
-        void RegisterConnectionNotifies(){
+        private void RegisterConnectionNotifies(){
             // Register an event if we need to know connection information.
             connectionNotify = new TankConnectionNotify();
             connectionNotify.RegisterConnectionNotifyEvents();
         }
-        void GeneratePadGUIs(){
+        private void GeneratePadGUIs()
+        {
             //Generate
             GameObject padGUIPrefab = (GameObject)Resources.Load("Tank/PadGUIs");
             GameObject padObjects = Instantiate(padGUIPrefab);
@@ -115,7 +126,8 @@ namespace SynicSugar.Samples.Tank {
             //Register Events to buttons to call Rpc from gui button.
             padGUI = padObjects.GetComponent<TankPadGUI>();
         }
-        void RegisterEventsToGUIs(){
+        private void RegisterEventsToGUIs()
+        {
             //To pad buttons
             TankPlayer player = ConnectHub.Instance.GetUserInstance<TankPlayer>(p2pInfo.Instance.LocalUserId);
             padGUI.RegisterButtonEvents(d => player.Move(d), () => player.Stop(), () => player.StartCharge(), () => player.ReleaseTheTrigger());
@@ -130,20 +142,25 @@ namespace SynicSugar.Samples.Tank {
         /// After creating an instance to send and receive data, start exchanging data.
         /// </summary>
         /// <returns></returns>
-        async UniTask PreparationForDataProcess(){
+        private async UniTask PreparationForDataProcess()
+        {
             //If the user is a reconnector, get synic packet before re-start a game.
-            if(p2pInfo.Instance.IsReconnecter){
+            if(p2pInfo.Instance.IsReconnecter)
+            {
                 //If this user comes here by ReconnectAPI, them need receive all the SynicPackets before back to the game.
                 ConnectHub.Instance.StartSynicReceiver(5);
                 await UniTask.WaitUntil(() => p2pInfo.Instance.HasReceivedAllSyncSynic, cancellationToken: this.GetCancellationTokenOnDestroy());
                 SetSynicsToObject();
                 //If the state is InGame and the player is dead, change the camera position.
-                if(CurrentGameState == GameState.InGame && !ConnectHub.Instance.GetUserInstance<TankPlayer>(p2pInfo.Instance.LocalUserId).gameObject.activeSelf){
+                if(CurrentGameState == GameState.InGame && 
+                    !ConnectHub.Instance.GetUserInstance<TankPlayer>(p2pInfo.Instance.LocalUserId).gameObject.activeSelf)
+                {
                     cameraControl.SwitchTargetToNextSurvivor(p2pInfo.Instance.GetUserIndex());
                 }
             }
             //If the game had not yet started, the reconnector also (re)sends the data.
-            if(CurrentGameState == GameState.PreparationForData){
+            if(CurrentGameState == GameState.PreparationForData)
+            {
                 SetLocalPlayerBasicData();
             }
 
@@ -157,7 +174,8 @@ namespace SynicSugar.Samples.Tank {
         /// <summary>
         /// Set basis data via sync.
         /// </summary>
-        void SetLocalPlayerBasicData(){
+        private void SetLocalPlayerBasicData()
+        {
             TankPlayerStatus status = new TankPlayerStatus()
             {
                 Name = TankPassedData.PlayerName, //carring over from Matchmaking scene.
@@ -173,7 +191,8 @@ namespace SynicSugar.Samples.Tank {
         /// <summary>
         /// Reflect synics to player object.
         /// </summary>
-        void SetSynicsToObject(){
+        private void SetSynicsToObject()
+        {
             foreach(var id in p2pInfo.Instance.CurrentConnectedUserIds){
                 ConnectHub.Instance.GetUserInstance<TankPlayer>(id).SetDataAfterReconnect();
             }
@@ -183,7 +202,8 @@ namespace SynicSugar.Samples.Tank {
         /// <summary>
         /// Wait for everyone ready.
         /// </summary>
-        void StandbyProcess(){
+        private void StandbyProcess()
+        {
             padGUI.SwitchGUISState(PadState.OnlyMove);
             SwitchSystemUIsState(GameState.Standby);
             
@@ -194,7 +214,8 @@ namespace SynicSugar.Samples.Tank {
         /// <summary>
         /// From call system button
         /// </summary>
-        public void ReadyToPlayBattle(){
+        public void ReadyToPlayBattle()
+        {
             //To deactivate all GUI.
             SwitchSystemUIsState(GameState.PreparationForObjects);
             ConnectHub.Instance.GetUserInstance<TankPlayer>(p2pInfo.Instance.LocalUserId).Ready();
@@ -202,17 +223,20 @@ namespace SynicSugar.Samples.Tank {
         /// <summary>
         /// Monitor isReady flag by everyoneIsReady.
         /// </summary>
-        async UniTask WaitForTheUsersReady(){
+        private async UniTask WaitForTheUsersReady()
+        {
             //Wait for Ready
             await UniTask.WaitUntil(() => everyoneIsReady, cancellationToken: this.GetCancellationTokenOnDestroy());
             //Host decide the start time of this round.
-            if(isHost){
+            if(isHost)
+            {
                 uint roomForLag = 3;
                 uint startTimestamp = p2pInfo.Instance.GetSessionTimestamp() + roomForLag;
                 ConnectHub.Instance.GetInstance<TankRoundTimer>().SetTimestamp(startTimestamp);
             }
             //reset flag while waiting for getting the start timestamp.
-            foreach(var id in p2pInfo.Instance.CurrentAllUserIds){
+            foreach(var id in p2pInfo.Instance.CurrentAllUserIds)
+            {
                 ConnectHub.Instance.GetUserInstance<TankPlayer>(id).status.isReady = false;
             }
             everyoneIsReady = false;
@@ -227,23 +251,25 @@ namespace SynicSugar.Samples.Tank {
         /// Go to InGame state after all users are ready. <br />
         /// Called from each ready prcess and disconnected proess.
         /// </summary>
-        internal void CheckReadyState(){
+        internal void CheckReadyState()
+        {
             //Compare state with everyone, then only go to InGame if these are the same.
-            foreach(var id in p2pInfo.Instance.CurrentConnectedUserIds){
-                if(!ConnectHub.Instance.GetUserInstance<TankPlayer>(id).status.isReady){
-                    return;
-                }
+            foreach(var id in p2pInfo.Instance.CurrentConnectedUserIds)
+            {
+                if(!ConnectHub.Instance.GetUserInstance<TankPlayer>(id).status.isReady) return;
             }
             everyoneIsReady = true;
         }
     #endregion
     #region InGame
-        async UniTask InGameProcess(){
+        private async UniTask InGameProcess()
+        {
             SwitchSystemUIsState(GameState.InGame);
             uint waitingTime = ConnectHub.Instance.GetInstance<TankRoundTimer>().SetTimer();
             //p2pInfo.Instance.IsReconnecter　is valid until a SynicPacket is received once.
             //So, we have to use others for reconnecter flag.
-            if(waitingTime > 0){
+            if(waitingTime > 0)
+            {
                 await GameStarting(waitingTime);
             }
 
@@ -258,44 +284,54 @@ namespace SynicSugar.Samples.Tank {
         /// Change the camera target and if there is the one user in the field, stop the timer and finish the game.
         /// </summary>
         /// <param name="deadUserIndex">To switch camera target</param>
-        internal void CheckRoundState(int deadUserIndex){
+        internal void CheckRoundState(int deadUserIndex)
+        {
             // When local user is dead, deactivate pads.
-            if(deadUserIndex == p2pInfo.Instance.GetUserIndex()){
+            if(deadUserIndex == p2pInfo.Instance.GetUserIndex())
+            {
                 padGUI.SwitchGUISState(PadState.None);
             }
             // Swtich camera position
             cameraControl.SwitchTargetToNextSurvivor(deadUserIndex);
             // Need end this round?
-            if(isHost && IsLastSurvivor()){
+            if(isHost && IsLastSurvivor())
+            {
                 ConnectHub.Instance.GetInstance<TankRoundTimer>().StopTimer();
             }
         }
-        bool IsLastSurvivor(){
+        private bool IsLastSurvivor()
+        {
             int survivorCount = 0;
-            foreach(var id in p2pInfo.Instance.CurrentAllUserIds){
+            foreach(var id in p2pInfo.Instance.CurrentAllUserIds)
+            {
                 TankPlayer player = ConnectHub.Instance.GetUserInstance<TankPlayer>(id);
                 // A player who has disconnected is also considered dead.
-                if(player.gameObject.activeSelf && player.status.CurrentHP > 0f){
+                if(player.gameObject.activeSelf && player.status.CurrentHP > 0f)
+                {
                     survivorCount++;
                 }
                 // If not alone, stop counting.
-                if(survivorCount > 1){
+                if(survivorCount > 1)
+                {
                     break;
                 }
             }
             return survivorCount == 1;
         }
-        async UniTask GameStarting(uint waitingTime){
+        private async UniTask GameStarting(uint waitingTime)
+        {
             int countTime = (int)waitingTime;
             //More than 3 do not count.
-            if(countTime > 3){
+            if(countTime > 3)
+            {
                 countTime -= 3;
                 int timeUntilCountdown = countTime * 1000;
                 await UniTask.Delay(timeUntilCountdown);
             }
             padGUI.SwitchGUISState(PadState.None);
             //Count 3　- 1
-            for(int i = countTime; i > 0; i--){
+            for(int i = countTime; i > 0; i--)
+            {
                 systemText.text = i.ToString();
                 await UniTask.Delay(1000);
             }
@@ -303,20 +339,24 @@ namespace SynicSugar.Samples.Tank {
             systemText.text = "Start";
             ResetSystemText().Forget();
         }
-        async UniTask GameEnding(){
+        private async UniTask GameEnding()
+        {
             padGUI.SwitchGUISState(PadState.None);
             systemText.text = "Finish";
             await ResetSystemText();
         }
-        async UniTask ResetSystemText(){
+        private async UniTask ResetSystemText()
+        {
             await UniTask.Delay(2000);
             systemText.text = string.Empty;
         }
     #endregion
     #region Result
-        async UniTask ResultProcess(){
+        private async UniTask ResultProcess()
+        {
             //Deactivate pre clown.
-            foreach(var id in p2pInfo.Instance.CurrentAllUserIds){
+            foreach(var id in p2pInfo.Instance.CurrentAllUserIds)
+            {
                 ConnectHub.Instance.GetUserInstance<TankPlayer>(id).ResetObjectState();
             }
 
@@ -332,7 +372,8 @@ namespace SynicSugar.Samples.Tank {
             await UniTask.Delay(2000);
 
             //Activate all player.
-            foreach(var id in p2pInfo.Instance.CurrentAllUserIds){
+            foreach(var id in p2pInfo.Instance.CurrentAllUserIds)
+            {
                 ConnectHub.Instance.GetUserInstance<TankPlayer>(id).ActivatePlayer();
             }
             //Switch Camera and GUI state
@@ -340,10 +381,11 @@ namespace SynicSugar.Samples.Tank {
             SwitchSystemUIsState(GameState.Result);
             padGUI.SwitchGUISState(PadState.OnlyMove);
         }
-        List<TankResultData> GetRoundResult(){
+        private List<TankResultData> GetRoundResult(){
             List<TankResultData> result = new List<TankResultData>();
 
-            foreach(var id in p2pInfo.Instance.CurrentAllUserIds){
+            foreach(var id in p2pInfo.Instance.CurrentAllUserIds)
+            {
                 TankPlayer player = ConnectHub.Instance.GetUserInstance<TankPlayer>(id);
                 // Disconnected playerｓ are treated as having 0 HP.
                 result.Add(new TankResultData(id, player.status.Name, player.gameObject.activeSelf ? player.status.CurrentHP : 0f));
@@ -354,7 +396,8 @@ namespace SynicSugar.Samples.Tank {
         /// <summary>
         /// Quit game and back to title scene.
         /// </summary>
-        public void TryAgain(){
+        public void TryAgain()
+        {
             gameResult.DeactivateResult();
             SwitchSystemUIsState(GameState.Standby);
             CurrentGameState = GameState.Standby;
@@ -364,21 +407,31 @@ namespace SynicSugar.Samples.Tank {
         /// <summary>
         /// Quit game and back to title scene.
         /// </summary>
-        public void ReturnToTitle(){
+        public void ReturnToTitle()
+        {
             SwitchSystemUIsState(GameState.PreparationForObjects);
             AsyncReturnToTitle().Forget();
         }
-        async UniTask AsyncReturnToTitle(){
+        private async UniTask AsyncReturnToTitle()
+        {
             Result closeResult;
-            if(p2pInfo.Instance.AllUserIds.Count == 1){ //or MatchMakeManager.Instance.GetCurrentLobbyID() == "OFFLINEMODE"
+            if(p2pInfo.Instance.AllUserIds.Count == 1)
+            { 
+                //or MatchMakeManager.Instance.GetCurrentLobbyID() == "OFFLINEMODE"
                 closeResult = await ConnectHub.Instance.DestoryOfflineLobby();
-            }else if(p2pInfo.Instance.CurrentConnectedUserIds.Count == 1){ //If the room is alone, close the room.
+            }
+            else if(p2pInfo.Instance.CurrentConnectedUserIds.Count == 1)
+            { 
+                //If the room is alone, close the room.
                 closeResult = await ConnectHub.Instance.CloseSession();
-            }else{
+            }
+            else
+            {
                 closeResult = await ConnectHub.Instance.ExitSession();
             }
 
-            if(closeResult != Result.Success){
+            if(closeResult != Result.Success)
+            {
                 Debug.Log("Failure to close the room");
                 ReadyGame.gameObject.SetActive(true);
                 QuitGame.gameObject.SetActive(true);
