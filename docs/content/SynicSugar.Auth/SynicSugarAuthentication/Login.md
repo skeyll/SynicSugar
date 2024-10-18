@@ -1,18 +1,21 @@
 +++
-title = "LoginWithDeviceID"
-weight = 1
+title = "Login"
+weight = 0
 +++
 
-## LoginWithDeviceID
-<small>*Namespace: SynicSugar.Login* <br>
-*Class: EOSConnect* </small>
+## Login
+<small>*Namespace: SynicSugar.Auth* <br>
+*Class: SynicSugarAuthentication* </small>
 
-public static async UniTask&lt;Result&gt;  LoginWithDeviceID(CancellationToken token = default(CancellationToken))
-public static async UniTask&lt;Result&gt;  LoginWithDeviceID(string displayName, CancellationToken token = default(CancellationToken))
+public static async UniTask&lt;Result&gt; Login(CancellationToken token = default(CancellationToken))
+public static async UniTask&lt;Result&gt; Login(string displayName, CancellationToken token = default(CancellationToken))
 
 
 ### Description
-Sign in EOS with DeviceID. If can sign in, return true.
+Sign in SynicSugar.　This API always logs in using an anonymous method such as DeviceID. <br>
+
+Log in to EOS by default. After a successful connection, the login token is managed on the SynicSugar side. Please check SynicSugarManger.Instance.State.IsLoggedIn to see if the connection is in progress
+
 
 ```cs
 using UnityEngine;
@@ -21,7 +24,7 @@ using SynicSugar.Login;
 
 public class Login : MonoBehaviour {     
     async UniTaskVoid Start(){
-        Result result = await EOSConnect.LoginWithDeviceID();
+        Result result = await SynicSugarAuthentication.Login();
 
         if(result == Result.Success){
             // success
@@ -43,7 +46,7 @@ public class Login : MonoBehaviour {
     async UniTaskVoid Start(){
         CancellationTokenSource cts = new CancellationTokenSource();
         try{
-            Result result = await EOSConnect.LoginWithDeviceID(cts.Token);
+            Result result = await SynicSugarAuthentication.Login(cts.Token);
 
             if(result == Result.Success){
                 // success

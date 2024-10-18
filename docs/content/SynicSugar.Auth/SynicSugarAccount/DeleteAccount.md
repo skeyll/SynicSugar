@@ -1,13 +1,13 @@
 +++
-title = "DeleteDeviceID"
-weight = 2
+title = "DeleteAccount"
+weight = 0
 +++
 
-## DeleteDeviceID
-<small>*Namespace: SynicSugar.Login* <br>
-*Class: EOSConnect* </small>
+## DeleteAccount
+<small>*Namespace: SynicSugar.Auth* <br>
+*Class: SynicSugarAccount* </small>
 
-public static async UniTask&lt;Result&gt;  DeleteDeviceID(CancellationToken token = default(CancellationToken))
+public static async UniTask&lt;Result&gt;  DeleteAccount(CancellationToken token = default(CancellationToken))
 
 ### Description
 This doesn't mean Delete an account from EOS. Just delete data from local. We can call this after calling LoginWithDeviceID.<br>
@@ -20,7 +20,7 @@ using SynicSugar.Login;
 
 public class Login : MonoBehaviour {     
     async UniTaskVoid Start(){
-        Result result = await EOSConnect.DeleteDeviceID();
+        Result result = await SynicSugarAccount.DeleteAccount();
 
         if(result == Result.Success){
             // success
@@ -42,7 +42,7 @@ public class Login : MonoBehaviour {
     async UniTaskVoid Start(){
         CancellationTokenSource cts = new CancellationTokenSource();
         try{
-            Result result = await EOSConnect.DeleteDeviceID(cts.Token);
+            Result result = await SynicSugarAccount.DeleteAccount(cts.Token);
 
             if(result == Result.Success){
                 // success
