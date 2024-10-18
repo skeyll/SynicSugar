@@ -67,7 +67,7 @@ public partial class Player {
 
 
 ## Requirement
-- Unity 21.3 or 22.x
+- Unity 21.3 or 22.43 (-ver0.8.0), later (ver0.8.1)
 - [UniTask](https://github.com/Cysharp/UniTask)
 - [MemoryPack](https://github.com/Cysharp/MemoryPack)
 - [eos_plugin_for_unity](https://github.com/PlayEveryWare/eos_plugin_for_unity)
