@@ -1,6 +1,6 @@
 +++
 title = "SynicSugarAccount"
-weight = 0
+weight = 1
 +++
 ## SynicSugarAccount
 <small>*Namespace: SynicSugar.Auth*</small>

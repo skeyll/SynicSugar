@@ -12,7 +12,6 @@ Default: This Authentication is via Connect interface instead of Auth Interface.
 | API | description |
 | --- | --- |
 | [Login](../SynicSugarAuthentication/loginwithdeviceid) | Sign in EOS with DeviceID |
-| [DeleteDeviceID](../EOSConnect/deletedeviceid) | Delete DeviceID from local |
 
 
 ```cs

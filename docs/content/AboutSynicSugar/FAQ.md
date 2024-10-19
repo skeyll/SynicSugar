@@ -11,13 +11,6 @@ Probably not. As long as you're not using it in extreme use, it should be fine.<
 
 </details>
 
-
-<details>
-<summary><b>Can the transport of p2p be changed?</b></summary>
-Currently, it cannot be changed. It's only EOS (Epic Online Services).<br>
-However,  SyicSugar will make it possible to change the backend server and the transport by modifying the Core before logging into the server. This feature is not implemented in v0.8.1.<br><br>
-</details>
-
 <details>
 <summary><b>Where can I find the DevTool for DebugLogin?</b></summary>
 It's included in the SDK, which can be downloaded from the "Download and configure EOS SDK" section after creating a product page in the Developer portal.<br>
@@ -40,8 +33,13 @@ EOS uses DTLS (Datagram Transport Layer Security), which is an encrypted version
 
 
 <details>
-<summary><b>About Transport of P2P.</b></summary>
-Why shouldn't user attributes in Lobby be used as user information for P2P?<br>
+<summary><b>Can the transport of p2p be changed?</b></summary>
+Currently, it cannot be changed. It's only EOS (Epic Online Services).<br>
+However,  SyicSugar will make it possible to change the backend server and the transport by modifying the Core before logging into the server. This feature is not implemented in v0.8.1.<br><br>
+</details>
+
+<details>
+<summary><b>Why shouldn't user attributes in Lobby be used as user information for P2P?</b></summary>
 There are two reasons. First, the Lobby has a lag of up to 5 seconds before information is reflected. Second, due to this lag, I decided to use the user attributes as a heartbeat for disconnections in SynicSugar now.<br>
 In EOS, there can be a lag of up to 30 seconds in recognizing a disconnection. This is because the SDK's heartbeat for recognizing EOS's own connection depends on user actions.
 While the lag is often shorter when communication is frequent, if there's no activity, the SDK checks for disconnections at specified intervals. This typically takes about twice as long as the time it takes for P2P disconnections to be notified.<br>
@@ -77,6 +75,7 @@ While the EOS SDK can only send packets up to 1170 bytes, SynicSugar divides pac
 Synic is converted to a string in JsonUtility before being serialized into bytes, which are then grouped into SyncedItems in ConnectHub. Therefore, it must be serializable in JsonUtility. Synic class needs [System.Serializable] attribute.<br><br>
 </details>
 
+<details>
 <summary><b>About Mobile Store Reviews.</b></summary>
 Mobile store reviews (for both Android and iOS) can be passed even using UDP alone. In the notes section of your review application, please mention that UDP is used and that online features may not function in the review environment. If you're concerned, it might be a good idea to add a tutorial using an SynicSugar Offline Mode.<br><br>
 </details>
