@@ -114,7 +114,7 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         public bool isLooking { get; private set; }
         /// <summary>
-        /// This local user is waiting for opponents?
+        /// This local user is preparing for p2p connection?
         /// </summary>
         public bool isConcluding { get; private set; }
 
