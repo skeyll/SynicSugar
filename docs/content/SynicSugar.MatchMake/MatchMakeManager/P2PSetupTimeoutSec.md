@@ -1,12 +1,12 @@
 +++
-title = "P2PSetupTimeoutSec"
+title = "p2pSetupTimeoutSec"
 weight = 1
 +++
-## P2PSetupTimeoutSec
+## p2pSetupTimeoutSec
 <small>*Namespace: SynicSugar.MatchMake* <br>
 *Class: MatchMakeManager* </small>
 
-public ushort P2PSetupTimeoutSec
+public ushort p2pSetupTimeoutSec
 
 
 ### Description
@@ -21,7 +21,7 @@ using SynicSugar.MatchMake;
 
 public class MatchmakingConfig : MonoBehaviour {
     public void ChangeConfig(){
-        MatchMakeManager.Instance.P2PSetupTimeoutSec = 20;
+        MatchMakeManager.Instance.p2pSetupTimeoutSec = 20;
     }
 }
 ```

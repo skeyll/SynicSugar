@@ -1,12 +1,12 @@
 +++
-title = "TimeoutSec"
+title = "timeoutSec"
 weight = 1
 +++
 ## TimeoutSec
 <small>*Namespace: SynicSugar.MatchMake* <br>
 *Class: MatchMakeManager* </small>
 
-public ushort TimeoutSec
+public ushort timeoutSec
 
 
 ### Description
@@ -22,7 +22,7 @@ using SynicSugar.MatchMake;
 public class MatchmakingConfig : MonoBehaviour {
     public void ChangeConfig(){
         //5min
-        MatchMakeManager.Instance.TimeoutSec = 300;
+        MatchMakeManager.Instance.timeoutSec = 300;
     }
 }
 ```
