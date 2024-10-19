@@ -71,6 +71,16 @@ While the EOS SDK can only send packets up to 1170 bytes, SynicSugar divides pac
 </details>
 
 <details>
+<summary><b>Is it necessary to differentiate between large packets and normal packets in RPC?</b></summary>
+Yes. If we don't use large packets, we can't send packets exceeding 1170 bytes due to EOS SDK limitations. We might think that all packets should be large packets, but in reality, we should usually send a packet as standard RPC for the performance.<br>
+When large packets are enabled, SynicSugar adds a header and internally sends packets in ReliableOrdered. On the receiving end, packets are stored in a dictionary, and when all necessary packets for reconstruction are received, the original data is deserialized and the RPC is triggered.<br>
+The reason for using Reliable transmission is that if some packets can't be sent, a large number of packets would be wasted. Also, if we don't use Ordered, data could become corrupted if packets from the next RPC are received before the current one is complete. That's why these settings are used.<br>
+On the other hand, standard packets are sent with just the channel and payload, without additional headers. The packet reliability is determined by the method specified in the P2P config. This means no extra processing is done.<br>
+In the EOS SDK, reliably ordered packets are sent and verified by the SDK internally, even if the client hasn't sent packets for an extended period. This should also be kept in mind when considering performance.<br>
+Therefore, I recommend using them appropriately based on your needs.<br><br>
+</details>
+
+<details>
 <summary><b>Can not sync Class or struct specified for Synic.</b></summary>
 Synic is converted to a string in JsonUtility before being serialized into bytes, which are then grouped into SyncedItems in ConnectHub. Therefore, it must be serializable in JsonUtility. Synic class needs [System.Serializable] attribute.<br><br>
 </details>
