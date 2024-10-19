@@ -116,7 +116,7 @@ namespace SynicSugar.MatchMake {
         /// <summary>
         /// This local user is waiting for opponents?
         /// </summary>
-        public bool isConcluding { get; set; }
+        public bool isConcluding { get; private set; }
 
         /// <summary>
         /// Sec until stopping the process to wait for opponents.
