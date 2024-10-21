@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using SynicSugar.RTC;
 using ResultE = Epic.OnlineServices.Result;
-using SynicSugar.P2P;
 
 namespace SynicSugar.MatchMake {
     public class Lobby {
@@ -35,7 +34,6 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         public bool RejoinAfterKickRequiresInvite = false;
         public List<AttributeData> Attributes = new List<AttributeData>();
-        internal uint AvailableSlots = 0;
         internal void SetBucketID(string[] conditions){
             BucketId = string.Empty;
             if(conditions.Length == 0){
@@ -83,8 +81,18 @@ namespace SynicSugar.MatchMake {
         internal void Clear(){
             LobbyId = string.Empty;
             LobbyOwner = new ProductUserId();
-            Attributes.Clear();
             Members.Clear();
+            _maxLobbyMembers = 0;
+            
+            _BeingCreated = false;
+            PermissionLevel = LobbyPermissionLevel.Publicadvertised;
+            BucketId = string.Empty;
+            bAllowInvites = false;
+            bDisableHostMigration = true;
+            bEnableRTCRoom = false;
+            RejoinAfterKickRequiresInvite = false;
+            
+            Attributes.Clear();
             RTCManager.Instance.RemoveRTCEvents();
         }
 
@@ -115,22 +123,23 @@ namespace SynicSugar.MatchMake {
             }
 
             InitFromLobbyDetails(outLobbyDetailsHandle);
+            outLobbyDetailsHandle.Release();
         }
         /// <summary>
         /// Initializing the given LobbyDetails handle and caches all relevant attributes
         /// </summary>
-        /// <param name="outLobbyDetailsHandle">Specified LobbyDetails handle</param>
-        internal void InitFromLobbyDetails(LobbyDetails outLobbyDetailsHandle){
+        /// <param name="lobbyDetailsHandle">Specified LobbyDetails handle</param>
+        void InitFromLobbyDetails(LobbyDetails lobbyDetailsHandle){
             // Get owner
             var lobbyDetailsGetLobbyOwnerOptions = new LobbyDetailsGetLobbyOwnerOptions();
-            ProductUserId newLobbyOwner = outLobbyDetailsHandle.GetLobbyOwner(ref lobbyDetailsGetLobbyOwnerOptions);
+            ProductUserId newLobbyOwner = lobbyDetailsHandle.GetLobbyOwner(ref lobbyDetailsGetLobbyOwnerOptions);
             if (newLobbyOwner != LobbyOwner){
                 LobbyOwner = newLobbyOwner;
             }
 
             // Copy lobby info
             var lobbyDetailsCopyInfoOptions = new LobbyDetailsCopyInfoOptions();
-            ResultE infoResult = outLobbyDetailsHandle.CopyInfo(ref lobbyDetailsCopyInfoOptions, out LobbyDetailsInfo? outLobbyDetailsInfo);
+            ResultE infoResult = lobbyDetailsHandle.CopyInfo(ref lobbyDetailsCopyInfoOptions, out LobbyDetailsInfo? outLobbyDetailsInfo);
             if (infoResult != ResultE.Success){
                 Debug.LogErrorFormat("Init Lobby: can't copy lobby info. Error code: {0}", infoResult);
                 return;
@@ -140,55 +149,49 @@ namespace SynicSugar.MatchMake {
                 return;
             }
 
-            LobbyId = outLobbyDetailsInfo?.LobbyId;
             MaxLobbyMembers = (uint)(outLobbyDetailsInfo?.MaxMembers);
             PermissionLevel = (LobbyPermissionLevel)(outLobbyDetailsInfo?.PermissionLevel);
+            BucketId = outLobbyDetailsInfo?.BucketId;
             bAllowInvites = (bool)(outLobbyDetailsInfo?.AllowInvites);
             bEnableRTCRoom = (bool)(outLobbyDetailsInfo?.RTCRoomEnabled);
-            AvailableSlots = (uint)(outLobbyDetailsInfo?.AvailableSlots);
-            BucketId = outLobbyDetailsInfo?.BucketId;
+            bDisableHostMigration = (bool)(outLobbyDetailsInfo?.AllowHostMigration);
+            RejoinAfterKickRequiresInvite = (bool)(outLobbyDetailsInfo?.RejoinAfterKickRequiresInvite);
 
             // Get attributes
             Attributes.Clear();
             var lobbyDetailsGetAttributeCountOptions = new LobbyDetailsGetAttributeCountOptions();
-            uint attrCount = outLobbyDetailsHandle.GetAttributeCount(ref lobbyDetailsGetAttributeCountOptions);
+            uint attrCount = lobbyDetailsHandle.GetAttributeCount(ref lobbyDetailsGetAttributeCountOptions);
             for (uint i = 0; i < attrCount; i++){
-                LobbyDetailsCopyAttributeByIndexOptions attrOptions = new LobbyDetailsCopyAttributeByIndexOptions();
-                attrOptions.AttrIndex = i;
-                ResultE copyAttrResult = outLobbyDetailsHandle.CopyAttributeByIndex(ref attrOptions, out Epic.OnlineServices.Lobby.Attribute? outAttribute);
+                LobbyDetailsCopyAttributeByIndexOptions attrOptions = new LobbyDetailsCopyAttributeByIndexOptions(){ AttrIndex = i };
+                ResultE copyAttrResult = lobbyDetailsHandle.CopyAttributeByIndex(ref attrOptions, out Attribute? outAttribute);
                 if (copyAttrResult == ResultE.Success && outAttribute != null && outAttribute?.Data != null){
-                    AttributeData attr = EOSLobbyExtensions.GenerateLobbyAttribute(outAttribute);
-                    Attributes.Add(attr);
+                    Attributes.Add(EOSLobbyExtensions.GenerateLobbyAttribute(outAttribute));
                 }
             }
 
             // Get members
             Members.Clear();
-
             var lobbyDetailsGetMemberCountOptions = new LobbyDetailsGetMemberCountOptions();
-            uint memberCount = outLobbyDetailsHandle.GetMemberCount(ref lobbyDetailsGetMemberCountOptions);
-
-            for (int memberIndex = 0; memberIndex < memberCount; memberIndex++){
-                var lobbyDetailsGetMemberByIndexOptions = new LobbyDetailsGetMemberByIndexOptions() { MemberIndex = (uint)memberIndex };
-                ProductUserId memberId = outLobbyDetailsHandle.GetMemberByIndex(ref lobbyDetailsGetMemberByIndexOptions);
+            uint memberCount = lobbyDetailsHandle.GetMemberCount(ref lobbyDetailsGetMemberCountOptions);
+            for (int i = 0; i < memberCount; i++){
+                var lobbyDetailsGetMemberByIndexOptions = new LobbyDetailsGetMemberByIndexOptions() { MemberIndex = (uint)i };
+                ProductUserId memberId = lobbyDetailsHandle.GetMemberByIndex(ref lobbyDetailsGetMemberByIndexOptions);
                 Members.Add(UserId.GetUserId(memberId).ToString(), new MemberState(){});
 
                 // Add member attributes
                 var lobbyDetailsGetMemberAttributeCountOptions = new LobbyDetailsGetMemberAttributeCountOptions() { TargetUserId = memberId };
-                int memberAttributeCount = (int)outLobbyDetailsHandle.GetMemberAttributeCount(ref lobbyDetailsGetMemberAttributeCountOptions);
+                int memberAttributeCount = (int)lobbyDetailsHandle.GetMemberAttributeCount(ref lobbyDetailsGetMemberAttributeCountOptions);
 
                 for (int attributeIndex = 0; attributeIndex < memberAttributeCount; attributeIndex++){
                     var lobbyDetailsCopyMemberAttributeByIndexOptions = new LobbyDetailsCopyMemberAttributeByIndexOptions() { AttrIndex = (uint)attributeIndex, TargetUserId = memberId };
-                    ResultE memberAttributeResult = outLobbyDetailsHandle.CopyMemberAttributeByIndex(ref lobbyDetailsCopyMemberAttributeByIndexOptions, out Epic.OnlineServices.Lobby.Attribute? outAttribute);
+                    ResultE memberAttributeResult = lobbyDetailsHandle.CopyMemberAttributeByIndex(ref lobbyDetailsCopyMemberAttributeByIndexOptions, out Attribute? outAttribute);
 
                     if (memberAttributeResult != ResultE.Success){
                         Debug.LogFormat("Lobbies (InitFromLobbyDetails): can't copy member attribute. Error code: {0}", memberAttributeResult);
                         continue;
                     }
-
-                    AttributeData newAttribute = EOSLobbyExtensions.GenerateLobbyAttribute(outAttribute);
  
-                    Members[memberId.ToString()].Attributes.Add(newAttribute);
+                    Members[UserId.GetUserId(memberId).ToString()].Attributes.Add(EOSLobbyExtensions.GenerateLobbyAttribute(outAttribute));
                 }
             }
         }

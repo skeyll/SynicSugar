@@ -280,10 +280,15 @@ namespace SynicSugar.Generator {
                 StringBuilder SyncedItem = new StringBuilder();
                 
                 foreach (var i in SyncedPlayer) {
-                    SyncedItem.Append(cb.CreateSyncedItem(i.Key, i.Value.ToString(), SyncedCommons[i.Key].ToString()));
                 }
-
-                //StringBuilder GenerateSynicContainer = new StringBuilder(cb.CreateGenerateSynicContainer(SyncSynic.ToString()));
+                for (int i = 0; i <= 9; i++){
+                    bool playerContain = SyncedPlayer.ContainsKey(i);
+                    bool commonsContain = SyncedCommons.ContainsKey(i);
+                    if(!playerContain && !commonsContain) {
+                        continue;
+                    }
+                    SyncedItem.Append(cb.CreateSyncedItem(i, playerContain ? SyncedPlayer[i].ToString() : string.Empty, commonsContain ? SyncedCommons[i].ToString() : string.Empty));
+                }
 
                 var connectTemplate = new ConnecthubTemplate() {
                     SyncList = SyncList.ToString(),

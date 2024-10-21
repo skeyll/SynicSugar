@@ -30,8 +30,14 @@ namespace SynicSugar.RTC {
                 Instance = null;
             }
         }
-        // RTCRoom CurrentRoom = new();
-        internal Lobby CurrentLobby { get { return MatchMakeManager.Instance.eosLobby.CurrentLobby; }}
+        /// <summary>
+        /// Set from Matchmaking core.
+        /// </summary>
+        /// <param name="currentLobbyInstance"></param>
+        internal void SetLobbyReference(Lobby currentLobbyInstance){
+            CurrentLobby = currentLobbyInstance;
+        }
+        Lobby CurrentLobby;
         RTCInterface rtcInterface;
         RTCAudioInterface audioInterface;
         CancellationTokenSource pttToken;
@@ -71,8 +77,8 @@ namespace SynicSugar.RTC {
                 return;
             }
 
-            MatchMakeManager.Instance.eosLobby.CurrentLobby.hasConnectedRTCRoom = isConnected;
-            MatchMakeManager.Instance.eosLobby.CurrentLobby.RTCRoomName = GetRTCRoomName();
+            CurrentLobby.hasConnectedRTCRoom = isConnected;
+            CurrentLobby.RTCRoomName = GetRTCRoomName();
 
             //Check audio devices
             var audioOptions = new GetAudioInputDevicesCountOptions();
@@ -203,7 +209,9 @@ namespace SynicSugar.RTC {
         /// </summary>
         public void StartVoiceSending(){
             if(!CurrentLobby.bEnableRTCRoom){
-                Debug.LogError("StartVoiceSending: This lobby doesn't have RTC room.");
+            #if SYNICSUGAR_LOG
+                Debug.Log("StartVoiceSending: This lobby doesn't have RTC room.");
+            #endif
                 return;
             }
             if(UseOpenVC){
@@ -218,7 +226,9 @@ namespace SynicSugar.RTC {
         /// </summary>
         public void StopVoiceSending(){
             if(!CurrentLobby.bEnableRTCRoom){
-                Debug.LogError("StartVoiceSending: This lobby doesn't have RTC room.");
+            #if SYNICSUGAR_LOG
+                Debug.Log("StartVoiceSending: This lobby doesn't have RTC room.");
+            #endif
                 return;
             }
             if(UseOpenVC){

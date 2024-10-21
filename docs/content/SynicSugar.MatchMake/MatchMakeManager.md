@@ -21,8 +21,9 @@ If this is no longer needed, we call *[CancelCurrentMatchMake](../MatchMakeManag
 | API | description |
 |---|---|
 | [maxSearchResult](../MatchMakeManager/maxsearchresult)  | The amount of search results |
-| [TimeoutSec](../MatchMakeManager/timeoutsec) | Timeout seconds for user to exit no-filled lobby |
-| [P2PSetupTimeoutSec](../MatchMakeManager/p2psetuptimeoutsec) | Timeout sec for prep init connection |
+| [timeoutSec](../MatchMakeManager/timeoutsec) | Timeout seconds for user to exit no-filled lobby |
+| [p2pSetupTimeoutSec](../MatchMakeManager/p2psetuptimeoutsec) | Timeout sec for prep init connection |
+| enableHostmigrationInMatchmaking | If true, pass host authority to others when local user leave the lobby |
 | [lobbyIdSaveType](../MatchMakeManager/lobbyidsavetype) | The way to return to the disconnected lobby |
 | [playerprefsSaveKey](../MatchMakeManager/playerprefssavekey) | The key to save LobbyID |
 | [customSaveLobbyID](../MatchMakeManager/customsavelobbyid) | UnityEvent to save LobbyID |
@@ -31,6 +32,9 @@ If this is no longer needed, we call *[CancelCurrentMatchMake](../MatchMakeManag
 | [asyncLobbyIDMethod](../../SynicSugar.MatchMake/asynclobbyidmethod) | Func&lt;UniTask&gt; to recconect Lobby |
 | [MatchMakingGUIEvents](../../SynicSugar.MatchMake/matchmakingguievents) | To manage GUI in matchmaking |
 | [MemberUpdatedNotifier](../MatchMakeManager/memberupdatednotifier) | Notify when a user attributes is updated |
+| isLooking | This local user is waiting for opponents? |
+| isConcluding | This local user is preparing for p2p connection? |
+| [timeUntilTimeout](../MatchMakeManager/timeuntiltimeout) | Sec until stopping the process to wait for opponents |
 | [isHost](../MatchMakeManager/ishost) | Whether this local user is the owner of current Lobby |
 
 
@@ -47,7 +51,6 @@ If this is no longer needed, we call *[CancelCurrentMatchMake](../MatchMakeManag
 | [CloseCurrentMatchMake](../MatchMakeManager/closecurrentmatchmake) | (Host) destroys lobby to stop the matchmaking |
 | [KickTargetFromLobby](../MatchMakeManager/kicktargetfromlobby) | (Host) kicks target from Lobby |
 | [CreateOfflineLobby](../MatchMakeManager/createofflinelobby) | Create fake-lobby as Host for tutorial |
-| DestoryOfflineLobby | Destory offline-lobby and stop offline mode |
 | [GetCurrentLobbyID](../MatchMakeManager/getcurrentlobbyid) | Get LobbyID that a user participating |
 | [GetReconnectLobbyID](../MatchMakeManager/getreconnectlobbyid) | Get LobbyID by Playerprefs |
 | [GetCurrentLobbyMemberCount](../MatchMakeManager/getcurrentlobbymembercount) | Get the current member count in Lobby |

@@ -4,149 +4,143 @@ using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using ResultE = Epic.OnlineServices.Result;
 
 namespace SynicSugar.Login {
     public static class EOSConnect {
+        /// <summary>
+        /// Checks if the user has logged in to EOS　and whether a UserId has been set in EOSManager.
+        /// </summary>
+        /// <returns>Returns true if the user has successfully logged in with EOS Connect,
+        /// otherwise returns false.</returns>
+        [Obsolete("This is Obsolete. We can use SynicSugarManger.Instance.State.IsLoggedIn instead of this.")]
         public static bool HasLoggedinEOS(){
             return EOSManager.Instance.HasLoggedInWithConnect();
         }
         /// <summary>
-        /// Login with DeviceID. If success, return true.
+        /// Login with DeviceID. If success, return true. <br />
+        /// We can't use DeviceId directly for security. This id is saved secure pos like as Keystore.
         /// </summary>
         /// <param name="token"></param>
         /// <returns></returns>
+        [Obsolete("This is Obsolete. We can use SynicSugarAuthentication.Login in SynicSugar.Auth instead of this.")]
         public static async UniTask<Result> LoginWithDeviceID(CancellationToken token = default(CancellationToken)){
-            bool needTryCatch = token == default;
-            token = needTryCatch ? new CancellationTokenSource().Token : token;
-
-            bool isSuccess = false;
-            bool waitingAuth = true;
-            Result resultS = Result.Canceled;
+            bool finishCallback = false;
+            Result result = Result.Canceled;
             //DeviceID
             var connectInterface = EOSManager.Instance.GetEOSPlatformInterface().GetConnectInterface();
             var createDeviceIdOptions = new CreateDeviceIdOptions() { DeviceModel = SystemInfo.deviceModel };
 
-            connectInterface.CreateDeviceId(ref createDeviceIdOptions, null, 
-                (ref CreateDeviceIdCallbackInfo data) => {
-                    if (data.ResultCode == ResultE.Success) {
-                        isSuccess = true;
-#if SYNICSUGAR_LOG
-                        Debug.Log("EOSConnect: Create new DeviceId");
-#endif
-                    }else if (data.ResultCode == ResultE.DuplicateNotAllowed){
-                        isSuccess = true;                  
-#if SYNICSUGAR_LOG
-                        Debug.Log("EOSConnect: Already have DeviceID in local");
-#endif    
-                    }
-                    resultS = (Result)data.ResultCode;
-                    waitingAuth = false;
-                });
-            if(needTryCatch){
-                try{
-                    await UniTask.WaitUntil(() => !waitingAuth, cancellationToken: token);
-                }catch(OperationCanceledException){  
-                    Debug.Log("LoginWithDeviceID: Cancel CreateDeviceId.");
-                    return resultS;
-                }
-            }else{
-                await UniTask.WaitUntil(() => !waitingAuth, cancellationToken: token);
+            connectInterface.CreateDeviceId(ref createDeviceIdOptions, null, OnCreateDeviceIdCallback);
+                
+            try{
+                await UniTask.WaitUntil(() => finishCallback, cancellationToken: token);
+            }catch(OperationCanceledException){  
+                Debug.Log("LoginWithDeviceID: CreateDeviceId is canceled.");
+                return Result.Canceled;
             }
 
-            if(!isSuccess){
+            if(result != Result.Success){
                 Debug.Log("LoginWithDeviceID: can't get device id");
-                return resultS;
+                return result;
             }
             //Login
-            waitingAuth = true;
-            resultS = Result.Canceled;
+            finishCallback = false;
+            result = Result.Canceled;
             //Pass UserID on each Game.
             EOSManager.Instance.StartConnectLoginWithDeviceToken("Guest", info => {
-                    resultS = (Result)info.ResultCode;
-                    waitingAuth = false;
+                    result = (Result)info.ResultCode;
+                    finishCallback = true;
                 });
 
-            if(needTryCatch){
-                try{
-                    await UniTask.WaitUntil(() => !waitingAuth, cancellationToken: token);
-                }catch(OperationCanceledException){
-                    Debug.Log("LoginWithDeviceID: Cancel StartConnectLoginWithDeviceToken.");
-                    return resultS;
-                }
-            }else{
-                await UniTask.WaitUntil(() => !waitingAuth, cancellationToken: token);
+            try{
+                await UniTask.WaitUntil(() => finishCallback, cancellationToken: token);
+            }catch(OperationCanceledException){
+                Debug.Log("LoginWithDeviceID: Cancel StartConnectLoginWithDeviceToken.");
+                return result;
             }
-            return resultS;
+            
+            if(result == Result.Success){   
+                SynicSugarManger.Instance.SetLocalUserId(UserId.GetUserId(EOSManager.Instance.GetProductUserId()));
+                SynicSugarManger.Instance.State.IsLoggedIn = true;
+            }else{
+                SynicSugarManger.Instance.State.IsLoggedIn = false;
+            }
+            return result;
+
+            void OnCreateDeviceIdCallback(ref CreateDeviceIdCallbackInfo data){
+                result = (Result)data.ResultCode;
+                if (result is Result.Success or Result.DuplicateNotAllowed) {
+                #if SYNICSUGAR_LOG
+                    Debug.Log(result is Result.Success  ? "EOSConnect: Create new DeviceId" : "EOSConnect: Already have DeviceID in local");
+                #endif
+                    result = Result.Success;
+                }
+                finishCallback = true;
+            }
         }
+
         /// <summary>
-        /// Login with DeviceID. If success, return true.
+        /// Login with DeviceID. If success, return true. <br />
+        /// We can't use DeviceId directly for security. This id is saved secure pos like as Keystore.
         /// </summary>
         /// <param name="displayName"></param>
         /// <param name="token"></param>
         /// <returns></returns>
+        [Obsolete("This is Obsolete. We can use SynicSugarAuthentication.Login in SynicSugar.Auth instead of this.")]
         public static async UniTask<Result> LoginWithDeviceID(string displayName, CancellationToken token = default(CancellationToken)){
-            bool needTryCatch = token == default;
-            token = needTryCatch ? new CancellationTokenSource().Token : token;
-
-            bool isSuccess = false;
-            bool waitingAuth = true;
-            Result resultS = Result.Canceled;
+            bool finishCallback = false;
+            Result result = Result.Canceled;
             //DeviceID
             var connectInterface = EOSManager.Instance.GetEOSPlatformInterface().GetConnectInterface();
             var createDeviceIdOptions = new CreateDeviceIdOptions() { DeviceModel = SystemInfo.deviceModel };
 
-            connectInterface.CreateDeviceId(ref createDeviceIdOptions, null, 
-                (ref CreateDeviceIdCallbackInfo data) => {
-                    if (data.ResultCode == ResultE.Success) {
-                        isSuccess = true;
-#if SYNICSUGAR_LOG
-                        Debug.Log("EOSConnect: Create new DeviceId");
-#endif
-                    }else if (data.ResultCode == ResultE.DuplicateNotAllowed){
-                        isSuccess = true;                  
-#if SYNICSUGAR_LOG
-                        Debug.Log("EOSConnect: Already have DeviceID in local");
-#endif    
-                    }
-                    resultS = (Result)data.ResultCode;
-                    waitingAuth = false;
-                });
-            if(needTryCatch){
-                try{
-                    await UniTask.WaitUntil(() => !waitingAuth, cancellationToken: token);
-                }catch(OperationCanceledException){  
-                    Debug.Log("LoginWithDeviceID: Cancel CreateDeviceId.");
-                    return resultS;
-                }
-            }else{
-                await UniTask.WaitUntil(() => !waitingAuth, cancellationToken: token);
+            connectInterface.CreateDeviceId(ref createDeviceIdOptions, null, OnCreateDeviceIdCallback);
+                
+            try{
+                await UniTask.WaitUntil(() => finishCallback, cancellationToken: token);
+            }catch(OperationCanceledException){  
+                Debug.Log("LoginWithDeviceID: CreateDeviceId is canceled.");
+                return Result.Canceled;
             }
 
-            if(!isSuccess){
+            if(result != Result.Success){
                 Debug.Log("LoginWithDeviceID: can't get device id");
-                return resultS;
+                return result;
             }
             //Login
-            waitingAuth = true;
-            resultS = Result.Canceled;
+            finishCallback = false;
+            result = Result.Canceled;
             //Pass UserID on each Game.
             EOSManager.Instance.StartConnectLoginWithDeviceToken(displayName, info => {
-                    resultS = (Result)info.ResultCode;
-                    waitingAuth = false;
+                    result = (Result)info.ResultCode;
+                    finishCallback = true;
                 });
 
-            if(needTryCatch){
-                try{
-                    await UniTask.WaitUntil(() => !waitingAuth, cancellationToken: token);
-                }catch(OperationCanceledException){
-                    Debug.Log("LoginWithDeviceID: Cancel StartConnectLoginWithDeviceToken.");
-                    return resultS;
-                }
-            }else{
-                await UniTask.WaitUntil(() => !waitingAuth, cancellationToken: token);
+            try{
+                await UniTask.WaitUntil(() => finishCallback, cancellationToken: token);
+            }catch(OperationCanceledException){
+                Debug.Log("LoginWithDeviceID: Cancel StartConnectLoginWithDeviceToken.");
+                return result;
             }
-            return resultS;
+
+            if(result == Result.Success){   
+                SynicSugarManger.Instance.SetLocalUserId(UserId.GetUserId(EOSManager.Instance.GetProductUserId()));
+                SynicSugarManger.Instance.State.IsLoggedIn = true;
+            }else{
+                SynicSugarManger.Instance.State.IsLoggedIn = false;
+            }
+            return result;
+
+            void OnCreateDeviceIdCallback(ref CreateDeviceIdCallbackInfo data){
+                result = (Result)data.ResultCode;
+                if (result is Result.Success or Result.DuplicateNotAllowed) {
+                #if SYNICSUGAR_LOG
+                    Debug.Log(result is Result.Success  ? "EOSConnect: Create new DeviceId" : "EOSConnect: Already have DeviceID in local");
+                #endif
+                    result = Result.Success;
+                }
+                finishCallback = true;
+            }
         }
         /// <summary>
         /// Delete any existing Device ID access credentials for the current user profile on the local device. <br />
@@ -155,34 +149,31 @@ namespace SynicSugar.Login {
         /// </summary>
         /// <param name="token"></param>
         /// <returns></returns>
+        [Obsolete("This is Obsolete. We can use SynicSugarAccount.DeleteAccount in SynicSugar.Auth instead of this.")]
         public static async UniTask<Result> DeleteDeviceID(CancellationToken token = default(CancellationToken)){
-            bool needTryCatch = token == default;
-            token = needTryCatch ? new CancellationTokenSource().Token : token;
-
             var connectInterface = EOSManager.Instance.GetEOSPlatformInterface().GetConnectInterface();
             DeleteDeviceIdOptions options = new DeleteDeviceIdOptions();
-            Result resultS = Result.Canceled;
-            bool finishDeleted = false;
-            connectInterface.DeleteDeviceId(ref options, null, (ref DeleteDeviceIdCallbackInfo data) => {
-                resultS = (Result)data.ResultCode;
-                if(data.ResultCode != ResultE.Success){
-                    Debug.Log("DeleteDeviceID: Failuer " + data.ResultCode);
-                }
-                finishDeleted = true;
-            });
+            Result result = Result.Canceled;
+            bool finishCallback = false;
 
-            if(needTryCatch){ 
-                try{
-                    await UniTask.WaitUntil(() => finishDeleted, cancellationToken: token);
-                }catch(OperationCanceledException){
-                    Debug.Log("DeleteDeviceID: Canceled.");
-                    return resultS;
-                }
-            }else{
-                await UniTask.WaitUntil(() => finishDeleted, cancellationToken: token);
+            connectInterface.DeleteDeviceId(ref options, null, OnDeleteDeviceId);
+
+            try{
+                await UniTask.WaitUntil(() => finishCallback, cancellationToken: token);
+            }catch(OperationCanceledException){
+                Debug.Log("DeleteDeviceID: Canceled.");
+                return Result.Canceled;
             }
             
-            return resultS;
+            return result;
+
+            void OnDeleteDeviceId(ref DeleteDeviceIdCallbackInfo data){
+                result = (Result)data.ResultCode;
+                if(result != Result.Success){
+                    Debug.Log("DeleteDeviceID: Failure: " + data.ResultCode);
+                }
+                finishCallback = true;
+            }
         }
     }
 }

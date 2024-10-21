@@ -1,6 +1,8 @@
 using Epic.OnlineServices.P2P;
 using UnityEngine;
 using System;
+using SynicSugar.Base;
+
 namespace SynicSugar.P2P {
     public class p2pConfig : MonoBehaviour {
 #region Singleton
@@ -11,15 +13,18 @@ namespace SynicSugar.P2P {
                 return;
             }
             Instance = this;
-            natRelay = new NatRelayManager();
+            sessionCore = SynicSugarManger.Instance.CoreFactory.GetSessionCore();
+            p2pInfo.Instance.SetDependency(sessionCore, natRelayManager);
         }
         void OnDestroy() {
             if( Instance == this ) {
+                sessionCore.Dispose();
                 Instance = null;
             }
         }
 #endregion
-        NatRelayManager natRelay;
+        internal SessionCore sessionCore;
+        internal readonly NatRelayManager natRelayManager = new NatRelayManager();
         /// <summary>
         /// Users with settings NoRelay and ForceRelays cannot connect.<br />
         /// So, we should use only AllowRelays and one of the other settings.<br /?
@@ -39,39 +44,31 @@ namespace SynicSugar.P2P {
         /// MEMO: Can't change this in game for performance now.
         /// </summary>
         public bool AllowDelayedDelivery = false;
+        /// <summary>
+        /// If true, use NotifyPeerConnectionInterrupted. Events: EarlyDisconnected, Restored, Disconnected<br />
+        /// When a connection with someone becomes unstable, an event is triggered and EarlyDisconnected is invoked.  <br />
+        /// Someones(Host + 2 peers) in the lobby will check anyone has been disconnected by sending a heartbeat to the lobby. 
+        /// A reconnection attempt will be made, and if connection is restored, Restored will be invoked.
+        /// When that user's connection with the lobby has also been lost, Disconnected will be called.<br />
+        /// If false, use　NotifyPeerConnectionClosed. Events: Disconnected<br />
+        /// When a connection becomes unstable, attempts to reconnect are made in the back. <br />
+        /// If reconnection fails, a heartbeat to the lobby is send to the lobby within p2p's NotifyPeerConnectionClosed. <br />
+        /// When that user's connection with the lobby has also been lost, Disconnected will be called.
+        /// </summary>
         public bool UseDisconnectedEarlyNotify;
 
-        public enum GetPacketFrequency {
-            PerSecondBurstFPS, PerSecondFPS, PerSecond100, PerSecond50, PerSecond25
-        }
-        [HideInInspector, Obsolete("This will soon be obsolete. This is managed from PacketReciveTiming that is in PacketReceiver's args now.")] 
-        /// <summary>
-        /// PacketReceiver's Frequency/per seconds.<br />
-        /// Cannot exceed the recive's fps of the app's. <br />
-        /// </summary>
-        public GetPacketFrequency getPacketFrequency = GetPacketFrequency.PerSecond50;
-        /// <summary>
-        /// Frequency of BurstFPS's GetPacket in a frame. Recommend: 2-5
-        /// </summary>
-        [HideInInspector, Obsolete("This will soon be obsolete. This is managed from PacketReciveTiming that is in PacketReceiver's args now.")]
-        public int BurstReceiveBatchSize = 5;
-        [Space(10), Range(1, 16)]
         /// <summary>
         /// The number of target users to be sent packet of RPC in a frame. Wait for a frame after a set. <br />
         /// The sending buffer is probably around 64 KB, so it should not exceed this. If we set 0 from the script, it will cause crash.
         /// </summary>
+        [Space(10), Range(1, 16)]
         public int RPCBatchSize = 3;
-        [Range(1, 16)]
         /// <summary>
         /// The number of packets to be sent of a large packet in a frame. Wait for a frame after a set. <br />
         /// The sending buffer is probably around 64 KB, so it should not exceed this. If we set 0 from the script, it will cause crash.
         /// </summary>
+        [Range(1, 16)]
         public int LargePacketBatchSize = 3;
-        /// <summary>
-        /// Frequency of GetSynicPacket in a frame. Recommend: 5-8
-        /// </summary>
-        [Range(2, 16)]
-        public int SynicReceiverBatchSize = 5;
         [Range(0, 5000)]
         /// <summary>
         /// Interval ms that a SyncVar dosen't been send even if the value changes after send that SyncVar.<br />
@@ -97,7 +94,15 @@ namespace SynicSugar.P2P {
         /// </summary>
         /// <param name="relay">AllowRelay is Default</param>
         public void SetRelayControl(RelayControl relay){
-            natRelay.SetRelayControl(relay);
+            natRelayManager.SetRelayControl(relay);
+        }
+        /// <summary>
+        /// Get instance to manage connection. <br />
+        /// Basically call these processes via ConnectHub, but we can also call this to call own processes.
+        /// </summary>
+        /// <returns></returns>
+        public INetworkCore GetNetworkCore(){
+            return sessionCore;
         }
     }
 }

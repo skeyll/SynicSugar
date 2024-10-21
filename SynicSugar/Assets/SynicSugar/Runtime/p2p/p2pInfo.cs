@@ -2,6 +2,8 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using System;
 using System.Collections.Generic;
+using SynicSugar.Base;
+
 namespace SynicSugar.P2P {
     public class p2pInfo : MonoBehaviour {
 #region Singleton
@@ -13,10 +15,11 @@ namespace SynicSugar.P2P {
             }
             Instance = this;
             userIds = new ();
-            natRelay = new();
             pings = new();
             lastRpcInfo = new();
             lastTargetRPCInfo = new();
+            ConnectionNotifier = new ConnectionNotifier();
+            SyncSnyicNotifier = new SyncSnyicNotifier();
         }
         void OnDestroy() {
             if( Instance == this ) {
@@ -27,12 +30,57 @@ namespace SynicSugar.P2P {
                 Instance = null;
             }
         }
+        /// <summary>
+        /// For the case not to destroy and play next match.
+        /// </summary>
+        internal void Reset(){
+            userIds = new ();
+            pings = new();
+            lastRpcInfo = new();
+            lastTargetRPCInfo = new();
+            UserId.CacheClear();
+            ConnectionNotifier.Clear();
+            SyncSnyicNotifier.Clear();
+        }
+        /// <summary>
+        /// Set reference of some manager classes.
+        /// </summary>
+        /// <param name="sessionInstance"></param>
+        /// <param name="natrelayInstance"></param>
+        internal void SetDependency(SessionCore sessionInstance, NatRelayManager natrelayInstance){
+            sessionCore = sessionInstance;
+            natRelayManager = natrelayInstance;
+        }
 #endregion
-        internal NatRelayManager natRelay;
+        SessionCore sessionCore;
+        NatRelayManager natRelayManager;
         internal UserIds userIds;
         internal p2pPing pings;
         internal RPCInformation lastRpcInfo;
         internal TargetRPCInformation lastTargetRPCInfo;
+        /// <summary>
+        /// Whether matching has been completed and the game has started.
+        /// </summary>
+        internal bool IsConnecting;
+        /// <summary>
+        /// Date time when this LOCAL user starts current session.
+        /// </summary>
+        /// <value></value>
+        public DateTime CurrentSessionStartUTC { get; internal set; }
+        /// <summary>
+        /// Get sec since start current session.
+        /// </summary>
+        /// <returns></returns>
+        public uint GetSessionTimestamp() {
+            return (uint)DateTime.UtcNow.Subtract(CurrentSessionStartUTC).TotalSeconds;
+        }
+        /// <summary>
+        /// Get micro sec since start current session for the case need precision.
+        /// </summary>
+        /// <returns></returns>
+        public double GetSessionTimestampInMs() {
+            return DateTime.UtcNow.Subtract(CurrentSessionStartUTC).TotalMilliseconds;
+        }
     #region UserId basic info
         /// <summary>
         /// This lobby's Host UserId.
@@ -89,7 +137,7 @@ namespace SynicSugar.P2P {
         /// <summary>
         /// The notify events for connection and disconection on current session.
         /// </summary>
-        public ConnectionNotifier ConnectionNotifier = new ConnectionNotifier();
+        public ConnectionNotifier ConnectionNotifier;
         /// <summary>
         /// Reason of the user disconnected from p2p.
         /// </summary>
@@ -105,10 +153,12 @@ namespace SynicSugar.P2P {
         /// <summary>
         /// The notify events for SyncSynic for recconecter and large packet.
         /// </summary>
-        public SyncSnyicNotifier SyncSnyicNotifier = new SyncSnyicNotifier();
+        public SyncSnyicNotifier SyncSnyicNotifier;
         /// <summary>
         /// Return True only once when this local user is received SyncSync from every other peers of the current session. <br />
-        /// After return true, all variable for this flag is initialized and returns False again.
+        /// EVERY here means p2pInfo.Instance.CurrentAllUserIds.Count if the host is also sending data for others who are disconnected, 
+        /// or p2pInfo.Instance. CurrentConnectedUserIds.Count.<br />
+        /// After return true, all variable about this flag is initialized and become returning False again.
         /// </summary>
         /// <returns></returns>
         public bool HasReceivedAllSyncSynic => SyncSnyicNotifier.ReceivedAllSyncSynic();
@@ -121,19 +171,19 @@ namespace SynicSugar.P2P {
         /// </summary>
         public UserId LastSyncedUserId { get { return SyncSnyicNotifier.LastSyncedUserId;} } 
         /// <summary>
-        /// Always return false. Just on reconnect, returns true until getting SyncSynic for SELF data from Host.
+        /// Always return false. Just on reconnect, returns true until getting SyncSynic about SELF data from Host.
         /// </summary>
         public bool IsReconnecter => userIds.isJustReconnected;
         
         /// <summary>
         /// Update local user's NATType to the latest state.
         /// </summary>
-        public async UniTask QueryNATType() => await natRelay.QueryNATType();
+        public async UniTask QueryNATType() => await natRelayManager.QueryNATType();
         /// <summary>
         /// Get last-queried NAT-type, if it has been successfully queried.
         /// </summary>
         /// <returns>Open means being able connect with direct p2p. Otherwise, the connection may be via Epic relay.</returns>
-        public NATType GetNATType() => natRelay.GetNATType();
+        public NATType GetNATType() => natRelayManager.GetNATType();
     #region IsHost
         /// <summary>
         /// Is this local user Game Host?
@@ -188,14 +238,26 @@ namespace SynicSugar.P2P {
         /// </summary>
         /// <returns></returns>
         public async UniTask RefreshPing(UserId target){
-            await pings.RefreshPing(target, p2pConnectorForOtherAssembly.Instance.p2pToken.Token);
+            if(!SynicSugarManger.Instance.State.IsInSession){
+            #if SYNICSUGAR_LOG
+                Debug.Log("RefreshPing: This local user is not in session.");
+            #endif
+                return;
+            }
+            await pings.RefreshPing(target, sessionCore.rttTokenSource.Token);
         }
         /// <summary>
         /// Manually update Pings data to latest.
         /// </summary>
         /// <returns></returns>
         public async UniTask RefreshPings(){
-            await pings.RefreshPings(p2pConnectorForOtherAssembly.Instance.p2pToken.Token);
+            if(!SynicSugarManger.Instance.State.IsInSession){
+            #if SYNICSUGAR_LOG
+                Debug.Log("RefreshPing: This local user is not in session.");
+            #endif
+                return;
+            }
+            await pings.RefreshPings(sessionCore.rttTokenSource.Token);
         }
     #endregion
         /// <summary>
@@ -220,5 +282,21 @@ namespace SynicSugar.P2P {
         public UserId LastTargetRPCUserId => lastTargetRPCInfo.target;
         public bool LastRPCIsLargePacket => lastRpcInfo.isLargePacket;
         public bool LastTargetRPCIsLargePacket => lastTargetRPCInfo.isLargePacket;
+        /// <summary>
+        /// Checks if the connection has been enabled by the library or user.
+        /// This does not necessarily mean that an actual connection has been established.
+        /// The IsConnected flag becomes true after the user or library initiates the connection.
+        /// </summary>
+        /// <returns>True if the connection is open, false otherwise.</returns>
+        public bool ConnectionIsValid(){
+            return sessionCore.IsConnected;
+        }
+        /// <summary>
+        /// Gets the currently valid (active) packet receiver type.
+        /// </summary>
+        /// <returns>The active ReceiverType enum value</returns>
+        public ReceiverType GetActiveReceiverType(){
+            return sessionCore.validReceiverType;
+        }
     }
 }

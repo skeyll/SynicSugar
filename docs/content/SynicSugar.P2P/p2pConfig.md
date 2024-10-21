@@ -31,13 +31,14 @@ If this is no longer needed, we call *[CancelCurrentMatchMake](../../SynicSugar.
 | [AutoRefreshPing](../p2pConfig/autorefreshping) | If true, update ping automatically |
 | [SamplesPerPing](../p2pConfig/samplesperping) | Number of samples used for a ping |
 | [PingAutoRefreshRateSec](../p2pConfig/pingautorefreshratesec) | Interval sec to update ping automatically |
-| [RelayControl](../p2pConfig/relaycontrol) | The way to connection |
+| [relayControl](../p2pConfig/relaycontrol) | The way to connection |
 
 
 ### Function 
 | API | description |
 |---|---|
 | [SetRelayControl](../MatchMakeManager/setrelaycontrol) | Change the way to connection |
+| GetNetworkCore | Get instance to manage connection script |
 
 
 

@@ -1,8 +1,6 @@
-using PlayEveryWare.EpicOnlineServices;
 using System;
 using System.Collections.Generic;
 using Epic.OnlineServices;
-using MemoryPack;
 
 namespace SynicSugar.P2P {
     /// <summary>
@@ -35,19 +33,14 @@ namespace SynicSugar.P2P {
         // If not, only the local user can manipulate the local user's data.
         // For Anti-Cheat to rewrite other player data.
         internal bool isJustReconnected { get; private set; }
-        internal UserIds(){
-            LocalUserId = UserId.GetUserId(EOSManager.Instance.GetProductUserId());
-        }
-        internal UserIds(bool isReconencter){
-            LocalUserId = UserId.GetUserId(EOSManager.Instance.GetProductUserId());
-            if(isReconencter){
-                isJustReconnected = true;
-            }
+        internal UserIds(bool isReconencter = false){
+            LocalUserId = SynicSugarManger.Instance.LocalUserId;
+            isJustReconnected = isReconencter;
         }
         /// <summary>
         /// Make reconencter flag false.
         /// </summary>
-        internal void ReceivedocalUserSynic(){
+        internal void ReceivedLocalUserSynic(){
             isJustReconnected = false;
         }
         /// <summary>
@@ -72,6 +65,9 @@ namespace SynicSugar.P2P {
             foreach(var id in DisconnectedUserIds){
                 CurrentAllUserIds.Add(id);
             }
+            //For the case this user did not have data of CurrentSessionStartUTC.
+            //Thanks for this users can play even in other platform, although the time accuracy(for lag) is low.
+            p2pInfo.Instance.CurrentSessionStartUTC = DateTime.UtcNow.Subtract(TimeSpan.FromSeconds(data.ElapsedSecSinceStart));
         }
         /// <summary>
         /// Remove user ID when the user leaves lobby.<br />

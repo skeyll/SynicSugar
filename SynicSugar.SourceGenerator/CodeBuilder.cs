@@ -16,7 +16,7 @@
             string assignment = isPublic ? $"MemoryPackSerializer.Deserialize<{GetFullName(nameSpace, param)}>(payload, ref {name}[id].{variable});" :
               $"{name}[id].SetLocal{variable}(MemoryPackSerializer.Deserialize<{GetFullName(nameSpace, param)}>(payload));";
             return $@"
-                case CHANNELLIST.{variable}:
+                case Channels.{variable}:
                     {assignment}
                 return;";
         }
@@ -26,7 +26,7 @@
                     {name}.SetLocal{variable}(MemoryPackSerializer.Deserialize<{GetFullName(nameSpace, param)}>(payload));
                     {name}.isLocalCall = true;";
             return $@"
-                case CHANNELLIST.{variable}:
+                case Channels.{variable}:
                     {assignment}
                 return;";
         }
@@ -42,7 +42,7 @@
             }
 
             string largepacketHeader = isLargePacket ? $@"{{
-                    if(!RestoreLargePackets(ref ch, ref id, ref payload)){{
+                    if(!RestoreLargePackets(ref ch, id, ref payload)){{
                 #if SYNICSUGAR_LOG 
                         Debug.LogFormat(""ConvertFormPacket: Restore Large packet is in progress. for {{0}} "", ch);
                 #endif
@@ -59,7 +59,7 @@
                 return; }}" : "return; ";
 
             return $@"
-                case CHANNELLIST.{method}:{largepacketHeader}
+                case Channels.{method}:{largepacketHeader}
                     {rootName}[id].{method}(UserId.GetUserId(id){paramName});
                 {footer}";
         }
@@ -77,7 +77,7 @@
             }
 
             string largepacketHeader = isLargePacket ? $@"{{
-                    if(!RestoreLargePackets(ref ch, ref id, ref payload)){{
+                    if(!RestoreLargePackets(ref ch, id, ref payload)){{
                 #if SYNICSUGAR_LOG 
                         Debug.LogFormat(""ConvertFormPacket: Restore Large packet is in progress. for {{0}}"", ch);
                 #endif
@@ -94,7 +94,7 @@
                 return; }}" : "return;";
 
             return $@"
-                case CHANNELLIST.{method}:{largepacketHeader}
+                case Channels.{method}:{largepacketHeader}
                     {rootName}[id].{method}({paramName});
                 {footer}";
         }
@@ -110,7 +110,7 @@
             }
 
             string largepacketHeader = isLargePacket ? $@"{{
-                    if(!RestoreLargePackets(ref ch, ref id, ref payload)){{
+                    if(!RestoreLargePackets(ref ch, id, ref payload)){{
                 #if SYNICSUGAR_LOG 
                         Debug.LogFormat(""ConvertFormPacket: Restore Large packet is in progress. for {{0}}"", ch);
                 #endif
@@ -128,7 +128,7 @@
                 return; }}" : "return;";
 
             return $@"
-                case CHANNELLIST.{method}:{largepacketHeader}
+                case Channels.{method}:{largepacketHeader}
                     {rootName}.isLocalCall = false;
                     {rootName}.{method}({paramName});
                 {footer}";
@@ -191,7 +191,7 @@
         internal void SetLocal{name}({GetFullName(paramNamespace, type)} value) {{
             {name} = value;
         }}"
-         ;
+        ;
             return $@"
         bool {intervalCondition};
         {setterMethod}
@@ -215,10 +215,10 @@
         async UniTask Synic{name}(){{
             var preValue = {name};
 
-            EOSp2p.SendPacketToAll((byte)ConnectHub.CHANNELLIST.{name}, MemoryPack.MemoryPackSerializer.Serialize({name})).Forget();
-            await UniTask.Delay({intervalTime});
+            EOSp2p.SendPacketToAll((byte)ConnectHub.Channels.{name}, MemoryPack.MemoryPackSerializer.Serialize({name})).Forget();
+            await UniTask.Delay({intervalTime}, cancellationToken: ConnectHub.Instance.GetSyncToken());
             
-            if(p2pConnectorForOtherAssembly.Instance.p2pToken.IsCancellationRequested){{
+            if(ConnectHub.Instance.GetSyncToken().IsCancellationRequested){{
                 return;
             }}
             if(preValue == {name}){{
@@ -245,7 +245,7 @@
             return $@"
         void SynicSugarRpc_{fnName}({arg}) {{
             if(isLocal){{{largepacketCompresser}
-                EOSp2p.{methodType}((byte)ConnectHub.CHANNELLIST.{fnName}, {serializer}{recordOption}).Forget();
+                EOSp2p.{methodType}((byte)ConnectHub.Channels.{fnName}, {serializer}{recordOption}).Forget();
             }}
         }}";
         }
@@ -265,7 +265,7 @@
             return $@"
         void SynicSugarRpc_{fnName}(UserId id{arg}) {{
             if(isLocal){{{largepacketCompresser}
-                EOSp2p.{methodType}((byte)ConnectHub.CHANNELLIST.{fnName}, {serializer}, id{recordOption}){forget};
+                EOSp2p.{methodType}((byte)ConnectHub.Channels.{fnName}, {serializer}, id{recordOption}){forget};
             }}
         }}";
         }
@@ -284,19 +284,19 @@
             return $@"
         void SynicSugarRpc_{fnName}({arg}) {{
             if(isLocalCall){{{largepacketCompresser}
-                EOSp2p.{methodType}((byte)ConnectHub.CHANNELLIST.{fnName}, {serializer}{recordOption}).Forget();
+                EOSp2p.{methodType}((byte)ConnectHub.Channels.{fnName}, {serializer}{recordOption}).Forget();
             }}
             isLocalCall = true;
         }}";
         }
-        //SyncSynic
+        //SyncSynicWithLocalData
         internal string CreateSynicItemVariable(string variable, string nameSpace, string param) {
             return $@"
         public {GetFullName(nameSpace, param)} {variable};";
         }
         internal string CreateSyncSynicContent(string variableName, string className, bool isPlayerClass) {
-            string id = isPlayerClass ? "[id.ToString()]" : System.String.Empty;
-            return $@" {variableName} = {className}{id}.{variableName},";
+            string assignment = isPlayerClass ? $"{className}.ContainsKey(id) ? {className}[id]?.{variableName} ?? default : default" : $"{className} != null ? {className}?.{variableName} ?? default : default";
+            return $@" {variableName} = {assignment},";
         }
         internal (string text, bool needData) AddSyncSynicFrame(int index, string playerContent, string commonsContent) {
             string getPart = string.IsNullOrEmpty(playerContent) && string.IsNullOrEmpty(commonsContent) ? System.String.Empty :$@"
@@ -309,7 +309,7 @@
                 case {index}: {getPart}
                 {footer}", !string.IsNullOrEmpty(getPart));
         }
-        //SyncedSynic
+        //OverwrittenSynicWithRemoteData
         internal string CreateSyncedInvoker(int index) {
             string footer = index == 0 ? @"
                 break;" : $@"
@@ -324,18 +324,42 @@
         }
 
         internal string CreateSyncedContent(string variableName, string className, bool isPlayerClass) {
-            string id = isPlayerClass ? "[id]" : System.String.Empty;
-            string indent = isPlayerClass ? System.String.Empty : "    ";
+            string id = isPlayerClass ? "[id]" : string.Empty;
+            string indent = isPlayerClass ? string.Empty : "    ";
+            string condition = isPlayerClass ? $"{className}.ContainsKey(id)" : $"{className} != null";
+
+            string itemName = $"\"{className}.{variableName}, \"";
+
             return $@"
-            {indent}{className}{id}.{variableName} = synicItem.{variableName};";
+            {indent}if({condition}) {{
+            #if SYNICSUGAR_LOG
+                {indent}items += {itemName};
+                {indent}itemCount++;
+            #endif
+                {indent}{className}{id}.{variableName} = synicItem.{variableName}; 
+            }}";
         }
+
         internal string CreateSyncedItem(int index, string playerContent, string commonsContent){
+            string logContent = $"$\"SyncedItem{index}: {{itemCount}} Synics is overwritten by {{id}}. The List: ({{items}}) \"";
+
             return $@"
-        void SyncedItem{index}(string id, SynicItem{index} synicItem){{ {playerContent}
+        void SyncedItem{index}(string id, SynicItem{index} synicItem){{
+            #if SYNICSUGAR_LOG
+                string items = string.Empty;
+                int itemCount = 0;
+            #endif
+            //Player
+            {playerContent}
             if(p2pInfo.Instance.IsHost(id)){{
                 //Commons
                 {commonsContent}
             }}
+        #if SYNICSUGAR_LOG
+            if(itemCount > 0){{
+                Debug.Log({logContent});
+            }}
+        #endif
         }}";
         }
 

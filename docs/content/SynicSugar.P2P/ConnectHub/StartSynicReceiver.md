@@ -6,11 +6,10 @@ weight = 2
 <small>*Namespace: SynicSugar.P2P* <br>
 *Class: ConnectHub* </small>
 
-public void StartSynicReceiver()
-
+public void StartSynicReceiver(byte maxBatchSize = 1)
 
 ### Description
-Start Packet Receiver (in burst FPS) to get only Synic packets from the receiving buffer.<br>
+Start Packet Receiver to get only Synic packets (in Unity.Update) from the receiving buffer.<br>
 This cannot be called with other Receiver at the same time. If start the other Receiver, ConenctHub stop this Receiver automatically before start the new one.<br>
 Need the Instance of each Class to get the packet.<br>
 So, genarete the components by *[SynicObject](../synicobject/)*, or set UserID in or after Unity.Start to Register the instanced to ConnectHub.<br>
@@ -26,12 +25,12 @@ public class p2pSample {
         //This user is Reconnecter
         if(p2pInfo.Instance.IsReconnecter){
                 //To get SynicPacket.
-                ConnectHub.Instance.StartSynicReceiver();
+                ConnectHub.Instance.StartSynicReceiver(8);
                 //This flag(HasReceivedAllSyncSynic) cannot be used at the same time. Once it returns True, it returns False again.
                 await UniTask.WaitUntil(() => p2pInfo.Instance.HasReceivedAllSyncSynic);
             }
         }
-        ConnectHub.Instance.StartSynicReceiver();
+        ConnectHub.Instance.StartPacketReceiver(maxBatchSize: 5);
     }
 }
 ```
