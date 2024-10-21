@@ -1,12 +1,12 @@
 +++
-title = "CHANNELLIST"
+title = "Channels"
 weight = 1
 +++
-## CHANNELLIST
+## Channels
 <small>*Namespace: SynicSugar.P2P* <br>
 *Class: ConnectHub* </small>
 
-public enum CHANNELLIST
+intenal enum Channels
 
 
 ### Description
@@ -20,7 +20,7 @@ using MemoryPack;
 [NetworkPlayer] //For [TargetRpc]
 public class p2pSample {
     void HandSend(){
-        EOSp2p.SendPacket((byte)ConnectHub.CHANNELLIST.TargetRPCFuction, MemoryPack.MemoryPackSerializer.Serialize("HELLO"), attackUserId).Forget();
+        EOSp2p.SendPacket((byte)ConnectHub.Channels.TargetRPCFuction, MemoryPack.MemoryPackSerializer.Serialize("HELLO"), attackUserId).Forget();
     }
 
     [TargetRpc] //Then, SourceGenerator add "RPCFuction" to enum ConnectHub.CHANNELLIST.

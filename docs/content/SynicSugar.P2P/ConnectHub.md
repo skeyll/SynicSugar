@@ -20,23 +20,23 @@ Each assembly can have max 250 variables and functions with Network attribute (s
 | API | description |
 |---|---|
 | [Instance](../ConnectHub/instance) | This scrip's instance |
-| [CHANNELLIST](../ConnectHub/channellist) | List of all variable and functions having Network attribute |
+| [Channels](../ConnectHub/channels) | List of all variable and functions having Network attribute |
 
 ### Function 
 | API | description |
 |---|---|
 | [StartSynicReceiver](../ConnectHub/startsynicreceiver) | Start the synic receiver to get only synic packet from buffer |
 | [StartPacketReceiver](../ConnectHub/startpacketreceiver) | (Re)Start the packet receiver to get packet from buffer |
-| [PausePacketReceiver](../ConnectHub/pausepacketreceiver) | Pause to get a packet from the buffer |
+| [StopPacketReceiver](../ConnectHub/stoppacketreceiver) | Stop to get a packet from the buffer |
 | [PauseConnections](../ConnectHub/pauseconnections) | Pause receiving a packet to the receive buffer |
 | [RestartConnections](../ConnectHub/restartconnections) | Restart to receive packets receive buffer |
 | [ExitSession](../ConnectHub/exitsession) | Leave connection |
 | [CloseSession](../ConnectHub/closesession) | Close connection. (If Host, close the Lobby) |
+| DestoryOfflineLobby | Destory offline-lobby and stop offline mode |
 | [RegisterInstance](../ConnectHub/registerinstance) | Register instance to receive packets |
 | [GetUserInstance](../ConnectHub/getuserinstance) | Get a NetworkPlayer instance of target user registered to ConnectHub |
 | [GetInstance](../ConnectHub/getinstance) | Get a NetworkCommons instance registered to ConenctHub |
 | [SyncSynic](../ConnectHub/syncsynic) | Synchronize all own Synic variables at once to TargetUser |
-| ConvertFromPacket | SynicSugar uses internally |
 | [ResendLastRPC](../ConnectHub/resendlastrpc) | Re-Send RPC with last recorded information |
 | [ResendLastRPCToTarget](../ConnectHub/resendlastrpctotarget) | Re-Send RPC to the specific target with last recorded information |
 | [ResendLastTargetRPC](../ConnectHub/resendlasttargetrpc) | Re-Send TargetRPC with last recorded information. |
