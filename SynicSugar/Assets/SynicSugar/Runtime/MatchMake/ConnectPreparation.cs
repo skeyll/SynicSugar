@@ -35,7 +35,7 @@ namespace SynicSugar.MatchMake {
         /// Different Assembly can have same CH, but not sorted when receive packet. <br />
         /// So must not use the same ch for what SynicSugar may receive at the same time.
         /// </summary>
-        const byte USERLISTCH = 252;
+        const byte basicInfoCh = 252;
         const int SendBatchSize = 8;
         byte ch;
         ProductUserId id;
@@ -58,7 +58,7 @@ namespace SynicSugar.MatchMake {
 
             using var compressor  = new BrotliCompressor();
             MemoryPackSerializer.Serialize(compressor, basicInfo);
-            SendPacket(USERLISTCH, compressor.ToArray(), target);
+            SendPacket(basicInfoCh, compressor.ToArray(), target);
         }
         /// <summary>
         /// For Host to send AllUserList after connection.
@@ -73,7 +73,7 @@ namespace SynicSugar.MatchMake {
             int count = SendBatchSize;
             var compressorArray = compressor.ToArray();
             foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
-                SendPacket(USERLISTCH, compressorArray, id);
+                SendPacket(basicInfoCh, compressorArray, id);
 
                 count--;
                 if(count <= 0){
@@ -115,7 +115,7 @@ namespace SynicSugar.MatchMake {
             //Next packet size
             var getNextReceivedPacketSizeOptions = new GetNextReceivedPacketSizeOptions {
                 LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
-                RequestedChannel = USERLISTCH
+                RequestedChannel = basicInfoCh
             };
             while(!token.IsCancellationRequested){
                 bool recivePacket = GetPacketFromBuffer(ref p2pInterface, ref getNextReceivedPacketSizeOptions, ref ch, ref id, ref payload);
@@ -145,7 +145,7 @@ namespace SynicSugar.MatchMake {
             ReceivePacketOptions options = new ReceivePacketOptions(){
                 LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
                 MaxDataSizeBytes = nextPacketSizeBytes,
-                RequestedChannel = USERLISTCH
+                RequestedChannel = basicInfoCh
             };
 
             byte[] data = new byte[nextPacketSizeBytes];
@@ -162,7 +162,7 @@ namespace SynicSugar.MatchMake {
         }
         
         void ConvertFromPacket(){
-            if(ch != USERLISTCH){
+            if(ch != basicInfoCh){
                 return;
             }
 
