@@ -11,7 +11,7 @@ using ResultE = Epic.OnlineServices.Result;
 using UnityEngine;
 
 namespace SynicSugar.MatchMake {
-    internal class ConnectPreparation {
+    internal class ConnectionSetupHandler {
         /// <summary>
         /// To open and request initial connection.
         /// </summary>

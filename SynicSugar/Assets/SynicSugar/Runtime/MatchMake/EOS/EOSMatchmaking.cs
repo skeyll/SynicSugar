@@ -872,7 +872,7 @@ namespace SynicSugar.MatchMake {
                 p2pInfo.Instance.ConnectionNotifier.Connected(UserId.GetUserId(info.TargetUserId));
                 // Send Id list.
                 if(p2pInfo.Instance.IsHost()){
-                    ConnectPreparation.SendUserList(UserId.GetUserId(info.TargetUserId));
+                    ConnectionSetupHandler.SendUserList(UserId.GetUserId(info.TargetUserId));
                 #if SYNICSUGAR_LOG
                     Debug.Log($"MemberStatusNotyfy: Send user list to {info.TargetUserId}.");
                 #endif
@@ -1469,7 +1469,7 @@ namespace SynicSugar.MatchMake {
         #if SYNICSUGAR_LOG
             Debug.Log("OpenConnection: Send connect request.");
         #endif
-            Result canConnect = await ConnectPreparation.WaitConnectPreparation(token, setupTimeoutSec * 1000); //Pass time as ms.
+            Result canConnect = await ConnectionSetupHandler.WaitConnectPreparation(token, setupTimeoutSec * 1000); //Pass time as ms.
             if(canConnect != Result.Success){
                 return Result.ConnectEstablishFailed;
             }
@@ -1478,12 +1478,12 @@ namespace SynicSugar.MatchMake {
         #if SYNICSUGAR_LOG
             Debug.Log("OpenConnection: Sends UserList as Host.");
         #endif
-                await ConnectPreparation.SendUserListToAll(token);
+                await ConnectionSetupHandler.SendUserListToAll(token);
             }else{
         #if SYNICSUGAR_LOG
             Debug.Log("OpenConnection: Wait for UserList as Guest.");
         #endif
-                ConnectPreparation basicInfo = new();
+                ConnectionSetupHandler basicInfo = new();
                 await basicInfo.ReciveUserIdsPacket(token);
             }
             p2pInfo.Instance.pings.Init();
