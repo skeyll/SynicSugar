@@ -75,7 +75,10 @@ namespace SynicSugar.MatchMake {
         /// This flag is NOT related if user calls cancel apis.
         /// </summary>
         public bool enableHostmigrationInMatchmaking;
-
+        /// <summary>
+        /// This is the file name to save the session start time. It is stored in Application.persistentDataPath/sessionTimestampFileName.dat at the end of matchmaking. 
+        /// </summary>
+        public string sessionTimestampFileName = "ss_sessiondata";
 
     #region TODO: Change this to Enum and display only one field for the selected way on UnityEditor.
         public enum RecconectLobbyIdSaveType {
@@ -499,7 +502,7 @@ namespace SynicSugar.MatchMake {
 
             MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Ready);
             
-            SessionDataManager sessionDataManager = new SessionDataManager();
+            SessionDataManager sessionDataManager = new SessionDataManager(sessionTimestampFileName);
             if(isReconencter){
                 SessionData localData = await sessionDataManager.LoadSessionData(matchmakingCore.GetCurrentLobbyID());
                 //Overwrite host's timestamp data by local data.
