@@ -56,7 +56,7 @@ namespace SynicSugar.MatchMake {
             }
             basicInfo.ElapsedSecSinceStart = p2pInfo.Instance.GetSessionTimestamp();
 
-            using var compressor  = new BrotliCompressor();
+            using var compressor  = new BrotliCompressor(MatchMakeManager.Instance.BasicInfoPacketCompressionLevel);
             MemoryPackSerializer.Serialize(compressor, basicInfo);
             SendPacket(basicInfoCh, compressor.ToArray(), target);
         }
@@ -67,7 +67,7 @@ namespace SynicSugar.MatchMake {
             BasicInfo basicInfo = new BasicInfo();
             basicInfo.userIds = p2pInfo.Instance.AllUserIds.ConvertAll(id => id.ToString());
             
-            using var compressor  = new BrotliCompressor();
+            using var compressor  = new BrotliCompressor(MatchMakeManager.Instance.BasicInfoPacketCompressionLevel);
             MemoryPackSerializer.Serialize(compressor, basicInfo);
             
             int count = SendBatchSize;
