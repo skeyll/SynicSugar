@@ -10,11 +10,11 @@ namespace SynicSugar.MatchMake {
     internal class SessionDataManager
     {
         private string filePath;
-        const string fileName = "ss_sessiondata.dat";
-        internal SessionDataManager()
+        internal SessionDataManager(string fileName)
         {
-            filePath = Path.Combine(Application.persistentDataPath, fileName);
+            filePath = Path.Combine(Application.persistentDataPath, $"{fileName}.dat");
         }
+
 
         /// <summary>
         /// Save LobbyId and DataTime on starting session.

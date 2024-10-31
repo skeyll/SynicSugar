@@ -872,7 +872,7 @@ namespace SynicSugar.MatchMake {
                 p2pInfo.Instance.ConnectionNotifier.Connected(UserId.GetUserId(info.TargetUserId));
                 // Send Id list.
                 if(p2pInfo.Instance.IsHost()){
-                    ConnectPreparation.SendUserList(UserId.GetUserId(info.TargetUserId));
+                    ConnectionSetupHandler.SendUserList(UserId.GetUserId(info.TargetUserId));
                 #if SYNICSUGAR_LOG
                     Debug.Log($"MemberStatusNotyfy: Send user list to {info.TargetUserId}.");
                 #endif
@@ -1171,7 +1171,6 @@ namespace SynicSugar.MatchMake {
     /// <summary>
     /// Host close matchmaking. Guest Cancel matchmaking.
     /// </summary>
-    /// <param name="cleanupMemberCountChanged"></param>
     /// <param name="token"></param>
     /// <returns></returns>
     public override async UniTask<Result> CloseMatchMaking(CancellationToken token = default(CancellationToken)){
@@ -1200,7 +1199,6 @@ namespace SynicSugar.MatchMake {
     /// <summary>
     /// Cancel MatcgMaking and leave the lobby.
     /// </summary>
-    /// <param name="cleanupMemberCountChanged"></param>
     /// <param name="token"></param>
     /// <returns>If true, user can leave or destroy the lobby. </returns>
     public override async UniTask<Result> CancelMatchMaking(CancellationToken token = default(CancellationToken)){
@@ -1238,7 +1236,6 @@ namespace SynicSugar.MatchMake {
         /// Leave the Participating Lobby.<br />
         /// When a game is over, call DestroyLobby() instead of this.
         /// </summary>
-        /// <param name="cleanupMemberCountChanged"></param>
         /// <param name="token"></param>
         public override async UniTask<Result> LeaveLobby(CancellationToken token){
             if (CurrentLobby == null || string.IsNullOrEmpty(CurrentLobby.LobbyId) || !EOSManager.Instance.GetProductUserId().IsValid()){
@@ -1290,7 +1287,6 @@ namespace SynicSugar.MatchMake {
         /// <summary>
         /// When a game is over, call this. Guest leaves Lobby by update notify.
         /// </summary>
-        /// <param name="cleanupMemberCountChanged"></param>
         /// <param name="token"></param>
         /// <returns>On destroy success, return true.</returns>
         public override async UniTask<Result> DestroyLobby(CancellationToken token){
@@ -1473,7 +1469,7 @@ namespace SynicSugar.MatchMake {
         #if SYNICSUGAR_LOG
             Debug.Log("OpenConnection: Send connect request.");
         #endif
-            Result canConnect = await ConnectPreparation.WaitConnectPreparation(token, setupTimeoutSec * 1000); //Pass time as ms.
+            Result canConnect = await ConnectionSetupHandler.WaitConnectPreparation(token, setupTimeoutSec * 1000); //Pass time as ms.
             if(canConnect != Result.Success){
                 return Result.ConnectEstablishFailed;
             }
@@ -1482,12 +1478,12 @@ namespace SynicSugar.MatchMake {
         #if SYNICSUGAR_LOG
             Debug.Log("OpenConnection: Sends UserList as Host.");
         #endif
-                await ConnectPreparation.SendUserListToAll(token);
+                await ConnectionSetupHandler.SendUserListToAll(token);
             }else{
         #if SYNICSUGAR_LOG
             Debug.Log("OpenConnection: Wait for UserList as Guest.");
         #endif
-                ConnectPreparation basicInfo = new();
+                ConnectionSetupHandler basicInfo = new();
                 await basicInfo.ReciveUserIdsPacket(token);
             }
             p2pInfo.Instance.pings.Init();

@@ -48,8 +48,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxSearchResult: 5
-  TimeoutSec: 180
-  P2PSetupTimeoutSec: 15
+  timeoutSec: 180
+  p2pSetupTimeoutSec: 15
+  enableHostmigrationInMatchmaking: 0
+  _basicInfoPacketCompressionLevel: 1
+  sessionTimestampFileName: ss_sessiondata
   lobbyIdSaveType: 1
   playerprefsSaveKey: eos_lobbyid
   customSaveLobbyID:
@@ -60,6 +63,7 @@ MonoBehaviour:
       m_Calls: []
   MatchMakingGUIEvents:
     stateText: {fileID: 0}
+    Standby: 
     StartMatchmaking: 
     WaitForOpponents: 
     FinishMatchmaking: 
@@ -82,11 +86,8 @@ MonoBehaviour:
   packetReliability: 2
   AllowDelayedDelivery: 0
   UseDisconnectedEarlyNotify: 0
-  getPacketFrequency: 2
-  BurstReceiveBatchSize: 5
   RPCBatchSize: 3
   LargePacketBatchSize: 3
-  SynicReceiverBatchSize: 5
   autoSyncInterval: 1000
   AutoRefreshPing: 0
   SamplesPerPing: 1
