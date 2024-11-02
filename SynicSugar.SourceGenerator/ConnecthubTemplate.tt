@@ -47,6 +47,21 @@ namespace SynicSugar.P2P {
         public CancellationToken GetSyncToken(){
             return syncTokenSource.Token;
         }
+
+        void Dispose() {
+            syncTokenSource?.Cancel();
+            syncTokenSource?.Dispose();
+            _networkCore = null;
+        }
+        /// <summary>
+        /// Disposes of the ConnectHub instance and its associated data. <br />
+        /// GC-managed data is explicitly disposed here as well, since this is called at a timing where processing overhead is not a concern.
+        /// </summary>
+        void ResetInstance() {
+            Dispose();
+            ClearReferenceDictionaries();
+            instance = new Lazy<ConnectHub>(() => new ConnectHub());
+        }
         //Start
         /// <summary>
         /// Start the packet receiver. Call after creating the Network Instance required for reception.<br />
@@ -124,8 +139,7 @@ namespace SynicSugar.P2P {
             Result result = await NetworkCore.ExitSession(destroyManager, cleanupMemberCountChanged, cancelToken);
             
             if(result == Result.Success){
-                syncTokenSource.Cancel();
-                ClearReferenceDictionaries();
+                ResetInstance();
             }
             return result;
         }
@@ -139,10 +153,9 @@ namespace SynicSugar.P2P {
         /// </summary>
         public async UniTask<Result> CloseSession(bool destroyManager = true, bool cleanupMemberCountChanged = false, CancellationToken cancelToken = default(CancellationToken)){
             Result result = await NetworkCore.CloseSession(destroyManager, cleanupMemberCountChanged, cancelToken);
-
+            
             if(result == Result.Success){
-                syncTokenSource.Cancel();
-                ClearReferenceDictionaries();
+                ResetInstance();
             }
             
             return result;
@@ -160,8 +173,7 @@ namespace SynicSugar.P2P {
             Result result = await NetworkCore.DestoryOfflineLobby(destroyManager, cleanupMemberCountChanged, cancelToken);
 
             if(result == Result.Success){
-                syncTokenSource.Cancel();
-                ClearReferenceDictionaries();
+                ResetInstance();
             }
             
             return result;
