@@ -417,16 +417,19 @@ namespace SynicSugar.Samples.Tank
             Result closeResult;
             if(p2pInfo.Instance.AllUserIds.Count == 1)
             { 
+                Debug.Log("DestoryOfflineLobby");
                 //or MatchMakeManager.Instance.GetCurrentLobbyID() == "OFFLINEMODE"
                 closeResult = await ConnectHub.Instance.DestoryOfflineLobby();
             }
             else if(p2pInfo.Instance.CurrentConnectedUserIds.Count == 1)
             { 
+                Debug.Log("CloseSession");
                 //If the room is alone, close the room.
                 closeResult = await ConnectHub.Instance.CloseSession();
             }
             else
             {
+                Debug.Log("ExitSession");
                 closeResult = await ConnectHub.Instance.ExitSession();
             }
 
@@ -438,7 +441,7 @@ namespace SynicSugar.Samples.Tank
                 return;
             }
             
-            SceneChanger.ChangeGameScene(SCENELIST.MainMenu);
+            SceneChanger.ChangeGameScene(Scene.MainMenu);
         }
         #endregion
     }

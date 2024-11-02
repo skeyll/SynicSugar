@@ -261,7 +261,7 @@ namespace SynicSugar.Samples
             {
                 await ConnectHub.Instance.DestoryOfflineLobby();
             }
-            SceneChanger.ChangeGameScene(SCENELIST.MainMenu);
+            SceneChanger.ChangeGameScene(Scene.MainMenu);
 
         }
         public async void CloseSession()
@@ -277,7 +277,7 @@ namespace SynicSugar.Samples
             {
                 await ConnectHub.Instance.DestoryOfflineLobby();
             }
-            SceneChanger.ChangeGameScene(SCENELIST.MainMenu);
+            SceneChanger.ChangeGameScene(Scene.MainMenu);
         }
     }
 }

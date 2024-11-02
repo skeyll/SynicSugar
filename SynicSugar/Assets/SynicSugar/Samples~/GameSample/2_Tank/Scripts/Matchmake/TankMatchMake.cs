@@ -66,7 +66,7 @@ namespace SynicSugar.Samples.Tank
                 return;
             }
             SynicSugarDebug.Instance.Log($"TryToReconnect: Success! LobbyID:{MatchMakeManager.Instance.GetCurrentLobbyID()}");
-            SceneChanger.ChangeGameScene(SCENELIST.Tank);
+            SceneChanger.ChangeGameScene(Scene.Tank);
         }
         /// <summary>
         /// Register tests and button events for in-matchmaking.
@@ -241,7 +241,7 @@ namespace SynicSugar.Samples.Tank
                 return;
             }
 
-            SceneChanger.ChangeGameScene(SCENELIST.Tank);
+            SceneChanger.ChangeGameScene(Scene.Tank);
         }
         /// <summary>
         /// Reset pre data.

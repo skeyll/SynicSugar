@@ -163,7 +163,7 @@ namespace SynicSugar.Samples.ReadHearts
         {
             await ConnectHub.Instance.CloseSession();
             
-            SceneChanger.ChangeGameScene(SCENELIST.MainMenu); 
+            SceneChanger.ChangeGameScene(Scene.MainMenu); 
         }
     }
 

@@ -1,5 +1,5 @@
 namespace SynicSugar.Samples {
-    public enum SCENELIST {
+    public enum Scene {
         MainMenu, Tank, TankMatchMake, ReadHearts, Chat
     }
 }
