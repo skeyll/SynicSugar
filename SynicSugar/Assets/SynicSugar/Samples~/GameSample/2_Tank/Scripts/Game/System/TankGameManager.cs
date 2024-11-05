@@ -5,6 +5,7 @@ using SynicSugar.P2P;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using SynicSugar.MatchMake;
 
 namespace SynicSugar.Samples.Tank
 {
@@ -415,17 +416,10 @@ namespace SynicSugar.Samples.Tank
         private async UniTask AsyncReturnToTitle()
         {
             Result closeResult;
-            if(p2pInfo.Instance.AllUserIds.Count == 1)
+            if(MatchMakeManager.Instance.GetCurrentLobbyID() == "OFFLINEMODE")
             { 
                 Debug.Log("DestoryOfflineLobby");
-                //or MatchMakeManager.Instance.GetCurrentLobbyID() == "OFFLINEMODE"
                 closeResult = await ConnectHub.Instance.DestoryOfflineLobby();
-            }
-            else if(p2pInfo.Instance.CurrentConnectedUserIds.Count == 1)
-            { 
-                Debug.Log("CloseSession");
-                //If the room is alone, close the room.
-                closeResult = await ConnectHub.Instance.CloseSession();
             }
             else
             {

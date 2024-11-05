@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using SynicSugar.MatchMake;
 using SynicSugar.P2P;
 using SynicSugar.RTC;
 using UnityEngine;
@@ -253,13 +254,14 @@ namespace SynicSugar.Samples
             isStressTesting = false;
             SynicSugarDebug.Instance.Log("Chat Mode: Leave");
 
-            if(p2pInfo.Instance.AllUserIds.Count > 1)
-            {
-                await ConnectHub.Instance.ExitSession();
+            if(MatchMakeManager.Instance.GetCurrentLobbyID() == "OFFLINEMODE")
+            { 
+                await ConnectHub.Instance.DestoryOfflineLobby();
             }
             else
             {
-                await ConnectHub.Instance.DestoryOfflineLobby();
+                //If this user is last one, this API closes the Lobby automatically.
+                await ConnectHub.Instance.ExitSession();
             }
             SceneChanger.ChangeGameScene(Scene.MainMenu);
 
@@ -269,14 +271,17 @@ namespace SynicSugar.Samples
             isStressTesting = false;
             SynicSugarDebug.Instance.Log("Chat Mode: Close");
 
-            if(p2pInfo.Instance.AllUserIds.Count > 1)
-            {
-                await ConnectHub.Instance.CloseSession();
-            }
-            else
-            {
+
+            if(MatchMakeManager.Instance.GetCurrentLobbyID() == "OFFLINEMODE")
+            { 
                 await ConnectHub.Instance.DestoryOfflineLobby();
             }
+            else
+            { 
+                //If the host calls this, the lobby will be closed even if there are people in the lobby.
+                await ConnectHub.Instance.CloseSession();
+            }
+
             SceneChanger.ChangeGameScene(Scene.MainMenu);
         }
     }
