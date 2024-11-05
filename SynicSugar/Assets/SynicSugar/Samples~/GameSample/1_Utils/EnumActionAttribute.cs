@@ -7,7 +7,8 @@ using UnityEngine;
 /// From https://forum.unity.com/threads/ability-to-add-enum-argument-to-button-functions.270817
 /// </summary>
 [AttributeUsage(AttributeTargets.Method)]
-public class EnumActionAttribute : PropertyAttribute {
+public class EnumActionAttribute : PropertyAttribute
+{
     public Type EnumType { get; }
     public EnumActionAttribute(Type enumType) => EnumType = enumType;
 }

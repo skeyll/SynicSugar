@@ -1,13 +1,18 @@
 using SynicSugar.MatchMake;
 
-namespace  SynicSugar.Samples {
-    public class MatchMakeConfig {
-        public enum Langugage{
+namespace  SynicSugar.Samples
+{
+    public class MatchMakeConfig 
+    {
+        public enum Langugage
+        {
             EN, JA
         }
-        public static MatchMakingGUIEvents SetMatchingText(Langugage langugage){
+        public static MatchMakingGUIEvents SetMatchingText(Langugage langugage)
+        {
             MatchMakingGUIEvents descriptions = new();
-            switch(langugage){
+            switch(langugage)
+            {
                 case Langugage.JA:
                     descriptions.StartMatchmaking = "マッチングを検索中";
                     descriptions.WaitForOpponents = "対戦相手を探しています";

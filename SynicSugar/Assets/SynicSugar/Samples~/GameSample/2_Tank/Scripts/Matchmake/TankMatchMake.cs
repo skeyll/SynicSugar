@@ -34,12 +34,13 @@ namespace SynicSugar.Samples.Tank
         [SerializeField] private Text lobbyMemberCount;
 
         //Key is UserId
-        private Dictionary<string, TankLobbyMemberState> LobbyMemberStatus = new();
+        private Dictionary<string, TankLobbyMemberState> LobbyMemberStatus;
 
     #region Prep for matchmaking
         //At first, prep GUI events for matchmaking　and try reconnection.
         private void Start()
         {
+            LobbyMemberStatus = new();
             SwitchButtonsActive(MatchmakingState.NoneAndAfterStart);
             lobbyMaker = new MatchmakingLobbyMaker(matchConditions);
             SetGUIEvents();
