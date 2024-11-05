@@ -14,7 +14,7 @@ namespace SynicSugar {
             }
             Instance = this;
             CoreFactory = new EOSCoreFactory();
-            LocalUserId = UserId.GenerateOfflineUserId();
+            State = new SynicSugarState();
             DontDestroyOnLoad(this);
         }
         void OnDestroy() {
@@ -26,6 +26,9 @@ namespace SynicSugar {
             #endif
             }
         }
+        void Start(){
+            LocalUserId = UserId.GenerateOfflineUserId();
+        }
     #if UNITY_EDITOR
         /// <summary>
         /// To clean up notify or event in Editor.
@@ -33,7 +36,7 @@ namespace SynicSugar {
         public event Action CleanupForEditor;
     #endif
 #endregion
-        public readonly SynicSugarState State = new SynicSugarState();
+        public SynicSugarState State { get; private set; }
         internal SynicSugarCoreFactory CoreFactory { get; private set; }
         public UserId LocalUserId { get; private set; }
         /// <summary>
