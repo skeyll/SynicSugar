@@ -194,6 +194,8 @@ namespace SynicSugar.Base {
             SynicSugarManger.Instance.State.IsInSession = false;
 
             p2pInfo.Instance.ConnectionNotifier.Closed(reason);
+            
+            p2pInfo.Instance.SessionType = SessionType.None;
             return Result.Success;
         }
     }

@@ -532,6 +532,7 @@ namespace SynicSugar.MatchMake {
 
             SynicSugarManger.Instance.State.IsMatchmaking = false;
             SynicSugarManger.Instance.State.IsInSession = true;
+            p2pInfo.Instance.SessionType = SessionType.OnlineSession;
             return Result.Success;
         }
 
@@ -625,16 +626,17 @@ namespace SynicSugar.MatchMake {
         /// <param name="cleanupMemberCountChanged">Need to call MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(id, false) after exit lobby?</param>
         /// <param name="token">Token for this task</param>
         internal async UniTask<Result> ExitCurrentLobby(bool cleanupMemberCountChanged, CancellationToken token){
-            Result canDestroy = await matchmakingCore.LeaveLobby(token);
+            Result result = await matchmakingCore.LeaveLobby(token);
 
-            if(canDestroy == Result.Success && cleanupMemberCountChanged){
+            if(result == Result.Success && cleanupMemberCountChanged){
                 //To delete member object.
                 foreach(var id in p2pInfo.Instance.AllUserIds){
                     MatchMakingGUIEvents.LobbyMemberCountChanged(id, false);
                 }
             }
 
-            return canDestroy;
+            p2pInfo.Instance.SessionType = SessionType.None;
+            return result;
         }
         /// <summary>
         /// Destroy the current lobby on the end of Game.
@@ -643,15 +645,17 @@ namespace SynicSugar.MatchMake {
         /// <param name="token">Token for this task</param>
         /// <returns>True on success. If user isn't host, return false.</returns>
         internal async UniTask<Result> CloseCurrentLobby(bool cleanupMemberCountChanged, CancellationToken token){
-            Result canDestroy = await matchmakingCore.DestroyLobby(token);
+            Result result = await matchmakingCore.DestroyLobby(token);
 
-            if(canDestroy == Result.Success && cleanupMemberCountChanged){
+            if(result == Result.Success && cleanupMemberCountChanged){
                 //To delete member object.
                 foreach(var id in p2pInfo.Instance.AllUserIds){
                     MatchMakingGUIEvents.LobbyMemberCountChanged(id, false);
                 }
             }
-            return canDestroy;
+
+            p2pInfo.Instance.SessionType = SessionType.None;
+            return result;
         }
     #region Offline Mode
         /// <summary>
@@ -683,6 +687,7 @@ namespace SynicSugar.MatchMake {
                 isLooking = false;
                 SynicSugarManger.Instance.State.IsMatchmaking = false;
                 SynicSugarManger.Instance.State.IsInSession = true;
+                p2pInfo.Instance.SessionType = SessionType.OfflineSession;
                 return result;
             }catch(OperationCanceledException){
             #if SYNICSUGAR_LOG
@@ -706,7 +711,8 @@ namespace SynicSugar.MatchMake {
             if(cleanupMemberCountChanged){
                 MatchMakingGUIEvents.LobbyMemberCountChanged(p2pInfo.Instance.LocalUserId, false);
             }
-
+            
+            p2pInfo.Instance.SessionType = SessionType.None;
             return Result.Success;
         }
     #endregion
