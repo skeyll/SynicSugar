@@ -39,12 +39,14 @@ namespace SynicSugar.P2P {
         public event Action<UserId> OnTargetRestored;
         
         /// <summary>
-        /// Invoked when the Lobby is closed, and the local user is removed from it.<br />
-        /// This can occur for one of the following reasons: <br />
+        /// Invoked when the Lobby is closed and the local user is removed　￥ from the Lobby.<br />
+        /// Possible reasons include:<br />
         /// - Disconnected: An unexpected disconnection occurred.<br />
-        /// - LobbyClosed: The Lobby was closed by the host.<br />
-        /// - Kicked: The local user was removed from the Lobby.<br />
-        /// LobbyID is deleted only when the Lobby is LobbyClosed.　If disconnected, to resume communication, rejoin with MatchMaking.Instance.ReconnectLobby().
+        /// - LobbyClosed: The host closed the Lobby.<br />
+        /// - Kicked: The local user was kicked from the Lobby by Host.<br />
+        /// Note: This does not include the process for destroying the NetworkManager. If it is no longer needed, please call `Destroy(MatchMakeManager.Instance.gameObject);`. <br />
+        /// The LobbyID is deleted only if the Lobby was closed by the host (LobbyClosed). <br />
+        /// If disconnected or kicked, can use `MatchMaking.Instance.ReconnectLobby()` to rejoin.
         /// </summary>
         public event Action<Reason> OnLobbyClosed;
 
