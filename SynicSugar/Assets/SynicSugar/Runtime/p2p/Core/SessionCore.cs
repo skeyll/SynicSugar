@@ -373,7 +373,7 @@ namespace SynicSugar.Base {
         /// <summary>
         /// Handle termination of notification at end of session, p2p disconnection, etc.
         /// </summary>
-        public Result RemoveNotifyAndCloseConnection (){
+        internal Result RemoveNotifyAndCloseConnection (){
             Result result = CloseConnection();
 
             if(result == Result.Success){

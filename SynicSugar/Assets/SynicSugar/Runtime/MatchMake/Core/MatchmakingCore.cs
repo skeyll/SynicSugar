@@ -2,6 +2,7 @@ using System.Threading;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using SynicSugar.MatchMake;
+using SynicSugar.P2P;
 
 namespace SynicSugar.Base {
     public abstract class MatchmakingCore {
@@ -169,6 +170,32 @@ namespace SynicSugar.Base {
         /// </summary>
         /// <param name="disconenctedUserIndex"> UserIndex. For second Heart beat, +100</param>
         public abstract void UpdateMemberAttributeAsHeartBeat(int disconenctedUserIndex);
+
+        /// <summary>
+        /// Cleans up and closes the active session when the Lobby is closed, either intentionally or due to network issues.<br />
+        /// This method handles session disconnection and Initialize IsInSession.<br />
+        /// If there is a possibility that the local user could be kicked from the Lobby by someone other than themselves during the session, please call this method to terminate the communication.
+        /// </summary>
+        /// <param name="reason">The reason for the　lobby closure</param>
+        /// <returns>indicating the success or failure of the cleanup process.</returns>
+        protected async UniTask<Result> CloseSessionOnLobbyClosure(Reason reason){
+            Result result = p2pConfig.Instance.sessionCore.RemoveNotifyAndCloseConnection();
+
+            if(result != Result.Success){
+                UnityEngine.Debug.LogErrorFormat("OnLobbyMemberStatusReceived: Failed to process Lobby closure. Host functions and lobby notifications may now be disabled, but P2P remains active. Result: {0}", result);
+                return result;
+            }
+
+            // If the reason is LobbyClosed, remove the Lobby ID. Otherwise, the local user can reconnect via Reconnect API.
+            if(reason == Reason.LobbyClosed){
+                await MatchMakeManager.Instance.OnDeleteLobbyID();
+            }
+
+            SynicSugarManger.Instance.State.IsInSession = false;
+
+            p2pInfo.Instance.ConnectionNotifier.Closed(reason);
+            return Result.Success;
+        }
     }
 }
 

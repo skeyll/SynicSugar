@@ -811,21 +811,7 @@ namespace SynicSugar.MatchMake {
                     RemoveAllNotifyEvents();
 
                     if(SynicSugarManger.Instance.State.IsInSession){
-                        Result result = p2pConfig.Instance.sessionCore.RemoveNotifyAndCloseConnection();
-
-                        if(result != Result.Success){
-                            Debug.LogErrorFormat("OnLobbyMemberStatusReceived: Failed to process Lobby closure. Host functions and lobby notifications may now be disabled, but P2P remains active. Result: {0}", result);
-                            return;
-                        }
-
-                        // If the reason is LobbyClosed, remove the Lobby ID. Otherwise, the local user can reconnect via Reconnect API.
-                        if(reason == Reason.LobbyClosed){
-                            MatchMakeManager.Instance.OnDeleteLobbyID().Forget();
-                        }
-
-                        SynicSugarManger.Instance.State.IsInSession = false;
-
-                        p2pInfo.Instance.ConnectionNotifier.Closed(reason);
+                        CloseSessionOnLobbyClosure(reason).Forget();
                         return;
                     }
 
