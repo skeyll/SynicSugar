@@ -34,6 +34,7 @@ namespace SynicSugar.Samples.Chat
         //In fact, you had better check id like this on the Title screen after user Login to EOS.
         private void Start()
         {
+            Debug.Log("ChatMatchmake");
             //Prep matchmaking
             // SetGUIEvents();
             SwitchButtonsActive(MatchmakingState.NoneAndAfterStart);
@@ -186,7 +187,7 @@ namespace SynicSugar.Samples.Chat
             {
                 await MatchMakeManager.Instance.ExitCurrentMatchMake(true);
             }
-            SceneChanger.ChangeGameScene(SCENELIST.MainMenu);
+            SceneChanger.ChangeGameScene(Scene.MainMenu);
         }
         /// <summary>
         /// Offline lobby id is "OFFLINEMODE"

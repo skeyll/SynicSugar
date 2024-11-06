@@ -34,12 +34,13 @@ namespace SynicSugar.Samples.Tank
         [SerializeField] private Text lobbyMemberCount;
 
         //Key is UserId
-        private Dictionary<string, TankLobbyMemberState> LobbyMemberStatus = new();
+        private Dictionary<string, TankLobbyMemberState> LobbyMemberStatus;
 
     #region Prep for matchmaking
         //At first, prep GUI events for matchmaking　and try reconnection.
         private void Start()
         {
+            LobbyMemberStatus = new();
             SwitchButtonsActive(MatchmakingState.NoneAndAfterStart);
             lobbyMaker = new MatchmakingLobbyMaker(matchConditions);
             SetGUIEvents();
@@ -66,7 +67,7 @@ namespace SynicSugar.Samples.Tank
                 return;
             }
             SynicSugarDebug.Instance.Log($"TryToReconnect: Success! LobbyID:{MatchMakeManager.Instance.GetCurrentLobbyID()}");
-            SceneChanger.ChangeGameScene(SCENELIST.Tank);
+            SceneChanger.ChangeGameScene(Scene.Tank);
         }
         /// <summary>
         /// Register tests and button events for in-matchmaking.
@@ -241,7 +242,7 @@ namespace SynicSugar.Samples.Tank
                 return;
             }
 
-            SceneChanger.ChangeGameScene(SCENELIST.Tank);
+            SceneChanger.ChangeGameScene(Scene.Tank);
         }
         /// <summary>
         /// Reset pre data.

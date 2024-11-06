@@ -3,8 +3,10 @@ using UnityEngine.UI;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace SynicSugar.Samples{
-    public class MatchMakeConditions : MonoBehaviour {
+namespace SynicSugar.Samples
+{
+    public class MatchMakeConditions : MonoBehaviour
+    {
 #region Condition
         public enum GameMode{ Rank, Casual, Friend }
         public enum Region{ ASIA, EU, NA }
@@ -13,11 +15,13 @@ namespace SynicSugar.Samples{
         int level;
 #endregion
         [SerializeField] Text matchConditions;
-        void Start(){
+        void Start()
+        {
             UpdateConditionsText();
         }
 
-        public Lobby GetLobbyCondition(uint MaxLobbyMembers = 2){
+        public Lobby GetLobbyCondition(uint MaxLobbyMembers = 2)
+        {
             bool useVC = SceneManager.GetActiveScene().name == "Chat";
             //Create conditions
             Lobby lobbyCondition = MatchMakeManager.GenerateLobbyObject(new string[3]{SceneManager.GetActiveScene().name, mode.ToString(), region.ToString()}, useVoiceChat: useVC);
@@ -35,20 +39,24 @@ namespace SynicSugar.Samples{
 
         }
 #region MatchMakeConditions
-        public void SetGameMode(int value){
+        public void SetGameMode(int value)
+        {
             mode = (GameMode)value;
             UpdateConditionsText();
         }
-        public void SetRegion(int value){
+        public void SetRegion(int value)
+        {
             region = (Region)value;
             UpdateConditionsText();
         }
-        public void ChangeMatchingLevel(int value){
+        public void ChangeMatchingLevel(int value)
+        {
             level = value;
             UpdateConditionsText();
         }
 #endregion
-        void UpdateConditionsText(){
+        void UpdateConditionsText()
+        {
             matchConditions.text = $"Bucket {mode}:{region} // Level {level}";
         }
     }

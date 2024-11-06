@@ -17,8 +17,10 @@ namespace SynicSugar.MatchMake {
             }
             Instance = this;
             DontDestroyOnLoad(gameObject);
-            MemberUpdatedNotifier = new();
-            MatchMakingGUIEvents = new MatchMakingGUIEvents();
+            if (MatchMakingGUIEvents == null) MatchMakingGUIEvents = new MatchMakingGUIEvents();
+            MemberUpdatedNotifier = new MemberUpdatedNotifier();
+            lobbyIDMethod = new LobbyIDMethod();
+            asyncLobbyIDMethod = new AsyncLobbyIDMethod();
 
             if(lobbyIdSaveType == RecconectLobbyIdSaveType.CustomMethod){
                 if(customSaveLobbyID != null && customDeleteLobbyID != null){
@@ -110,8 +112,8 @@ namespace SynicSugar.MatchMake {
         [SerializeField] UnityEvent customDeleteLobbyID;
     #endregion
     #region SaveEvent's
-        public LobbyIDMethod lobbyIDMethod = new LobbyIDMethod();
-        public AsyncLobbyIDMethod asyncLobbyIDMethod = new AsyncLobbyIDMethod();
+        public LobbyIDMethod lobbyIDMethod;
+        public AsyncLobbyIDMethod asyncLobbyIDMethod;
     #endregion
         internal MatchmakingCore matchmakingCore { get; private set; }
 
