@@ -353,29 +353,33 @@ namespace SynicSugar.Base {
         public abstract bool GetSynicPacketFromBuffer(ref byte ch, ref UserId id, ref ArraySegment<byte> payload);
     #endregion
 #region Connect
-    /// <summary>
-    /// Prep for p2p connections.
-    /// Call from the library after the MatchMake is established.
-    /// </summary>
-    //* Maybe: Some processes in InitConnectConfig need time to complete and the Member list will be created after that end. Therefore, we will add Notify first to spent time.
-    public Result OpenConnection(bool checkInitConnect = false){
-        Result result = InitiateConnection(checkInitConnect);
+        /// <summary>
+        /// Prep for p2p connections.
+        /// Call from the library after the MatchMake is established.
+        /// </summary>
+        //* Maybe: Some processes in InitConnectConfig need time to complete and the Member list will be created after that end. Therefore, we will add Notify first to spent time.
+        public Result OpenConnection(bool checkInitConnect = false){
+            Result result = InitiateConnection(checkInitConnect);
 
-        if (result == Result.Success){
-            rttTokenSource = new CancellationTokenSource();
-            IsConnected = true;
+            if (result == Result.Success){
+                rttTokenSource = new CancellationTokenSource();
+                IsConnected = true;
+            }
+            return result;
         }
-        return result;
-    }
-    protected abstract Result InitiateConnection(bool checkInitConnect);
+        protected abstract Result InitiateConnection(bool checkInitConnect);
 #endregion
 #region Disconnect
-        protected void RemoveNotifyAndCloseConnection (){
+        /// <summary>
+        /// Handle termination of notification at end of session, p2p disconnection, etc.
+        /// </summary>
+        public Result RemoveNotifyAndCloseConnection (){
             Result result = CloseConnection();
 
             if(result == Result.Success){
                 IsConnected = false;
             }
+            return result;
         }
         protected abstract Result CloseConnection();
 #endregion
