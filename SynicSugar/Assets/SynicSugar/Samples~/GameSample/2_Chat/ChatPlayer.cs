@@ -254,8 +254,8 @@ namespace SynicSugar.Samples
             isStressTesting = false;
             SynicSugarDebug.Instance.Log("Chat Mode: Leave");
 
-            if(MatchMakeManager.Instance.GetCurrentLobbyID() == "OFFLINEMODE")
-            { 
+            if(MatchMakeManager.Instance.GetCurrentLobbyID() == "OFFLINEMODE") //= p2pInfo.Instance.AllUserIds.Count == 1, p2pInfo.Instance.SessionType == SessionType.OfflineSession
+            {
                 await ConnectHub.Instance.DestoryOfflineLobby();
             }
             else
@@ -272,7 +272,7 @@ namespace SynicSugar.Samples
             SynicSugarDebug.Instance.Log("Chat Mode: Close");
 
 
-            if(MatchMakeManager.Instance.GetCurrentLobbyID() == "OFFLINEMODE")
+            if(MatchMakeManager.Instance.GetCurrentLobbyID() == "OFFLINEMODE") //= p2pInfo.Instance.AllUserIds.Count == 1,　p2pInfo.Instance.SessionType == SessionType.OfflineSession
             { 
                 await ConnectHub.Instance.DestoryOfflineLobby();
             }

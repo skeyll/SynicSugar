@@ -416,7 +416,7 @@ namespace SynicSugar.Samples.Tank
         private async UniTask AsyncReturnToTitle()
         {
             Result closeResult;
-            if(MatchMakeManager.Instance.GetCurrentLobbyID() == "OFFLINEMODE")
+            if(p2pInfo.Instance.SessionType == SessionType.OfflineSession) //= p2pInfo.Instance.AllUserIds.Count == 1,MatchMakeManager.Instance.GetCurrentLobbyID() == "OFFLINEMODE"
             { 
                 Debug.Log("DestoryOfflineLobby");
                 closeResult = await ConnectHub.Instance.DestoryOfflineLobby();
