@@ -135,9 +135,9 @@ namespace SynicSugar.Base {
         /// <param name="cleanupMemberCountChanged">Need to call MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(id, false) after exit lobby?</param>
         /// <param name="token">token for this task</param>
         async UniTask<Result> INetworkCore.ExitSession(bool destroyManager, bool cleanupMemberCountChanged , CancellationToken token){
-            if(!SynicSugarManger.Instance.State.IsInSession || p2pInfo.Instance.userIds.AllUserIds.Count == 1){
+            if(!SynicSugarManger.Instance.State.IsInSession || p2pInfo.Instance.SessionType == SessionType.OnlineSession){
             #if SYNICSUGAR_LOG
-                Debug.Log("ExitSession: This local user is NOT in Session.");
+                Debug.Log("ExitSession: This local user is NOT in Online Session.");
             #endif
                 return Result.InvalidAPICall;
             }
@@ -183,9 +183,9 @@ namespace SynicSugar.Base {
         /// <param name="cleanupMemberCountChanged">Need to call MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(id, false) after exit lobby?</param>
         /// <param name="token">token for this task</param>
         async UniTask<Result> INetworkCore.CloseSession(bool destroyManager, bool cleanupMemberCountChanged, CancellationToken token){
-            if(!SynicSugarManger.Instance.State.IsInSession || p2pInfo.Instance.userIds.AllUserIds.Count == 1){
+            if(!SynicSugarManger.Instance.State.IsInSession || p2pInfo.Instance.SessionType != SessionType.OnlineSession){
             #if SYNICSUGAR_LOG
-                Debug.Log("CloseSession: This local user is NOT in Session.");
+                Debug.Log("CloseSession: This local user is NOT in Online Session.");
             #endif
                 return Result.InvalidAPICall;
             }
@@ -229,9 +229,9 @@ namespace SynicSugar.Base {
         /// <param name="token">token for this task</param>
         /// <returns>Always return true. the LastResultCode becomes Success after return true.</returns>
         async UniTask<Result> INetworkCore.DestoryOfflineLobby(bool destroyManager, bool cleanupMemberCountChanged, CancellationToken token){
-            if(!SynicSugarManger.Instance.State.IsInSession || p2pInfo.Instance.userIds.AllUserIds.Count != 1){
+            if(!SynicSugarManger.Instance.State.IsInSession || p2pInfo.Instance.SessionType != SessionType.OfflineSession){
             #if SYNICSUGAR_LOG
-                Debug.Log("DestoryOfflineLobby: This user dosen't have OfflineLobby.");
+                Debug.Log("DestoryOfflineLobby: This local user is NOT in Offline Session.");
             #endif
                 return Result.InvalidAPICall;
             }
