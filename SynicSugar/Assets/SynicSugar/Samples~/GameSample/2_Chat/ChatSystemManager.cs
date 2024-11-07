@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using SynicSugar.MatchMake;
 using SynicSugar.P2P;
 using SynicSugar.RTC;
 using UnityEngine;
@@ -12,19 +13,19 @@ namespace SynicSugar.Samples
         public Text chatText, inputCount;
         public InputField contentField, nameField;
         public GameObject chatPlayerPrefab, uiSetsPrefabs;
-        private Dictionary<string, Text> vcStates; //Key is UserId.ToString().
+        private Dictionary<string, Text> vcStates = new Dictionary<string, Text>(); //Key is UserId.ToString().
         [SerializeField] private Transform vcStatesContentParent;
         [SerializeField] private Text vcStatePrefab;
         public RawImage ForLargePacket;
 
         private async UniTaskVoid Start() 
         {
-            vcStates = new();
             if(p2pInfo.Instance.AllUserIds.Count > 1)
             { 
                 //Regsiter notify for Online mode.
                 p2pInfo.Instance.ConnectionNotifier.OnTargetDisconnected += OnDisconect;
                 p2pInfo.Instance.ConnectionNotifier.OnTargetConnected += OnConnected;
+                p2pInfo.Instance.ConnectionNotifier.OnLobbyClosed += OnClosed;
                 p2pInfo.Instance.SyncSnyicNotifier.OnSyncedSynic += OnSyncedSynic;
             }
             //At first, instantiate network objects.
@@ -91,6 +92,26 @@ namespace SynicSugar.Samples
             chatText.text += $"{id} Join {System.Environment.NewLine}";
             //Send local data
             ConnectHub.Instance.SyncSynic(p2pInfo.Instance.LastConnectedUsersId, SynicType.WithOthers, 0, false);
+        }
+        
+        /// <summary>
+        /// When the host closes the lobby, the session will be terminated. The session will be closed and the MatchMake state will be reset. However, the state of NetworkManager will not be destroyed and MatchMaking GUI not clean up in this process.
+        /// If you no longer need this manager for scene transitions, you need to destory or reset them manually.
+        /// This event is only called when the host calls ConnectHub.Instance.CloseSession(); to close the lobby. If you want to continue the session after the host leaves, you should call ConnectHub.Instance.ExitSession(); to leave.
+        /// If the guest calls ConnectHub.Instance.CloseSession();, ConnectHub.Instance.ExitSession(); will be called internally. Only the host can destroy the lobby.
+        /// </summary>
+        private void OnClosed(Reason reason)
+        {
+            chatText.text += $"This lobby is closed. Return to the lobby in 5 seconds. : {reason}";
+            ReturnToMenu(reason).Forget();
+        }
+
+        private async UniTask ReturnToMenu(Reason reason){
+            Debug.Log($"ReturnToMenu: Reason {reason} / IsMatchmaking {SynicSugarManger.Instance.State.IsMatchmaking} / IsInSession {SynicSugarManger.Instance.State.IsInSession} / SessionType {p2pInfo.Instance.SessionType}");
+            await UniTask.Delay(5000);
+            Destroy(MatchMakeManager.Instance.gameObject);
+
+            SceneChanger.ChangeGameScene(Scene.MainMenu);
         }
         //Called each time a SyncSynic packet is received.
         //Use when Synic is used as just a large packet.
