@@ -811,7 +811,7 @@ namespace SynicSugar.MatchMake {
                     RemoveAllNotifyEvents();
 
                     if(SynicSugarManger.Instance.State.IsInSession){
-                        CloseSessionOnLobbyClosure(reason).Forget();
+                        CloseSessionOnLobbyClosure(reason);
                         return;
                     }
 

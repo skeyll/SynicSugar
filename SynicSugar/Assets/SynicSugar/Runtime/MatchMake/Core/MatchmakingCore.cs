@@ -172,31 +172,30 @@ namespace SynicSugar.Base {
         public abstract void UpdateMemberAttributeAsHeartBeat(int disconenctedUserIndex);
 
         /// <summary>
-        /// Cleans up and closes the active session when the Lobby is closed, either intentionally or due to network issues.<br />
-        /// This method handles session disconnection and Initialize IsInSession.<br />
+        /// Cleans up and closes the active session when the local user was disconnected from the lobby, either intentionally or due to network issues.<br />
+        /// This process initializes almost all session flags but p2pInfo.Instance.SessionType becomes SessionType.InvalidSession. <br />
+        /// ConnectHub cannot be initialized from the SynicSugar assembly, so ExitSession or CloseSession must be called in the events registered to Closed to completely terminate the Session. <br />
         /// If there is a possibility that the local user could be kicked from the Lobby by someone other than themselves during the session, please call this method to terminate the communication.
         /// </summary>
         /// <param name="reason">The reason for the　lobby closure</param>
         /// <returns>indicating the success or failure of the cleanup process.</returns>
-        protected async UniTask<Result> CloseSessionOnLobbyClosure(Reason reason){
-            Result result = p2pConfig.Instance.sessionCore.RemoveNotifyAndCloseConnection();
-
+        protected Result CloseSessionOnLobbyClosure(Reason reason){
+            Result result = p2pConfig.Instance.sessionCore.ResetConnections();
             if(result != Result.Success){
-                UnityEngine.Debug.LogErrorFormat("OnLobbyMemberStatusReceived: Failed to process Lobby closure. Host functions and lobby notifications may now be disabled, but P2P remains active. Result: {0}", result);
-                return result;
+                UnityEngine.Debug.LogErrorFormat("CloseSessionOnLobbyClosure: Failed to process Lobby closure. Host functions and lobby notifications may now be disabled, but P2P remains active. Result: {0}", result);
             }
 
             // If the reason is LobbyClosed, remove the Lobby ID. Otherwise, the local user can reconnect via Reconnect API.
-            if(reason == Reason.LobbyClosed){
-                await MatchMakeManager.Instance.OnDeleteLobbyID();
-            }
+            // if(reason == Reason.LobbyClosed){
+            //     await MatchMakeManager.Instance.OnDeleteLobbyID();
+            // }
 
             SynicSugarManger.Instance.State.IsInSession = false;
+            p2pInfo.Instance.SessionType = SessionType.InvalidSession;
 
             p2pInfo.Instance.ConnectionNotifier.Closed(reason);
             
-            p2pInfo.Instance.SessionType = SessionType.None;
-            return Result.Success;
+            return result;
         }
     }
 }

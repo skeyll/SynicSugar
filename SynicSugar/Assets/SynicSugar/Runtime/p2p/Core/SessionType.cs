@@ -11,6 +11,10 @@ namespace SynicSugar.P2P {
         /// <summary>
         /// In pseudo-session mode without network connection (single-player simulation).
         /// </summary>
-        OfflineSession
+        OfflineSession,
+        /// <summary>        
+        /// The lobby was closed by host or the local user disconnected from the lobby, causing the (p2p) session to end.
+        /// </summary>
+        InvalidSession
     }
 }
