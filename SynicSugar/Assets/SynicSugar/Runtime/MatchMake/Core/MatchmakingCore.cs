@@ -179,19 +179,19 @@ namespace SynicSugar.Base {
         /// </summary>
         /// <param name="reason">The reason for the　lobby closure</param>
         /// <returns>indicating the success or failure of the cleanup process.</returns>
-        protected Result CloseSessionOnLobbyClosure(Reason reason){
+        protected async UniTask<Result> CloseSessionOnLobbyClosure(Reason reason){
             Result result = p2pConfig.Instance.sessionCore.ResetConnections();
             if(result != Result.Success){
                 UnityEngine.Debug.LogErrorFormat("CloseSessionOnLobbyClosure: Failed to process Lobby closure. Host functions and lobby notifications may now be disabled, but P2P remains active. Result: {0}", result);
             }
 
-            // If the reason is LobbyClosed, remove the Lobby ID. Otherwise, the local user can reconnect via Reconnect API.
-            // if(reason == Reason.LobbyClosed){
-            //     await MatchMakeManager.Instance.OnDeleteLobbyID();
-            // }
-
             SynicSugarManger.Instance.State.IsInSession = false;
             p2pInfo.Instance.SessionType = SessionType.InvalidSession;
+            // To delete it only if LobbyClosed, LobbyID can't be deleted anywhere (like as the user's exit or close process) but here.
+            // If the reason is LobbyClosed, remove the Lobby ID. Otherwise, the local user can reconnect via Reconnect API.
+            if(reason == Reason.LobbyClosed){
+                await MatchMakeManager.Instance.OnDeleteLobbyID();
+            }
 
             p2pInfo.Instance.ConnectionNotifier.Closed(reason);
             
