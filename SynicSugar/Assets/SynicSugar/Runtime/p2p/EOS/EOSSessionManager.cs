@@ -239,11 +239,20 @@ namespace SynicSugar.P2P {
     /// <summary>
     /// Stop packet reciver, clse connections, then clear PacketQueue(incoming and outgoing).
     /// </summary>
-    protected override void ResetConnections(){
-        ((INetworkCore)this).StopPacketReceiver();
+    protected internal override Result ResetConnections(){
+        Result result = ((INetworkCore)this).StopPacketReceiver();
+        if(result != Result.Success){
+            Debug.LogError($"ResetConnections: Failed to stop the packet receiver.: {result}");
+            return result;
+        }
         CancelRTTToken();
-        RemoveNotifyAndCloseConnection();
+        result = RemoveNotifyAndCloseConnection();
+        if(result != Result.Success){
+            Debug.LogError($"ResetConnections: Failed to close the connection.: {result}");
+            return result;
+        }
         ClearPacketQueue();
+        return result;
     }
     /// <summary>
     /// For the end of matchmaking. <br />

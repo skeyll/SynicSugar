@@ -372,8 +372,11 @@ namespace SynicSugar.Base {
 #region Disconnect
         /// <summary>
         /// Handle termination of notification at end of session, p2p disconnection, etc.
+        /// This is the entry point for initializing the IsConnected flag. All initialization and disconnection 
+        /// operations should be routed through this method rather than calling CloseConnection directly.
+        /// This method is invoked through ResetConnections when a connection termination occurs.
         /// </summary>
-        internal Result RemoveNotifyAndCloseConnection (){
+        protected Result RemoveNotifyAndCloseConnection (){
             Result result = CloseConnection();
 
             if(result == Result.Success){
@@ -384,7 +387,7 @@ namespace SynicSugar.Base {
         protected abstract Result CloseConnection();
 #endregion
 
-        protected abstract void ResetConnections();
+        protected internal abstract Result ResetConnections();
         /// <summary>
         /// Update SyncedInfo, then Invoke SyncedSynic event.
         /// </summary>
