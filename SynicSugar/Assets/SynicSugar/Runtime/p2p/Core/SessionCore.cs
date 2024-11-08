@@ -135,12 +135,18 @@ namespace SynicSugar.Base {
         /// <param name="cleanupMemberCountChanged">Need to call MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(id, false) after exit lobby?</param>
         /// <param name="token">token for this task</param>
         async UniTask<Result> INetworkCore.ExitSession(bool destroyManager, bool cleanupMemberCountChanged , CancellationToken token){
-            if(!SynicSugarManger.Instance.State.IsInSession || p2pInfo.Instance.SessionType == SessionType.OnlineSession){
+            if(!SynicSugarManger.Instance.State.IsInSession || p2pInfo.Instance.SessionType != SessionType.OnlineSession){
+                // For the user who kicked from the lobby.
+                if(p2pInfo.Instance.SessionType == SessionType.InvalidSession){
+                    CleanupOnLobbyClosure(destroyManager, cleanupMemberCountChanged);
+                    return Result.Success;
+                }
             #if SYNICSUGAR_LOG
                 Debug.Log("ExitSession: This local user is NOT in Online Session.");
             #endif
                 return Result.InvalidAPICall;
             }
+
             //Stop connection
             bool tmpState = IsConnected;
             IsConnected = false;
@@ -184,6 +190,11 @@ namespace SynicSugar.Base {
         /// <param name="token">token for this task</param>
         async UniTask<Result> INetworkCore.CloseSession(bool destroyManager, bool cleanupMemberCountChanged, CancellationToken token){
             if(!SynicSugarManger.Instance.State.IsInSession || p2pInfo.Instance.SessionType != SessionType.OnlineSession){
+                // For the user who kicked from the lobby.
+                if(p2pInfo.Instance.SessionType == SessionType.InvalidSession){
+                    CleanupOnLobbyClosure(destroyManager, cleanupMemberCountChanged);
+                    return Result.Success;
+                }
             #if SYNICSUGAR_LOG
                 Debug.Log("CloseSession: This local user is NOT in Online Session.");
             #endif
@@ -218,6 +229,24 @@ namespace SynicSugar.Base {
             }
             
             return result;
+        }
+        /// <summary>
+        /// Cleans up session state for a user who has been removed from the lobby due to lobby closure or disconnection.
+        /// </summary>
+        /// <param name="destroyManager"></param>
+        void CleanupOnLobbyClosure(bool destroyManager, bool cleanupMemberCountChanged){
+            MatchMakeManager.Instance.ResetStateOnLobbyClosure(cleanupMemberCountChanged);
+
+            IsConnected = false;
+            
+            if(destroyManager){
+                Destroy(MatchMakeManager.Instance.gameObject);
+            }else{
+                p2pInfo.Instance.Reset();
+            }
+            #if SYNICSUGAR_LOG
+                Debug.Log("CleanupOnLobbyClosure: Clean up the session state.");
+            #endif
         }
 
         /// <summary>

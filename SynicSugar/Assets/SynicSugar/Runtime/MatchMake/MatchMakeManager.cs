@@ -696,6 +696,24 @@ namespace SynicSugar.MatchMake {
         #endif
             return result;
         }
+        /// <summary>
+        /// Reset GUI and SessionType for the kicked user who left from the lobby due to some reason.
+        /// </summary>
+        /// <param name="cleanupMemberCountChanged"></param>
+        /// <returns></returns>
+        internal void ResetStateOnLobbyClosure(bool cleanupMemberCountChanged){
+            if(cleanupMemberCountChanged){
+                //To delete member object.
+                foreach(var id in p2pInfo.Instance.AllUserIds){
+                    MatchMakingGUIEvents.LobbyMemberCountChanged(id, false);
+                }
+            }
+
+            p2pInfo.Instance.SessionType = SessionType.None;
+        #if SYNICSUGAR_LOG
+            Debug.Log($"ResetStateOnLobbyClosure: Finish destorying the lobby. / IsMatchmaking {SynicSugarManger.Instance.State.IsMatchmaking} / IsInSession {SynicSugarManger.Instance.State.IsInSession} / SessionType {p2pInfo.Instance.SessionType}");
+        #endif
+        }
     #region Offline Mode
         /// <summary>
         /// Just for solo mode like as tutorial. <br />
