@@ -37,6 +37,18 @@ namespace SynicSugar.P2P {
         /// About game data, the peer should have it.
         /// </summary>
         public event Action<UserId> OnTargetRestored;
+        
+        /// <summary>
+        /// Invoked when the Lobby is closed and the local user is removed　￥ from the Lobby.<br />
+        /// Possible reasons include:<br />
+        /// - Disconnected: An unexpected disconnection occurred.<br />
+        /// - LobbyClosed: The host closed the Lobby.<br />
+        /// - Kicked: The local user was kicked from the Lobby by Host.<br />
+        /// Note: This does not include the process for destroying the NetworkManager. If it is no longer needed, please call `Destroy(MatchMakeManager.Instance.gameObject);`. <br />
+        /// The LobbyID is deleted only if the Lobby was closed by the host (LobbyClosed). <br />
+        /// If disconnected or kicked, can use `MatchMaking.Instance.ReconnectLobby()` to rejoin.
+        /// </summary>
+        public event Action<Reason> OnLobbyClosed;
 
         public void Register(Action<UserId> leaved, Action<UserId> disconnected, Action<UserId> connected){
             OnTargetLeaved += leaved;
@@ -55,6 +67,7 @@ namespace SynicSugar.P2P {
             OnTargetConnected = null;
             OnTargetEarlyDisconnected = null;
             OnTargetRestored = null;
+            OnLobbyClosed = null;
             establishedMemberCounts = 0;
             completeConnectPreparetion = false;
         }
@@ -94,10 +107,25 @@ namespace SynicSugar.P2P {
             ConnectUserId = id;
             OnTargetRestored?.Invoke(id);
         }
+        /// <summary>
+        /// Target user leaved from Lobby by SynicSugarAPI.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="reason"></param>
         internal void Leaved(UserId id, Reason reason){
             ClosedReason = reason;
             CloseUserId = id;
             OnTargetLeaved?.Invoke(id);
+        }
+        
+        /// <summary>
+        /// This Local user can't connect to lobby anymore.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="reason"></param>
+        internal void Closed(Reason reason){
+            ClosedReason = reason;
+            OnLobbyClosed?.Invoke(reason);
         }
         private int establishedMemberCounts;
         internal bool completeConnectPreparetion; 

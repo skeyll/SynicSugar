@@ -793,18 +793,28 @@ namespace SynicSugar.MatchMake {
                     info.CurrentStatus == LobbyMemberStatus.Kicked ||
                     info.CurrentStatus == LobbyMemberStatus.Disconnected){
                     CurrentLobby.Clear();
+                    Reason reason = Reason.Unknown;
                     switch(info.CurrentStatus){
                         case LobbyMemberStatus.Closed:
                             matchingResult = Result.LobbyClosed;
+                            reason = Reason.LobbyClosed;
                         break;
                         case LobbyMemberStatus.Kicked:
                             matchingResult = Result.UserKicked;
+                            reason = Reason.Kicked;
                         break;
                         case LobbyMemberStatus.Disconnected:
                             matchingResult = Result.NetworkDisconnected;
+                            reason = Reason.Disconnected;
                         break;
                     }
                     RemoveAllNotifyEvents();
+
+                    if(SynicSugarManger.Instance.State.IsInSession){
+                        CloseSessionOnLobbyClosure(reason).Forget();
+                        return;
+                    }
+
                     isMatchmakingCompleted = true;
                     return;
                 }

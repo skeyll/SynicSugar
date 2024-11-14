@@ -237,13 +237,21 @@ namespace SynicSugar.P2P {
     
     //Reason: This order(Receiver, Connection, Que) is that if the RPC includes Rpc to reply, the connections are automatically re-started.
     /// <summary>
-    /// Stop packet reciver, clse connections, then clear PacketQueue(incoming and outgoing).
+    /// Stop packet reciver, clse connections, then clear PacketQueue(incoming and outgoing).　<br />
+    /// Errors here are not fatal; even if a failure occurs, the entire cleanup process will proceed to ensure all resources are released.
     /// </summary>
-    protected override void ResetConnections(){
-        ((INetworkCore)this).StopPacketReceiver();
+    protected internal override Result ResetConnections(){
+        Result receiverResult = ((INetworkCore)this).StopPacketReceiver();
+        if(receiverResult != Result.Success){
+            Debug.LogError($"ResetConnections: Failed to stop the packet receiver.: {receiverResult}");
+        }
         CancelRTTToken();
-        RemoveNotifyAndCloseConnection();
+        Result connectionResult = RemoveNotifyAndCloseConnection();
+        if(connectionResult != Result.Success){
+            Debug.LogError($"ResetConnections: Failed to close the connection.: {connectionResult}");
+        }
         ClearPacketQueue();
+        return receiverResult == Result.Success ? connectionResult : receiverResult;
     }
     /// <summary>
     /// For the end of matchmaking. <br />

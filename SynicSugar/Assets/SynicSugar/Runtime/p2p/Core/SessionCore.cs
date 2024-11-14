@@ -50,9 +50,7 @@ namespace SynicSugar.Base {
         /// </summary>
         void GeneratePacketReceiver(){
             if(receiverObject != null){
-            #if SYNICSUGAR_LOG
                 Debug.LogError("This manager has generated receivers already.");
-            #endif
                 return;
             }
             receiverObject = new GameObject("SynicSugarReceiver");
@@ -87,9 +85,7 @@ namespace SynicSugar.Base {
         /// <param name="token">For this task</param>
         async UniTask<Result> INetworkCore.PauseConnections(bool isForced, CancellationToken token){
             if(!IsConnected || !SynicSugarManger.Instance.State.IsInSession){
-            #if SYNICSUGAR_LOG
-                Debug.Log(!IsConnected ? "PauseConnections: Connection is invalid now." : "PauseConnections: This local user is NOT in Session.");
-            #endif
+                Debug.LogWarning(!IsConnected ? "PauseConnections: Connection is invalid now." : "PauseConnections: This local user is NOT in Session.");
                 return Result.InvalidAPICall;
             }
             //To stop sending process before result.
@@ -111,9 +107,7 @@ namespace SynicSugar.Base {
         /// </summary>
         Result INetworkCore.RestartConnections(){
             if(IsConnected || !SynicSugarManger.Instance.State.IsInSession){
-            #if SYNICSUGAR_LOG
-                Debug.Log(IsConnected ? "RestartConnections: Connection is invalid now." : "RestartConnections: This local user is NOT in Session.");
-            #endif
+                Debug.LogWarning(IsConnected ? "RestartConnections: Connection is invalid now." : "RestartConnections: This local user is NOT in Session.");
                 return Result.InvalidAPICall;
             }
             Result result = RestartConnections();
@@ -135,12 +129,16 @@ namespace SynicSugar.Base {
         /// <param name="cleanupMemberCountChanged">Need to call MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(id, false) after exit lobby?</param>
         /// <param name="token">token for this task</param>
         async UniTask<Result> INetworkCore.ExitSession(bool destroyManager, bool cleanupMemberCountChanged , CancellationToken token){
-            if(!SynicSugarManger.Instance.State.IsInSession || p2pInfo.Instance.userIds.AllUserIds.Count == 1){
-            #if SYNICSUGAR_LOG
-                Debug.Log("ExitSession: This local user is NOT in Session.");
-            #endif
+            if(!SynicSugarManger.Instance.State.IsInSession || p2pInfo.Instance.SessionType != SessionType.OnlineSession){
+                // For the user who kicked from the lobby.
+                if(p2pInfo.Instance.SessionType == SessionType.InvalidSession){
+                    CleanupOnLobbyClosure(destroyManager, cleanupMemberCountChanged);
+                    return Result.Success;
+                }
+                Debug.LogWarning("ExitSession: This local user is NOT in Online Session.");
                 return Result.InvalidAPICall;
             }
+
             //Stop connection
             bool tmpState = IsConnected;
             IsConnected = false;
@@ -183,9 +181,14 @@ namespace SynicSugar.Base {
         /// <param name="cleanupMemberCountChanged">Need to call MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(id, false) after exit lobby?</param>
         /// <param name="token">token for this task</param>
         async UniTask<Result> INetworkCore.CloseSession(bool destroyManager, bool cleanupMemberCountChanged, CancellationToken token){
-            if(!SynicSugarManger.Instance.State.IsInSession || p2pInfo.Instance.userIds.AllUserIds.Count == 1){
+            if(!SynicSugarManger.Instance.State.IsInSession || p2pInfo.Instance.SessionType != SessionType.OnlineSession){
+                // For the user who kicked from the lobby.
+                if(p2pInfo.Instance.SessionType == SessionType.InvalidSession){
+                    CleanupOnLobbyClosure(destroyManager, cleanupMemberCountChanged);
+                    return Result.Success;
+                }
             #if SYNICSUGAR_LOG
-                Debug.Log("CloseSession: This local user is NOT in Session.");
+                Debug.Log("CloseSession: This local user is NOT in Online Session.");
             #endif
                 return Result.InvalidAPICall;
             }
@@ -219,6 +222,24 @@ namespace SynicSugar.Base {
             
             return result;
         }
+        /// <summary>
+        /// Cleans up session state for a user who has been removed from the lobby due to lobby closure or disconnection.
+        /// </summary>
+        /// <param name="destroyManager"></param>
+        void CleanupOnLobbyClosure(bool destroyManager, bool cleanupMemberCountChanged){
+            MatchMakeManager.Instance.ResetStateOnLobbyClosure(cleanupMemberCountChanged);
+
+            IsConnected = false;
+            
+            if(destroyManager){
+                Destroy(MatchMakeManager.Instance.gameObject);
+            }else{
+                p2pInfo.Instance.Reset();
+            }
+            #if SYNICSUGAR_LOG
+                Debug.Log("CleanupOnLobbyClosure: Clean up the session state.");
+            #endif
+        }
 
         /// <summary>
         /// Just for solo mode like as tutorial. <br />
@@ -229,10 +250,8 @@ namespace SynicSugar.Base {
         /// <param name="token">token for this task</param>
         /// <returns>Always return true. the LastResultCode becomes Success after return true.</returns>
         async UniTask<Result> INetworkCore.DestoryOfflineLobby(bool destroyManager, bool cleanupMemberCountChanged, CancellationToken token){
-            if(!SynicSugarManger.Instance.State.IsInSession || p2pInfo.Instance.userIds.AllUserIds.Count != 1){
-            #if SYNICSUGAR_LOG
-                Debug.Log("DestoryOfflineLobby: This user dosen't have OfflineLobby.");
-            #endif
+            if(!SynicSugarManger.Instance.State.IsInSession || p2pInfo.Instance.SessionType != SessionType.OfflineSession){
+                Debug.LogWarning("DestoryOfflineLobby: This local user is NOT in Offline Session.");
                 return Result.InvalidAPICall;
             }
             CancelRTTToken();
@@ -254,9 +273,7 @@ namespace SynicSugar.Base {
         /// </summary>
         Result INetworkCore.StartPacketReceiver(IPacketConvert hubInstance, PacketReceiveTiming timing, uint maxBatchSize){
             if(!SynicSugarManger.Instance.State.IsInSession){
-            #if SYNICSUGAR_LOG
-                Debug.Log("StartPacketReceiver: This local user is NOT in Session.");
-            #endif
+                Debug.LogWarning("StartPacketReceiver: This local user is NOT in Session.");
                 return Result.InvalidAPICall;
             }
             if(validReceiverType != ReceiverType.None){
@@ -291,9 +308,7 @@ namespace SynicSugar.Base {
         /// </summary>
         Result INetworkCore.StartSynicReceiver(IPacketConvert hubInstance, uint maxBatchSize){
             if(!SynicSugarManger.Instance.State.IsInSession){
-            #if SYNICSUGAR_LOG
-                Debug.Log("StopPacketReceiver: This local user is NOT in Session.");
-            #endif
+                Debug.LogWarning("StopPacketReceiver: This local user is NOT in Session.");
                 return Result.InvalidAPICall;
             }
             if(validReceiverType != ReceiverType.None){
@@ -308,15 +323,11 @@ namespace SynicSugar.Base {
 
         Result INetworkCore.StopPacketReceiver(){
             if(!SynicSugarManger.Instance.State.IsInSession){
-            #if SYNICSUGAR_LOG
-                Debug.Log("StopPacketReceiver: This local user is NOT in Session.");
-            #endif
+                Debug.LogWarning("StopPacketReceiver: This local user is NOT in Session.");
                 return Result.InvalidAPICall;
             }
             if(validReceiverType is ReceiverType.None){
-            #if SYNICSUGAR_LOG
-                Debug.Log("StopPacketReceiver: PacketReciver is not working now.");
-            #endif
+                Debug.LogWarning("StopPacketReceiver: PacketReciver is not working now.");
                 return Result.InvalidAPICall;
             }
             
@@ -353,34 +364,41 @@ namespace SynicSugar.Base {
         public abstract bool GetSynicPacketFromBuffer(ref byte ch, ref UserId id, ref ArraySegment<byte> payload);
     #endregion
 #region Connect
-    /// <summary>
-    /// Prep for p2p connections.
-    /// Call from the library after the MatchMake is established.
-    /// </summary>
-    //* Maybe: Some processes in InitConnectConfig need time to complete and the Member list will be created after that end. Therefore, we will add Notify first to spent time.
-    public Result OpenConnection(bool checkInitConnect = false){
-        Result result = InitiateConnection(checkInitConnect);
+        /// <summary>
+        /// Prep for p2p connections.
+        /// Call from the library after the MatchMake is established.
+        /// </summary>
+        //* Maybe: Some processes in InitConnectConfig need time to complete and the Member list will be created after that end. Therefore, we will add Notify first to spent time.
+        public Result OpenConnection(bool checkInitConnect = false){
+            Result result = InitiateConnection(checkInitConnect);
 
-        if (result == Result.Success){
-            rttTokenSource = new CancellationTokenSource();
-            IsConnected = true;
+            if (result == Result.Success){
+                rttTokenSource = new CancellationTokenSource();
+                IsConnected = true;
+            }
+            return result;
         }
-        return result;
-    }
-    protected abstract Result InitiateConnection(bool checkInitConnect);
+        protected abstract Result InitiateConnection(bool checkInitConnect);
 #endregion
 #region Disconnect
-        protected void RemoveNotifyAndCloseConnection (){
+        /// <summary>
+        /// Handle termination of notification at end of session, p2p disconnection, etc.
+        /// This is the entry point for initializing the IsConnected flag. All initialization and disconnection 
+        /// operations should be routed through this method rather than calling CloseConnection directly.
+        /// This method is invoked through ResetConnections when a connection termination occurs.
+        /// </summary>
+        protected Result RemoveNotifyAndCloseConnection (){
             Result result = CloseConnection();
 
             if(result == Result.Success){
                 IsConnected = false;
             }
+            return result;
         }
         protected abstract Result CloseConnection();
 #endregion
 
-        protected abstract void ResetConnections();
+        protected internal abstract Result ResetConnections();
         /// <summary>
         /// Update SyncedInfo, then Invoke SyncedSynic event.
         /// </summary>

@@ -98,9 +98,11 @@ namespace SynicSugar.P2P {
         }
         /// <summary>
         /// Get instance to manage connection. <br />
-        /// Basically call these processes via ConnectHub, but we can also call this to call own processes.
+        /// <b>Note:</b> It is strongly recommended to use NetworkCore via ConnectHub, as it manages essential connection processes
+        /// and dependencies. Directly accessing this instance is allowed but should be done with caution, as improper handling may lead 
+        /// to unexpected behavior or bugs.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Instance of INetworkCore</returns>
         public INetworkCore GetNetworkCore(){
             return sessionCore;
         }
