@@ -100,9 +100,17 @@ namespace SynicSugar.Samples
         /// This event is only called when the host calls ConnectHub.Instance.CloseSession(); to close the lobby. If you want to continue the session after the host leaves, you should call ConnectHub.Instance.ExitSession(); to leave.
         /// If the guest calls ConnectHub.Instance.CloseSession();, ConnectHub.Instance.ExitSession(); will be called internally. Only the host can destroy the lobby.
         /// </summary>
-        private async void OnClosed(Reason reason)
+        private void OnClosed(Reason reason)
         {
             chatText.text += $"This lobby is closed. Return to the lobby in 5 seconds. : {reason}";
+            
+            ReturnToMenu(reason).Forget();
+        }
+
+        private async UniTask ReturnToMenu(Reason reason){
+            Debug.Log($"ReturnToMenu: Reason {reason} / IsMatchmaking {SynicSugarManger.Instance.State.IsMatchmaking} / IsInSession {SynicSugarManger.Instance.State.IsInSession} / SessionType {p2pInfo.Instance.SessionType}");
+            await UniTask.Delay(5000);
+
             //To reset ConnectHub, we must call ExitSession or CloseSession.
             //This use always returns Success and is done synchronously, so it is called also possible as Forget().
             Result result = await ConnectHub.Instance.ExitSession();
@@ -112,13 +120,6 @@ namespace SynicSugar.Samples
                 Debug.LogError("Failed to exit session.");
                 return;
             }
-            await ReturnToMenu(reason);
-        }
-
-        private async UniTask ReturnToMenu(Reason reason){
-            Debug.Log($"ReturnToMenu: Reason {reason} / IsMatchmaking {SynicSugarManger.Instance.State.IsMatchmaking} / IsInSession {SynicSugarManger.Instance.State.IsInSession} / SessionType {p2pInfo.Instance.SessionType}");
-            await UniTask.Delay(5000);
-            Destroy(MatchMakeManager.Instance.gameObject);
 
             SceneChanger.ChangeGameScene(Scene.MainMenu);
         }
