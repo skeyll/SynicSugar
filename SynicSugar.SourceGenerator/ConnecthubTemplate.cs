@@ -120,33 +120,34 @@ namespace SynicSugarGenerator {
                     "UniTask<Result> CloseSession(bool destroyManager = true, bool cleanupMemberCount" +
                     "Changed = false, CancellationToken cancelToken = default(CancellationToken)){\n  " +
                     "          Result result = await NetworkCore.CloseSession(destroyManager, cleanup" +
-                    "MemberCountChanged, cancelToken);\n            \n            if(result == Result.S" +
-                    "uccess){\n                ResetInstance();\n            }\n            \n           " +
-                    " return result;\n        }\n\n        /// <summary>\n        /// Destory offline-lob" +
-                    "by and stop offline mode.<br />\n        /// This process is valid only when a se" +
-                    "ssion is created by CreateOfflineLobby.\n        /// <param name=\"destroyManager\"" +
-                    ">Destroy NetworkManager after exit lobby.</param>\n        /// <param name=\"clean" +
-                    "upMemberCountChanged\">Need to call MatchMakeManager.Instance.MatchMakingGUIEvent" +
-                    "s.LobbyMemberCountChanged(id, false) after exit lobby?</param>\n        /// <para" +
-                    "m name=\"cancelToken\">Cancel token for this task</param>\n        /// </summary>\n " +
-                    "       public async UniTask<Result> DestoryOfflineLobby(bool destroyManager = tr" +
-                    "ue, bool cleanupMemberCountChanged = false, CancellationToken cancelToken = defa" +
-                    "ult(CancellationToken)){\n            Result result = await NetworkCore.DestoryOf" +
-                    "flineLobby(destroyManager, cleanupMemberCountChanged, cancelToken);\n\n           " +
-                    " if(result == Result.Success){\n                ResetInstance();\n            }\n  " +
-                    "          \n            return result;\n        }\n\n        [Obsolete(\"This is old." +
-                    " Channels is new one\")]\n        public enum CHANNELLIST {\n            ");
+                    "MemberCountChanged, cancelToken);\n            \n            \n            if(resul" +
+                    "t == Result.Success){\n                ResetInstance();\n            }\n           " +
+                    " \n            return result;\n            \n        }\n\n        /// <summary>\n     " +
+                    "   /// Destory offline-lobby and stop offline mode.<br />\n        /// This proce" +
+                    "ss is valid only when a session is created by CreateOfflineLobby.\n        /// <p" +
+                    "aram name=\"destroyManager\">Destroy NetworkManager after exit lobby.</param>\n    " +
+                    "    /// <param name=\"cleanupMemberCountChanged\">Need to call MatchMakeManager.In" +
+                    "stance.MatchMakingGUIEvents.LobbyMemberCountChanged(id, false) after exit lobby?" +
+                    "</param>\n        /// <param name=\"cancelToken\">Cancel token for this task</param" +
+                    ">\n        /// </summary>\n        public async UniTask<Result> DestoryOfflineLobb" +
+                    "y(bool destroyManager = true, bool cleanupMemberCountChanged = false, Cancellati" +
+                    "onToken cancelToken = default(CancellationToken)){\n            Result result = a" +
+                    "wait NetworkCore.DestoryOfflineLobby(destroyManager, cleanupMemberCountChanged, " +
+                    "cancelToken);\n\n            if(result == Result.Success){\n                ResetIn" +
+                    "stance();\n            }\n            \n            return result;\n        }\n\n     " +
+                    "   [Obsolete(\"This is old. Channels is new one\")]\n        public enum CHANNELLIS" +
+                    "T {\n            ");
             
             #line default
             #line hidden
             
-            #line 183 ""
+            #line 185 ""
             this.Write(this.ToStringHelper.ToStringWithCulture( SyncList ));
             
             #line default
             #line hidden
             
-            #line 183 ""
+            #line 185 ""
             this.Write("\n        }\n        //(for elements)\n        /// <summary>\n        /// Ch\'s list a" +
                     "llocated for SendPacket.\n        /// </summary>\n        public enum Channels {\n " +
                     "           ");
@@ -154,13 +155,13 @@ namespace SynicSugarGenerator {
             #line default
             #line hidden
             
-            #line 190 ""
+            #line 192 ""
             this.Write(this.ToStringHelper.ToStringWithCulture( SyncList ));
             
             #line default
             #line hidden
             
-            #line 190 ""
+            #line 192 ""
             this.Write(@"
         }
         //For Synic(UserId, value)
@@ -176,25 +177,25 @@ namespace SynicSugarGenerator {
             #line default
             #line hidden
             
-            #line 200 ""
+            #line 202 ""
             this.Write(this.ToStringHelper.ToStringWithCulture( Reference ));
             
             #line default
             #line hidden
             
-            #line 200 ""
+            #line 202 ""
             this.Write("\n\n        //Clear ref\n        private void ClearReferenceDictionaries(){ ");
             
             #line default
             #line hidden
             
-            #line 203 ""
+            #line 205 ""
             this.Write(this.ToStringHelper.ToStringWithCulture( ClearReference ));
             
             #line default
             #line hidden
             
-            #line 203 ""
+            #line 205 ""
             this.Write("\n            synicBuffer.Clear();\n            synicPacketInfo.Clear();\n          " +
                     "  largeBuffer.Clear();\n            largePacketInfo.Clear();\n        }\n\n        /" +
                     "/Register(for class)");
@@ -202,13 +203,13 @@ namespace SynicSugarGenerator {
             #line default
             #line hidden
             
-            #line 210 ""
+            #line 212 ""
             this.Write(this.ToStringHelper.ToStringWithCulture( Register ));
             
             #line default
             #line hidden
             
-            #line 210 ""
+            #line 212 ""
             this.Write(@"
         
         /// <summary>
@@ -221,13 +222,13 @@ namespace SynicSugarGenerator {
             #line default
             #line hidden
             
-            #line 217 ""
+            #line 219 ""
             this.Write(this.ToStringHelper.ToStringWithCulture( PlayeInstance ));
             
             #line default
             #line hidden
             
-            #line 217 ""
+            #line 219 ""
             this.Write(@"
             return default(T);
         }
@@ -241,13 +242,13 @@ namespace SynicSugarGenerator {
             #line default
             #line hidden
             
-            #line 225 ""
+            #line 227 ""
             this.Write(this.ToStringHelper.ToStringWithCulture( CommonsInstance ));
             
             #line default
             #line hidden
             
-            #line 225 ""
+            #line 227 ""
             this.Write(@"
             return default(T);
         }
@@ -261,13 +262,13 @@ namespace SynicSugarGenerator {
             #line default
             #line hidden
             
-            #line 233 ""
+            #line 235 ""
             this.Write(this.ToStringHelper.ToStringWithCulture( PacketConvert ));
             
             #line default
             #line hidden
             
-            #line 233 ""
+            #line 235 ""
             this.Write("\n                case Channels.ObtainPing:\n                    EOSp2p.SendPacket(" +
                     "(byte)Channels.ReturnPong, payload, UserId.GetUserId(id));\n                retur" +
                     "n;\n                case Channels.ReturnPong:\n                    NetworkCore.Get" +
@@ -317,13 +318,13 @@ namespace SynicSugarGenerator {
             #line default
             #line hidden
             
-            #line 307 ""
+            #line 309 ""
  if (needSyncSynic) { 
             
             #line default
             #line hidden
             
-            #line 308 ""
+            #line 310 ""
             this.Write("        \n        /// <summary>\n        /// Sync all Synic variables. This is very" +
                     " heavy because it handles multiple data and repeats compression and serializatio" +
                     "n.\n        /// </summary>\n        /// <param name=\"targetId\">Target to be synced" +
@@ -362,26 +363,26 @@ namespace SynicSugarGenerator {
             #line default
             #line hidden
             
-            #line 352 ""
+            #line 354 ""
             this.Write(this.ToStringHelper.ToStringWithCulture( GenerateSynicContainer ));
             
             #line default
             #line hidden
             
-            #line 352 ""
+            #line 354 ""
             this.Write("\n                default:\n                goto case 9;\n            }\n            " +
                     "return synicContainer;\n        }\n        ");
             
             #line default
             #line hidden
             
-            #line 358 ""
+            #line 360 ""
  } 
             
             #line default
             #line hidden
             
-            #line 359 ""
+            #line 361 ""
             this.Write("        \n        //Synced 0 = index, 1 = additional packet amount\n        bool Re" +
                     "storeLargePackets(ref byte ch, string id, ref ArraySegment<byte> payload){\n     " +
                     "       //Prep\n            if(!largeBuffer.ContainsKey(id)){\n                larg" +
@@ -447,26 +448,26 @@ namespace SynicSugarGenerator {
             #line default
             #line hidden
             
-            #line 448 ""
+            #line 450 ""
             this.Write(this.ToStringHelper.ToStringWithCulture( SyncedInvoker ));
             
             #line default
             #line hidden
             
-            #line 448 ""
+            #line 450 ""
             this.Write("\n                default:\n                goto case 9;\n            }\n        }\n  " +
                     "      ");
             
             #line default
             #line hidden
             
-            #line 453 ""
+            #line 455 ""
             this.Write(this.ToStringHelper.ToStringWithCulture( SyncedItems ));
             
             #line default
             #line hidden
             
-            #line 453 ""
+            #line 455 ""
             this.Write("\n    }\n}");
             
             #line default
