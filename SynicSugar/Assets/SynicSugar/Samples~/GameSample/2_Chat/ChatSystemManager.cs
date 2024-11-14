@@ -20,7 +20,7 @@ namespace SynicSugar.Samples
 
         private async UniTaskVoid Start() 
         {
-            if(p2pInfo.Instance.AllUserIds.Count > 1)
+            if(p2pInfo.Instance.AllUserIds.Count > 1) //=　p2pInfo.Instance.SessionType == SessionType.OnlineSession
             { 
                 //Regsiter notify for Online mode.
                 p2pInfo.Instance.ConnectionNotifier.OnTargetDisconnected += OnDisconect;
@@ -115,6 +115,8 @@ namespace SynicSugar.Samples
         }
         //Called each time a SyncSynic packet is received.
         //Use when Synic is used as just a large packet.
+        //With this usage method, we can receive instance data about yourself, but data about others is discarded when packets are got from buffer. 
+        //By setting syncSinglePhase to true and using p2pInfo.Instance.SyncedSynicPhase, we can also batch sync specific phases only.
         private void OnSyncedSynic()
         {
             if(p2pInfo.Instance.SyncedSynicPhase == 1)
