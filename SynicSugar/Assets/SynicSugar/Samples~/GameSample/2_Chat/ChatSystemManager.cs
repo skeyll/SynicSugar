@@ -100,10 +100,19 @@ namespace SynicSugar.Samples
         /// This event is only called when the host calls ConnectHub.Instance.CloseSession(); to close the lobby. If you want to continue the session after the host leaves, you should call ConnectHub.Instance.ExitSession(); to leave.
         /// If the guest calls ConnectHub.Instance.CloseSession();, ConnectHub.Instance.ExitSession(); will be called internally. Only the host can destroy the lobby.
         /// </summary>
-        private void OnClosed(Reason reason)
+        private async void OnClosed(Reason reason)
         {
             chatText.text += $"This lobby is closed. Return to the lobby in 5 seconds. : {reason}";
-            ReturnToMenu(reason).Forget();
+            //To reset ConnectHub, we must call ExitSession or CloseSession.
+            //This use always returns Success and is done synchronously, so it is called also possible as Forget().
+            Result result = await ConnectHub.Instance.ExitSession();
+            if (result != Result.Success) 
+            {
+                //This probably won't be called.
+                Debug.LogError("Failed to exit session.");
+                return;
+            }
+            await ReturnToMenu(reason);
         }
 
         private async UniTask ReturnToMenu(Reason reason){
