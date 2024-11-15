@@ -120,7 +120,7 @@ namespace SynicSugar.MatchMake {
         /// <summary>
         /// This token manages the matching task, which is created internally when the API is called.  This cannot be touched from the outside.
         /// </summary>
-        internal CancellationTokenSource matchmakeTokenSource;
+        CancellationTokenSource matchmakeTokenSource;
         public MatchMakingGUIEvents MatchMakingGUIEvents;
         // Events
         public MemberUpdatedNotifier MemberUpdatedNotifier;
@@ -257,7 +257,9 @@ namespace SynicSugar.MatchMake {
                 isLooking = false;
                 SynicSugarManger.Instance.State.IsMatchmaking = false;
                 return Result.Canceled;
-            }         
+            }finally{
+                DisposeMatchmakingTokenSource();
+            }
         }
     #endregion
     #region Just Search
@@ -340,7 +342,9 @@ namespace SynicSugar.MatchMake {
                 isLooking = false;
                 SynicSugarManger.Instance.State.IsMatchmaking = false;
                 return Result.Canceled;
-            }         
+            }finally{
+                DisposeMatchmakingTokenSource();
+            }
         }
     #endregion
     #region Just Create
@@ -423,7 +427,9 @@ namespace SynicSugar.MatchMake {
                 isLooking = false;
                 SynicSugarManger.Instance.State.IsMatchmaking = false;
                 return Result.Canceled;
-            }         
+            }finally{
+                DisposeMatchmakingTokenSource();
+            } 
         }
     #endregion
         /// <summary>
@@ -486,6 +492,16 @@ namespace SynicSugar.MatchMake {
                     timeUntilTimeout -= Time.deltaTime;
                     await UniTask.Yield(PlayerLoopTiming.Update, cancellationToken: userToken);
                 }
+
+                //Cancel matchmaking in timeout(=isLooking)
+                //or the matchmaking is complete(=!isLooking).
+                if(isLooking){
+                #if SYNICSUGAR_LOG
+                    Debug.Log("Cancel matching by timeout");
+                #endif
+                    matchmakeTokenSource?.Cancel();
+                    isLooking = false;
+                }
             }
             catch (OperationCanceledException){ // Cancel matchmaking process by user from library outside.
             #if SYNICSUGAR_LOG
@@ -496,20 +512,16 @@ namespace SynicSugar.MatchMake {
                 }
             #endif
                 matchmakeTokenSource?.Cancel();
-                return;
             }
         #if SYNICSUGAR_LOG
             Debug.Log("MatchMakeManager: Stop timeout timer for looking opponents.");
         #endif
-            //Cancel matchmaking in timeout(=isLooking)
-            //or the matchmaking is complete(=!isLooking).
-            if(isLooking){
-            #if SYNICSUGAR_LOG
-                Debug.Log("Cancel matching by timeout");
-            #endif
-                matchmakeTokenSource?.Cancel();
-                isLooking = false;
-            }
+        }
+
+        void DisposeMatchmakingTokenSource(){
+            matchmakeTokenSource?.Cancel();
+            matchmakeTokenSource?.Dispose();
+            matchmakeTokenSource = null;
         }
         /// <summary>
         /// Call this after matchmaking to prepare for p2p connection.
