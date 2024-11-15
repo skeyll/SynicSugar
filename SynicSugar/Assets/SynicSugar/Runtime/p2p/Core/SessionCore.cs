@@ -280,7 +280,10 @@ namespace SynicSugar.Base {
                 ((INetworkCore)this).StopPacketReceiver();
             }
             if(p2pConfig.Instance.AutoRefreshPing){
-                rttTokenSource = new CancellationTokenSource();
+                if(rttTokenSource == null || !rttTokenSource.Token.CanBeCanceled){
+                    CancelRTTToken();
+                    rttTokenSource = new CancellationTokenSource();
+                }
                 AutoRefreshPings(rttTokenSource.Token).Forget();
             }
             
@@ -425,10 +428,12 @@ namespace SynicSugar.Base {
             MatchMakeManager.Instance.HeartBeatToLobby(disconenctedUserIndex);
         }
         internal void CancelRTTToken(){
-            if(rttTokenSource == null || !rttTokenSource.Token.CanBeCanceled){
+            if(rttTokenSource == null){
                 return;
             }
             rttTokenSource.Cancel();
+            rttTokenSource.Dispose();
+            rttTokenSource = null;
         }
         /// <summary>
         /// Change AcceptHostsSynic to false. Call from ConnectHub
