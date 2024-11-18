@@ -606,6 +606,7 @@ namespace SynicSugar.MatchMake {
             Debug.Log("ExitCurrentMatchMake: Starting to leave the Matchmake.");
         #endif
             isLooking = false;
+            MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Cancel);
             Result cancelResult = await matchmakingCore.CancelMatchMaking(token);
             
             if(cancelResult != Result.Success){
@@ -641,6 +642,7 @@ namespace SynicSugar.MatchMake {
             Debug.Log("CloseCurrentMatchMake: Starting to close the Matchmake.");
         #endif
             isLooking = false;
+            MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Cancel);
             Result closeResult = await matchmakingCore.CloseMatchMaking(token);
             
             if(closeResult != Result.Success){
