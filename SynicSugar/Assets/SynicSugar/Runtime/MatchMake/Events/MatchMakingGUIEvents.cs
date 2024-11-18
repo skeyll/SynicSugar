@@ -183,6 +183,14 @@ namespace SynicSugar.MatchMake {
                         SetText(TryToCancel);
                     }
                 break;
+                case State.Reconnect:
+                    DisableStart?.Invoke();
+                    canKick = false;
+                    enabledManualConclude = false;
+                    if(stateText != null){
+                        SetText(StartReconnection);
+                    }
+                break;
             }
         }
         /// <summary>
