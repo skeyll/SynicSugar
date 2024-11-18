@@ -245,6 +245,7 @@ namespace SynicSugar.MatchMake {
                 minLobbyMember = 0;
             }
             matchmakeTokenSource = new CancellationTokenSource();
+            MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Start);
             
             TimeoutTimer(timeoutSec, token).Forget();
 
@@ -330,6 +331,7 @@ namespace SynicSugar.MatchMake {
                 minLobbyMember = 0;
             }
             matchmakeTokenSource = new CancellationTokenSource();
+            MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Start);
             
             TimeoutTimer(timeoutSec, token).Forget();
 
@@ -415,7 +417,8 @@ namespace SynicSugar.MatchMake {
                 minLobbyMember = 0;
             }
             matchmakeTokenSource = new CancellationTokenSource();
-            
+            MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Start);
+
             TimeoutTimer(timeoutSec, token).Forget();
 
             try{
@@ -456,6 +459,8 @@ namespace SynicSugar.MatchMake {
     #endif
             isLooking = true;
             SynicSugarManger.Instance.State.IsMatchmaking = true;
+            MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Reconnect);
+
             try{
                 Result joinResult = await matchmakingCore.JoinLobbyBySavedLobbyId(LobbyID, token);
 
@@ -529,6 +534,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="isReconencter">If true, create UserIds class as Reconnecter.</param>
         /// <returns></returns>
         async UniTask<Result> SetupP2P(bool isReconencter, CancellationToken token){
+            MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.SetupP2P);
             p2pInfo.Instance.userIds = new UserIds(isReconencter);
 
             Result setupResult = await matchmakingCore.SetupP2PConnection(p2pSetupTimeoutSec, token);
@@ -574,6 +580,7 @@ namespace SynicSugar.MatchMake {
                 return;
             }
             isConcluding = true;
+            MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.SetupP2P);
             matchmakingCore.SwitchLobbyAttribute();
             isConcluding = false;
         }
@@ -752,6 +759,10 @@ namespace SynicSugar.MatchMake {
             
             try{
                 isLooking = true;
+                if(delay.StartMatchmakingDelay > 0){
+                    MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Start);
+                    await UniTask.Delay((int)delay.StartMatchmakingDelay, cancellationToken: token);
+                }
                 Result result = await matchmakingCore.CreateOfflineLobby(lobbyCondition, delay, userAttributes ?? new(), token);
                 isLooking = false;
                 SynicSugarManger.Instance.State.IsMatchmaking = false;
@@ -1072,6 +1083,7 @@ namespace SynicSugar.MatchMake {
             Debug.Log($"Try Recconect with {LobbyID}");
     #endif
             matchmakeTokenSource = new CancellationTokenSource();
+            MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Reconnect);
             
             try{
                 Result joinResult = await matchmakingCore.JoinLobbyBySavedLobbyId(LobbyID, token.Token);
