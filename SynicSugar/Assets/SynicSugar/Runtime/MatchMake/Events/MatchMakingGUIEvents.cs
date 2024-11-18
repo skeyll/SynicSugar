@@ -99,7 +99,37 @@ namespace SynicSugar.MatchMake {
         public string StartReconnection;
     #endregion
         public enum State {
-            Standby, Start, Wait, SetupP2P, Ready, Cancel, Reconnect
+            /// <summary>
+            /// Matchmaking is idle and ready to be started by user interaction (e.g., pressing a button).
+            /// No matchmaking process is currently active.
+            /// </summary>
+            Standby,
+            /// <summary>
+            /// Matchmaking process has been initiated, attempting to join or create a lobby.
+            /// </summary>
+            Start,
+            /// <summary>
+            /// Waiting for opponents in the lobby to join until matchmaking is complete.
+            /// </summary>
+            Wait,
+            /// <summary>
+            /// Lobby is filled or matchmaking has been manually closed. 
+            /// Begins exchanging data for peer-to-peer (P2P) connection setup.
+            /// </summary>
+            SetupP2P,
+            /// <summary>
+            /// P2P connection is ready and the game can start.
+            /// Usually transitions to the game scene or closing matchmaking GUI.
+            /// </summary>
+            Ready,
+            /// <summary>
+            /// Cancels matchmaking by leaving or destroying the lobby.
+            /// </summary>
+            Cancel,
+            /// <summary>
+            /// Reconnection process begins after disconnection, attempting to rejoin a lobby.
+            /// </summary>
+            Reconnect
         }
         internal void Clear(){
             DisableStart = null;
