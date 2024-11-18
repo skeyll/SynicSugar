@@ -363,7 +363,7 @@ namespace SynicSugar.MatchMake {
                 return Result.InvalidAPICall;
             }
             //Matchmaking
-            Result matchmakingResult = await SearchLobbyEntity(lobbyCondition, 0, new List<AttributeData>(), token);
+            Result matchmakingResult = await CreateLobbyEntity(lobbyCondition, 0, new List<AttributeData>(), token);
 
             if(matchmakingResult != Result.Success){
                 MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
@@ -506,15 +506,15 @@ namespace SynicSugar.MatchMake {
             catch (OperationCanceledException){ // Cancel matchmaking process by user from library outside.
             #if SYNICSUGAR_LOG
                 if(timeUntilTimeout > 0){
-                    Debug.Log("Canceld matching by cancel token from MatchMakeManager outside.");
+                    Debug.Log("TimeoutTimer: Canceld matching by cancel token from MatchMakeManager outside.");
                 }else{
-                    Debug.Log("Cancel matching by timeout");
+                    Debug.Log("TimeoutTimer: Cancel matching by timeout");
                 }
             #endif
                 matchmakeTokenSource?.Cancel();
             }
         #if SYNICSUGAR_LOG
-            Debug.Log("MatchMakeManager: Stop timeout timer for looking opponents.");
+            Debug.Log("TimeoutTimer: Stop timeout timer for looking opponents.");
         #endif
         }
 
