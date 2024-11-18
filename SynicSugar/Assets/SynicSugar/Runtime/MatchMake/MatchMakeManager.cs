@@ -130,7 +130,8 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         public bool isLooking { get; private set; }
         /// <summary>
-        /// This local user is preparing for p2p connection?
+        /// This local user close Lobby and start preparing for p2p connection?<br />
+        /// Flag to prevent the host from calling the concluding process repeatedly.
         /// </summary>
         public bool isConcluding { get; private set; }
 
@@ -534,7 +535,9 @@ namespace SynicSugar.MatchMake {
         /// <param name="isReconencter">If true, create UserIds class as Reconnecter.</param>
         /// <returns></returns>
         async UniTask<Result> SetupP2P(bool isReconencter, CancellationToken token){
-            MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.SetupP2P);
+            if(!isConcluding){
+                MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.SetupP2P);
+            }
             p2pInfo.Instance.userIds = new UserIds(isReconencter);
 
             Result setupResult = await matchmakingCore.SetupP2PConnection(p2pSetupTimeoutSec, token);
