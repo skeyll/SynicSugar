@@ -688,16 +688,17 @@ namespace SynicSugar.MatchMake {
 
                 CurrentLobby.InitFromLobbyHandle(lobbyId);
 
-                foreach(var member in CurrentLobby.Members){
-                    UserId thisUserId = UserId.GetUserId(member.Key);
-                    MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(thisUserId, true);
-                    //About user attribute of localuser, add these after this.
-                    if(MatchMakeManager.Instance.isLocalUserId(thisUserId)){
-                        continue;
-                    }
-                    MatchMakeManager.Instance.MemberUpdatedNotifier.MemberAttributesUpdated(thisUserId);
-                }
                 if(!isReconencter){
+                    foreach(var member in CurrentLobby.Members){
+                        UserId thisUserId = UserId.GetUserId(member.Key);
+                        MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(thisUserId, true);
+                        //About user attribute of localuser, add these after this.
+                        if(MatchMakeManager.Instance.isLocalUserId(thisUserId)){
+                            continue;
+                        }
+                        MatchMakeManager.Instance.MemberUpdatedNotifier.MemberAttributesUpdated(thisUserId);
+                    }
+                    
                     // To get SocketName safety
                     AddNotifyLobbyUpdateReceived();
                     // To get Member attributes
