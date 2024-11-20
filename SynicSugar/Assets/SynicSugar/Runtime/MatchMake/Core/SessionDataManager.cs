@@ -6,15 +6,29 @@ using SynicSugar.P2P;
 using Cysharp.Threading.Tasks;
 
 namespace SynicSugar.MatchMake {
-
-    internal class SessionDataManager
+    public class SessionDataManager
     {
         private string filePath;
-        internal SessionDataManager(string fileName)
+        const uint ALLOWED_DIFF_SEC = 3;
+        public SessionDataManager(string fileName)
         {
             filePath = Path.Combine(Application.persistentDataPath, $"{fileName}.dat");
         }
 
+        public static DateTime CalculateReconnecterTimeStamp(uint erapsedSec){
+            DateTime estimatedTimestamp = DateTime.UtcNow.Subtract(TimeSpan.FromSeconds(erapsedSec));
+            TimeSpan diff = p2pInfo.Instance.CurrentSessionStartUTC - estimatedTimestamp;
+            
+            // Check if the time difference exceeds allowed seconds, use estimated timestamp if true
+            if (Math.Abs(diff.TotalSeconds) > ALLOWED_DIFF_SEC) 
+            {
+                #if SYNICSUGAR_LOG
+                Debug.Log($"Adjusted timestamp: Difference exceeded {ALLOWED_DIFF_SEC} sec. Estimated: {estimatedTimestamp}, CurrentStartUTC: {p2pInfo.Instance.CurrentSessionStartUTC}");
+                #endif
+                return estimatedTimestamp;
+            }
+            return Math.Abs(diff.TotalSeconds) > 2 ? estimatedTimestamp : p2pInfo.Instance.CurrentSessionStartUTC;
+        }
 
         /// <summary>
         /// Save LobbyId and DataTime on starting session.
