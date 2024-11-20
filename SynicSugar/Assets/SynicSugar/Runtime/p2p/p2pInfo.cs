@@ -38,6 +38,7 @@ namespace SynicSugar.P2P {
             pings = new();
             lastRpcInfo = new();
             lastTargetRPCInfo = new();
+            CurrentSessionStartUTC = DateTime.MinValue;
             UserId.CacheClear();
             ConnectionNotifier.Clear();
             SyncSnyicNotifier.Clear();
