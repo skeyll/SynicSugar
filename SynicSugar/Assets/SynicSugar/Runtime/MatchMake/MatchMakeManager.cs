@@ -538,6 +538,19 @@ namespace SynicSugar.MatchMake {
             if(!isConcluding){
                 MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.SetupP2P);
             }
+            //Decide SessionTime at a step with as little lag as possible.
+            SessionDataManager sessionDataManager = new SessionDataManager(sessionTimestampFileName);
+            if(isReconencter){
+                SessionData localData = await sessionDataManager.LoadSessionData(matchmakingCore.GetCurrentLobbyID());
+                //Overwrite host's timestamp data by local data.
+                //If no data in local, use estimated timestamps based on data sent by the host.
+                if(localData != null){
+                    p2pInfo.Instance.CurrentSessionStartUTC = localData.SessionStartTimestamp;
+                }
+            }else{
+                p2pInfo.Instance.CurrentSessionStartUTC = DateTime.UtcNow;
+            }
+            
             p2pInfo.Instance.userIds = new UserIds(isReconencter);
 
             Result setupResult = await matchmakingCore.SetupP2PConnection(p2pSetupTimeoutSec, token);
@@ -550,17 +563,6 @@ namespace SynicSugar.MatchMake {
 
             MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Ready);
             
-            SessionDataManager sessionDataManager = new SessionDataManager(sessionTimestampFileName);
-            if(isReconencter){
-                SessionData localData = await sessionDataManager.LoadSessionData(matchmakingCore.GetCurrentLobbyID());
-                //Overwrite host's timestamp data by local data.
-                //If no data in local, use estimated timestamps based on data sent by the host.
-                if(localData != null){
-                    p2pInfo.Instance.CurrentSessionStartUTC = localData.SessionStartTimestamp;
-                }
-            }else{
-                p2pInfo.Instance.CurrentSessionStartUTC = DateTime.UtcNow;
-            }
             if(lobbyIdSaveType != RecconectLobbyIdSaveType.NoReconnection){
                 sessionDataManager.SaveSessionData(new SessionData(matchmakingCore.GetCurrentLobbyID(), p2pInfo.Instance.CurrentSessionStartUTC)).Forget();
             }
