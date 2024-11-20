@@ -187,9 +187,7 @@ namespace SynicSugar.Base {
                     CleanupOnLobbyClosure(destroyManager, cleanupMemberCountChanged);
                     return Result.Success;
                 }
-            #if SYNICSUGAR_LOG
-                Debug.Log("CloseSession: This local user is NOT in Online Session.");
-            #endif
+                Debug.LogWarning("CloseSession: This local user is NOT in Online Session.");
                 return Result.InvalidAPICall;
             }
 
