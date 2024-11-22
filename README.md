@@ -9,6 +9,7 @@ Almost SynicSugar APIs are zero-allocation in Runtime, so the process is sonic. 
 
 For more details, visit [https://skeyll.github.io/SynicSugar/](https://skeyll.github.io/SynicSugar/).
 
+[![Sample(youtube)](https://github.com/skeyll/SynicSugar/blob/main/Resources/Resources/youtube_thumbnail.png)](https://www.youtube.com/embed/hQT1yniGNi0)
 
 ## Features:
  - Mesh topology with max 64 peers
@@ -21,7 +22,6 @@ For more details, visit [https://skeyll.github.io/SynicSugar/](https://skeyll.gi
     (Windows / Linux / macOS <br>
     Android / iOS <br>
     Nintendo Switch / Xbox One / Xbox Series X / PlayStation 4 / PlayStation 5)
-
 
 ```csharp
 using SynicSugar.P2P;
@@ -108,7 +108,7 @@ You can get SynicSugar from OpenUPM or [SynicSugar/Release](https://github.com/s
 2. Install SynicSugar and dependecies <br>
 　These packages can be imported from **Window/PackageManager/MyRegistries**. Importing SynicSugar will automatically import the other required librarys. If uses synicsugar.unitypackage, import other three packages.<br>
  If you are using another version in your project, that one will probably work. However, SynicSugar has been developed using the following:  
- * Epic Online Services Plugin for Unity: 3.0.3 
+ * Epic Online Services Plugin for Unity: 3.3.3 
  * UniTask: 2.5.5
  * MemoryPack: 1.10.0
  
