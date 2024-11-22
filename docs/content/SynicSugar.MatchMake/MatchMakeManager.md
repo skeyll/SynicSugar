@@ -24,6 +24,8 @@ If this is no longer needed, we call *[CancelCurrentMatchMake](../MatchMakeManag
 | [timeoutSec](../MatchMakeManager/timeoutsec) | Timeout seconds for user to exit no-filled lobby |
 | [p2pSetupTimeoutSec](../MatchMakeManager/p2psetuptimeoutsec) | Timeout sec for prep init connection |
 | enableHostmigrationInMatchmaking | If true, pass host authority to others when local user leave the lobby |
+| [BasicInfoPacketCompressionLevel](../MatchMakeManager/basicinfopacketcompressionlevel) | The quality level of BrotliCompressor for compressing the BasicInfo |
+| [sessionTimestampFileName](../MatchMakeManager/sessiontimestampfilename) | The file name to save the session start time |
 | [lobbyIdSaveType](../MatchMakeManager/lobbyidsavetype) | The way to return to the disconnected lobby |
 | [playerprefsSaveKey](../MatchMakeManager/playerprefssavekey) | The key to save LobbyID |
 | [customSaveLobbyID](../MatchMakeManager/customsavelobbyid) | UnityEvent to save LobbyID |

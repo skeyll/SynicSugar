@@ -60,9 +60,7 @@ Typically, locally saved data is used for the session start time. However, when 
 Up to 64 players are possible, but 16 or fewer is recommended.<br>
 In SynicSugar, after closing matchmaking, the host synchronizes the user list to sync information about Lobby users. (The user index may differ locally for each user when retrieved from the Lobby information.)<br>
 During this process, three things are synchronized: a list of UserIDs (32 characters * number of users), a byte list of disconnected user indexes, and a timestamp expressed as a uint. These are compressed using MemoryPack and Brotli compression set to Fastest mode before transmission via sendpacket(packet limit is 1170). This is to keep the matchmaking time as short as possible.<br>
-As a result, depending on the UserIDs, it may not be possible to start connection.  It will likely succeed with up to 40 users.<br>
-By changing the compression rate, we can increase the success rate to about 95% even with 64 users, but since handling P2P connection with over 32 users is inherently challenging, we've kept it this way for now.<br>
-If there's a demand, we can make it possible to specify the compression rate. (This would be easy to implement.)<br><br>
+As a result, depending on the UserIDs, it may not be possible to start connection.  It will likely succeed with up to 45 users by default compression quality.<br><br>
 </details>
 
 <details>

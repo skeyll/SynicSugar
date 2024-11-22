@@ -47,6 +47,21 @@ namespace SynicSugar.P2P {
         public CancellationToken GetSyncToken(){
             return syncTokenSource.Token;
         }
+
+        void Dispose() {
+            syncTokenSource?.Cancel();
+            syncTokenSource?.Dispose();
+            _networkCore = null;
+        }
+        /// <summary>
+        /// Disposes of the ConnectHub instance and its associated data. <br />
+        /// GC-managed data is explicitly disposed here as well, since this is called at a timing where processing overhead is not a concern.
+        /// </summary>
+        void ResetInstance() {
+            Dispose();
+            ClearReferenceDictionaries();
+            instance = new Lazy<ConnectHub>(() => new ConnectHub());
+        }
         //Start
         /// <summary>
         /// Start the packet receiver. Call after creating the Network Instance required for reception.<br />
@@ -114,8 +129,8 @@ namespace SynicSugar.P2P {
         
         /// <summary>
         /// Stop receiver, close all connections and remove the notify events.
-        /// Then, the user leave the lobby.<br />
-        /// The last user closes the lobby in Backend.
+        /// Then, the user leave the lobby. The last user closes the lobby in Backend. <br />
+        /// If the host calls this method to leave the Lobby, a host migration will occur, assigning a new host.
         /// <param name="destroyManager">Destroy NetworkManager after exit lobby.</param>
         /// <param name="cleanupMemberCountChanged">Need to call MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(id, false) after exit lobby?</param>
         /// <param name="cancelToken">Cancel token for this task</param>
@@ -124,34 +139,31 @@ namespace SynicSugar.P2P {
             Result result = await NetworkCore.ExitSession(destroyManager, cleanupMemberCountChanged, cancelToken);
             
             if(result == Result.Success){
-                syncTokenSource.Cancel();
-                ClearReferenceDictionaries();
+                ResetInstance();
             }
             return result;
         }
         /// <summary>
-        /// Stop receiver, close all connections and remove the notify events.
-        /// Then, Host closes and Guest leaves the Lobby.<br />
-        /// When Host closes Lobby, Guests are automatically kicked out from the Lobby.
+        /// Stop receiver, close all connections and remove the notify events. Then, Host closes and Guest leaves the Lobby.　<br />
+        /// When Host closes Lobby, Guests are automatically kicked out from the Lobby. <br />
+        /// If the Lobby is closed with this API during a session, the Lobby will be destroyed, ending all peer-to-peer connections not only between the Host and Guests but also among Guests. Following this, ConnectionNotifier will invoke OnLobbyClosed with the Reason.LobbyClosed.
         /// <param name="destroyManager">Destroy NetworkManager after exit lobby.</param>
         /// <param name="cleanupMemberCountChanged">Need to call MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(id, false) after exit lobby?</param>
         /// <param name="cancelToken">Cancel token for this task</param>
         /// </summary>
         public async UniTask<Result> CloseSession(bool destroyManager = true, bool cleanupMemberCountChanged = false, CancellationToken cancelToken = default(CancellationToken)){
             Result result = await NetworkCore.CloseSession(destroyManager, cleanupMemberCountChanged, cancelToken);
-
+            
             if(result == Result.Success){
-                syncTokenSource.Cancel();
-                ClearReferenceDictionaries();
+                ResetInstance();
             }
             
             return result;
         }
 
         /// <summary>
-        /// Stop receiver, close all connections and remove the notify events.
-        /// Then, Host closes and Guest leaves the Lobby.<br />
-        /// When Host closes Lobby, Guests are automatically kicked out from the Lobby.
+        /// Destory offline-lobby and stop offline mode.<br />
+        /// This process is valid only when a session is created by CreateOfflineLobby.
         /// <param name="destroyManager">Destroy NetworkManager after exit lobby.</param>
         /// <param name="cleanupMemberCountChanged">Need to call MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(id, false) after exit lobby?</param>
         /// <param name="cancelToken">Cancel token for this task</param>
@@ -160,8 +172,7 @@ namespace SynicSugar.P2P {
             Result result = await NetworkCore.DestoryOfflineLobby(destroyManager, cleanupMemberCountChanged, cancelToken);
 
             if(result == Result.Success){
-                syncTokenSource.Cancel();
-                ClearReferenceDictionaries();
+                ResetInstance();
             }
             
             return result;

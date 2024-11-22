@@ -5,6 +5,7 @@ using SynicSugar.P2P;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using SynicSugar.MatchMake;
 
 namespace SynicSugar.Samples.Tank
 {
@@ -415,18 +416,14 @@ namespace SynicSugar.Samples.Tank
         private async UniTask AsyncReturnToTitle()
         {
             Result closeResult;
-            if(p2pInfo.Instance.AllUserIds.Count == 1)
+            if(p2pInfo.Instance.SessionType == SessionType.OfflineSession) //= p2pInfo.Instance.AllUserIds.Count == 1,MatchMakeManager.Instance.GetCurrentLobbyID() == "OFFLINEMODE"
             { 
-                //or MatchMakeManager.Instance.GetCurrentLobbyID() == "OFFLINEMODE"
+                Debug.Log("DestoryOfflineLobby");
                 closeResult = await ConnectHub.Instance.DestoryOfflineLobby();
-            }
-            else if(p2pInfo.Instance.CurrentConnectedUserIds.Count == 1)
-            { 
-                //If the room is alone, close the room.
-                closeResult = await ConnectHub.Instance.CloseSession();
             }
             else
             {
+                Debug.Log("ExitSession");
                 closeResult = await ConnectHub.Instance.ExitSession();
             }
 
@@ -438,7 +435,7 @@ namespace SynicSugar.Samples.Tank
                 return;
             }
             
-            SceneChanger.ChangeGameScene(SCENELIST.MainMenu);
+            SceneChanger.ChangeGameScene(Scene.MainMenu);
         }
         #endregion
     }

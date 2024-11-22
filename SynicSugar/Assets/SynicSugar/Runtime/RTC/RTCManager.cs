@@ -22,6 +22,7 @@ namespace SynicSugar.RTC {
                 return;
             }
             Instance = this;
+            ParticipantUpdatedNotifier = new();
         }
         void OnDestroy() {
             if( Instance == this ) {
@@ -42,7 +43,7 @@ namespace SynicSugar.RTC {
         RTCAudioInterface audioInterface;
         CancellationTokenSource pttToken;
         ulong ParticipantStatusId, ParticipantUpdatedId = 0;
-        public ParticipantUpdatedNotifier ParticipantUpdatedNotifier = new();
+        public ParticipantUpdatedNotifier ParticipantUpdatedNotifier;
         /// <summary>
         /// This is valid only before matching. If we want to switch OpenVC and PTT after matching, call ToggleLocalUserSending() ourself.
         /// </summary>

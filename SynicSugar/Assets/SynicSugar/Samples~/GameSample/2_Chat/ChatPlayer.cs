@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using SynicSugar.MatchMake;
 using SynicSugar.P2P;
 using SynicSugar.RTC;
 using UnityEngine;
@@ -202,7 +203,6 @@ namespace SynicSugar.Samples
             systemManager.chatText.text += LargePacket;
             //Pass OnlySelf to 2nd arg, to send Synic data as simple RPC. The opponent will drop the packets for self data except for the moment re-cconect.
             //When the 3rd arg is true, this becomea the rpc to send large packet.
-            
             foreach (var id in p2pInfo.Instance.CurrentRemoteUserIds)
             {
                 ConnectHub.Instance.SyncSynic(id, SynicType.OnlySelf, 1, true);
@@ -253,15 +253,16 @@ namespace SynicSugar.Samples
             isStressTesting = false;
             SynicSugarDebug.Instance.Log("Chat Mode: Leave");
 
-            if(p2pInfo.Instance.AllUserIds.Count > 1)
-            {
-                await ConnectHub.Instance.ExitSession();
-            }
-            else
+            if(MatchMakeManager.Instance.GetCurrentLobbyID() == "OFFLINEMODE") //= p2pInfo.Instance.AllUserIds.Count == 1, p2pInfo.Instance.SessionType == SessionType.OfflineSession
             {
                 await ConnectHub.Instance.DestoryOfflineLobby();
             }
-            SceneChanger.ChangeGameScene(SCENELIST.MainMenu);
+            else
+            {
+                //If this user is last one, this API closes the Lobby automatically.
+                await ConnectHub.Instance.ExitSession();
+            }
+            SceneChanger.ChangeGameScene(Scene.MainMenu);
 
         }
         public async void CloseSession()
@@ -269,15 +270,18 @@ namespace SynicSugar.Samples
             isStressTesting = false;
             SynicSugarDebug.Instance.Log("Chat Mode: Close");
 
-            if(p2pInfo.Instance.AllUserIds.Count > 1)
-            {
-                await ConnectHub.Instance.CloseSession();
+            if(p2pInfo.Instance.SessionType == SessionType.OfflineSession) //= p2pInfo.Instance.AllUserIds.Count == 1,　MatchMakeManager.Instance.GetCurrentLobbyID() == "OFFLINEMODE"
+            { 
+                await ConnectHub.Instance.DestoryOfflineLobby();
             }
             else
             {
-                await ConnectHub.Instance.DestoryOfflineLobby();
+                //If the host calls this, the lobby will be closed even if there are people in the lobby.
+                //Peers in the Session will have their p2p closed and OnLobbyClosed will be called.
+                await ConnectHub.Instance.CloseSession();
             }
-            SceneChanger.ChangeGameScene(SCENELIST.MainMenu);
+
+            SceneChanger.ChangeGameScene(Scene.MainMenu);
         }
     }
 }

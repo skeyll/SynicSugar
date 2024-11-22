@@ -38,6 +38,7 @@ namespace SynicSugar.P2P {
             pings = new();
             lastRpcInfo = new();
             lastTargetRPCInfo = new();
+            CurrentSessionStartUTC = DateTime.MinValue;
             UserId.CacheClear();
             ConnectionNotifier.Clear();
             SyncSnyicNotifier.Clear();
@@ -58,10 +59,11 @@ namespace SynicSugar.P2P {
         internal p2pPing pings;
         internal RPCInformation lastRpcInfo;
         internal TargetRPCInformation lastTargetRPCInfo;
+
         /// <summary>
-        /// Whether matching has been completed and the game has started.
+        /// The type of current session.
         /// </summary>
-        internal bool IsConnecting;
+        public SessionType SessionType { get; internal set; }
         /// <summary>
         /// Date time when this LOCAL user starts current session.
         /// </summary>

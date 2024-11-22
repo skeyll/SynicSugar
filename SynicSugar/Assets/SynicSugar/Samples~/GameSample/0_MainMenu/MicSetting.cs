@@ -11,11 +11,13 @@ namespace SynicSugar.Samples
         [SerializeField] private Dropdown inputDevices, outputDevices;
         private List<AudioInputDeviceInfo> inputs;
         private List<AudioOutputDeviceInfo> outputs;
-        private void Start()
+        private void Awake()
         {
             inputs = RTCConfig.GetInputDeviceInformation();
             outputs = RTCConfig.GetOutputDeviceInformation();
-
+        }
+        private void Start()
+        {
             inputDevices.onValueChanged.AddListener(i => OnInputSelected(i));
             outputDevices.onValueChanged.AddListener(i => OnOutputSelected(i));
             RefreshShownValue();

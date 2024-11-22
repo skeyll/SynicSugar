@@ -28,6 +28,7 @@ If this is no longer needed, we call *[CancelCurrentMatchMake](../../SynicSugar.
 | CurrentConnectedUserIds | Connected user ids include Local UserId |
 | CurrentAllUserIds | AllUserIds - LeftUsers (not disconnected) |
 | [AllUserIds](../p2pInfo/alluserids) | AllUserIds in the session |
+| [SessionType](../p2pInfo/sessiontype) | The type of current session |
 | [CurrentSessionStartUTC](../p2pInfo/currentsessionstartutc) | Date time when this LOCAL user starts current session |
 | [AcceptHostSynic](../p2pInfo/accepthostsynic) | If true, host overwrite this local user instnace |
 | LastDisconnectedUsersReason | The reason of last disconnected user |
