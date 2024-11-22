@@ -9,7 +9,7 @@ Almost SynicSugar APIs are zero-allocation in Runtime, so the process is sonic. 
 
 For more details, visit [https://skeyll.github.io/SynicSugar/](https://skeyll.github.io/SynicSugar/).
 
-[![Sample(youtube)](https://github.com/skeyll/SynicSugar/blob/main/Resources/Resources/youtube_thumbnail.png)](https://www.youtube.com/embed/hQT1yniGNi0)
+[![Sample(youtube)](https://github.com/skeyll/SynicSugar/blob/main/Resources/youtube_thumbnail.png)](https://www.youtube.com/embed/hQT1yniGNi0)
 
 ## Features:
  - Mesh topology with max 64 peers
