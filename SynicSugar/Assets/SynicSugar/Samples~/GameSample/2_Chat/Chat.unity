@@ -637,6 +637,26 @@ PrefabInstance:
       propertyPath: hostsTimeoutSec
       value: 10
       objectReference: {fileID: 0}
+    - target: {fileID: 1127570235843273856, guid: e18422c96d27f49489abe8b774c3a6b9, type: 3}
+      propertyPath: customSaveLobbyID.m_PersistentCalls.m_Calls.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1127570235843273856, guid: e18422c96d27f49489abe8b774c3a6b9, type: 3}
+      propertyPath: customSaveLobbyID.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1127570235843273856, guid: e18422c96d27f49489abe8b774c3a6b9, type: 3}
+      propertyPath: customSaveLobbyID.m_PersistentCalls.m_Calls.Array.data[1].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1127570235843273856, guid: e18422c96d27f49489abe8b774c3a6b9, type: 3}
+      propertyPath: customSaveLobbyID.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1127570235843273856, guid: e18422c96d27f49489abe8b774c3a6b9, type: 3}
+      propertyPath: customSaveLobbyID.m_PersistentCalls.m_Calls.Array.data[1].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 1535193180786485604, guid: e18422c96d27f49489abe8b774c3a6b9, type: 3}
       propertyPath: m_RootOrder
       value: 5
@@ -706,11 +726,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e18422c96d27f49489abe8b774c3a6b9, type: 3}
---- !u!1 &420806984 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1535193180786485607, guid: e18422c96d27f49489abe8b774c3a6b9, type: 3}
-  m_PrefabInstance: {fileID: 420806983}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &480589676
 GameObject:
   m_ObjectHideFlags: 0
@@ -1262,7 +1277,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3918f4b41e6a04a6cace2ffb8e2b336b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  matchmakePrefab: {fileID: 420806984}
   matchmakeState: {fileID: 355272012}
   startMatchMake: {fileID: 55211627}
   startOfflineMode: {fileID: 1435183114}
