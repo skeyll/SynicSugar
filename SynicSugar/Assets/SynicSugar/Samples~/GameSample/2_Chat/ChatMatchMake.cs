@@ -131,6 +131,7 @@ namespace SynicSugar.Samples.Chat
             }
 
             SynicSugarDebug.Instance.Log($"Success Matching! LobbyID:{MatchMakeManager.Instance.GetCurrentLobbyID()}");
+            SynicSugarDebug.Instance.Log($"CurrentSessionStartUTC :{p2pInfo.Instance.CurrentSessionStartUTC}");
             SwitchButtonsActive(MatchmakingState.ReadyToStartGame);
         }
         /// <summary>
@@ -150,6 +151,7 @@ namespace SynicSugar.Samples.Chat
             if(result != Result.Success) return; 
 
             SynicSugarDebug.Instance.Log($"Success Matching! LobbyID:{MatchMakeManager.Instance.GetCurrentLobbyID()}");
+            SynicSugarDebug.Instance.Log($"CurrentSessionStartUTC :{p2pInfo.Instance.CurrentSessionStartUTC}");
             SwitchButtonsActive(MatchmakingState.ReadyToStartGame);
         }
         /// <summary>

@@ -1,3 +1,4 @@
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using SynicSugar.MatchMake;
 using SynicSugar.P2P;
@@ -5,7 +6,7 @@ using SynicSugar.RTC;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace SynicSugar.Samples 
+namespace SynicSugar.Samples.Chat
 {
     //To use "ConnectHub.Instance.GetUserInstance<ChatPlayer>(UserID), make this [NetworkPlayer(true)].
     [NetworkPlayer(true)]

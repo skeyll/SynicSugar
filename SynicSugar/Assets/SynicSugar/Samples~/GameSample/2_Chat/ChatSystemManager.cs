@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using SynicSugar.MatchMake;
 using SynicSugar.P2P;
 using SynicSugar.RTC;
 using UnityEngine;
 using UnityEngine.UI;
-namespace SynicSugar.Samples 
+
+namespace SynicSugar.Samples.Chat
 {
     public class ChatSystemManager : MonoBehaviour 
     {
@@ -35,10 +35,12 @@ namespace SynicSugar.Samples
             //IsReconnecter means that this local user is a reconnector and they has not received Synic data about themself.
             if(p2pInfo.Instance.IsReconnecter)
             {
+                Debug.Log("Start SynicReceiver");
                 //To get SynicPacket.
                 ConnectHub.Instance.StartSynicReceiver(5);
                 //This flag(HasReceivedAllSyncSynic) cannot be used at the same time. Once it returns True, it returns False again.
                 await UniTask.WaitUntil(() => p2pInfo.Instance.HasReceivedAllSyncSynic, cancellationToken: this.GetCancellationTokenOnDestroy());
+                Debug.Log("Finish SynicReceiver");
                 UpdateChatCount();
             }
             

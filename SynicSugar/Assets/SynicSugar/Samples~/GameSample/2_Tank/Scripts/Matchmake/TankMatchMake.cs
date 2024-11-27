@@ -67,6 +67,7 @@ namespace SynicSugar.Samples.Tank
                 return;
             }
             SynicSugarDebug.Instance.Log($"TryToReconnect: Success! LobbyID:{MatchMakeManager.Instance.GetCurrentLobbyID()}");
+            SynicSugarDebug.Instance.Log($"CurrentSessionStartUTC :{P2P.p2pInfo.Instance.CurrentSessionStartUTC}");
             SceneChanger.ChangeGameScene(Scene.Tank);
         }
         /// <summary>
@@ -242,6 +243,7 @@ namespace SynicSugar.Samples.Tank
                 return;
             }
 
+            SynicSugarDebug.Instance.Log($"CurrentSessionStartUTC :{P2P.p2pInfo.Instance.CurrentSessionStartUTC}");
             SceneChanger.ChangeGameScene(Scene.Tank);
         }
         /// <summary>
