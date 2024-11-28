@@ -36,6 +36,8 @@ namespace SynicSugar.P2P {
         public SocketId ReferenceSocketId;
 
         ulong RequestNotifyId, InterruptedNotify, EstablishedNotify, ClosedNotify;
+        // Allocate memory at maximum packet size in advance.
+        byte[] buffer = new byte[1170];
 
         /// <summary>
         /// To get packets
@@ -86,6 +88,10 @@ namespace SynicSugar.P2P {
             if(existPacket != ResultE.Success){
                 return false;
             }
+            if(nextPacketSizeBytes > 1170){
+                Debug.LogError($"GetPacketFromBuffer: Packet size {nextPacketSizeBytes} exceeds maximum expected size of 1170.");
+                return false;
+            }
             //Set options
             ReceivePacketOptions options = new ReceivePacketOptions(){
                 LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
@@ -93,8 +99,7 @@ namespace SynicSugar.P2P {
                 RequestedChannel = null
             };
 
-            byte[] data = new byte[nextPacketSizeBytes];
-            payload = new ArraySegment<byte>(data);
+            payload = new ArraySegment<byte>(buffer, 0, (int)nextPacketSizeBytes);
             ResultE result = P2PHandle.ReceivePacket(ref options, ref productUserId, ref ReferenceSocketId, out ch, payload, out uint bytesWritten);
             
             if (result != ResultE.Success){
@@ -120,6 +125,10 @@ namespace SynicSugar.P2P {
             if(existPacket != ResultE.Success){
                 return false;
             }
+            if(nextPacketSizeBytes > 1170){
+                Debug.LogError($"GetSynicPacketFromBuffer: Packet size {nextPacketSizeBytes} exceeds maximum expected size of 1170.");
+                return false;
+            }
             //Set options
             ReceivePacketOptions options = new ReceivePacketOptions(){
                 LocalUserId = p2pInfo.Instance.userIds.LocalUserId.AsEpic,
@@ -127,8 +136,7 @@ namespace SynicSugar.P2P {
                 RequestedChannel = 255
             };
 
-            byte[] data = new byte[nextPacketSizeBytes];
-            payload = new ArraySegment<byte>(data);
+            payload = new ArraySegment<byte>(buffer, 0, (int)nextPacketSizeBytes);
             ResultE result = P2PHandle.ReceivePacket(ref options, ref productUserId, ref ReferenceSocketId, out ch, payload, out uint bytesWritten);
             
             if (result != ResultE.Success){
