@@ -20,6 +20,7 @@ If this is no longer needed, we call *[CancelCurrentMatchMake](../MatchMakeManag
 ### Properity
 | API | description |
 |---|---|
+| IsMatchmaking | Whether the user is in matchmaking |
 | [maxSearchResult](../MatchMakeManager/maxsearchresult)  | The amount of search results |
 | [timeoutSec](../MatchMakeManager/timeoutsec) | Timeout seconds for user to exit no-filled lobby |
 | [p2pSetupTimeoutSec](../MatchMakeManager/p2psetuptimeoutsec) | Timeout sec for prep init connection |

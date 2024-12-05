@@ -21,6 +21,8 @@ If this is no longer needed, we call *[CancelCurrentMatchMake](../../SynicSugar.
 ### Properity
 | API | description |
 |---|---|
+| IsInSession | Whether the user is in p2pSession. |
+| InConnected | Whether the connection actually is active. |
 | HostUserId | Host's UserId in this lobby |
 | [LocalUserId](../p2pInfo/localuserid) | UserID of this local |
 | [CurrentRemoteUserIds](../p2pInfo/currentremoteuserids) | UserIDs of current conenction |

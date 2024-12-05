@@ -11,7 +11,10 @@ public float timeUntilTimeout { get; private set; }
 
 ### Description
 Sec until stopping the process to wait for opponents.<br>
-This time counts only for the time a local user is waiting for opponents in matchmaking. After closing lobby, this time is not used and p2pSetupTimeoutSec is used.<br>
+This value is typically 0. <br>
+It is set to the same value as `timeoutSec` just before matchmaking starts. At that time, `IsMatchmaking` and `isLooking` also become true.<br>
+While `isLooking` is true, meaning from the start of matchmaking until a peer is found and P2P preparation begins, this value continues to count down.<br>
+Once `isLooking` becomes false and p2p preparation is complete, `IsMatchmaking` is set to false, this value is reset to 0, and the Matchmaking API's result is returned.
 
 
 ```cs
