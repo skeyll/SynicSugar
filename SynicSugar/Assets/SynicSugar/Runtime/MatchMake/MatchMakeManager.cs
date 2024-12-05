@@ -140,7 +140,11 @@ namespace SynicSugar.MatchMake {
         public bool isConcluding { get; private set; }
 
         /// <summary>
-        /// Sec until stopping the process to wait for opponents.
+        /// Sec until stopping the process to wait for opponent. <br />
+        /// This value is typically 0. <br />
+        /// It is set to the same value as `timeoutSec` just before matchmaking starts. At that time, `IsMatchmaking` and `isLooking` also become true.<br />
+        /// While `isLooking` is true, meaning from the start of matchmaking until a peer is found and P2P preparation begins, this value continues to count down.<br />
+        /// Once `isLooking` becomes false and p2p preparation is complete, `IsMatchmaking` is set to false, this value is reset to 0, and the Matchmaking API's result is returned.
         /// </summary>
         public float timeUntilTimeout { get; private set; }
         /// <summary>
@@ -494,9 +498,10 @@ namespace SynicSugar.MatchMake {
         /// <param name="userToken">Token for the function to be passed from API caller.</param>
         /// <returns></returns>
         async UniTask TimeoutTimer(int timeoutSec, CancellationToken userToken){
+            timeUntilTimeout = timeoutSec;
             isLooking = true;
             SynicSugarManger.Instance.State.IsMatchmaking = true;
-            timeUntilTimeout = timeoutSec;
+
             try{
                 while(timeUntilTimeout > 0f && isLooking){
                     timeUntilTimeout -= Time.deltaTime;
@@ -521,6 +526,7 @@ namespace SynicSugar.MatchMake {
                     Debug.Log("TimeoutTimer: Cancel matching by timeout");
                 }
             #endif
+                timeUntilTimeout = 0f;
                 matchmakeTokenSource?.Cancel();
             }
         #if SYNICSUGAR_LOG
@@ -562,6 +568,7 @@ namespace SynicSugar.MatchMake {
             if(setupResult != Result.Success){
                 MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
                 SynicSugarManger.Instance.State.IsMatchmaking = false;
+                timeUntilTimeout = 0f;
                 return setupResult;
             }
 
@@ -571,9 +578,16 @@ namespace SynicSugar.MatchMake {
                 sessionDataManager.SaveSessionData(new SessionData(matchmakingCore.GetCurrentLobbyID(), p2pInfo.Instance.CurrentSessionStartUTC)).Forget();
             }
 
+            // The SessionType might be used by the user immediately after the session starts. 
+            // Therefore, it should be updated before IsInSession is set to true. 
+            // Ideally, it might be more appropriate to update SessionType after IsMatchmaking is set to false. 
+            // However, for the sake of convenience, where IsMatchmaking being false and IsInSession being true represent the same transition,　SessionType is updated first. 
+            // The timeUntilTimeout is set to 0 after IsMatchmaking is updated to false to clarify whether it was due to a timeout or initialization.
+            p2pInfo.Instance.SessionType = SessionType.OnlineSession;
             SynicSugarManger.Instance.State.IsMatchmaking = false;
             SynicSugarManger.Instance.State.IsInSession = true;
-            p2pInfo.Instance.SessionType = SessionType.OnlineSession;
+            timeUntilTimeout = 0f;
+
         #if SYNICSUGAR_LOG
             Debug.Log($"SetupP2P: Finish p2p setup. isReconencter {isReconencter} / IsMatchmaking {IsMatchmaking} / IsInSession {SynicSugarManger.Instance.State.IsInSession} / SessionType {p2pInfo.Instance.SessionType}");
         #endif
