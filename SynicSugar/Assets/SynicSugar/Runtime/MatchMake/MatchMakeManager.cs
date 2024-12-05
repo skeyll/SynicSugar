@@ -578,9 +578,14 @@ namespace SynicSugar.MatchMake {
                 sessionDataManager.SaveSessionData(new SessionData(matchmakingCore.GetCurrentLobbyID(), p2pInfo.Instance.CurrentSessionStartUTC)).Forget();
             }
 
+            // The SessionType might be used by the user immediately after the session starts. 
+            // Therefore, it should be updated before IsInSession is set to true. 
+            // Ideally, it might be more appropriate to update SessionType after IsMatchmaking is set to false. 
+            // However, for the sake of convenience, where IsMatchmaking being false and IsInSession being true represent the same transition,　SessionType is updated first. 
+            // The timeUntilTimeout is set to 0 after IsMatchmaking is updated to false to clarify whether it was due to a timeout or initialization.
+            p2pInfo.Instance.SessionType = SessionType.OnlineSession;
             SynicSugarManger.Instance.State.IsMatchmaking = false;
             SynicSugarManger.Instance.State.IsInSession = true;
-            p2pInfo.Instance.SessionType = SessionType.OnlineSession;
             timeUntilTimeout = 0f;
 
         #if SYNICSUGAR_LOG
