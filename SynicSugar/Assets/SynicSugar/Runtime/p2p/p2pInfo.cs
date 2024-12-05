@@ -53,6 +53,19 @@ namespace SynicSugar.P2P {
             natRelayManager = natrelayInstance;
         }
 #endregion
+
+        /// <summary>
+        /// Indicates whether the matchmaking process has finished and the system is in a state where P2P communication is possible.<br />
+        /// After get Success by matchmaking APIs include for Offline, this value becomes true　until finish Session by ExitSession or CloseSession.
+        /// </summary>
+        public bool IsInSession => SynicSugarManger.Instance.State.IsInSession;
+
+        /// <summary>
+        /// Indicates whether the connection is currently active.<br />
+        /// After matchmaking completes and transitions to the session state, the connection automatically starts, and this value returns true.<br />
+        /// If the value is false and you want to restart the connection, call ConnectHub.Instance.RestartConnections(). (*This method is only valid when IsInSession is true.)
+        /// </summary>
+        public bool IsConnected => sessionCore.IsConnected;
         SessionCore sessionCore;
         NatRelayManager natRelayManager;
         internal UserIds userIds;
@@ -240,7 +253,7 @@ namespace SynicSugar.P2P {
         /// </summary>
         /// <returns></returns>
         public async UniTask RefreshPing(UserId target){
-            if(!SynicSugarManger.Instance.State.IsInSession){
+            if(!IsInSession){
             #if SYNICSUGAR_LOG
                 Debug.Log("RefreshPing: This local user is not in session.");
             #endif
@@ -253,7 +266,7 @@ namespace SynicSugar.P2P {
         /// </summary>
         /// <returns></returns>
         public async UniTask RefreshPings(){
-            if(!SynicSugarManger.Instance.State.IsInSession){
+            if(!IsInSession){
             #if SYNICSUGAR_LOG
                 Debug.Log("RefreshPing: This local user is not in session.");
             #endif
@@ -290,6 +303,7 @@ namespace SynicSugar.P2P {
         /// The IsConnected flag becomes true after the user or library initiates the connection.
         /// </summary>
         /// <returns>True if the connection is open, false otherwise.</returns>
+        [Obsolete("This is old. p2pInfo.Instance.IsConnected is new one.")]
         public bool ConnectionIsValid(){
             return sessionCore.IsConnected;
         }
