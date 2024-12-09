@@ -11,6 +11,16 @@ Probably not. As long as you're not using it in extreme use, it should be fine.<
 
 </details>
 
+
+<details>
+<summary><b>SynicSugar Prefab Issues</b></summary>
+In most cases, prefabs break due to updates that change the internal structure of script from when the GUID was cached. When serialization fails, the script will appear as "None."<br>
+To resolve this issue:<br>
+1. Navigate to Packages > SynicSugar > Prefabs, locate the broken object, right-click on it, and select Reimport. Alternatively, you can use the top menu: Tools > SynicSugar > Reimport to reimport the relevant package.<br>
+2. If the issue persists, close the affected project, open the project folder, and delete the .csproj file for the assembly where the object is located. If you have not defined an AssemblyDefinition, delete Assembly-CSharp-Editor.csproj. The file will be regenerated automatically when you reopen the project.<br>
+3. If these steps do not resolve the issue, please report it on GitHub as an Issue.<br><br>
+</details>
+
 <details>
 <summary><b>Where can I find the DevTool for DebugLogin?</b></summary>
 It's included in the SDK, which can be downloaded from the "Download and configure EOS SDK" section after creating a product page in the Developer portal.<br>
