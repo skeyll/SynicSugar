@@ -126,7 +126,7 @@ namespace SynicSugar.MatchMake {
             requiredMembers = minLobbyMember;
 
             Result createResult = await CreateLobby(lobbyCondition, userAttributes, token);
-            
+
             if(createResult == Result.Success){
                 // Wait for establised matchmaking and to get SocketName to be used in p2p connection.
                 Result matchingResult = await WaitForMatchingEstablishment(token);
@@ -400,6 +400,7 @@ namespace SynicSugar.MatchMake {
                 return matchingResult;
             }
             catch (OperationCanceledException){
+                MatchMakeManager.Instance.MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Cancel);
                 //User cancels Matchmaking process from cancel APIs.
                 if(!MatchMakeManager.Instance.isLooking){
                     return Result.Canceled;
