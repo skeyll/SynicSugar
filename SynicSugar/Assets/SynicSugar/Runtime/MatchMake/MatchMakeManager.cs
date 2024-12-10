@@ -431,7 +431,7 @@ namespace SynicSugar.MatchMake {
             TimeoutTimer(timeoutSec, token).Forget();
 
             try{
-                Result result = await matchmakingCore.StartJustCreate(lobbyCondition, userAttributes, minLobbyMember, token);
+                Result result = await matchmakingCore.StartJustCreate(lobbyCondition, userAttributes, minLobbyMember, matchmakeTokenSource.Token);
                 isLooking = false;
                 return result;
             }catch(OperationCanceledException){
@@ -515,7 +515,6 @@ namespace SynicSugar.MatchMake {
                     Debug.Log("Cancel matching by timeout");
                 #endif
                     matchmakeTokenSource?.Cancel();
-                    isLooking = false;
                 }
             }
             catch (OperationCanceledException){ // Cancel matchmaking process by user from library outside.
@@ -527,7 +526,6 @@ namespace SynicSugar.MatchMake {
                 }
             #endif
                 timeUntilTimeout = 0f;
-                matchmakeTokenSource?.Cancel();
             }
         #if SYNICSUGAR_LOG
             Debug.Log("TimeoutTimer: Stop timeout timer for looking opponents.");
