@@ -77,6 +77,7 @@ namespace SynicSugar.MatchMake {
             //If player cannot join lobby as a guest, creates a lobby as a host and waits for other player.
             //Create
             Result createResult = await CreateLobby(lobbyCondition, userAttributes, token);
+
             if(createResult == Result.Success){
                 // Wait for establised matchmaking and to get SocketName to be used in p2p connection.
                 Result matchingResult = await WaitForMatchingEstablishment(token);
@@ -222,7 +223,6 @@ namespace SynicSugar.MatchMake {
                 Debug.LogError("Create Lobby: can't add lobby search attributes.");
                 return modifyAttribute;
             }
-            
             return modifyAttribute;
 
             void OnCreateLobbyCompleted(ref CreateLobbyCallbackInfo info){
@@ -404,12 +404,12 @@ namespace SynicSugar.MatchMake {
                 if(!MatchMakeManager.Instance.isLooking){
                     return Result.Canceled;
                 }
-
+                
                 //Timeout or User cancels Matchmaking process from token.
                 if(MatchMakeManager.Instance.enableHostmigrationInMatchmaking){
-                    await CancelMatchMaking(token);
+                    await CancelMatchMaking(MatchMakeManager.Instance.GetCancellationTokenOnDestroy());
                 }else{
-                    await CloseMatchMaking(token);
+                    await CloseMatchMaking(MatchMakeManager.Instance.GetCancellationTokenOnDestroy());
                 }
                 //Need to clear GUI state for Timeout.
                 foreach(var member in CurrentLobby.Members){
