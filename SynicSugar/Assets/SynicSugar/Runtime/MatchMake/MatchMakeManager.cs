@@ -431,7 +431,7 @@ namespace SynicSugar.MatchMake {
             TimeoutTimer(timeoutSec, token).Forget();
 
             try{
-                Result result = await matchmakingCore.StartJustCreate(lobbyCondition, userAttributes, minLobbyMember, token);
+                Result result = await matchmakingCore.StartJustCreate(lobbyCondition, userAttributes, minLobbyMember, matchmakeTokenSource.Token);
                 isLooking = false;
                 return result;
             }catch(OperationCanceledException){
