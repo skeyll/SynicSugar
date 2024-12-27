@@ -179,6 +179,8 @@ namespace SynicSugar.Generator {
                     SyncedCommons.Add(i, new StringBuilder());
                     SyncedInvoker.Append(cb.CreateSyncedInvoker(i));
                 }
+                // Namespaces for use with ConnectHub
+                HashSet<string> connecthubNamespaces = new ();
 
                 foreach (var info in contentsInfo) {
                     if (info.type == ContentInfo.Type.Synic) {
@@ -186,6 +188,7 @@ namespace SynicSugar.Generator {
                     }else{
                         SyncList.Append($"{info.contentName}, ");
                     }
+                    connecthubNamespaces.Add(info.rootNameSpace);
 
                     if (info.isNetworkPlayer) {
                         switch (info.type) {
@@ -234,6 +237,7 @@ namespace SynicSugar.Generator {
                 StringBuilder PlayeInstance = new StringBuilder();
                 StringBuilder CommonsInstance = new StringBuilder();
                 StringBuilder AdditionalClass = new StringBuilder(AdditionalClassHeader);
+
                 foreach (var info in classesInfo){
                     ClearReference.Append(cb.CreateClearReference(info.name, info.isNetworkPlayer));
 
@@ -307,7 +311,16 @@ namespace SynicSugar.Generator {
 
                 context.AddSource("SynicSugarAdditonalClass.g.cs", AdditionalClass.ToString());
 
+                //Synic Container
                 StringBuilder SynicItemsClass = new StringBuilder(SynicItemsHeader);
+                StringBuilder UsingStatements = new StringBuilder();
+                foreach (var ns in connecthubNamespaces) {
+                    if(string.IsNullOrEmpty(ns)){ continue;}
+
+                    UsingStatements.AppendLine($"using {ns};");
+                }
+                SynicItemsClass.Replace("USING_STATEMENTS", UsingStatements.ToString());
+
                 foreach (var i in SynicItems){
                     var st = new SynicItemsTemplate(){
                         hierarchyIndex = i.Key,
@@ -375,6 +388,8 @@ using MemoryPack.Compression;
 // </auto-generated>
 #pragma warning disable CS0164 // This label has not been referenced
 #pragma warning disable CS0436 // Type conflicts with the imported type
+
+USING_STATEMENTS
 
 namespace SynicSugar.P2P {{
 ";
