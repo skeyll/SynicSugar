@@ -131,7 +131,8 @@ namespace SynicSugar.Generator {
                             }
                         }
                         
-                        if (synicSyntax != null && field.Modifiers.Any(SyntaxKind.PublicKeyword)){
+                        if (synicSyntax != null && 
+                            (field.Modifiers.Any(SyntaxKind.PublicKeyword) || field.Modifiers.Any(SyntaxKind.InternalKeyword))){
                             int ci = contentsI() + 1;
                             AddInfoWithBasicData(ci, false);
 
@@ -179,13 +180,16 @@ namespace SynicSugar.Generator {
                     SyncedCommons.Add(i, new StringBuilder());
                     SyncedInvoker.Append(cb.CreateSyncedInvoker(i));
                 }
+                // Namespaces for use with ConnectHub
+                HashSet<string> connecthubNamespaces = new ();
 
                 foreach (var info in contentsInfo) {
                     if (info.type == ContentInfo.Type.Synic) {
-                        SynicItems[info.intAttributeArg].Append(cb.CreateSynicItemVariable(info.contentName, info.paramNamespace, info.param));
+                        SynicItems[info.intAttributeArg].Append(cb.CreateSynicItemVariable(info.param, info.contentName));
                     }else{
                         SyncList.Append($"{info.contentName}, ");
                     }
+                    connecthubNamespaces.Add(info.paramNamespace);
 
                     if (info.isNetworkPlayer) {
                         switch (info.type) {
@@ -234,6 +238,7 @@ namespace SynicSugar.Generator {
                 StringBuilder PlayeInstance = new StringBuilder();
                 StringBuilder CommonsInstance = new StringBuilder();
                 StringBuilder AdditionalClass = new StringBuilder(AdditionalClassHeader);
+
                 foreach (var info in classesInfo){
                     ClearReference.Append(cb.CreateClearReference(info.name, info.isNetworkPlayer));
 
@@ -278,9 +283,7 @@ namespace SynicSugar.Generator {
                 }
 
                 StringBuilder SyncedItem = new StringBuilder();
-                
-                foreach (var i in SyncedPlayer) {
-                }
+
                 for (int i = 0; i <= 9; i++){
                     bool playerContain = SyncedPlayer.ContainsKey(i);
                     bool commonsContain = SyncedCommons.ContainsKey(i);
@@ -307,7 +310,16 @@ namespace SynicSugar.Generator {
 
                 context.AddSource("SynicSugarAdditonalClass.g.cs", AdditionalClass.ToString());
 
+                //Synic Container
                 StringBuilder SynicItemsClass = new StringBuilder(SynicItemsHeader);
+                StringBuilder UsingStatements = new StringBuilder();
+                foreach (var ns in connecthubNamespaces) {
+                    if(string.IsNullOrEmpty(ns)){ continue;}
+
+                    UsingStatements.AppendLine($"using {ns};");
+                }
+                SynicItemsClass.Replace("USING_STATEMENTS", UsingStatements.ToString());
+
                 foreach (var i in SynicItems){
                     var st = new SynicItemsTemplate(){
                         hierarchyIndex = i.Key,
@@ -375,6 +387,8 @@ using MemoryPack.Compression;
 // </auto-generated>
 #pragma warning disable CS0164 // This label has not been referenced
 #pragma warning disable CS0436 // Type conflicts with the imported type
+
+USING_STATEMENTS
 
 namespace SynicSugar.P2P {{
 ";

@@ -416,7 +416,7 @@ namespace SynicSugar.MatchMake {
                 foreach(var member in CurrentLobby.Members){
                     MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(UserId.GetUserId(member.Key), false);
                 }
-                return Result.Canceled;
+                return Result.TimedOut;
             }
         }
         /// <summary>
