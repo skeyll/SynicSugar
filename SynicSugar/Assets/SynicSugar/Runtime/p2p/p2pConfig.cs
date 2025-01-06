@@ -14,13 +14,15 @@ namespace SynicSugar.P2P {
             }
             Instance = this;
             sessionCore = SynicSugarManger.Instance.CoreFactory.GetSessionCore();
-            p2pInfo.Instance.SetDependency(sessionCore, natRelayManager);
         }
         void OnDestroy() {
             if( Instance == this ) {
                 sessionCore.Dispose();
                 Instance = null;
             }
+        }
+        void Start(){
+            p2pInfo.Instance.SetDependency(sessionCore, natRelayManager);
         }
 #endregion
         internal SessionCore sessionCore;
