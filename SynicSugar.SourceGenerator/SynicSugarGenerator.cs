@@ -184,7 +184,7 @@ namespace SynicSugar.Generator {
 
                 foreach (var info in contentsInfo) {
                     if (info.type == ContentInfo.Type.Synic) {
-                        SynicItems[info.intAttributeArg].Append(cb.CreateSynicItemVariable(info.paramNamespace, info.param, info.contentName));
+                        SynicItems[info.intAttributeArg].Append(cb.CreateSynicItemVariable(info.param, info.contentName));
                     }else{
                         SyncList.Append($"{info.contentName}, ");
                     }
