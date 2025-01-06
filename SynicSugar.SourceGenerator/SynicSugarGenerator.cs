@@ -283,8 +283,6 @@ namespace SynicSugar.Generator {
 
                 StringBuilder SyncedItem = new StringBuilder();
                 
-                foreach (var i in SyncedPlayer) {
-                }
                 for (int i = 0; i <= 9; i++){
                     bool playerContain = SyncedPlayer.ContainsKey(i);
                     bool commonsContain = SyncedCommons.ContainsKey(i);
