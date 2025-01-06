@@ -290,9 +290,10 @@
         }}";
         }
         //SyncSynicWithLocalData
-        internal string CreateSynicItemVariable(string variable, string nameSpace, string param) {
+        internal string CreateSynicItemVariable(string param, string variable) {
+            //If the namespace is resolved by using directive, set automatically namespace before parameter.
             return $@"
-        public {GetFullName(nameSpace, param)} {variable};";
+        public {param} {variable};";
         }
         internal string CreateSyncSynicContent(string variableName, string className, bool isPlayerClass) {
             string assignment = isPlayerClass ? $"{className}.ContainsKey(id) ? {className}[id]?.{variableName} ?? default : default" : $"{className} != null ? {className}?.{variableName} ?? default : default";
