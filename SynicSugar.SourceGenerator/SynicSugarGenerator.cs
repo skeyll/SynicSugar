@@ -131,7 +131,8 @@ namespace SynicSugar.Generator {
                             }
                         }
                         
-                        if (synicSyntax != null && field.Modifiers.Any(SyntaxKind.PublicKeyword)){
+                        if (synicSyntax != null && 
+                            (field.Modifiers.Any(SyntaxKind.PublicKeyword) || field.Modifiers.Any(SyntaxKind.InternalKeyword))){
                             int ci = contentsI() + 1;
                             AddInfoWithBasicData(ci, false);
 
@@ -282,7 +283,7 @@ namespace SynicSugar.Generator {
                 }
 
                 StringBuilder SyncedItem = new StringBuilder();
-                
+
                 for (int i = 0; i <= 9; i++){
                     bool playerContain = SyncedPlayer.ContainsKey(i);
                     bool commonsContain = SyncedCommons.ContainsKey(i);
