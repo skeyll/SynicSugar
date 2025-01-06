@@ -290,7 +290,7 @@
         }}";
         }
         //SyncSynicWithLocalData
-        internal string CreateSynicItemVariable(string variable, string nameSpace, string param) {
+        internal string CreateSynicItemVariable(string nameSpace, string param, string variable) {
             return $@"
         public {GetFullName(nameSpace, param)} {variable};";
         }

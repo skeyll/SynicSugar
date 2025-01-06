@@ -184,11 +184,11 @@ namespace SynicSugar.Generator {
 
                 foreach (var info in contentsInfo) {
                     if (info.type == ContentInfo.Type.Synic) {
-                        SynicItems[info.intAttributeArg].Append(cb.CreateSynicItemVariable(info.contentName, info.paramNamespace, info.param));
+                        SynicItems[info.intAttributeArg].Append(cb.CreateSynicItemVariable(info.paramNamespace, info.param, info.contentName));
                     }else{
                         SyncList.Append($"{info.contentName}, ");
                     }
-                    connecthubNamespaces.Add(info.rootNameSpace);
+                    connecthubNamespaces.Add(info.paramNamespace);
 
                     if (info.isNetworkPlayer) {
                         switch (info.type) {
