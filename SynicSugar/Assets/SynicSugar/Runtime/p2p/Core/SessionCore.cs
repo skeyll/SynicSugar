@@ -84,8 +84,8 @@ namespace SynicSugar.Base {
         /// If false, process current queue, then stop it.</param>
         /// <param name="token">For this task</param>
         async UniTask<Result> INetworkCore.PauseConnections(bool isForced, CancellationToken token){
-            if(!IsConnected || !SynicSugarManger.Instance.State.IsInSession){
-                Debug.LogWarning(!IsConnected ? "PauseConnections: Connection is invalid now." : "PauseConnections: This local user is NOT in Session.");
+            if(!IsConnected || p2pInfo.Instance.SessionType != SessionType.OnlineSession){
+                Debug.LogWarning(p2pInfo.Instance.SessionType != SessionType.OnlineSession ? "PauseConnections: This local user is NOT in the online session." : "PauseConnections: Connection is invalid now.");
                 return Result.InvalidAPICall;
             }
             //To stop sending process before result.
@@ -106,8 +106,8 @@ namespace SynicSugar.Base {
         /// Prepare to receive in advance. If user sent packets, it can open to get packets for a socket id without this.
         /// </summary>
         Result INetworkCore.RestartConnections(){
-            if(IsConnected || !SynicSugarManger.Instance.State.IsInSession){
-                Debug.LogWarning(IsConnected ? "RestartConnections: Connection is invalid now." : "RestartConnections: This local user is NOT in Session.");
+            if(IsConnected || p2pInfo.Instance.SessionType != SessionType.OnlineSession){
+                Debug.LogWarning(p2pInfo.Instance.SessionType != SessionType.OnlineSession ? "RestartConnections: This local user is NOT in the online session." : "RestartConnections: Connection is invalid now.");
                 return Result.InvalidAPICall;
             }
             Result result = RestartConnections();
