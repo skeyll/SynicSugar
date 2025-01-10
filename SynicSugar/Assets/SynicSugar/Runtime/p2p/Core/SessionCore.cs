@@ -41,7 +41,7 @@ namespace SynicSugar.Base {
         PacketReceiver FixedUpdateReceiver, UpdateReceiver, LateUpdateReceiver, SynicReceiver;
         /// <summary>
         /// Is the connection currently active?　<br />
-        /// Can change this flag own, but basically Base class manages the flags.
+        /// Can change this flag own, but basically Base class manages the flags.　
         /// </summary>
         public bool IsConnected { get; protected set; }
         
@@ -256,6 +256,7 @@ namespace SynicSugar.Base {
 
             await MatchMakeManager.Instance.DestoryOfflineLobby(cleanupMemberCountChanged, token);
             
+            SynicSugarManger.Instance.State.IsInSession = false;
             if(destroyManager){
                 Destroy(MatchMakeManager.Instance.gameObject);
             }else{
