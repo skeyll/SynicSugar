@@ -3,6 +3,10 @@ using MemoryPack;
 namespace SynicSugar {
     public class UserIdFormatter : MemoryPackFormatter<UserId>
     {
+        private UserIdSerializable adapter;
+        internal UserIdFormatter (){
+            adapter = new UserIdSerializable();
+        }
         public override void Serialize(ref MemoryPackWriter writer, ref UserId? value)
         {
             if (value == null || !value.IsValid()){
@@ -10,7 +14,7 @@ namespace SynicSugar {
                 return;
             }
 
-            writer.WritePackable(new UserIdSerializable(value));
+            writer.WritePackable(adapter.SetValue(value));
         }
 
         public override void Deserialize(ref MemoryPackReader reader, ref UserId? value)

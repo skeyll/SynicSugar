@@ -2,21 +2,33 @@ using MemoryPack;
 
 namespace SynicSugar {
     [MemoryPackable]
-    public partial class UserIdSerializable {
+    internal partial class UserIdSerializable {
 
-        [MemoryPackIgnore] public readonly UserId userId;
+        [MemoryPackIgnore] internal UserId userId;
         [MemoryPackInclude] internal string value_s => userId.ToString();
 
-
+        /// <summary>
+        /// For formatter's constructer.
+        /// </summary>
+        public UserIdSerializable(){}
+        /// <summary>
+        /// For MemoryPack.
+        /// </summary>
+        /// <param name="value_s"></param>
         [MemoryPackConstructor]
         public UserIdSerializable(string value_s)
         {
             userId = UserId.GetUserId(value_s);
         }
 
-        public UserIdSerializable(UserId userid)
+        /// <summary>
+        /// For serilaizer.
+        /// </summary>
+        /// <param name="userId"></param>
+        internal UserIdSerializable SetValue(UserId userId)
         {
-            userId = userid;
+            this.userId = userId;
+            return this;
         }
     }
 }
