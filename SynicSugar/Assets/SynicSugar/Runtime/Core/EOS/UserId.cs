@@ -1,11 +1,8 @@
 using System.Collections.Generic;
 using Epic.OnlineServices;
-using MemoryPack;
 
 namespace SynicSugar {
-    [MemoryPackable]
-    public partial class UserId {
-    #region Cache
+    public class UserId {
         static Dictionary<string, UserId> idCache = new();
         internal static void CacheClear(){
             idCache.Clear();
@@ -20,26 +17,22 @@ namespace SynicSugar {
                 idCache.Add(localUserIdString, SynicSugarManger.Instance.LocalUserId);
             }
         }
-    #endregion
         const string OFFLINE_USERID = "OFFLINEUSER";
+
         readonly ProductUserId value;
-        [MemoryPackInclude] readonly string value_s;
+        readonly string value_s;
+
+
+        /// <summary>
+        /// Basic UserId generation method; UserId can only be created from here, based on ProductUserID.
+        /// </summary>
+        /// <param name="id"></param>
         private UserId(ProductUserId id){
             if(!id.IsValid()){
                 return;
             }
             value = id;
             value_s = id.ToString();
-        }
-
-        [MemoryPackConstructor]
-        internal UserId(string value_s){
-            if(!idCache.ContainsKey(value_s)){
-                value = null;
-                this.value_s = "INVALIDUSERID";
-                return;
-            }
-            GetUserId(value_s);
         }
 
         /// <summary>
@@ -113,7 +106,12 @@ namespace SynicSugar {
             }
             return null;
         }
-        [MemoryPackIgnore] public ProductUserId AsEpic => value;
+
+
+        public bool IsValid(){
+            return value != null;
+        }
+        public ProductUserId AsEpic => value;
 
         public static explicit operator ProductUserId(UserId id) => GetUserId(id).value;
         public static explicit operator UserId(ProductUserId value) => ToUserId(value);
