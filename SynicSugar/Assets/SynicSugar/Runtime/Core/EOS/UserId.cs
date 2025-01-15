@@ -3,7 +3,6 @@ using Epic.OnlineServices;
 
 namespace SynicSugar {
     public class UserId {
-    #region Cache
         static Dictionary<string, UserId> idCache = new();
         internal static void CacheClear(){
             idCache.Clear();
@@ -18,10 +17,16 @@ namespace SynicSugar {
                 idCache.Add(localUserIdString, SynicSugarManger.Instance.LocalUserId);
             }
         }
-    #endregion
         const string OFFLINE_USERID = "OFFLINEUSER";
+
         readonly ProductUserId value;
         readonly string value_s;
+
+
+        /// <summary>
+        /// Basic UserId generation method; UserId can only be created from here, based on ProductUserID.
+        /// </summary>
+        /// <param name="id"></param>
         private UserId(ProductUserId id){
             if(!id.IsValid()){
                 return;
@@ -29,6 +34,7 @@ namespace SynicSugar {
             value = id;
             value_s = id.ToString();
         }
+
         /// <summary>
         /// *Experimental. <br />
         /// For offline mode.
@@ -99,6 +105,11 @@ namespace SynicSugar {
                 return idCache[key];
             }
             return null;
+        }
+
+
+        public bool IsValid(){
+            return value != null;
         }
         public ProductUserId AsEpic => value;
 
