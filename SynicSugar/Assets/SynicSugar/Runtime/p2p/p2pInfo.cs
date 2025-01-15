@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using SynicSugar.Base;
 
 namespace SynicSugar.P2P {
+    [DefaultExecutionOrder(-50)]
     public class p2pInfo : MonoBehaviour {
 #region Singleton
         public static p2pInfo Instance { get; private set; }

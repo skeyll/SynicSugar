@@ -7,6 +7,7 @@ using SynicSugar.Base;
 using UnityEngine;
 using UnityEngine.Events;
 namespace SynicSugar.MatchMake {
+    [DefaultExecutionOrder(-50)]
     public class MatchMakeManager : MonoBehaviour {
 #region Singleton
         public static MatchMakeManager Instance { get; private set; }
@@ -33,6 +34,7 @@ namespace SynicSugar.MatchMake {
             timeUntilTimeout = 0f;
         }
         void Start(){
+            //If you make it possible to replace the Core in the middle in the future, you will continue to use the previous Core in this way.
             matchmakingCore = SynicSugarManger.Instance.CoreFactory.GetMatchmakingCore(maxSearchResult);
         }
         void OnDestroy() {

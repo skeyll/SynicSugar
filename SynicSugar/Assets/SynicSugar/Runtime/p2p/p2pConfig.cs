@@ -4,6 +4,7 @@ using System;
 using SynicSugar.Base;
 
 namespace SynicSugar.P2P {
+    [DefaultExecutionOrder(-50)]
     public class p2pConfig : MonoBehaviour {
 #region Singleton
         public static p2pConfig Instance { get; private set; }
@@ -13,7 +14,6 @@ namespace SynicSugar.P2P {
                 return;
             }
             Instance = this;
-            sessionCore = SynicSugarManger.Instance.CoreFactory.GetSessionCore();
         }
         void OnDestroy() {
             if( Instance == this ) {
@@ -22,6 +22,7 @@ namespace SynicSugar.P2P {
             }
         }
         void Start(){
+            sessionCore = SynicSugarManger.Instance.CoreFactory.GetSessionCore();
             p2pInfo.Instance.SetDependency(sessionCore, natRelayManager);
         }
 #endregion
