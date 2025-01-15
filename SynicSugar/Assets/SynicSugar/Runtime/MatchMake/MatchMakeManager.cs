@@ -34,6 +34,7 @@ namespace SynicSugar.MatchMake {
             timeUntilTimeout = 0f;
         }
         void Start(){
+            //If you make it possible to replace the Core in the middle in the future, you will continue to use the previous Core in this way.
             matchmakingCore = SynicSugarManger.Instance.CoreFactory.GetMatchmakingCore(maxSearchResult);
         }
         void OnDestroy() {
