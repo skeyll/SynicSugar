@@ -7,6 +7,7 @@ using SynicSugar.Base;
 using UnityEngine;
 using UnityEngine.Events;
 namespace SynicSugar.MatchMake {
+    [DefaultExecutionOrder(-50)]
     public class MatchMakeManager : MonoBehaviour {
 #region Singleton
         public static MatchMakeManager Instance { get; private set; }
