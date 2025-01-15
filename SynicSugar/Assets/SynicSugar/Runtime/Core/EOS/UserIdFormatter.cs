@@ -1,23 +1,19 @@
 using MemoryPack;
 
 namespace SynicSugar {
-    public class UserIdFormatter : MemoryPackFormatter<UserId>
+    internal class UserIdFormatter : MemoryPackFormatter<UserId>
     {
-        private UserIdSerializable adapter;
-        internal UserIdFormatter (){
-            adapter = new UserIdSerializable();
-        }
-        public override void Serialize(ref MemoryPackWriter writer, ref UserId? value)
+        public override void Serialize(ref MemoryPackWriter writer, ref UserId value)
         {
             if (value == null || !value.IsValid()){
                 writer.WriteNullObjectHeader();
                 return;
             }
 
-            writer.WritePackable(adapter.SetValue(value));
+            writer.WriteString(value.ToString());
         }
 
-        public override void Deserialize(ref MemoryPackReader reader, ref UserId? value)
+        public override void Deserialize(ref MemoryPackReader reader, ref UserId value)
         {
             if (reader.PeekIsNull())
             {
@@ -25,8 +21,8 @@ namespace SynicSugar {
                 return;
             }
             
-            var wrapped = reader.ReadPackable<UserIdSerializable>();
-            value = UserId.GetUserId(wrapped.value_s);
+            var value_s = reader.ReadString();
+            value = UserId.GetUserId(value_s);
         }
     }
 }
