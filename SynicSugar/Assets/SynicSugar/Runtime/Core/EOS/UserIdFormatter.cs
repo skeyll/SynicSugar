@@ -21,8 +21,7 @@ namespace SynicSugar {
                 return;
             }
             
-            var value_s = reader.ReadString();
-            value = UserId.GetUserId(value_s);
+            value = UserId.GetUserId(reader.ReadString());
         }
     }
 }
