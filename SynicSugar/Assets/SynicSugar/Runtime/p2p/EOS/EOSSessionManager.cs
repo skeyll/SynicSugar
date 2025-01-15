@@ -13,15 +13,14 @@ namespace SynicSugar.P2P {
     public sealed class EOSSessionManager : SessionCore {
         public EOSSessionManager() : base (){
             P2PHandle = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface();
-
             // To get Next packet size
             standardPacketSizeOptions = new GetNextReceivedPacketSizeOptions {
-                LocalUserId = EOSManager.Instance.GetProductUserId(),
+                LocalUserId = SynicSugarManger.Instance.LocalUserId.AsEpic,
                 RequestedChannel = null
             };
 
             synicPacketSizeOptions = new GetNextReceivedPacketSizeOptions {
-                LocalUserId = EOSManager.Instance.GetProductUserId(),
+                LocalUserId = SynicSugarManger.Instance.LocalUserId.AsEpic,
                 RequestedChannel = 255
             };
         }
@@ -235,12 +234,22 @@ namespace SynicSugar.P2P {
         if(checkInitConnect || p2pConfig.Instance.UseDisconnectedEarlyNotify){
             AddNotifyPeerConnectionEstablished();
         }
+        if(checkInitConnect){
+            UpdatePacketOptions();
+        }
         if(p2pConfig.Instance.UseDisconnectedEarlyNotify){
             AddNotifyPeerConnectionInterrupted();
         }else{
             AddNotifyPeerConnectionClosed();
         }
         return Result.Success;
+    }
+    /// <summary>
+    /// This UserId may have changed from the pre-UserId, so update object's value before connection.
+    /// </summary>
+    void UpdatePacketOptions(){
+        standardPacketSizeOptions.LocalUserId = SynicSugarManger.Instance.LocalUserId.AsEpic;
+        synicPacketSizeOptions.LocalUserId = SynicSugarManger.Instance.LocalUserId.AsEpic;
     }
     
     //Reason: This order(Receiver, Connection, Que) is that if the RPC includes Rpc to reply, the connections are automatically re-started.

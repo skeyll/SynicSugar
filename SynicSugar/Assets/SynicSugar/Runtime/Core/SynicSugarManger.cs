@@ -1,9 +1,11 @@
 using UnityEngine;
+using MemoryPack;
 #if UNITY_EDITOR
 using System; //For Cleanup event.
 #endif
 
 namespace SynicSugar {
+    [DefaultExecutionOrder(-75)]
     public sealed class SynicSugarManger : MonoBehaviour {
 #region Singleton
         public static SynicSugarManger Instance { get; private set; }
@@ -13,6 +15,7 @@ namespace SynicSugar {
                 return;
             }
             Instance = this;
+            MemoryPackFormatterProvider.Register(new UserIdFormatter());
             CoreFactory = new EOSCoreFactory();
             State = new SynicSugarState();
             DontDestroyOnLoad(this);
