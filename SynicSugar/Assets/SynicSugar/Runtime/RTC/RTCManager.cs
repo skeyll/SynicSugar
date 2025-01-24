@@ -17,8 +17,10 @@ namespace SynicSugar.RTC {
     public class RTCManager : MonoBehaviour {
         public static RTCManager Instance { get; private set; }
         void Awake() {
+            Logger.Log("RTCManager", "Start initialization of RTCManager.");
             if( Instance != null ) {
                 Destroy( this );
+                Logger.Log("RTCManager", "Discard this instance since RTCManager already exists.");
                 return;
             }
             Instance = this;
@@ -61,6 +63,7 @@ namespace SynicSugar.RTC {
             if(!CurrentLobby.bEnableRTCRoom){
                 return;
             }
+            Logger.LogError("AddNotifyParticipantStatusChanged", "Add Notify for RTC Room.");
             
             rtcInterface = EOSManager.Instance.GetEOSRTCInterface();
             audioInterface = rtcInterface.GetAudioInterface();
@@ -74,7 +77,7 @@ namespace SynicSugar.RTC {
             };
             ResultE result = lobbyInterface.IsRTCRoomConnected(ref isConnectedOptions, out bool isConnected);
             if (result != ResultE.Success){
-                Debug.LogFormat("AddNotifyParticipantStatusChanged: This user is not participating in the RTC room.: {0}", result);
+                Logger.LogError("AddNotifyParticipantStatusChanged", "This user is not participating in the RTC room.", (Result)result);
                 return;
             }
 
@@ -99,7 +102,7 @@ namespace SynicSugar.RTC {
                 ParticipantStatusId = rtcInterface.AddNotifyParticipantStatusChanged(ref StatusChangedOptions, null, OnParticipantStatusChanged);
 
                 if(ParticipantStatusId == 0){
-                    Debug.LogError("AddNotifyParticipantStatusChanged: RTCRoomParticipantUpdate can not be regisered.");
+                    Logger.LogError("AddNotifyParticipantStatusChanged", "RTCRoomParticipantUpdate can not be regisered.");
                 }
             }
             string GetRTCRoomName(){
@@ -111,7 +114,7 @@ namespace SynicSugar.RTC {
                 ResultE result = lobbyInterface.GetRTCRoomName(ref options, out Utf8String roomName);
 
                 if(result != ResultE.Success){
-                    Debug.LogErrorFormat("GetRTCRoomName: Could not get Room Name. Error Code: {0}", result);
+                    Logger.LogError("GetRTCRoomName", "Could not get Room Name.", (Result)result);
                     return string.Empty;
                 }
                 return roomName;
@@ -123,7 +126,7 @@ namespace SynicSugar.RTC {
         /// <param name="data"></param>
         void OnParticipantStatusChanged(ref ParticipantStatusChangedCallbackInfo data){
             if (CurrentLobby.RTCRoomName != data.RoomName){
-                Debug.LogError("OnParticipantStatusChanged: this room is invalid");
+                Logger.LogError("OnParticipantStatusChanged", "This room is invalid");
                 return;
             }
             if(data.ParticipantStatus == RTCParticipantStatus.Left){
@@ -146,11 +149,12 @@ namespace SynicSugar.RTC {
             if(!CurrentLobby.bEnableRTCRoom){
                 return;
             }
-            if(System.String.IsNullOrEmpty(CurrentLobby.RTCRoomName)){
-                Debug.LogError("AddNotifyParticipantUpdatedOptions: This user does't have not find RTC room.");
+            if(string.IsNullOrEmpty(CurrentLobby.RTCRoomName)){
+                Logger.LogError("AddNotifyParticipantUpdated", "This user does't have not find RTC room.");
                 return;
             }
             
+            Logger.LogError("AddNotifyParticipantUpdated", "Add Notifiy for RTC Room.");
             //Notify to get user Speaking status
             if(ParticipantUpdatedId == 0){
                 AddNotifyParticipantUpdatedOptions addNotifyParticipantUpdatedOptions = new AddNotifyParticipantUpdatedOptions(){
@@ -159,7 +163,7 @@ namespace SynicSugar.RTC {
                 };
                 ParticipantUpdatedId = audioInterface.AddNotifyParticipantUpdated(ref addNotifyParticipantUpdatedOptions, null, OnParticipantUpdated);
                 if(ParticipantUpdatedId == 0){
-                    Debug.LogError("AddNotifyParticipantUpdated: can not be regisered.");
+                    Logger.LogError("AddNotifyParticipantUpdated", "can not be regisered.");
                     return;
                 }
             }
@@ -170,12 +174,11 @@ namespace SynicSugar.RTC {
         /// <param name="info"></param>
         void OnParticipantUpdated(ref ParticipantUpdatedCallbackInfo info){
             if (CurrentLobby.RTCRoomName != info.RoomName){
-                Debug.LogError("OnParticipantUpdate: this room is invalid");
+                Logger.LogError("OnParticipantUpdate", "This room is invalid");
                 return;
             }
-        #if SYNICSUGAR_LOG
-            Debug.LogFormat("OnParticipantUpdate: Change Paticipant State. UserId: {0} IsSpeaking: {1}", info.ParticipantId, info.Speaking);
-        #endif
+            Logger.Log("OnParticipantUpdate", $"Change Paticipant State. UserId: {info.ParticipantId} IsSpeaking: {info.Speaking}");
+
             MemberState member = CurrentLobby.Members[UserId.GetUserId(info.ParticipantId).ToString()];
             member.RTCState.IsSpeakinging = info.Speaking;
             member.RTCState.IsAudioOutputEnabled = info.AudioStatus == RTCAudioStatus.Enabled;
@@ -193,6 +196,7 @@ namespace SynicSugar.RTC {
             if(!CurrentLobby.bEnableRTCRoom){
                 return;
             }
+            Logger.Log("RemoveRTCEvents", "Remove Rtc Notify Events.");
             if(ParticipantStatusId != 0){
                 rtcInterface.RemoveNotifyParticipantStatusChanged(ParticipantStatusId);
             }
@@ -210,11 +214,10 @@ namespace SynicSugar.RTC {
         /// </summary>
         public void StartVoiceSending(){
             if(!CurrentLobby.bEnableRTCRoom){
-            #if SYNICSUGAR_LOG
-                Debug.Log("StartVoiceSending: This lobby doesn't have RTC room.");
-            #endif
+                Logger.LogWarning("StartVoiceSending", "This lobby doesn't have RTC room.");
                 return;
             }
+            Logger.Log("StartVoiceSending", "Start VoiceChat.");
             if(UseOpenVC){
                 ToggleLocalUserSending(true);
             }else{
@@ -227,11 +230,10 @@ namespace SynicSugar.RTC {
         /// </summary>
         public void StopVoiceSending(){
             if(!CurrentLobby.bEnableRTCRoom){
-            #if SYNICSUGAR_LOG
-                Debug.Log("StartVoiceSending: This lobby doesn't have RTC room.");
-            #endif
+                Logger.LogWarning("StopVoiceSending", "This lobby doesn't have RTC room.");
                 return;
             }
+            Logger.Log("StopVoiceSending", "Stop VoiceChat.");
             if(UseOpenVC){
                 ToggleLocalUserSending(false);
             }else{
@@ -245,7 +247,7 @@ namespace SynicSugar.RTC {
         /// <param name="isEnable">If true, send VC. If false, stop VC.</param>
         public void ToggleLocalUserSending(bool isEnable){
             if(!CurrentLobby.isValid() || System.String.IsNullOrEmpty(CurrentLobby.RTCRoomName)){
-                Debug.LogError("MuteSendingOfLocalUserOnSession: the room is invalid.");
+                Logger.LogWarning("ToggleLocalUserSending", "the room is invalid.");
                 return;
             }
             var sendingOptions = new UpdateSendingOptions(){
@@ -257,15 +259,13 @@ namespace SynicSugar.RTC {
         }
         void OnUpdateSending(ref UpdateSendingCallbackInfo info){
             if(info.ResultCode != ResultE.Success){
-                Debug.LogErrorFormat("OnUpdateSending: could not toggle mute setting of local user sending. : {0}", info.ResultCode);
+                Logger.LogError("OnUpdateSending", "could not toggle mute setting of local user sending.", (Result)info.ResultCode);
                 return;
             }
             if(info.AudioStatus != RTCAudioStatus.Enabled){
                 ParticipantUpdatedNotifier.StopSpeaking(p2pInfo.Instance.userIds.LocalUserId);
             }
-    #if SYNICSUGAR_LOG
-            Debug.LogFormat("OnUpdateSending: the toggle is successful. Status: {0}", info.AudioStatus);
-    #endif
+            Logger.Log("OnUpdateSending", $"the toggle is successful. Status: {info.AudioStatus}");
         }
         /// <summary>
         /// Switch Output setting(Enable or Mute) of receiving from target user on this Session.
@@ -274,7 +274,7 @@ namespace SynicSugar.RTC {
         /// <param name="isEnable">If true, receive vc from target. If false, mute target.</param>
         public void ToggleReceiveingFromTarget(UserId targetId, bool isEnable){
             if(!CurrentLobby.isValid() || System.String.IsNullOrEmpty(CurrentLobby.RTCRoomName)){
-                Debug.LogError("ToggleReceiveingFromTargetUser: the room is invalid.");
+                Logger.LogWarning("ToggleReceiveingFromTargetUser", "the room is invalid.");
                 return;
             }
             var receiveOptions = new UpdateReceivingOptions(){
@@ -287,7 +287,7 @@ namespace SynicSugar.RTC {
         }
         void OnUpdateReceiving(ref UpdateReceivingCallbackInfo info){
             if(info.ResultCode != ResultE.Success){
-                Debug.LogErrorFormat("OnUpdateReceiving: could not toggle setting. : {0}", info.ResultCode);
+                Logger.LogError("OnUpdateReceiving" ,"could not toggle setting.", (Result)info.ResultCode);
                 return;
             }
             if(info.ParticipantId == null){
@@ -298,9 +298,7 @@ namespace SynicSugar.RTC {
                 CurrentLobby.Members[UserId.GetUserId(info.ParticipantId).ToString()].RTCState.IsLocalMute = !info.AudioEnabled;
             }
             
-    #if SYNICSUGAR_LOG
-            Debug.LogFormat("OnUpdateReceiving: the toggle is successful. :{0}", info.AudioEnabled);
-    #endif
+            Logger.Log("OnUpdateReceiving", $"the toggle is successful. CurrentStatus: {info.AudioEnabled}");
         }
         /// <summary>
         /// Change the receiving volume on this Session.
@@ -309,7 +307,7 @@ namespace SynicSugar.RTC {
         /// <param name="volume">Range 0.0 - 100. 50 means that the audio volume is not modified and stays in its source value.</param>
         public void UpdateReceiveingVolumeFromTarget(UserId targetId, float volume){
             if(!CurrentLobby.isValid() || System.String.IsNullOrEmpty(CurrentLobby.RTCRoomName)){
-                Debug.LogError("ToggleReceiveingFromTargetUser: the room is invalid.");
+                Logger.LogWarning("ToggleReceiveingFromTargetUser", "the room is invalid.");
                 return;
             }
             if(volume < 0){
@@ -328,7 +326,7 @@ namespace SynicSugar.RTC {
         }
         void OnUpdateParticipantVolume(ref UpdateParticipantVolumeCallbackInfo info){
             if(info.ResultCode != ResultE.Success){
-                Debug.LogErrorFormat("OnUpdateParticipantVolume: could not toggle setting. : {0}", info.ResultCode);
+                Logger.LogError("OnUpdateParticipantVolume", "could not toggle setting.", (Result)info.ResultCode);
                 return;
             }
             if(info.ParticipantId == null){
@@ -339,9 +337,7 @@ namespace SynicSugar.RTC {
                 CurrentLobby.Members[UserId.GetUserId(info.ParticipantId).ToString()].RTCState.LocalOutputedVolume =  info.Volume;
             }
 
-    #if SYNICSUGAR_LOG
-            Debug.LogFormat("OnUpdateParticipantVolume: volume change is successful. target: {0} / Volume:{1}", info.ParticipantId, info.Volume);
-    #endif
+            Logger.Log("OnUpdateParticipantVolume", $"volume change is successful. target: {info.ParticipantId} / Volume:{info.Volume}");
         }
         /// <summary>
         /// Host user mutes target user('s input). The target can't speak but can hear other members of the lobby.
@@ -349,6 +345,7 @@ namespace SynicSugar.RTC {
         /// <param name="target">Muted Target</param>
         public void HardMuteTargetUser(UserId target, bool isMuted){
             if(!CurrentLobby.bEnableRTCRoom || !CurrentLobby.isHost()){
+                Logger.LogWarning("HardMuteTargetUser", !CurrentLobby.bEnableRTCRoom ? "This lobby doesn't have RTC room." : "This user is not Host.");
                 return;
             }
             LobbyInterface lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();
@@ -363,16 +360,10 @@ namespace SynicSugar.RTC {
         }
         void OnHardMuteMember(ref HardMuteMemberCallbackInfo info){         
             if(info.LobbyId != CurrentLobby.LobbyId || info.ResultCode != ResultE.Success){
-                Debug.LogErrorFormat("OnHardMuteMember: could not mute target. : {0}", info.ResultCode);
+                Logger.LogError("OnHardMuteMember", "could not mute target.", (Result)info.ResultCode);
                 return;
             }
-            if(info.ResultCode != ResultE.Success){
-                Debug.LogErrorFormat("OnHardMuteMember: is failed: {0}", info.ResultCode);
-                return;
-            }
-    #if SYNICSUGAR_LOG
-            Debug.LogFormat("OnHardMuteMember: hard mute is successful. target: {0} / Volume:{1}", info.TargetUserId);
-    #endif
+            Logger.Log("OnHardMuteMember", $"hard mute is successful. target: {info.TargetUserId}");
         }
         /// <summary>
         /// Start to accept PushToTalk key. <br />

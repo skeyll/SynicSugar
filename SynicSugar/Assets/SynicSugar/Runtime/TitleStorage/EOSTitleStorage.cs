@@ -2,7 +2,6 @@ using Epic.OnlineServices;
 using Epic.OnlineServices.TitleStorage;
 using PlayEveryWare.EpicOnlineServices;
 using Cysharp.Threading.Tasks;
-using UnityEngine;
 using ResultE = Epic.OnlineServices.Result;
 using System;
 using System.Threading;
@@ -74,7 +73,7 @@ namespace SynicSugar.TitleStorage {
                 canGetFileNames = data.ResultCode == ResultE.Success;
 
                 if (!canGetFileNames){
-                    Debug.LogErrorFormat("QueryFileList: Failure by {0}", data.ResultCode);
+                    Logger.LogError("QueryFileList", (Result)data.ResultCode);
                     finishQuery = true;
                     return;
                 }
@@ -122,7 +121,7 @@ namespace SynicSugar.TitleStorage {
                 titleStorageInterface.QueryFile(ref queryOptions, null, OnQueryFileCompleteCallback);
                 await UniTask.WaitUntil(() => finishQuery);
                 if(!findFile){
-                    Debug.LogError("ReadFile: can't query meta data.");
+                    Logger.LogError("ReadFile", "can't query meta data.");
                     return false;
                 }
                 void OnQueryFileCompleteCallback(ref QueryFileCallbackInfo data){
@@ -137,13 +136,13 @@ namespace SynicSugar.TitleStorage {
                 titleStorageInterface.CopyFileMetadataByFilename(ref copyFileMetadataOptions, out FileMetadata? fileMetadata);
 
                 if (fileMetadata == null || string.IsNullOrEmpty(fileMetadata?.Filename)){
-                    Debug.LogError("ReadFile: can't find the meta data in query.");
+                    Logger.LogError("ReadFile", "can't find the meta data in query.");
                     return false;
                 }
                 FileMetaDatas.Add(fileMetadata?.Filename, (uint)fileMetadata?.FileSizeBytes);
             }
             if(string.Compare(fileName, CurrentTransfer.FileName,true) == 0){
-                Debug.LogError("ReadFile: This call is Duplicateds. Downloading it now.");
+                Logger.LogError("ReadFile", "This call is Duplicateds. Downloading it now.");
                 return false;
             }
             //Need download
@@ -171,7 +170,7 @@ namespace SynicSugar.TitleStorage {
             void OnReadFileComplete(ref ReadFileCallbackInfo data){
                 getFile = data.ResultCode == ResultE.Success;
                 if (!getFile){
-                    Debug.LogErrorFormat("ReadFile: OnFileReceived is Failure. {0}", data.ResultCode);
+                    Logger.LogError("ReadFile", "OnFileReceived is Failure. ", (Result)data.ResultCode);
                 }
                 FinishFileDownload(data.Filename, getFile);
                 finishRead = true;
@@ -192,7 +191,7 @@ namespace SynicSugar.TitleStorage {
             foreach(var f in fileNames){
                 getFile = await FetchFile(f);
                 if(!getFile){
-                    Debug.LogErrorFormat("CanReadFiles: Can't read {0}", f);
+                    Logger.LogError("CanReadFiles", $"Can't read {f}");
                     return false;
                 }
             }
@@ -200,18 +199,18 @@ namespace SynicSugar.TitleStorage {
         }
         static void FinishFileDownload(string fileName, bool success){
             if (string.Compare(fileName, CurrentTransfer.FileName, true) != 0){
-                Debug.LogError("ReadFile: Failure.  This is a wrong download.");
+                Logger.LogError("ReadFile", "Failure.  This is a wrong download.");
                 return;
             }
 
             if (!CurrentTransfer.isDownload){
-                Debug.LogError("ReadFile: Failure. Read incorrect data.");
+                Logger.LogError("ReadFile", "Failure. Read incorrect data.");
                 return;
             }
 
             if (success){
                 if (!CurrentTransfer.Done()){
-                    Debug.LogError("ReadFile: Failure. Not enough data to read.");
+                    Logger.LogError("ReadFile", "Failure. Not enough data to read.");
                 }
 
                 if (fileName == ProgressInfo.CurrentFileName){
@@ -219,9 +218,7 @@ namespace SynicSugar.TitleStorage {
                 }
             }
 
-        #if SYNICSUGAR_LOG
-            Debug.Log("ReadFile: Finish to read " + fileName);
-        #endif
+            Logger.Log("ReadFile", "Finish to read " + fileName);
 
             CurrentTransfer.Init();
 
@@ -239,18 +236,18 @@ namespace SynicSugar.TitleStorage {
 
         static ReadResult OnReadFileData(ref ReadFileDataCallbackInfo data){
             if (data.DataChunk == null){
-                Debug.LogError("ReadFile: Failure. Data pointer is null.");
+                Logger.LogError("ReadFile", "Failure. Data pointer is null.");
                 return ReadResult.RrFailrequest;
             }
 
             //Failure and Cancel
             if (string.Compare(data.Filename, CurrentTransfer.FileName, true) != 0){
-                Debug.LogError("ReadFile: Failure. Read incorrect data.");
+                Logger.LogError("ReadFile", "Failure. Read incorrect data.");
                 return ReadResult.RrCancelrequest;
             }
 
             if (!CurrentTransfer.isDownload){
-                Debug.LogError("ReadFile: Failure. Unintended Download.");
+                Logger.LogError("ReadFile", "Failure. Unintended Download.");
                 return ReadResult.RrFailrequest;
             }
             //Prep data array
@@ -292,7 +289,7 @@ namespace SynicSugar.TitleStorage {
             void OnDeleteCacheComplete(ref DeleteCacheCallbackInfo data){
                 canDelete = data.ResultCode == ResultE.Success;
                 if(!canDelete){
-                    Debug.LogError("DeleteCache: Failure");
+                    Logger.LogError("DeleteCache", "Failure");
                 }
                 finishDeleted = true;
             }
@@ -324,7 +321,7 @@ namespace SynicSugar.TitleStorage {
                 titleStorageInterface.QueryFile(ref queryOptions, null, OnQueryFileCompleteCallback);
                 await UniTask.WaitUntil(() => finishQuery);
                 if(!findFile){
-                    Debug.LogError("LoadFile: can't query meta data.");
+                    Logger.LogError("LoadFile", "can't query meta data.");
                     return null;
                 }
                 void OnQueryFileCompleteCallback(ref QueryFileCallbackInfo data){
@@ -339,13 +336,13 @@ namespace SynicSugar.TitleStorage {
                 titleStorageInterface.CopyFileMetadataByFilename(ref copyFileMetadataOptions, out FileMetadata? fileMetadata);
 
                 if (fileMetadata == null || string.IsNullOrEmpty(fileMetadata?.Filename)){
-                    Debug.LogError("LoadFile: can't find the meta data in query.");
+                    Logger.LogError("LoadFile", "can't find the meta data in query.");
                     return null;
                 }
                 FileMetaDatas.Add(fileMetadata?.Filename, (uint)fileMetadata?.FileSizeBytes);
             }
             if(string.Compare(filePath, CurrentTransfer.FileName,true) == 0){
-                Debug.LogError("LoadFile: This call is Duplicateds. Already is loading it.");
+                Logger.LogError("LoadFile", "This call is Duplicateds. Already is loading it.");
                 return null;
             }
             //Try to get
@@ -379,7 +376,7 @@ namespace SynicSugar.TitleStorage {
             void OnReadFileComplete(ref ReadFileCallbackInfo data){
                 getFile = data.ResultCode == ResultE.Success;
                 if (!getFile){
-                    Debug.LogErrorFormat("ReadFile: OnFileReceived is Failure. {0}", data.ResultCode);
+                    Logger.LogError("ReadFile", "OnFileReceived is Failure. ", (Result)data.ResultCode);
                 }
                 FinishFileDownload(data.Filename, getFile);
                 finishRead = true;
@@ -416,7 +413,7 @@ namespace SynicSugar.TitleStorage {
                 titleStorageInterface.QueryFile(ref queryOptions, null, OnQueryFileCompleteCallback);
                 await UniTask.WaitUntil(() => finishQuery);
                 if(!findFile){
-                    Debug.LogError("LoadFile: can't query meta data.");
+                    Logger.LogError("LoadFile", "can't query meta data.");
                     return null;
                 }
                 void OnQueryFileCompleteCallback(ref QueryFileCallbackInfo data){
@@ -431,13 +428,13 @@ namespace SynicSugar.TitleStorage {
                 titleStorageInterface.CopyFileMetadataByFilename(ref copyFileMetadataOptions, out FileMetadata? fileMetadata);
 
                 if (fileMetadata == null || string.IsNullOrEmpty(fileMetadata?.Filename)){
-                    Debug.LogError("LoadFile: can't find the meta data in query.");
+                    Logger.LogError("LoadFile", "can't find the meta data in query.");
                     return null;
                 }
                 FileMetaDatas.Add(fileMetadata?.Filename, (uint)fileMetadata?.FileSizeBytes);
             }
             if(string.Compare(fileName, CurrentTransfer.FileName,true) == 0){
-                Debug.LogError("LoadFile: This call is Duplicateds. Already is loading it.");
+                Logger.LogError("LoadFile", "This call is Duplicateds. Already is loading it.");
                 return null;
             }
 
@@ -466,7 +463,7 @@ namespace SynicSugar.TitleStorage {
             void OnReadFileComplete(ref ReadFileCallbackInfo data){
                 getFile = data.ResultCode == ResultE.Success;
                 if (!getFile){
-                    Debug.LogErrorFormat("LoadFile: OnFileReceived is Failure. {0}", data.ResultCode);
+                    Logger.LogError("LoadFile", "OnFileReceived is Failure. ", (Result)data.ResultCode);
                 }
                 FinishFileDownload(data.Filename, getFile, out result);
                 finishRead = true;
@@ -477,20 +474,20 @@ namespace SynicSugar.TitleStorage {
         }
         static void FinishFileDownload(string fileName, bool success, out byte[] result){
             if (string.Compare(fileName, CurrentTransfer.FileName, true) != 0){
-                Debug.LogError("LoadFile: Failure.  This is a wrong download.");
+                Logger.LogError("LoadFile", "Failure.  This is a wrong download.");
                 result = null;
                 return;
             }
 
             if (!CurrentTransfer.isDownload){
-                Debug.LogError("LoadFile: Failure. Read incorrect data.");
+                Logger.LogError("LoadFile", "Failure. Read incorrect data.");
                 result = null;
                 return;
             }
 
             if (success){
                 if (!CurrentTransfer.Done()){
-                    Debug.LogError("LoadFile: Failure. Not enough data to read.");
+                    Logger.LogError("LoadFile", "Failure. Not enough data to read.");
                 }
 
                 if (fileName == ProgressInfo.CurrentFileName){
@@ -504,9 +501,7 @@ namespace SynicSugar.TitleStorage {
                 test += result[CurrentTransfer.Data.Length - i];
             }
 
-        #if SYNICSUGAR_LOG
-            Debug.Log("LoadFile: Finish to read " + fileName + result.Length);
-        #endif
+            Logger.Log("LoadFile", "Finish to read " + fileName + result.Length);
 
             CurrentTransfer.Init();
 
@@ -636,7 +631,7 @@ namespace SynicSugar.TitleStorage {
 //                 canGetFileName = data.ResultCode == ResultE.Success;
 
 //                 if (!canGetFileName){
-//                     Debug.LogErrorFormat("QueryFile: Failure by {0}", data.ResultCode);
+//                     Logger.LogErrorFormat("QueryFile: Failure by ", data.ResultCode);
 //                     finishQuery = true;
 //                     return;
 //                 }
@@ -647,7 +642,7 @@ namespace SynicSugar.TitleStorage {
 //                 //Copy meta data
 //                 titleStorageInterface.CopyFileMetadataByFilename(ref options, out FileMetadata? fileMetadata);
 //                 if(string.IsNullOrEmpty(fileMetadata?.Filename)){
-//                     Debug.LogErrorFormat("QueryFile: Meta file is null.", data.ResultCode);
+//                     Logger.LogErrorFormat("QueryFile: Meta file is null.", data.ResultCode);
 //                     finishQuery = true;
 //                     return;
 //                 }
@@ -725,7 +720,7 @@ namespace SynicSugar.TitleStorage {
 
 //             void OnQueryFileListComplete(ref QueryFileListCallbackInfo data) {
 //                 if (data.ResultCode != ResultE.Success){
-//                     Debug.LogErrorFormat("QueryFileList: Failure by {0}", data.ResultCode);
+//                     Logger.LogErrorFormat("QueryFileList: Failure by ", data.ResultCode);
 //                     finishQuery = true;
 //                     return;
 //                 }
@@ -791,7 +786,7 @@ namespace SynicSugar.TitleStorage {
 //                 titleStorageInterface.QueryFile(ref queryOptions, null, OnQueryFileCompleteCallback);
 //                 await UniTask.WaitUntil(() => finishQuery);
 //                 if(!findFile){
-//                     Debug.LogError("ReadFile: can't query meta data.");
+//                     Logger.LogError("ReadFile: can't query meta data.");
 //                     return false;
 //                 }
 //                 void OnQueryFileCompleteCallback(ref QueryFileCallbackInfo data){
@@ -806,13 +801,13 @@ namespace SynicSugar.TitleStorage {
 //                 titleStorageInterface.CopyFileMetadataByFilename(ref copyFileMetadataOptions, out FileMetadata? fileMetadata);
 
 //                 if (fileMetadata == null || string.IsNullOrEmpty(fileMetadata?.Filename)){
-//                     Debug.LogError("ReadFile: can't find the meta data in query.");
+//                     Logger.LogError("ReadFile: can't find the meta data in query.");
 //                     return false;
 //                 }
 //                 // MetaData.Add(fileMetadata?.Filename, new EOSFileMetaData(fileMetadata?.MD5Hash, (uint)fileMetadata?.FileSizeBytes));
 //             }
 //             if(string.Compare(fileName, CurrentTransfer.FileName,true) == 0){
-//                 Debug.LogError("ReadFile: This call is Duplicateds. Downloading it now.");
+//                 Logger.LogError("ReadFile: This call is Duplicateds. Downloading it now.");
 //                 return false;
 //             }
 //             //Need download
@@ -840,7 +835,7 @@ namespace SynicSugar.TitleStorage {
 //             void OnReadFileComplete(ref ReadFileCallbackInfo data){
 //                 getFile = data.ResultCode == ResultE.Success;
 //                 if (!getFile){
-//                     Debug.LogErrorFormat("ReadFile: OnFileReceived is Failure. {0}", data.ResultCode);
+//                     Logger.LogErrorFormat("ReadFile: OnFileReceived is Failure. ", data.ResultCode);
 //                 }
 //                 FinishFileDownload(data.Filename, getFile);
 //                 finishRead = true;
@@ -861,7 +856,7 @@ namespace SynicSugar.TitleStorage {
 //             foreach(var f in fileNames){
 //                 getFile = await FetchFile(f);
 //                 if(!getFile){
-//                     Debug.LogErrorFormat("CanReadFiles: Can't read {0}", f);
+//                     Logger.LogErrorFormat("CanReadFiles: Can't read ", f);
 //                     return false;
 //                 }
 //             }
@@ -869,18 +864,18 @@ namespace SynicSugar.TitleStorage {
 //         }
 //         static void FinishFileDownload(string fileName, bool success){
 //             if (string.Compare(fileName, CurrentTransfer.FileName, true) != 0){
-//                 Debug.LogError("ReadFile: Failure.  This is a wrong download.");
+//                 Logger.LogError("ReadFile: Failure.  This is a wrong download.");
 //                 return;
 //             }
 
 //             if (!CurrentTransfer.isDownload){
-//                 Debug.LogError("ReadFile: Failure. Read incorrect data.");
+//                 Logger.LogError("ReadFile: Failure. Read incorrect data.");
 //                 return;
 //             }
 
 //             if (success){
 //                 if (!CurrentTransfer.Done()){
-//                     Debug.LogError("ReadFile: Failure. Not enough data to read.");
+//                     Logger.LogError("ReadFile: Failure. Not enough data to read.");
 //                 }
 
 //                 if (fileName == ProgressInfo.CurrentFileName){
@@ -889,7 +884,7 @@ namespace SynicSugar.TitleStorage {
 //             }
 
 //         #if SYNICSUGAR_LOG
-//             Debug.Log("ReadFile: Finish to read " + fileName);
+//             Logger.Log("ReadFile: Finish to read " + fileName);
 //         #endif
 
 //             CurrentTransfer.Init();
@@ -908,18 +903,18 @@ namespace SynicSugar.TitleStorage {
 
 //         static ReadResult OnReadFileData(ref ReadFileDataCallbackInfo data){
 //             if (data.DataChunk == null){
-//                 Debug.LogError("ReadFile: Failure. Data pointer is null.");
+//                 Logger.LogError("ReadFile: Failure. Data pointer is null.");
 //                 return ReadResult.RrFailrequest;
 //             }
 
 //             //Failure and Cancel
 //             if (string.Compare(data.Filename, CurrentTransfer.FileName, true) != 0){
-//                 Debug.LogError("ReadFile: Failure. Read incorrect data.");
+//                 Logger.LogError("ReadFile: Failure. Read incorrect data.");
 //                 return ReadResult.RrCancelrequest;
 //             }
 
 //             if (!CurrentTransfer.isDownload){
-//                 Debug.LogError("ReadFile: Failure. Unintended Download.");
+//                 Logger.LogError("ReadFile: Failure. Unintended Download.");
 //                 return ReadResult.RrFailrequest;
 //             }
 //             //Prep data array
@@ -961,7 +956,7 @@ namespace SynicSugar.TitleStorage {
 //             void OnDeleteCacheComplete(ref DeleteCacheCallbackInfo data){
 //                 canDelete = data.ResultCode == ResultE.Success;
 //                 if(!canDelete){
-//                     Debug.LogError("DeleteCache: Failure");
+//                     Logger.LogError("DeleteCache: Failure");
 //                 }
 //                 finishDeleted = true;
 //             }
@@ -993,7 +988,7 @@ namespace SynicSugar.TitleStorage {
 //                 titleStorageInterface.QueryFile(ref queryOptions, null, OnQueryFileCompleteCallback);
 //                 await UniTask.WaitUntil(() => finishQuery);
 //                 if(!findFile){
-//                     Debug.LogError("LoadFile: can't query meta data.");
+//                     Logger.LogError("LoadFile: can't query meta data.");
 //                     return null;
 //                 }
 //                 void OnQueryFileCompleteCallback(ref QueryFileCallbackInfo data){
@@ -1008,13 +1003,13 @@ namespace SynicSugar.TitleStorage {
 //                 titleStorageInterface.CopyFileMetadataByFilename(ref copyFileMetadataOptions, out FileMetadata? fileMetadata);
 
 //                 if (fileMetadata == null || string.IsNullOrEmpty(fileMetadata?.Filename)){
-//                     Debug.LogError("LoadFile: can't find the meta data in query.");
+//                     Logger.LogError("LoadFile: can't find the meta data in query.");
 //                     return null;
 //                 }
 //                 FileMetaDatas.Add(fileMetadata?.Filename, (uint)fileMetadata?.FileSizeBytes);
 //             }
 //             if(string.Compare(filePath, CurrentTransfer.FileName,true) == 0){
-//                 Debug.LogError("LoadFile: This call is Duplicateds. Already is loading it.");
+//                 Logger.LogError("LoadFile: This call is Duplicateds. Already is loading it.");
 //                 return null;
 //             }
 //             //Try to get
@@ -1048,7 +1043,7 @@ namespace SynicSugar.TitleStorage {
 //             void OnReadFileComplete(ref ReadFileCallbackInfo data){
 //                 getFile = data.ResultCode == ResultE.Success;
 //                 if (!getFile){
-//                     Debug.LogErrorFormat("ReadFile: OnFileReceived is Failure. {0}", data.ResultCode);
+//                     Logger.LogErrorFormat("ReadFile: OnFileReceived is Failure. ", data.ResultCode);
 //                 }
 //                 FinishFileDownload(data.Filename, getFile);
 //                 finishRead = true;
@@ -1085,7 +1080,7 @@ namespace SynicSugar.TitleStorage {
 //                 titleStorageInterface.QueryFile(ref queryOptions, null, OnQueryFileCompleteCallback);
 //                 await UniTask.WaitUntil(() => finishQuery);
 //                 if(!findFile){
-//                     Debug.LogError("LoadFile: can't query meta data.");
+//                     Logger.LogError("LoadFile: can't query meta data.");
 //                     return null;
 //                 }
 //                 void OnQueryFileCompleteCallback(ref QueryFileCallbackInfo data){
@@ -1100,13 +1095,13 @@ namespace SynicSugar.TitleStorage {
 //                 titleStorageInterface.CopyFileMetadataByFilename(ref copyFileMetadataOptions, out FileMetadata? fileMetadata);
 
 //                 if (fileMetadata == null || string.IsNullOrEmpty(fileMetadata?.Filename)){
-//                     Debug.LogError("LoadFile: can't find the meta data in query.");
+//                     Logger.LogError("LoadFile: can't find the meta data in query.");
 //                     return null;
 //                 }
 //                 // MetaData.Add(fileMetadata?.Filename, new EOSFileMetaData(fileMetadata?.MD5Hash, (uint)fileMetadata?.FileSizeBytes));
 //             }
 //             if(string.Compare(fileName, CurrentTransfer.FileName,true) == 0){
-//                 Debug.LogError("LoadFile: This call is Duplicateds. Already is loading it.");
+//                 Logger.LogError("LoadFile: This call is Duplicateds. Already is loading it.");
 //                 return null;
 //             }
 
@@ -1135,7 +1130,7 @@ namespace SynicSugar.TitleStorage {
 //             void OnReadFileComplete(ref ReadFileCallbackInfo data){
 //                 getFile = data.ResultCode == ResultE.Success;
 //                 if (!getFile){
-//                     Debug.LogErrorFormat("LoadFile: OnFileReceived is Failure. {0}", data.ResultCode);
+//                     Logger.LogErrorFormat("LoadFile: OnFileReceived is Failure. ", data.ResultCode);
 //                 }
 //                 FinishFileDownload(data.Filename, getFile, out result);
 //                 finishRead = true;
@@ -1146,20 +1141,20 @@ namespace SynicSugar.TitleStorage {
 //         }
 //         static void FinishFileDownload(string fileName, bool success, out byte[] result){
 //             if (string.Compare(fileName, CurrentTransfer.FileName, true) != 0){
-//                 Debug.LogError("LoadFile: Failure. This is a wrong download.");
+//                 Logger.LogError("LoadFile: Failure. This is a wrong download.");
 //                 result = null;
 //                 return;
 //             }
 
 //             if (!CurrentTransfer.isDownload){
-//                 Debug.LogError("LoadFile: Failure. Read incorrect data.");
+//                 Logger.LogError("LoadFile: Failure. Read incorrect data.");
 //                 result = null;
 //                 return;
 //             }
 
 //             if (success){
 //                 if (!CurrentTransfer.Done()){
-//                     Debug.LogError("LoadFile: Failure. Not enough data to read.");
+//                     Logger.LogError("LoadFile: Failure. Not enough data to read.");
 //                 }
 
 //                 if (fileName == ProgressInfo.CurrentFileName){
@@ -1170,7 +1165,7 @@ namespace SynicSugar.TitleStorage {
 //             Buffer.BlockCopy(CurrentTransfer.Data, 0, result, 0, result.Length);
 
 //         #if SYNICSUGAR_LOG
-//             Debug.Log("LoadFile: Finish to read " + fileName + result.Length);
+//             Logger.Log("LoadFile: Finish to read " + fileName + result.Length);
 //         #endif
 
 //             CurrentTransfer.Init();

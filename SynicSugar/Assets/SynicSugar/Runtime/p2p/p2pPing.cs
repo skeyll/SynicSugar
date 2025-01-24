@@ -26,14 +26,14 @@ namespace SynicSugar.P2P {
         /// <param name="targetId"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        internal async UniTask<bool> RefreshPing(UserId targetId, CancellationToken token){
+        internal async UniTask<Result> RefreshPing(UserId targetId, CancellationToken token){
             if(!p2pConfig.Instance.sessionCore.IsConnected){
-                UnityEngine.Debug.LogError("RefreshPings: The connection is invalid.");
-                return false;
+                Logger.LogWarning("RefreshPings", "The connection is invalid.");
+                return Result.InvalidAPICall;
             }
             if(isRefreshing){
-                UnityEngine.Debug.LogError("RefreshPing: is Refreshing now.");
-                return false;
+                Logger.LogWarning("RefreshPing", "Currently being refreshed.");
+                return Result.RequestInProgress;
             }
             isRefreshing = true;
             refreshMembers = 0;
@@ -46,20 +46,20 @@ namespace SynicSugar.P2P {
             await UniTask.WhenAny(UniTask.WaitUntil(() => refreshMembers == 1, cancellationToken: token), UniTask.Delay(5000, cancellationToken: token));
 
             isRefreshing = false;
-            return true;
+            return refreshMembers == 1 ? Result.Success : Result.TimedOut;
         }
         /// <summary>
         /// Send 0 + Utc. Measure ping at the time of return 1 + UTC.
         /// </summary> 
         // MEMO: Replace SendPacketToAll when it can be made more efficient.
-        internal async UniTask<bool> RefreshPings(CancellationToken token){
+        internal async UniTask<Result> RefreshPings(CancellationToken token){
             if(!p2pConfig.Instance.sessionCore.IsConnected){
-                UnityEngine.Debug.LogError("RefreshPings: The connection is invalid.");
-                return false;
+                Logger.LogWarning("RefreshPings", "The connection is invalid.");
+                return Result.InvalidAPICall;
             }
             if(isRefreshing){
-                UnityEngine.Debug.LogError("RefreshPings: is Refreshing now.");
-                return false;
+                Logger.LogWarning("RefreshPing", "Currently being refreshed.");
+                return Result.RequestInProgress;
             }
             isRefreshing = true;
             refreshMembers = 0;
@@ -76,7 +76,7 @@ namespace SynicSugar.P2P {
             UniTask.Delay(10000, cancellationToken: token));
 
             isRefreshing = false;
-            return true;
+            return refreshMembers == p2pInfo.Instance.userIds.RemoteUserIds.Count ? Result.Success : Result.TimedOut;
         }
         //Get Pong and calc
         internal void GetPong(string id, ArraySegment<byte> utc){
@@ -84,6 +84,7 @@ namespace SynicSugar.P2P {
 
             TimeSpan delta = current - MemoryPackSerializer.Deserialize<DateTime>(utc);
             pingInfo[id].tmpPings.Add(delta.TotalMilliseconds);
+            Logger.Log("GetPong", $"{id} sent pong at {MemoryPackSerializer.Deserialize<DateTime>(utc)}");
 
             if(pingInfo[id].tmpPings.Count == p2pConfig.Instance.SamplesPerPing){
                 pingInfo[id].Ping = (int)(pingInfo[id].tmpPings.Sum() / pingInfo[id].tmpPings.Count);

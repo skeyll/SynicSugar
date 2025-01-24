@@ -10,10 +10,12 @@ using SynicSugar.MatchMake;
 namespace SynicSugar.Base {
     public abstract class SessionCore : INetworkCore {
         protected SessionCore(){
+            Logger.Log("SessionCore", $"SessionCore is initialized");
             IsConnected = false;
             GeneratePacketReceiver();
         }
         internal void Dispose(){
+            Logger.Log("SessionCore", $"SessionCore is disposed");
             Destroy(receiverObject);
         }
         GameObject receiverObject;
@@ -50,7 +52,7 @@ namespace SynicSugar.Base {
         /// </summary>
         void GeneratePacketReceiver(){
             if(receiverObject != null){
-                Debug.LogError("This manager has generated receivers already.");
+                Logger.LogError("GeneratePacketReceiver", "This manager has generated receivers already.");
                 return;
             }
             receiverObject = new GameObject("SynicSugarReceiver");
@@ -85,7 +87,7 @@ namespace SynicSugar.Base {
         /// <param name="token">For this task</param>
         async UniTask<Result> INetworkCore.PauseConnections(bool isForced, CancellationToken token){
             if(!IsConnected || p2pInfo.Instance.SessionType != SessionType.OnlineSession){
-                Debug.LogWarning(p2pInfo.Instance.SessionType != SessionType.OnlineSession ? "PauseConnections: This local user is NOT in the online session." : "PauseConnections: Connection is invalid now.");
+                Logger.LogWarning("PauseConnections", p2pInfo.Instance.SessionType != SessionType.OnlineSession ? "PauseConnections: This local user is NOT in the online session." : "PauseConnections: Connection is invalid now.");
                 return Result.InvalidAPICall;
             }
             //To stop sending process before result.
@@ -107,7 +109,7 @@ namespace SynicSugar.Base {
         /// </summary>
         Result INetworkCore.RestartConnections(){
             if(IsConnected || p2pInfo.Instance.SessionType != SessionType.OnlineSession){
-                Debug.LogWarning(p2pInfo.Instance.SessionType != SessionType.OnlineSession ? "RestartConnections: This local user is NOT in the online session." : "RestartConnections: Connection is invalid now.");
+                Logger.LogWarning("RestartConnections", p2pInfo.Instance.SessionType != SessionType.OnlineSession ? "RestartConnections: This local user is NOT in the online session." : "RestartConnections: Connection is invalid now.");
                 return Result.InvalidAPICall;
             }
             Result result = RestartConnections();
@@ -135,7 +137,7 @@ namespace SynicSugar.Base {
                     CleanupOnLobbyClosure(destroyManager, cleanupMemberCountChanged);
                     return Result.Success;
                 }
-                Debug.LogWarning("ExitSession: This local user is NOT in Online Session.");
+                Logger.LogWarning("ExitSession", "This local user is NOT in Online Session.");
                 return Result.InvalidAPICall;
             }
 
@@ -187,7 +189,7 @@ namespace SynicSugar.Base {
                     CleanupOnLobbyClosure(destroyManager, cleanupMemberCountChanged);
                     return Result.Success;
                 }
-                Debug.LogWarning("CloseSession: This local user is NOT in Online Session.");
+                Logger.LogWarning("CloseSession", "This local user is NOT in Online Session.");
                 return Result.InvalidAPICall;
             }
 
@@ -234,9 +236,7 @@ namespace SynicSugar.Base {
             }else{
                 p2pInfo.Instance.Reset();
             }
-            #if SYNICSUGAR_LOG
-                Debug.Log("CleanupOnLobbyClosure: Clean up the session state.");
-            #endif
+            Logger.Log("CleanupOnLobbyClosure", "Clean up the session state.");
         }
 
         /// <summary>
@@ -249,7 +249,7 @@ namespace SynicSugar.Base {
         /// <returns>Always return true. the LastResultCode becomes Success after return true.</returns>
         async UniTask<Result> INetworkCore.DestoryOfflineLobby(bool destroyManager, bool cleanupMemberCountChanged, CancellationToken token){
             if(!SynicSugarManger.Instance.State.IsInSession || p2pInfo.Instance.SessionType != SessionType.OfflineSession){
-                Debug.LogWarning("DestoryOfflineLobby: This local user is NOT in Offline Session.");
+                Logger.LogWarning("DestoryOfflineLobby", "This local user is NOT in Offline Session.");
                 return Result.InvalidAPICall;
             }
             CancelRTTToken();
@@ -272,7 +272,7 @@ namespace SynicSugar.Base {
         /// </summary>
         Result INetworkCore.StartPacketReceiver(IPacketConvert hubInstance, PacketReceiveTiming timing, uint maxBatchSize){
             if(!SynicSugarManger.Instance.State.IsInSession){
-                Debug.LogWarning("StartPacketReceiver: This local user is NOT in Session.");
+                Logger.LogWarning("StartPacketReceiver", "This local user is NOT in Session.");
                 return Result.InvalidAPICall;
             }
             if(validReceiverType != ReceiverType.None){
@@ -310,7 +310,7 @@ namespace SynicSugar.Base {
         /// </summary>
         Result INetworkCore.StartSynicReceiver(IPacketConvert hubInstance, uint maxBatchSize){
             if(!SynicSugarManger.Instance.State.IsInSession){
-                Debug.LogWarning("StopPacketReceiver: This local user is NOT in Session.");
+                Logger.LogWarning("StopPacketReceiver", "This local user is NOT in Session.");
                 return Result.InvalidAPICall;
             }
             if(validReceiverType != ReceiverType.None){
@@ -325,11 +325,11 @@ namespace SynicSugar.Base {
 
         Result INetworkCore.StopPacketReceiver(){
             if(!SynicSugarManger.Instance.State.IsInSession){
-                Debug.LogWarning("StopPacketReceiver: This local user is NOT in Session.");
+                Logger.LogWarning("StopPacketReceiver", "This local user is NOT in Session.");
                 return Result.InvalidAPICall;
             }
             if(validReceiverType is ReceiverType.None){
-                Debug.LogWarning("StopPacketReceiver: PacketReciver is not working now.");
+                Logger.LogWarning("StopPacketReceiver", "PacketReciver is not working now.");
                 return Result.InvalidAPICall;
             }
             

@@ -10,8 +10,15 @@ namespace SynicSugar.Auth {
         /// <param name="token"></param>
         /// <returns></returns>
         public static async UniTask<Result> Login(CancellationToken token = default(CancellationToken)){
+            Logger.Log("SynicSugarAuthentication.Login", "Try to login with DisplayName(Guest).");
             Result result = await SynicSugarManger.Instance.CoreFactory.GetAuthenticationCore().Login("Guest", token);
             SynicSugarManger.Instance.State.IsLoggedIn = result == Result.Success;
+
+            if(result == Result.Success){
+                Logger.Log("Login", $"Login succeeded. UserId: {SynicSugarManger.Instance.LocalUserId}");
+            }else{
+                Logger.LogError("Login", $"Login failed.", result);
+            }
             return result;
         }
 
@@ -23,8 +30,16 @@ namespace SynicSugar.Auth {
         /// <param name="token"></param>
         /// <returns></returns>
         public static async UniTask<Result> Login(string displayName, CancellationToken token = default(CancellationToken)){
+            Logger.Log("SynicSugarAuthentication.Login", $"Try to login with DisplayName({displayName}).");
+
             Result result = await SynicSugarManger.Instance.CoreFactory.GetAuthenticationCore().Login(displayName, token);
             SynicSugarManger.Instance.State.IsLoggedIn = result == Result.Success;
+
+            if(result == Result.Success){
+                Logger.Log("Login", $"Login succeeded. UserId: {SynicSugarManger.Instance.LocalUserId} displayName: {displayName}");
+            }else{
+                Logger.LogError("Login", $"Login failed.", result);
+            }
             return result;
         }
     }

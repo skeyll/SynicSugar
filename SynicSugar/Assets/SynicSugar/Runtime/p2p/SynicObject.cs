@@ -11,13 +11,15 @@ namespace SynicSugar.P2P {
         /// <param name="original"></param>
         /// <returns></returns>
         public static List<GameObject> AllSpawn(GameObject original){
+            Logger.Log("AllSpawn", $"Start AllSpawn for {original.name}");
             List<GameObject> objcs = new List<GameObject>();
             foreach(UserId id in p2pInfo.Instance.userIds.AllUserIds){
                 objcs.Add(Instantiate(id, original));
             }
             return objcs; 
         }
-        public static List<GameObject> AllSpawn(GameObject original, Transform parent){     
+        public static List<GameObject> AllSpawn(GameObject original, Transform parent){    
+            Logger.Log("AllSpawn", $"Start AllSpawn for {original.name}"); 
             List<GameObject> objcs = new List<GameObject>();
             foreach(UserId id in p2pInfo.Instance.userIds.AllUserIds){
                 objcs.Add(Instantiate(id, original, parent));
@@ -25,6 +27,7 @@ namespace SynicSugar.P2P {
             return objcs;
         }
         public static List<GameObject> AllSpawn(GameObject original, Transform parent, bool instantiateInWorldSpace){
+            Logger.Log("AllSpawn", $"Start AllSpawn for {original.name}");
             List<GameObject> objcs = new List<GameObject>();
             foreach(UserId id in p2pInfo.Instance.userIds.AllUserIds){
                 objcs.Add(Instantiate(id, original, parent, instantiateInWorldSpace));
@@ -32,6 +35,7 @@ namespace SynicSugar.P2P {
             return objcs;
         }
         public static List<GameObject> AllSpawn(GameObject original, Vector3 position, Quaternion rotation){
+            Logger.Log("AllSpawn", $"Start AllSpawn for {original.name}");
             List<GameObject> objcs = new List<GameObject>();
             foreach(UserId id in p2pInfo.Instance.userIds.AllUserIds){
                 objcs.Add(Instantiate(id, original, position, rotation));
@@ -39,6 +43,7 @@ namespace SynicSugar.P2P {
             return objcs;
         }
         public static List<GameObject> AllSpawn(GameObject original, Vector3 position, Quaternion rotation, Transform parent){
+            Logger.Log("AllSpawn", $"Start AllSpawn for {original.name}");
             List<GameObject> objcs = new List<GameObject>();
             foreach(UserId id in p2pInfo.Instance.userIds.AllUserIds){
                 objcs.Add(Instantiate(id, original, position, rotation, parent));
@@ -54,56 +59,41 @@ namespace SynicSugar.P2P {
         /// <param name="original"></param>
         /// <returns></returns>
         public static List<GameObject> AllSpawnForCurrent(GameObject original){
+            Logger.Log("AllSpawnForCurrent", $"Start AllSpawnForCurrent for {original.name}");
             List<GameObject> objcs = new List<GameObject>();
-            //Local User
-            objcs.Add(Instantiate(p2pInfo.Instance.userIds.LocalUserId, original));
-
-            //Remote Users
-            foreach(UserId id in p2pInfo.Instance.userIds.RemoteUserIds){
+            foreach(UserId id in p2pInfo.Instance.userIds.CurrentAllUserIds){
                 objcs.Add(Instantiate(id, original));
             }
             return objcs; 
         }
-        public static List<GameObject> AllSpawnForCurrent(GameObject original, Transform parent){     
+        public static List<GameObject> AllSpawnForCurrent(GameObject original, Transform parent){
+            Logger.Log("AllSpawnForCurrent", $"Start AllSpawnForCurrent for {original.name}");
             List<GameObject> objcs = new List<GameObject>();
-            //Local User
-            objcs.Add(Instantiate(p2pInfo.Instance.userIds.LocalUserId, original, parent));
-
-            //Remote Users
-            foreach(UserId id in p2pInfo.Instance.userIds.RemoteUserIds){
+            foreach(UserId id in p2pInfo.Instance.userIds.CurrentAllUserIds){
                 objcs.Add(Instantiate(id, original, parent));
             }
             return objcs;
         }
         public static List<GameObject> AllSpawnForCurrent(GameObject original, Transform parent, bool instantiateInWorldSpace){
+            Logger.Log("AllSpawnForCurrent", $"Start AllSpawnForCurrent for {original.name}");
             List<GameObject> objcs = new List<GameObject>();
-            //Local User
-            objcs.Add(Instantiate(p2pInfo.Instance.userIds.LocalUserId, original, parent, instantiateInWorldSpace));
-
-            //Remote Users
-            foreach(UserId id in p2pInfo.Instance.userIds.RemoteUserIds){
+            foreach(UserId id in p2pInfo.Instance.userIds.CurrentAllUserIds){
                 objcs.Add(Instantiate(id, original, parent, instantiateInWorldSpace));
             }
             return objcs;
         }
         public static List<GameObject> AllSpawnForCurrent(GameObject original, Vector3 position, Quaternion rotation){
+            Logger.Log("AllSpawnForCurrent", $"Start AllSpawnForCurrent for {original.name}");
             List<GameObject> objcs = new List<GameObject>();
-            //Local User
-            objcs.Add(Instantiate(p2pInfo.Instance.userIds.LocalUserId, original, position, rotation));
-
-            //Remote Users
-            foreach(UserId id in p2pInfo.Instance.userIds.RemoteUserIds){
+            foreach(UserId id in p2pInfo.Instance.userIds.CurrentAllUserIds){
                 objcs.Add(Instantiate(id, original, position, rotation));
             }
             return objcs;
         }
         public static List<GameObject> AllSpawnForCurrent(GameObject original, Vector3 position, Quaternion rotation, Transform parent){
+            Logger.Log("AllSpawnForCurrent", $"Start AllSpawnForCurrent for {original.name}");
             List<GameObject> objcs = new List<GameObject>();
-            //Local User
-            objcs.Add(Instantiate(p2pInfo.Instance.userIds.LocalUserId, original, position, rotation, parent));
-            
-            //Remote Users
-            foreach(UserId id in p2pInfo.Instance.userIds.RemoteUserIds){
+            foreach(UserId id in p2pInfo.Instance.userIds.CurrentAllUserIds){
                 objcs.Add(Instantiate(id, original, position, rotation, parent));
             }
             return objcs;
@@ -118,14 +108,17 @@ namespace SynicSugar.P2P {
         /// <param name="original"></param>
         /// <returns></returns>
         public static GameObject Instantiate(UserId id, GameObject original){
+            Logger.Log("SynicObject.Instantiate", $"Instantiate object for {id}");
             GameObject obj = UnityEngine.Object.Instantiate (original);
             var nos = obj.GetComponents<INetworkOwner>();
+
             foreach(var i in nos){
                 i.SetOwnerID(id);
             }
             return obj; 
         }
         public static GameObject Instantiate(UserId id, GameObject original, Transform parent){
+            Logger.Log("SynicObject.Instantiate", $"Instantiate object for {id}");
             GameObject obj = UnityEngine.Object.Instantiate (original, parent);
             var nos = obj.GetComponents<INetworkOwner>();
             foreach(var i in nos){
@@ -134,6 +127,7 @@ namespace SynicSugar.P2P {
             return obj; 
         }
         public static GameObject Instantiate(UserId id, GameObject original, Transform parent, bool instantiateInWorldSpace){
+            Logger.Log("SynicObject.Instantiate", $"Instantiate object for {id}");
             GameObject obj = UnityEngine.Object.Instantiate (original, parent, instantiateInWorldSpace);
             var nos = obj.GetComponents<INetworkOwner>();
             foreach(var i in nos){
@@ -142,6 +136,7 @@ namespace SynicSugar.P2P {
             return obj; 
         }
         public static GameObject Instantiate(UserId id, GameObject original, Vector3 position, Quaternion rotation){
+            Logger.Log("SynicObject.Instantiate", $"Instantiate object for {id}");
             GameObject obj = UnityEngine.Object.Instantiate (original, position, rotation);
             var nos = obj.GetComponents<INetworkOwner>();
             foreach(var i in nos){
@@ -150,6 +145,7 @@ namespace SynicSugar.P2P {
             return obj; 
         }
         public static GameObject Instantiate(UserId id, GameObject original, Vector3 position, Quaternion rotation, Transform parent){
+            Logger.Log("SynicObject.Instantiate", $"Instantiate object for {id}");
             GameObject obj = UnityEngine.Object.Instantiate (original, position, rotation, parent);
             var nos = obj.GetComponents<INetworkOwner>();
             foreach(var i in nos){

@@ -2,7 +2,6 @@ using PlayEveryWare.EpicOnlineServices;
 using Epic.OnlineServices;
 using Epic.OnlineServices.Lobby;
 using System.Collections.Generic;
-using UnityEngine;
 using SynicSugar.RTC;
 using ResultE = Epic.OnlineServices.Result;
 
@@ -114,11 +113,11 @@ namespace SynicSugar.MatchMake {
 
             ResultE result = EOSManager.Instance.GetEOSLobbyInterface().CopyLobbyDetailsHandle(ref options, out LobbyDetails outLobbyDetailsHandle);
             if (result != ResultE.Success){
-                Debug.LogErrorFormat("Init Lobby: can't get lobby info handle. Error code: {0}", result);
+                Logger.LogError("InitFromLobbyHandle", "Ican't get lobby info handle.", (Result)result);
                 return;
             }
             if (outLobbyDetailsHandle == null){
-                Debug.LogError("Init Lobby: can't get lobby info handle. outLobbyDetailsHandle is null");
+                Logger.LogError("InitFromLobbyHandle", "can't get lobby info handle. outLobbyDetailsHandle is null");
                 return;
             }
 
@@ -141,11 +140,11 @@ namespace SynicSugar.MatchMake {
             var lobbyDetailsCopyInfoOptions = new LobbyDetailsCopyInfoOptions();
             ResultE infoResult = lobbyDetailsHandle.CopyInfo(ref lobbyDetailsCopyInfoOptions, out LobbyDetailsInfo? outLobbyDetailsInfo);
             if (infoResult != ResultE.Success){
-                Debug.LogErrorFormat("Init Lobby: can't copy lobby info. Error code: {0}", infoResult);
+                Logger.LogError("InitFromLobbyDetails", "Can't copy lobby info.", (Result)infoResult);
                 return;
             }
             if (outLobbyDetailsInfo == null){
-                Debug.LogError("Init Lobby: could not copy info: outLobbyDetailsInfo is null.");
+                Logger.LogError("InitFromLobbyDetails", "Could not copy info: outLobbyDetailsInfo is null.");
                 return;
             }
 
@@ -156,6 +155,8 @@ namespace SynicSugar.MatchMake {
             bEnableRTCRoom = (bool)(outLobbyDetailsInfo?.RTCRoomEnabled);
             bDisableHostMigration = (bool)(outLobbyDetailsInfo?.AllowHostMigration);
             RejoinAfterKickRequiresInvite = (bool)(outLobbyDetailsInfo?.RejoinAfterKickRequiresInvite);
+
+            Logger.Log("InitFromLobbyDetails", $"Update Lobby Data. {System.Environment.NewLine} MaxLobbyMembers {MaxLobbyMembers} / PermissionLevel {PermissionLevel} / BucketId {BucketId} / AllowInvites {bAllowInvites} / RTCRoomEnabled {bEnableRTCRoom} / AllowHostMigration {bDisableHostMigration} / RejoinAfterKickRequiresInvite {RejoinAfterKickRequiresInvite}");
 
             // Get attributes
             Attributes.Clear();
@@ -187,7 +188,7 @@ namespace SynicSugar.MatchMake {
                     ResultE memberAttributeResult = lobbyDetailsHandle.CopyMemberAttributeByIndex(ref lobbyDetailsCopyMemberAttributeByIndexOptions, out Attribute? outAttribute);
 
                     if (memberAttributeResult != ResultE.Success){
-                        Debug.LogFormat("Lobbies (InitFromLobbyDetails): can't copy member attribute. Error code: {0}", memberAttributeResult);
+                        Logger.Log("InitFromLobbyDetails", "Can't copy member attribute.", (Result)memberAttributeResult);
                         continue;
                     }
  

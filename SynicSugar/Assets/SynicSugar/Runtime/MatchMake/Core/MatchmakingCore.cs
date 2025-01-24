@@ -182,7 +182,7 @@ namespace SynicSugar.Base {
         protected async UniTask<Result> CloseSessionOnLobbyClosure(Reason reason){
             Result result = p2pConfig.Instance.sessionCore.ResetConnections();
             if(result != Result.Success){
-                UnityEngine.Debug.LogErrorFormat("CloseSessionOnLobbyClosure: Failed to process Lobby closure. Host functions and lobby notifications may now be disabled, but P2P remains active. Result: {0}", result);
+                Logger.LogError("CloseSessionOnLobbyClosure", "Failed to process Lobby closure. Host functions and lobby notifications may now be disabled, but P2P remains active.", result);
             }
 
             SynicSugarManger.Instance.State.IsInSession = false;
