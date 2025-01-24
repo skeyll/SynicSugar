@@ -10,10 +10,13 @@ namespace SynicSugar {
 #region Singleton
         public static SynicSugarManger Instance { get; private set; }
         void Awake() {
+            Logger.Log("SynicSugarManger", "Start initialization of SynicSugarManger.");
             if( Instance != null ) {
                 Destroy( gameObject );
+                Logger.Log("SynicSugarManger", "Discard this instance since SynicSugarManger already exists.");
                 return;
             }
+
             Instance = this;
             MemoryPackFormatterProvider.Register(new UserIdFormatter());
             CoreFactory = new EOSCoreFactory();
@@ -31,6 +34,7 @@ namespace SynicSugar {
         }
         void Start(){
             LocalUserId = UserId.GenerateOfflineUserId();
+            Logger.Log("SynicSugarManger", $"Set OllineUserId. UserId: {LocalUserId}");
         }
     #if UNITY_EDITOR
         /// <summary>
@@ -57,13 +61,13 @@ namespace SynicSugar {
         /// <returns></returns>
         public Result SetCoreFactory(SynicSugarCoreFactory coreFactory){
             if(State.IsLoggedIn){
-            #if SYNICSUGAR_LOG
-                Debug.LogError("SetCoreFactory: This call is invalid. This function must be called before the local user logs in a server.");
-            #endif
+                Logger.LogError("SetCoreFactory", "This call is invalid. This function must be called before the local user logs in a server.");
                 return Result.InvalidAPICall;
             }
 
             CoreFactory = coreFactory.CreateInstance();
+            Logger.Log("SetCoreFactory", $"Set new core factory. FactoryName: {CoreFactory.CoreName}");
+
             return Result.Success;
         }
         /// <summary>
@@ -71,6 +75,7 @@ namespace SynicSugar {
         /// </summary>
         /// <param name="userId"></param>
         internal void SetLocalUserId(UserId userId){
+            Logger.Log("SetLocalUserId", $"The LocalUserId has changed. Previous UserId: {LocalUserId}, New UserId: {userId}");
             LocalUserId = userId;
         }
     }

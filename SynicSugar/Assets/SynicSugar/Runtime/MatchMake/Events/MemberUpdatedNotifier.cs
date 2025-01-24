@@ -18,6 +18,7 @@ namespace SynicSugar.MatchMake {
             OnAttributesUpdated = null;
         }
         internal void MemberAttributesUpdated(UserId target){
+            Logger.Log("MemberAttributesUpdated", $"UserId: {target}");
             OnAttributesUpdated?.Invoke(target);
         }
     }

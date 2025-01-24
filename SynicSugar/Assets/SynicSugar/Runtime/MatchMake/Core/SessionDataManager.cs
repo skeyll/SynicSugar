@@ -22,9 +22,8 @@ namespace SynicSugar.MatchMake {
             // Check if the time difference exceeds allowed seconds, use estimated timestamp if true
             if (Math.Abs(diff.TotalSeconds) > ALLOWED_DIFF_SEC) 
             {
-                #if SYNICSUGAR_LOG
-                Debug.Log($"Adjusted timestamp: Difference exceeded {ALLOWED_DIFF_SEC} sec. Estimated: {estimatedTimestamp}, CurrentStartUTC: {p2pInfo.Instance.CurrentSessionStartUTC}");
-                #endif
+                Logger.Log("Adjusted timestamp", $"Difference exceeded {ALLOWED_DIFF_SEC} sec. Estimated: {estimatedTimestamp}, CurrentStartUTC: {p2pInfo.Instance.CurrentSessionStartUTC}");
+                
                 return estimatedTimestamp;
             }
             return Math.Abs(diff.TotalSeconds) > 2 ? estimatedTimestamp : p2pInfo.Instance.CurrentSessionStartUTC;
@@ -42,20 +41,18 @@ namespace SynicSugar.MatchMake {
             }
             catch (UnauthorizedAccessException e)
             {
-                Debug.LogError($"SaveSessionData: Don't have access permission. {e.Message}");
+                Logger.LogError("SaveSessionData", $"Don't have access permission. {e.Message}");
             }
             catch (IOException e)
             {
-                Debug.LogError($"SaveSessionData: An error occurred during file operation. {e.Message}");
+                Logger.LogError("SaveSessionData", $"An error occurred during file operation. {e.Message}");
             }
             catch (Exception e)
             {
-                Debug.LogError($"SaveSessionData: An unexpected error has occurred. {e.Message}");
+                Logger.LogError("SaveSessionData", $"An unexpected error has occurred. {e.Message}");
             }
 
-        #if SYNICSUGAR_LOG
-            Debug.Log($"SaveSessionData: Save SessionData to {filePath}.");
-        #endif
+            Logger.Log("SaveSessionData", $"Save SessionData to {filePath}.");
         }
 
         /// <summary>
@@ -73,17 +70,15 @@ namespace SynicSugar.MatchMake {
 
                 if(lobbyId != data.LobbyID)
                 {
-                    Debug.Log($"LoadSessionData: Failed to load SessionData. This data is not for {lobbyId}.");
+                    Logger.Log("LoadSessionData", $"Failed to load SessionData. This data is not for {lobbyId}.");
                     return null;
                 }
-            #if SYNICSUGAR_LOG
-                Debug.Log($"SaveSessionData: Success in loading SessionData.");
-            #endif
+                Logger.Log("LoadSessionData", $"Success in loading SessionData.");
                 return data;
             }
             else
             {
-                Debug.LogWarning("LoadSessionData: SessionData does not exist");
+                Logger.LogWarning("LoadSessionData", "SessionData does not exist");
                 return null;
             }
         }

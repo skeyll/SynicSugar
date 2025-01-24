@@ -42,7 +42,7 @@ namespace SynicSugar.RTC {
                 var changedOptions = new AddNotifyAudioDevicesChangedOptions();
                 AudioDevicesChangedId = audioInterface.AddNotifyAudioDevicesChanged(ref changedOptions, null, OnAudioDevicesChanged);
                 if(AudioDevicesChangedId == 0){
-                    Debug.LogError("AddNotifyAudioDevicesChanged: is failed");
+                    Logger.LogError("AddNotifyAudioDevicesChanged", "is failed");
                 }
             }
         }
@@ -70,7 +70,7 @@ namespace SynicSugar.RTC {
                 var changedOptions = new AddNotifyAudioDevicesChangedOptions();
                 AudioDevicesChangedId = audioInterface.AddNotifyAudioDevicesChanged(ref changedOptions, null, OnAudioDevicesChanged);
                 if(AudioDevicesChangedId == 0){
-                    Debug.LogError("AddNotifyAudioDevicesChanged: is failed");
+                    Logger.LogError("AddNotifyAudioDevicesChanged", "is failed");
                 }
             }
         }
@@ -98,14 +98,13 @@ namespace SynicSugar.RTC {
                 var changedOptions = new AddNotifyAudioDevicesChangedOptions();
                 AudioDevicesChangedId = audioInterface.AddNotifyAudioDevicesChanged(ref changedOptions, null, OnAudioDevicesChanged);
                 if(AudioDevicesChangedId == 0){
-                    Debug.LogError("AddNotifyAudioDevicesChanged: is failed");
+                    Logger.LogError("AddNotifyAudioDevicesChanged", "is failed");
                 }
+                Logger.Log("AddNotifyAudioDevicesChanged", "Can add notify.");
             }
         }
         void OnAudioDevicesChanged(ref AudioDevicesChangedCallbackInfo info){
-        #if SYNICSUGAR_LOG
-            Debug.Log("OnAudioDevicesChanged: audio device is changed.");
-        #endif
+            Logger.Log("OnAudioDevicesChanged", "audio device is changed.");
             AudioDeviceChangedNotifier.DeviceChanged();
         }
         /// <summary>
@@ -118,6 +117,7 @@ namespace SynicSugar.RTC {
                 audioInterface.RemoveNotifyAudioDevicesChanged(AudioDevicesChangedId);
                 AudioDeviceChangedNotifier.Clear();
                 AudioDevicesChangedId = 0;
+                Logger.Log("RemoveNotifyAudioDevicesChanged", "Can remove notify.");
             }
         }
         /// <summary>
@@ -140,6 +140,8 @@ namespace SynicSugar.RTC {
                 var info = audioInterface.GetAudioInputDeviceByIndex(ref deviceByIndexOptions);
                 devicesInfo.Add(new AudioInputDeviceInfo(info));
             }
+            
+            Logger.Log("GetInputDeviceInformation", $"Can get {deviceCount} devices info.");
             return devicesInfo;
         }
         /// <summary>
@@ -160,11 +162,9 @@ namespace SynicSugar.RTC {
             ResultE result = audioInterface.SetAudioInputSettings(ref settingOptions);
 
             if(result != ResultE.Success){
-                Debug.LogErrorFormat("SetAudioInputDevice: failed. {0}", result);
+                Logger.LogError("SetAudioInputDevice", (Result)result);
             }
-        #if SYNICSUGAR_LOG
-            Debug.Log("SetAudioInputDevice: set a device as Input Device.");
-        #endif
+            Logger.Log("SetAudioInputDevice", "set a device as Input Device.");
         }
         /// <summary>
         /// Change volume status.
@@ -180,11 +180,9 @@ namespace SynicSugar.RTC {
             ResultE result = audioInterface.SetAudioInputSettings(ref settingOptions);
 
             if(result != ResultE.Success){
-                Debug.LogErrorFormat("ChangeAudioMuteStatus: failed. {0}", result);
+                Logger.LogError("ChangeAudioMuteStatus", (Result)result);
             }
-        #if SYNICSUGAR_LOG
-            Debug.Log("ChangeAudioMuteStatus: can change audio volume.");
-        #endif
+            Logger.Log("ChangeAudioMuteStatus", "can change audio volume.");
         }
         /// <summary>
         /// Get Device List to output vc.
@@ -206,6 +204,7 @@ namespace SynicSugar.RTC {
                 var info = audioInterface.GetAudioOutputDeviceByIndex(ref deviceByIndexOptions);
                 devicesInfo.Add(new AudioOutputDeviceInfo(info));
             }
+            Logger.Log("GetOutputDeviceInformation", $"Can get {deviceCount} devices info.");
             return devicesInfo;
         }
         
@@ -224,11 +223,9 @@ namespace SynicSugar.RTC {
             ResultE result = audioInterface.SetAudioOutputSettings(ref settingOptions);
 
             if(result != ResultE.Success){
-                Debug.LogErrorFormat("SetAudioOutputDevice: failed. {0}", result);
+                Logger.LogError("SetAudioOutputDevice", (Result)result);
             }
-        #if SYNICSUGAR_LOG
-            Debug.Log("SetAudioOutputDevice: set a device as Output Device.");
-        #endif
+            Logger.Log("SetAudioOutputDevice", "set a device as Output Device.");
         }
         /// <summary>
         /// Change volume status.
@@ -244,11 +241,9 @@ namespace SynicSugar.RTC {
             ResultE result = audioInterface.SetAudioOutputSettings(ref settingOptions);
 
             if(result != ResultE.Success){
-                Debug.LogErrorFormat("ChangeOutputVolume: failed. {0}", result);
+                Logger.LogError("ChangeOutputVolume", (Result)result);
             }
-        #if SYNICSUGAR_LOG
-            Debug.Log("ChangeOutputVolume: can change audio volume.");
-        #endif
+            Logger.Log("ChangeOutputVolume", "can change audio volume.");
         }
     }
 }

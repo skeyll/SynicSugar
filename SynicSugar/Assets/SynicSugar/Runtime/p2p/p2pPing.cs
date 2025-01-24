@@ -28,11 +28,11 @@ namespace SynicSugar.P2P {
         /// <returns></returns>
         internal async UniTask<bool> RefreshPing(UserId targetId, CancellationToken token){
             if(!p2pConfig.Instance.sessionCore.IsConnected){
-                UnityEngine.Debug.LogError("RefreshPings: The connection is invalid.");
+                Logger.LogWarning("RefreshPings", "The connection is invalid.");
                 return false;
             }
             if(isRefreshing){
-                UnityEngine.Debug.LogError("RefreshPing: is Refreshing now.");
+                Logger.LogWarning("RefreshPing", "Currently being refreshed.");
                 return false;
             }
             isRefreshing = true;
@@ -54,11 +54,11 @@ namespace SynicSugar.P2P {
         // MEMO: Replace SendPacketToAll when it can be made more efficient.
         internal async UniTask<bool> RefreshPings(CancellationToken token){
             if(!p2pConfig.Instance.sessionCore.IsConnected){
-                UnityEngine.Debug.LogError("RefreshPings: The connection is invalid.");
+                Logger.LogWarning("RefreshPings", "The connection is invalid.");
                 return false;
             }
             if(isRefreshing){
-                UnityEngine.Debug.LogError("RefreshPings: is Refreshing now.");
+                Logger.LogWarning("RefreshPing", "Currently being refreshed.");
                 return false;
             }
             isRefreshing = true;
@@ -84,6 +84,7 @@ namespace SynicSugar.P2P {
 
             TimeSpan delta = current - MemoryPackSerializer.Deserialize<DateTime>(utc);
             pingInfo[id].tmpPings.Add(delta.TotalMilliseconds);
+            Logger.Log("GetPong", $"{id} sent pong at {MemoryPackSerializer.Deserialize<DateTime>(utc)}");
 
             if(pingInfo[id].tmpPings.Count == p2pConfig.Instance.SamplesPerPing){
                 pingInfo[id].Ping = (int)(pingInfo[id].tmpPings.Sum() / pingInfo[id].tmpPings.Count);

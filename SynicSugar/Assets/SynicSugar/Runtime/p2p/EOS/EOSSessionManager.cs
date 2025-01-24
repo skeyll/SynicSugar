@@ -88,7 +88,7 @@ namespace SynicSugar.P2P {
                 return false;
             }
             if(nextPacketSizeBytes > 1170){
-                Debug.LogError($"GetPacketFromBuffer: Packet size {nextPacketSizeBytes} exceeds maximum expected size of 1170.");
+                Logger.LogError("GetPacketFromBuffer", $"Packet size {nextPacketSizeBytes} exceeds maximum expected size of 1170.");
                 return false;
             }
             //Set options
@@ -104,13 +104,13 @@ namespace SynicSugar.P2P {
             if (result != ResultE.Success){
 #if SYNICSUGAR_LOG //This range is for performance since this is called every frame.
                 if(result == ResultE.InvalidParameters){
-                    Debug.LogErrorFormat("Get Packets: input was invalid: {0}", result);
+                    Logger.LogError("Get Packets", "input was invalid", (Result)result);
                 }
 #endif
                 return false; //No packet
             }
         #if SYNICSUGAR_PACKETINFO
-            Debug.Log($"ReceivePacket: ch: {ch} from {id} / packet size {bytesWritten} / payload {EOSp2p.ByteArrayToHexString(data)}");
+            Debug.Log($"ReceivePacket: ch: {ch} from {id} / packet size {bytesWritten} / payload {EOSp2p.ByteArrayToHexString(payload)}");
         #endif
             id = UserId.GetUserId(productUserId);
             return true;
@@ -125,7 +125,7 @@ namespace SynicSugar.P2P {
                 return false;
             }
             if(nextPacketSizeBytes > 1170){
-                Debug.LogError($"GetSynicPacketFromBuffer: Packet size {nextPacketSizeBytes} exceeds maximum expected size of 1170.");
+                Logger.LogError("GetSynicPacketFromBuffer", $"Packet size {nextPacketSizeBytes} exceeds maximum expected size of 1170.");
                 return false;
             }
             //Set options
@@ -141,13 +141,13 @@ namespace SynicSugar.P2P {
             if (result != ResultE.Success){
 #if SYNICSUGAR_LOG //This range is for performance since this is called every frame.
                 if(result == ResultE.InvalidParameters){
-                    Debug.LogErrorFormat("Get Synic Packets: input was invalid: {0}", result);
+                    Logger.LogError("Get Synic Packets", "input was invalid", (Result)result);
                 }
 #endif
                 return false; //No packet
             }
         #if SYNICSUGAR_PACKETINFO
-            Debug.Log($"ReceivePacket(Synic): ch: {ch}  from {id} / packet size {bytesWritten} / payload {EOSp2p.ByteArrayToHexString(data)}");
+            Debug.Log($"ReceivePacket(Synic): ch: {ch}  from {id} / packet size {bytesWritten} / payload {EOSp2p.ByteArrayToHexString(payload)}");
         #endif
             id = UserId.GetUserId(productUserId);
             return true;
@@ -170,13 +170,11 @@ namespace SynicSugar.P2P {
                 ResultE result = P2PHandle.ClearPacketQueue(ref options);
                 
                 if (result != ResultE.Success){
-                    Debug.LogErrorFormat("Clear Queue: can't clear packet queue, code: {0}", result);
+                    Logger.LogError("ClearPacketQueue", "can't clear packet queue", (Result)result);
                     return;
                 }
             }
-        #if SYNICSUGAR_LOG
-            Debug.Log("Clear Queue: Finish!");
-        #endif
+            Logger.Log("ClearPacketQueue", "Finish!");
         }
 #region Notify(ConnectRquest)
         /// <summary>
@@ -192,7 +190,7 @@ namespace SynicSugar.P2P {
                 RequestNotifyId = P2PHandle.AddNotifyPeerConnectionRequest(ref options, null, OnIncomingConnectionRequest);
                 
                 if (RequestNotifyId == 0){
-                    Debug.LogError("Connection Request: could not subscribe, bad notification id returned.");
+                    Logger.LogError("AddNotifyPeerConnectionRequest", "could not subscribe, bad notification id returned.");
                 }
             }
         }
@@ -200,7 +198,7 @@ namespace SynicSugar.P2P {
         // This function will only be called if the connection has not been accepted yet.
         void OnIncomingConnectionRequest(ref OnIncomingConnectionRequestInfo data){
             if (!(bool)data.SocketId?.SocketName.Equals(ScoketName)){
-                Debug.LogError("ConnectRequest: unknown socket id. This peer should be no lobby member.");
+                Logger.LogError("OnIncomingConnectionRequest", "unknown socket id. This peer should be no lobby member.");
                 return;
             }
 
@@ -213,7 +211,7 @@ namespace SynicSugar.P2P {
             ResultE result = P2PHandle.AcceptConnection(ref options);
 
             if (result != ResultE.Success){
-                Debug.LogErrorFormat("p2p connect request: error while accepting connection, code: {0}", result);
+                Logger.LogError("OnIncomingConnectionRequest", "error while accepting connection.", (Result)result);
             }
         }
         void RemoveNotifyPeerConnectionRequest(){
@@ -260,12 +258,12 @@ namespace SynicSugar.P2P {
     protected internal override Result ResetConnections(){
         Result receiverResult = ((INetworkCore)this).StopPacketReceiver();
         if(receiverResult != Result.Success){
-            Debug.LogError($"ResetConnections: Failed to stop the packet receiver.: {receiverResult}");
+            Logger.LogError("ResetConnections", "Failed to stop the packet receiver.", receiverResult);
         }
         CancelRTTToken();
         Result connectionResult = RemoveNotifyAndCloseConnection();
         if(connectionResult != Result.Success){
-            Debug.LogError($"ResetConnections: Failed to close the connection.: {connectionResult}");
+            Logger.LogError("ResetConnections", "Failed to close the connection.", connectionResult);
         }
         ClearPacketQueue();
         return receiverResult == Result.Success ? connectionResult : receiverResult;
@@ -286,7 +284,7 @@ namespace SynicSugar.P2P {
             result = P2PHandle.AcceptConnection(ref options);
 
             if (result != ResultE.Success){
-                Debug.LogErrorFormat("Accept All Connections: error while accepting connection, code: {0} / id: {1}", result, id);
+                Logger.LogError("AcceptAllConenctions", $"error while accepting connection for {id}.", (Result)result);
                 break;
             }
         }
@@ -303,14 +301,14 @@ namespace SynicSugar.P2P {
             InterruptedNotify = P2PHandle.AddNotifyPeerConnectionInterrupted(ref options, null, OnPeerConnectionInterruptedCallback);
             
             if (InterruptedNotify == 0){
-                Debug.LogError("Connection Request: could not subscribe, bad notification id returned.");
+                Logger.LogError("Connection Request", "could not subscribe, bad notification id returned.");
             }
         }
     }
     // Call from SubscribeToConnectionRequest.
     void OnPeerConnectionInterruptedCallback(ref OnPeerConnectionInterruptedInfo data){
         if (!(bool)data.SocketId?.SocketName.Equals(ScoketName)){
-            Debug.LogError("InterruptedCallback: unknown socket id. This peer should be no lobby member.");
+            Logger.LogError("InterruptedCallback", "unknown socket id. This peer should be no lobby member.");
             return;
         }
         //Users with young index send Heartbeat.
@@ -320,9 +318,7 @@ namespace SynicSugar.P2P {
         }
 
         p2pInfo.Instance.ConnectionNotifier.EarlyDisconnected(UserId.GetUserId(data.RemoteUserId), Reason.Interrupted);
-    #if SYNICSUGAR_LOG
-        Debug.Log("PeerConnectionInterrupted: Connection lost now. with " +  data.RemoteUserId);
-    #endif
+        Logger.Log("PeerConnectionInterrupted", $"Connection lost now. UserId: {data.RemoteUserId} / Reason: {Reason.Interrupted}");
     }
     void RemoveNotifyPeerConnectionInterrupted(){
         P2PHandle.RemoveNotifyPeerConnectionInterrupted(InterruptedNotify);
@@ -338,21 +334,19 @@ namespace SynicSugar.P2P {
             EstablishedNotify = P2PHandle.AddNotifyPeerConnectionEstablished(ref options, null, OnPeerConnectionEstablishedCallback);
             
             if (EstablishedNotify == 0){
-                Debug.LogError("Connection Request: could not subscribe, bad notification id returned.");
+                Logger.LogError("AddNotifyPeerConnectionEstablished", "could not subscribe, bad notification id returned.");
             }
         }
     }
     // Call from SubscribeToConnectionRequest.
     void OnPeerConnectionEstablishedCallback(ref OnPeerConnectionEstablishedInfo data){
         if (!(bool)data.SocketId?.SocketName.Equals(ScoketName)){
-            Debug.LogError("EstablishedCallback: unknown socket id. This peer should be no lobby member.");
+            Logger.LogError("OnPeerConnectionEstablishedCallback", "unknown socket id. This peer should be no lobby member.");
             return;
         }
         if(data.ConnectionType == ConnectionEstablishedType.Reconnection){
             p2pInfo.Instance.ConnectionNotifier.Restored(UserId.GetUserId(data.RemoteUserId));
-    #if SYNICSUGAR_LOG
-            Debug.Log("EstablishedCallback: Connection is restored.");
-    #endif
+            Logger.Log("OnPeerConnectionEstablishedCallback", "Connection is restored.");
             return;
         }
         
@@ -376,14 +370,14 @@ namespace SynicSugar.P2P {
             ClosedNotify = P2PHandle.AddNotifyPeerConnectionClosed(ref options, null, OnPeerConnectionClosedCallback);
             
             if (ClosedNotify == 0){
-                Debug.LogError("Connection Request: could not subscribe, bad notification id returned.");
+                Logger.LogError("AddNotifyPeerConnectionClosed", "could not subscribe, bad notification id returned.");
             }
         }
     }
     // Call from SubscribeToConnectionRequest.
     void OnPeerConnectionClosedCallback(ref OnRemoteConnectionClosedInfo data){
         if (!(bool)data.SocketId?.SocketName.Equals(ScoketName)){
-            Debug.LogError("ClosedCallback: unknown socket id. This peer should be no lobby member.");
+            Logger.LogError("OnPeerConnectionClosedCallback", "unknown socket id. This peer should be no lobby member.");
             return;
         }
         if(data.Reason is not ConnectionClosedReason.ClosedByLocalUser or ConnectionClosedReason.ClosedByPeer){
@@ -393,9 +387,7 @@ namespace SynicSugar.P2P {
                 int disconnectedUserIndex = 100 + p2pInfo.Instance.GetUserIndex(UserId.GetUserId(data.RemoteUserId));
                 HeartBeatToLobby(disconnectedUserIndex);
             }
-        #if SYNICSUGAR_LOG
-            Debug.LogFormat("PeerConnectionClosedCallback: Connection lost now with {0}. Reason {1}", data.RemoteUserId, data.Reason);
-        #endif
+            Logger.Log("OnPeerConnectionClosedCallback", $"Connection lost now. UserId {data.RemoteUserId} / Reason {data.Reason}");
         }
     }
     internal void RemoveNotifyPeerConnectionnClosed(){
@@ -419,7 +411,7 @@ namespace SynicSugar.P2P {
             };
             Result result = (Result)P2PHandle.CloseConnections(ref closeOptions);
             if(result != Result.Success){
-                Debug.LogErrorFormat("CloseConnections: Failed to disconnect {0}", result);
+                Logger.LogError("CloseConnections", "Failed to close connection.", result);
             }
             return result;
         }
