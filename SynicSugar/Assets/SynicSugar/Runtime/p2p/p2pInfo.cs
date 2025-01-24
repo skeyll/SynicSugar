@@ -246,9 +246,14 @@ namespace SynicSugar.P2P {
         /// Get last Ping of specific user from local data.
         /// </summary>
         /// <param name="id"></param>
-        /// <returns></returns>
+        /// <returns>Returns the last ping obtained. <br />
+        /// If the target user is disconnected, -1 is returned. If the key cannot be found because the local user is offline, etc., -2 is returned.</returns>
         public int GetPing(UserId id){
-            return pings.pingInfo[id.ToString()].Ping;
+            if (pings.pingInfo.TryGetValue(id.ToString(), out var pingInfo)){
+                return pingInfo.Ping;
+            }
+
+            return -1;
         }
 
         /// <summary>
@@ -256,8 +261,8 @@ namespace SynicSugar.P2P {
         /// </summary>
         /// <returns></returns>
         public async UniTask<Result> RefreshPing(UserId target){
-            if(!IsInSession){
-                Logger.LogWarning("RefreshPing", "This local user is not in session.");
+            if(!IsInSession || SessionType == SessionType.OfflineSession){
+                Logger.LogWarning("RefreshPing", "This local user is not in online session.");
                 return Result.InvalidAPICall;
             }
             return await pings.RefreshPing(target, sessionCore.rttTokenSource.Token);
@@ -267,8 +272,8 @@ namespace SynicSugar.P2P {
         /// </summary>
         /// <returns></returns>
         public async UniTask<Result> RefreshPings(){
-            if(!IsInSession){
-                Logger.LogWarning("RefreshPing", "This local user is not in session.");
+            if(!IsInSession || SessionType == SessionType.OfflineSession){
+                Logger.LogWarning("RefreshPing", "This local user is not in online session.");
                 return Result.InvalidAPICall;
             }
             return await pings.RefreshPings(sessionCore.rttTokenSource.Token);
