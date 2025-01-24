@@ -255,23 +255,23 @@ namespace SynicSugar.P2P {
         /// Manually update Ping data with Target to latest.
         /// </summary>
         /// <returns></returns>
-        public async UniTask RefreshPing(UserId target){
+        public async UniTask<Result> RefreshPing(UserId target){
             if(!IsInSession){
                 Logger.LogWarning("RefreshPing", "This local user is not in session.");
-                return;
+                return Result.InvalidAPICall;
             }
-            await pings.RefreshPing(target, sessionCore.rttTokenSource.Token);
+            return await pings.RefreshPing(target, sessionCore.rttTokenSource.Token);
         }
         /// <summary>
         /// Manually update Pings data to latest.
         /// </summary>
         /// <returns></returns>
-        public async UniTask RefreshPings(){
+        public async UniTask<Result> RefreshPings(){
             if(!IsInSession){
                 Logger.LogWarning("RefreshPing", "This local user is not in session.");
-                return;
+                return Result.InvalidAPICall;
             }
-            await pings.RefreshPings(sessionCore.rttTokenSource.Token);
+            return await pings.RefreshPings(sessionCore.rttTokenSource.Token);
         }
     #endregion
         /// <summary>
