@@ -60,8 +60,7 @@ namespace SynicSugar.MatchMake {
                     data.SetValue(serverAttribute.Value.AsUtf8);
                     break;
                 default:
-                Logger.LogError("GenerateLobbyAttribute", "Can't set attribute. Please confirm the type.");
-                return null;
+                    throw new System.InvalidOperationException($"GenerateLobbyAttribute: Can't set attribute. Please confirm the type.");
             }
 
             return data;
