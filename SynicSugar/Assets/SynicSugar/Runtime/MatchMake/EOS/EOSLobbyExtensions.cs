@@ -1,6 +1,6 @@
 using Epic.OnlineServices;
 using Epic.OnlineServices.Lobby;
-using UnityEngine;
+
 namespace SynicSugar.MatchMake {
     internal static class EOSLobbyExtensions {
         internal static Epic.OnlineServices.Lobby.AttributeData AsLobbyAttribute(this AttributeData attribute){
@@ -60,7 +60,7 @@ namespace SynicSugar.MatchMake {
                     data.SetValue(serverAttribute.Value.AsUtf8);
                     break;
                 default:
-                Debug.LogError("ERROR: Can't set attribute. Please confirm the type.");
+                Logger.LogError("GenerateLobbyAttribute", "Can't set attribute. Please confirm the type.");
                 return null;
             }
 

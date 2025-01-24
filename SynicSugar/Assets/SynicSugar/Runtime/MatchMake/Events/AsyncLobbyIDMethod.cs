@@ -18,6 +18,7 @@ namespace SynicSugar.MatchMake {
         public void Register(Func<UniTask> save, Func<UniTask> delete, bool changeType = true){
             if(changeType){
                 MatchMakeManager.Instance.lobbyIdSaveType = MatchMakeManager.RecconectLobbyIdSaveType.AsyncCustomMethod;
+                Logger.Log("AsyncLobbyIDMethod.Register", $"SaveType changed to AsyncCustomMethod.");
             }
             Save += save;
             Delete += delete;

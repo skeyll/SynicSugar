@@ -42,7 +42,7 @@ namespace SynicSugar.P2P {
 
                 result = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface().SendPacket(ref options);
                 if(result != ResultE.Success){
-                    Debug.LogErrorFormat("Send Packet: can't send packet, code: {0}", result);
+                    Logger.LogError("SendPacketToAll", "can't send packet.", (Result)result);
                     continue;
                 }
 
@@ -50,9 +50,7 @@ namespace SynicSugar.P2P {
                 if(count <= 0){
                     await UniTask.Yield();
                     if(!p2pConfig.Instance.sessionCore.IsConnected){
-                #if SYNICSUGAR_LOG
-                        Debug.Log("Send Packet: get out of the loop by Cancel");
-                #endif
+                        Logger.Log("SendPacketToAll", "get out of the loop by Cancel");
                         break;
                     }
                     count = p2pConfig.Instance.RPCBatchSize;
@@ -101,16 +99,14 @@ namespace SynicSugar.P2P {
 
                 result = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface().SendPacket(ref options);
                 if(result != ResultE.Success){
-                    Debug.LogErrorFormat("Send Packet: can't send packet, code: {0}", result);
+                    Logger.LogError("SSendPacketToAll", "can't send packet.", (Result)result);
                     continue;
                 }
                 count--;
                 if(count <= 0){
                     await UniTask.Yield();
                     if(!p2pConfig.Instance.sessionCore.IsConnected){
-                #if SYNICSUGAR_LOG
-                        Debug.Log("Send Packet: get out of the loop by Cancel");
-                #endif
+                        Logger.Log("SendPacketToAll", "get out of the loop by Cancel");
                         break;
                     }
                     count = p2pConfig.Instance.RPCBatchSize;
@@ -146,16 +142,14 @@ namespace SynicSugar.P2P {
 
                 result = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface().SendPacket(ref options);
                 if(result != ResultE.Success){
-                    Debug.LogErrorFormat("Send Packet: can't send packet, code: {0}", result);
+                    Logger.LogError("SendPacketToAll", "can't send packet", (Result)result);
                     continue;
                 }
                 count--;
                 if(count <= 0){
                     await UniTask.Yield();
                     if(!p2pConfig.Instance.sessionCore.IsConnected){
-                #if SYNICSUGAR_LOG
-                        Debug.Log("Send Packet: get out of the loop by Cancel");
-                #endif
+                        Logger.Log("SendPacketToAll", "get out of the loop by Cancel");
                         break;
                     }
                     count = p2pConfig.Instance.RPCBatchSize;
@@ -185,7 +179,7 @@ namespace SynicSugar.P2P {
             ResultE result = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface().SendPacket(ref options);
 
             if(result != ResultE.Success){
-                Debug.LogErrorFormat("Send Packet: can't send packet, code: {0}", result);
+                Logger.LogError("SendPacket", "can't send packet", (Result)result);
                 return;
             }
         }
@@ -219,7 +213,7 @@ namespace SynicSugar.P2P {
             ResultE result = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface().SendPacket(ref options);
 
             if(result != ResultE.Success){
-                Debug.LogErrorFormat("Send Packet: can't send packet, code: {0}", result);
+                Logger.LogError("SendPacket", "can't send packet.", (Result)result);
                 return;
             }
         }
@@ -247,7 +241,7 @@ namespace SynicSugar.P2P {
             ResultE result = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface().SendPacket(ref options);
 
             if(result != ResultE.Success){
-                Debug.LogErrorFormat("Send Packet: can't send packet, code: {0}", result);
+                Logger.LogError("SendPacket", "can't send packet, code: {0}", (Result)result);
                 return;
             }
         }
@@ -262,7 +256,7 @@ namespace SynicSugar.P2P {
         public async static UniTask SendLargePackets(byte ch, byte[] value, UserId targetId){
             if(!p2pConfig.Instance.sessionCore.IsConnected){ return; }
             if(value.Length > MAX_LARGEPACKET_SIZE){
-                throw new ArgumentException("SendPacket: Data size exceeds maximum large packet size");
+                throw new ArgumentException("SendLargePackets: Data size exceeds maximum large packet size");
             }
             int length = MAX_LARGEPACKET_PAYLOADSIZE;
             byte[] header = GenerateHeader(value.Length);
@@ -282,9 +276,7 @@ namespace SynicSugar.P2P {
                 }
 
             }
-        #if SYNICSUGAR_LOG
-            Debug.Log($"SendLargePackets: Finish to Send to {targetId}!");
-        #endif
+            Logger.Log($"SendLargePackets", $"Finish to Send to {targetId}!");
         }
         
         /// <summary>
@@ -296,7 +288,7 @@ namespace SynicSugar.P2P {
         public async static UniTask SendLargePackets(byte ch, byte[] value, UserId targetId, bool recordPacketInfo){
             if(!p2pConfig.Instance.sessionCore.IsConnected){ return; }
             if(value.Length > MAX_LARGEPACKET_SIZE){
-                throw new ArgumentException("SendPacket(Large): Data size exceeds maximum large packet size");
+                throw new ArgumentException("SendLargePackets: Data size exceeds maximum large packet size");
             }
             if(recordPacketInfo){
                 p2pInfo.Instance.lastTargetRPCInfo.ch = ch;
@@ -323,9 +315,7 @@ namespace SynicSugar.P2P {
                 }
 
             }
-        #if SYNICSUGAR_LOG
-            Debug.Log($"SendLargePackets: Finish to Send to {targetId}!");
-        #endif
+            Logger.Log($"SendLargePackets", $"Finish to Send to {targetId}!");
         }
         //To use Span. However, this process generates Garbage by each loop.
         static void SendPacket(byte[] value, int startIndex, int length, byte[] header, UserId targetId, byte ch){
@@ -351,7 +341,7 @@ namespace SynicSugar.P2P {
             ResultE result = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface().SendPacket(ref options);
 
             if(result != ResultE.Success){
-                Debug.LogErrorFormat("Send Large Packet: can't send packet, code: {0}", result);
+                Logger.LogError("SendPacket", "can't send packet.", (Result)result);
                 return;
             }
         }
@@ -364,14 +354,12 @@ namespace SynicSugar.P2P {
         public async static UniTask SendLargePacketsToAll(byte ch, byte[] value){
             if(!p2pConfig.Instance.sessionCore.IsConnected){ return; }
             if(value.Length > MAX_LARGEPACKET_SIZE){
-                throw new ArgumentException("SendPacket(Large/All): Data size exceeds maximum large packet size");
+                throw new ArgumentException("SendLargePacketsToAll: Data size exceeds maximum large packet size");
             }
             foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
                 await SendLargePackets(ch, value, id);
             }
-        #if SYNICSUGAR_LOG
-            Debug.Log($"Finish SendLargePacketsToAll for {ch}");
-        #endif
+            Logger.Log("SendLargePacketsToAll", $"Finish SendLargePacketsToAll for {ch}");
         }
         
         /// <summary>
@@ -383,7 +371,7 @@ namespace SynicSugar.P2P {
         public async static UniTask SendLargePacketsToAll(byte ch, byte[] value, bool recordPacketInfo){
             if(!p2pConfig.Instance.sessionCore.IsConnected){ return; }
             if(value.Length > MAX_LARGEPACKET_SIZE){
-                throw new ArgumentException("SendPacket(Large/ALL): Data size exceeds maximum large packet size");
+                throw new ArgumentException("SendLargePacketsToAll: Data size exceeds maximum large packet size");
             }
             if(recordPacketInfo){
                 p2pInfo.Instance.lastRpcInfo.ch = ch;
@@ -399,9 +387,7 @@ namespace SynicSugar.P2P {
             foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
                 await SendLargePackets(ch, value, id);
             }
-        #if SYNICSUGAR_LOG
-            Debug.Log($"Finish SendLargePacketsToAll for {ch}");
-        #endif
+            Logger.Log("SendLargePacketsToAll", $"Finish SendLargePacketsToAll for {ch}");
         }
     #endregion
 
@@ -420,7 +406,7 @@ namespace SynicSugar.P2P {
         public static void SendSynicPackets(byte ch, byte[] value, UserId targetId, UserId dataOwner, byte syncedPhase = 9, bool syncSpecificPhase = false){
             if(!p2pConfig.Instance.sessionCore.IsConnected){ return; }
             if(value.Length > MAX_LARGEPACKET_SIZE){
-                throw new ArgumentException("SendPacket(Synic): Data size exceeds maximum large packet size");
+                throw new ArgumentException("SendSynicPackets: Data size exceeds maximum large packet size");
             }
             int length = MAX_LARGEPACKET_PAYLOADSIZE;
             byte[] header = GenerateHeader(value.Length, syncedPhase, syncSpecificPhase, targetId, dataOwner);
@@ -454,15 +440,13 @@ namespace SynicSugar.P2P {
                 ResultE result = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface().SendPacket(ref options);
 
                 if(result != ResultE.Success){
-                    Debug.LogErrorFormat("Send Large Packet: can't send packet, code: {0}", result);
+                    Logger.LogError("SendSynicPackets", "can't send packet.", (Result)result);
                     return;
                 }
                 //add index
                 header[0]++;
             }
-        #if SYNICSUGAR_LOG
-            Debug.Log($"Send Large Packet: Success to {targetId}!");
-        #endif
+            Logger.Log("SendSynicPackets", $"Success to {targetId}!");
         }
     #endregion
     #region Large-packet header

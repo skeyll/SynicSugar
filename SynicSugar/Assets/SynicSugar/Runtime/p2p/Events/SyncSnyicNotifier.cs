@@ -27,6 +27,7 @@ namespace SynicSugar.P2P {
                 ReceivedUsers.Clear();
                 _receivedAllSyncSynic = false;
                 includeDisconnectedData = false;
+                Logger.Log("ReceivedAllSyncSynic", "Initialize Synicflags and returne True.");
 
                 return true;
             }
@@ -38,6 +39,7 @@ namespace SynicSugar.P2P {
         /// <param name="id"></param>
         /// <param name="phase"></param>
         internal void UpdateSynicStatus(string id, byte phase){
+            Logger.Log("UpdateSynicStatus", $"Received Synic packet from {id}.");
             if (!ReceivedUsers.Contains(id)){
                 ReceivedUsers.Add(id);
                 LastSyncedUserId = UserId.GetUserId(id);
@@ -52,6 +54,7 @@ namespace SynicSugar.P2P {
             OnSyncedSynic?.Invoke();
 
             if(ReceivedUsers.Count == (includeDisconnectedData ? p2pInfo.Instance.CurrentAllUserIds.Count : p2pInfo.Instance.CurrentConnectedUserIds.Count)){
+                Logger.Log("UpdateSynicStatus", "Initialize because Synic flag returned True.Receive all Synic packets and reset flags.");
                 _receivedAllSyncSynic = true;
             }
         }

@@ -14,6 +14,7 @@ namespace SynicSugar.MatchMake{
                     return attribute;
                 }
             }
+            Logger.LogError("GetAttributeData", $"can't get attribute data for {Key}.");
             //No data
             return null;
         }

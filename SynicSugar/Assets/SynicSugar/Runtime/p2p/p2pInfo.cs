@@ -10,8 +10,10 @@ namespace SynicSugar.P2P {
 #region Singleton
         public static p2pInfo Instance { get; private set; }
         void Awake() {
+            Logger.Log("p2pInfo", "Start initialization of p2pInfo.");
             if( Instance != null ) {
                 Destroy( this );
+                Logger.Log("p2pInfo", "Discard this instance since p2pInfo already exists.");
                 return;
             }
             Instance = this;
@@ -255,9 +257,7 @@ namespace SynicSugar.P2P {
         /// <returns></returns>
         public async UniTask RefreshPing(UserId target){
             if(!IsInSession){
-            #if SYNICSUGAR_LOG
-                Debug.Log("RefreshPing: This local user is not in session.");
-            #endif
+                Logger.LogWarning("RefreshPing", "This local user is not in session.");
                 return;
             }
             await pings.RefreshPing(target, sessionCore.rttTokenSource.Token);
@@ -268,9 +268,7 @@ namespace SynicSugar.P2P {
         /// <returns></returns>
         public async UniTask RefreshPings(){
             if(!IsInSession){
-            #if SYNICSUGAR_LOG
-                Debug.Log("RefreshPing: This local user is not in session.");
-            #endif
+                Logger.LogWarning("RefreshPing", "This local user is not in session.");
                 return;
             }
             await pings.RefreshPings(sessionCore.rttTokenSource.Token);

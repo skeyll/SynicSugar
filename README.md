@@ -9,6 +9,11 @@ Almost SynicSugar APIs are zero-allocation in Runtime, so the process is sonic. 
 
 For more details, visit [https://skeyll.github.io/SynicSugar/](https://skeyll.github.io/SynicSugar/).
 
+## Why SynicSugar?
+Most networking libraries are designed with dedicated servers in mind. In contrast, SynicSugar is built on a serverless P2P architecture, seamlessly supporting host migration and even providing a reconnection feature for disconnected players. 
+
+With its focus on small-scale games and a simple API, SynicSugar enables efficient and cost-effective network development.
+
 [![Sample(youtube)](https://github.com/skeyll/SynicSugar/blob/main/Resources/youtube_thumbnail.png)](https://www.youtube.com/embed/hQT1yniGNi0)
 
 ## Features:

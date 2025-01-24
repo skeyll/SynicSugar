@@ -16,6 +16,7 @@ namespace SynicSugar.MatchMake {
         public void Register(Action save, Action delete, bool changeType = true){
             if(changeType){
                 MatchMakeManager.Instance.lobbyIdSaveType = MatchMakeManager.RecconectLobbyIdSaveType.CustomMethod;
+                Logger.Log("LobbyIDMethod.Register", $"SaveType changed to CustomMethod.");
             }
             Save += save;
             Delete += delete;

@@ -141,6 +141,7 @@ namespace SynicSugar.MatchMake {
         }
         
         internal void ChangeState(State state){
+            Logger.Log("ChangeState", $"Matchmaking state has changed. Current state is {state}.");
             switch(state){
                 case State.Standby:
                     canKick = false;
@@ -224,12 +225,11 @@ namespace SynicSugar.MatchMake {
                 enabledManualConclude = meetMinCondition;
                 
                 if(meetMinCondition){
-                #if SYNICSUGAR_LOG
-                    UnityEngine.Debug.Log("LobbyMemberCountChanged: Matchmaking meets min member conditions. Host can close Lobby from now.");
-                #endif
                     EnableHostConclude?.Invoke();
+                    Logger.Log("LobbyMemberCountChanged", "Matchmaking meets min member conditions. Host can close Lobby from now.");
                 }else{
                     DisableHostConclude?.Invoke();
+                    Logger.Log("LobbyMemberCountChanged", "The member conditions are no longer met.");
                 }
             }
         }
@@ -241,12 +241,11 @@ namespace SynicSugar.MatchMake {
                 enabledManualConclude = meetMinCondition;
                 
                 if(meetMinCondition){
-                #if SYNICSUGAR_LOG
-                    UnityEngine.Debug.Log("LobbyMemberCountChanged: Matchmaking meets min member conditions. Host can close Lobby from now.");
-                #endif
                     EnableHostConclude?.Invoke();
+                    Logger.Log("LocalUserIsPromoted", "Matchmaking meets min member conditions. Host can close Lobby from now.");
                 }else{
                     DisableHostConclude?.Invoke();
+                    Logger.Log("LocalUserIsPromoted", "The member conditions are no longer met.");
                 }
             }
         }
@@ -256,6 +255,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="target"></param>
         /// <param name="isParticipated"></param>
         internal void LobbyMemberCountChanged(UserId target, bool isParticipated){
+            Logger.Log("LobbyMemberCountChanged", $"UserId({target}) is participated: {isParticipated}");
             OnLobbyMemberCountChanged?.Invoke(target, isParticipated);
         }
     }

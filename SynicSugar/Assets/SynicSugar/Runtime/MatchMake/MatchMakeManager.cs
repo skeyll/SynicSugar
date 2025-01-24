@@ -12,8 +12,10 @@ namespace SynicSugar.MatchMake {
 #region Singleton
         public static MatchMakeManager Instance { get; private set; }
         void Awake() {
+            Logger.Log("MatchMakeManager", "Start initialization of MatchMakeManager.");
             if( Instance != null ) {
                 Destroy( gameObject );
+                Logger.Log("MatchMakeManager", "Discard this instance since SynicSugarManger already exists.");
                 return;
             }
             Instance = this;
@@ -198,10 +200,8 @@ namespace SynicSugar.MatchMake {
         /// <param name="token">For cancel matchmaking. If cancelled externally, all processes are cancelled via Timeout processing.</param>
         /// <returns></returns>
         public async UniTask<Result> SearchAndCreateLobby(Lobby lobbyCondition, CancellationToken token = default(CancellationToken)){
-            if(IsMatchmaking || SynicSugarManger.Instance.State.IsInSession){        
-            #if SYNICSUGAR_LOG
-                Debug.Log(IsMatchmaking ? "SearchAndCreateLobby: Matchmaking is in progress" : "SearchAndCreateLobby: Currently in session.");
-            #endif
+            if(IsMatchmaking || SynicSugarManger.Instance.State.IsInSession){
+                Logger.LogWarning("SearchAndCreateLobby", IsMatchmaking ? "Matchmaking is in progress" : "Currently in session.");
                 return Result.InvalidAPICall;
             }
             //Matchmaking
@@ -212,9 +212,7 @@ namespace SynicSugar.MatchMake {
                 SynicSugarManger.Instance.State.IsMatchmaking = false;
                 return matchmakingResult;
             }
-            #if SYNICSUGAR_LOG
-                Debug.Log("SearchAndCreateLobby: Lobby matched successfully. Transitioning to P2P setup.");
-            #endif
+            Logger.Log("SearchAndCreateLobby", "Lobby matched successfully. Transitioning to P2P setup.");
             //p2p setup
             return await SetupP2P(false, token);
         }
@@ -231,10 +229,8 @@ namespace SynicSugar.MatchMake {
         /// <param name="token">For cancel matchmaking. If cancelled externally, all processes are cancelled via Timeout processing.</param>
         /// <returns></returns>
         public async UniTask<Result> SearchAndCreateLobby(Lobby lobbyCondition, uint minLobbyMember, List<AttributeData> userAttributes = null, CancellationToken token = default(CancellationToken)){    
-            if(IsMatchmaking || SynicSugarManger.Instance.State.IsInSession){        
-            #if SYNICSUGAR_LOG
-                Debug.Log(IsMatchmaking ? "SearchAndCreateLobby: Matchmaking is in progress" : "SearchAndCreateLobby: Currently in session.");
-            #endif
+            if(IsMatchmaking || SynicSugarManger.Instance.State.IsInSession){
+                Logger.LogWarning("SearchAndCreateLobby", IsMatchmaking ? "Matchmaking is in progress" : "Currently in session.");
                 return Result.InvalidAPICall;
             }
             //Matchmaking
@@ -245,9 +241,7 @@ namespace SynicSugar.MatchMake {
                 SynicSugarManger.Instance.State.IsMatchmaking = false;
                 return matchmakingResult;
             }
-            #if SYNICSUGAR_LOG
-                Debug.Log("SearchAndCreateLobby: Lobby matched successfully. Transitioning to P2P setup.");
-            #endif
+            Logger.Log("SearchAndCreateLobby", "Lobby matched successfully. Transitioning to P2P setup.");
             //p2p setup
             return await SetupP2P(false, token);
         }
@@ -258,6 +252,7 @@ namespace SynicSugar.MatchMake {
             matchmakeTokenSource = new CancellationTokenSource();
             MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Start);
             
+            Logger.Log("SearchAndCreateLobbyEntity", $"Start MatchMaking. Bucket: {lobbyCondition.BucketId} / MaxPlayers: {lobbyCondition.MaxLobbyMembers} / VoiceChat: {lobbyCondition.bEnableRTCRoom}");
             TimeoutTimer(timeoutSec, token).Forget();
 
             try{
@@ -284,9 +279,7 @@ namespace SynicSugar.MatchMake {
         /// <returns></returns>
         public async UniTask<Result> SearchLobby(Lobby lobbyCondition, CancellationToken token = default(CancellationToken)){
             if(IsMatchmaking || SynicSugarManger.Instance.State.IsInSession){        
-            #if SYNICSUGAR_LOG
-                Debug.Log(IsMatchmaking ? "SearchLobby: Matchmaking is in progress" : "SearchLobby: Currently in session.");
-            #endif
+                Logger.LogWarning("SearchLobby", IsMatchmaking ? "Matchmaking is in progress" : "Currently in session.");
                 return Result.InvalidAPICall;
             }
             //Matchmaking
@@ -297,9 +290,7 @@ namespace SynicSugar.MatchMake {
                 SynicSugarManger.Instance.State.IsMatchmaking = false;
                 return matchmakingResult;
             }
-            #if SYNICSUGAR_LOG
-                Debug.Log("SearchLobby: Lobby matched successfully. Transitioning to P2P setup.");
-            #endif
+            Logger.Log("SearchLobby", "Lobby matched successfully. Transitioning to P2P setup.");
             //p2p setup
             return await SetupP2P(false, token);
         }
@@ -316,10 +307,8 @@ namespace SynicSugar.MatchMake {
         /// <param name="token">For cancel matchmaking. If cancelled externally, all processes are cancelled via Timeout processing.</param>
         /// <returns></returns>
         public async UniTask<Result> SearchLobby(Lobby lobbyCondition, uint minLobbyMember, List<AttributeData> userAttributes = null, CancellationToken token = default(CancellationToken)){
-            if(IsMatchmaking || SynicSugarManger.Instance.State.IsInSession){        
-            #if SYNICSUGAR_LOG
-                Debug.Log(IsMatchmaking ? "SearchLobby: Matchmaking is in progress" : "SearchLobby: Currently in session.");
-            #endif
+            if(IsMatchmaking || SynicSugarManger.Instance.State.IsInSession){
+                Logger.LogWarning("SearchLobby", IsMatchmaking ? "Matchmaking is in progress" : "Currently in session.");
                 return Result.InvalidAPICall;
             }
             //Matchmaking
@@ -330,9 +319,7 @@ namespace SynicSugar.MatchMake {
                 SynicSugarManger.Instance.State.IsMatchmaking = false;
                 return matchmakingResult;
             }
-            #if SYNICSUGAR_LOG
-                Debug.Log("SearchLobby: Lobby matched successfully. Transitioning to P2P setup.");
-            #endif
+            Logger.Log("SearchLobby", "Lobby matched successfully. Transitioning to P2P setup.");
             //p2p setup
             return await SetupP2P(false, token);
         }
@@ -344,6 +331,7 @@ namespace SynicSugar.MatchMake {
             matchmakeTokenSource = new CancellationTokenSource();
             MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Start);
             
+            Logger.Log("SearchLobbyEntity", $"Start MatchMaking. Bucket: {lobbyCondition.BucketId} / MaxPlayers: {lobbyCondition.MaxLobbyMembers} / VoiceChat: {lobbyCondition.bEnableRTCRoom}");
             TimeoutTimer(timeoutSec, token).Forget();
 
             try{
@@ -369,10 +357,8 @@ namespace SynicSugar.MatchMake {
         /// <param name="token">For cancel matchmaking. If cancelled externally, all processes are cancelled via Timeout processing.</param>
         /// <returns></returns>
         public async UniTask<Result> CreateLobby(Lobby lobbyCondition, CancellationToken token = default(CancellationToken)){
-            if(IsMatchmaking || SynicSugarManger.Instance.State.IsInSession){        
-            #if SYNICSUGAR_LOG
-                Debug.Log(IsMatchmaking ? "CreateLobby: Matchmaking is in progress" : "CreateLobby: Currently in session.");
-            #endif
+            if(IsMatchmaking || SynicSugarManger.Instance.State.IsInSession){
+                Logger.LogWarning("CreateLobby", IsMatchmaking ? "Matchmaking is in progress" : "Currently in session.");
                 return Result.InvalidAPICall;
             }
             //Matchmaking
@@ -383,9 +369,7 @@ namespace SynicSugar.MatchMake {
                 SynicSugarManger.Instance.State.IsMatchmaking = false;
                 return matchmakingResult;
             }
-            #if SYNICSUGAR_LOG
-                Debug.Log("CreateLobby: Lobby matched successfully. Transitioning to P2P setup.");
-            #endif
+            Logger.Log("CreateLobby", "Lobby matched successfully. Transitioning to P2P setup.");
             //p2p setup
             return await SetupP2P(false, token);
         }
@@ -403,9 +387,7 @@ namespace SynicSugar.MatchMake {
         /// <returns></returns>
         public async UniTask<Result> CreateLobby(Lobby lobbyCondition, uint minLobbyMember, List<AttributeData> userAttributes = null, CancellationToken token = default(CancellationToken)){
             if(IsMatchmaking || SynicSugarManger.Instance.State.IsInSession){        
-            #if SYNICSUGAR_LOG
-                Debug.Log(IsMatchmaking ? "CreateLobby: Matchmaking is in progress" : "CreateLobby: Currently in session.");
-            #endif
+                Logger.LogWarning("CreateLobby", IsMatchmaking ? "Matchmaking is in progress" : "Currently in session.");
                 return Result.InvalidAPICall;
             }
             
@@ -416,9 +398,7 @@ namespace SynicSugar.MatchMake {
                 SynicSugarManger.Instance.State.IsMatchmaking = false;
                 return matchmakingResult;
             }
-            #if SYNICSUGAR_LOG
-                Debug.Log("CreateLobby: Lobby matched successfully. Transitioning to P2P setup.");
-            #endif
+            Logger.Log("CreateLobby", "Lobby matched successfully. Transitioning to P2P setup.");
             //p2p setup
             return await SetupP2P(false, token);
         }
@@ -430,6 +410,7 @@ namespace SynicSugar.MatchMake {
             matchmakeTokenSource = new CancellationTokenSource();
             MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Start);
 
+            Logger.Log("CreateLobbyEntity", $"Start MatchMaking. Bucket: {lobbyCondition.BucketId} / MaxPlayers: {lobbyCondition.MaxLobbyMembers} / VoiceChat: {lobbyCondition.bEnableRTCRoom}");
             TimeoutTimer(timeoutSec, token).Forget();
 
             try{
@@ -453,21 +434,15 @@ namespace SynicSugar.MatchMake {
         /// <param name="LobbyID">Lobby ID to <c>re</c>-connect</param>
         /// <param name="token">For cancel matchmaking. If cancelled externally, all processes are cancelled via Timeout processing.</param>
         public async UniTask<Result> ReconnectLobby(string LobbyID, CancellationToken token = default(CancellationToken)){
-            if(IsMatchmaking || SynicSugarManger.Instance.State.IsInSession){        
-            #if SYNICSUGAR_LOG
-                Debug.Log(IsMatchmaking ? "ReconnectLobby: Matchmaking is in progress" : "ReconnectLobby: Currently in session.");
-            #endif
+            if(IsMatchmaking || SynicSugarManger.Instance.State.IsInSession){
+                Logger.LogWarning("ReconnectLobby", IsMatchmaking ? "Matchmaking is in progress" : "Currently in session.");
                 return Result.InvalidAPICall;
             }
             if(string.IsNullOrEmpty(LobbyID)){
-             #if SYNICSUGAR_LOG
-                Debug.Log("ReconnectLobby: LobbyId is empty.");
-            #endif
+                Logger.Log("ReconnectLobby", "LobbyId is empty.");
                 return Result.InvalidParameters;
             }
-    #if SYNICSUGAR_LOG
-            Debug.Log($"ReconnectLobby: Try to join lobby. LobbyId: {LobbyID}");
-    #endif
+            Logger.Log("ReconnectLobby", $"Try to join lobby. LobbyId: {LobbyID}");
             isLooking = true;
             SynicSugarManger.Instance.State.IsMatchmaking = true;
             MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Reconnect);
@@ -476,7 +451,9 @@ namespace SynicSugar.MatchMake {
                 Result joinResult = await matchmakingCore.JoinLobbyBySavedLobbyId(LobbyID, token);
 
                 isLooking = false;
+
                 if(joinResult != Result.Success){
+                    Logger.Log("ReconnectLobby", "ReconnectLobby is failer.", joinResult);
                     MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
                     SynicSugarManger.Instance.State.IsMatchmaking = false;
                     return joinResult;
@@ -487,9 +464,7 @@ namespace SynicSugar.MatchMake {
                 SynicSugarManger.Instance.State.IsMatchmaking = false;
                 return Result.Canceled;
             }
-            #if SYNICSUGAR_LOG
-                Debug.Log("ReconnectLobby: Lobby matched successfully. Transitioning to P2P setup.");
-            #endif
+            Logger.Log("ReconnectLobby", "Lobby matched successfully. Transitioning to P2P setup.");
             return await SetupP2P(true, token);
         }
 
@@ -513,31 +488,28 @@ namespace SynicSugar.MatchMake {
                 //Cancel matchmaking in timeout(=isLooking)
                 //or the matchmaking is complete(=!isLooking).
                 if(isLooking){
-                #if SYNICSUGAR_LOG
-                    Debug.Log("Cancel matching by timeout");
-                #endif
+                    Logger.Log("TimeoutTimer", "Cancel matching by timeout");
                     matchmakeTokenSource?.Cancel();
                 }
             }
             catch (OperationCanceledException){ // Cancel matchmaking process by user from library outside.
             #if SYNICSUGAR_LOG
                 if(timeUntilTimeout > 0){
-                    Debug.Log("TimeoutTimer: Canceld matching by cancel token from MatchMakeManager outside.");
+                    Logger.Log("TimeoutTimer", "Canceld matching by cancel token from MatchMakeManager outside.");
                 }else{
-                    Debug.Log("TimeoutTimer: Cancel matching by timeout");
+                    Logger.Log("TimeoutTimer", "Cancel matching by timeout");
                 }
             #endif
                 timeUntilTimeout = 0f;
             }
-        #if SYNICSUGAR_LOG
-            Debug.Log("TimeoutTimer: Stop timeout timer for looking opponents.");
-        #endif
+            Logger.Log("TimeoutTimer", "Stop timeout timer for looking opponents.");
         }
 
         void DisposeMatchmakingTokenSource(){
             matchmakeTokenSource?.Cancel();
             matchmakeTokenSource?.Dispose();
             matchmakeTokenSource = null;
+            Logger.Log("DisposeMatchmakingTokenSource", "Dispose current cancel token source for Matchmaking.");
         }
         /// <summary>
         /// Call this after matchmaking to prepare for p2p connection.
@@ -588,9 +560,8 @@ namespace SynicSugar.MatchMake {
             SynicSugarManger.Instance.State.IsInSession = true;
             timeUntilTimeout = 0f;
 
-        #if SYNICSUGAR_LOG
-            Debug.Log($"SetupP2P: Finish p2p setup. isReconencter {isReconencter} / IsMatchmaking {IsMatchmaking} / IsInSession {SynicSugarManger.Instance.State.IsInSession} / SessionType {p2pInfo.Instance.SessionType}");
-        #endif
+            Logger.Log("SetupP2P", $"Finish p2p setup. isReconencter {isReconencter} / IsMatchmaking {IsMatchmaking} / IsInSession {SynicSugarManger.Instance.State.IsInSession} / SessionType {p2pInfo.Instance.SessionType}");
+
             return Result.Success;
         }
 
@@ -599,13 +570,14 @@ namespace SynicSugar.MatchMake {
         /// </summary>
         public void ConcludeMatchMake(){
             if(isConcluding || !isHost){
-                Debug.LogError("ConcludeMatchMake: This user can't conclude lobby now.");
+                Logger.LogWarning("ConcludeMatchMake", "This user can't conclude lobby now.");
                 return;
             }
             isConcluding = true;
             MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.SetupP2P);
             matchmakingCore.SwitchLobbyAttribute();
             isConcluding = false;
+            Logger.Log("ConcludeMatchMake", "The host has hidden the lobby from search results");
         }
         
         /// <summary>
@@ -620,14 +592,10 @@ namespace SynicSugar.MatchMake {
         /// <returns></returns>
         public async UniTask<Result> ExitCurrentMatchMake(bool destroyManager = true, CancellationToken token = default(CancellationToken)){
             if(!IsMatchmaking || !isLooking){
-            #if SYNICSUGAR_LOG
-                Debug.Log("ExitCurrentMatchMake: This user is not in matchmaking now.");
-            #endif
+                Logger.LogWarning("ExitCurrentMatchMake", "This user is not in matchmaking now.");
                 return Result.InvalidAPICall;
             }
-        #if SYNICSUGAR_LOG
-            Debug.Log("ExitCurrentMatchMake: Starting to leave the Matchmake.");
-        #endif
+            Logger.Log("ExitCurrentMatchMake", "Starting to leave the Matchmake.");
             isLooking = false;
             MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Cancel);
             Result cancelResult = await matchmakingCore.CancelMatchMaking(token);
@@ -639,9 +607,7 @@ namespace SynicSugar.MatchMake {
                 Destroy(gameObject);
             }
             SynicSugarManger.Instance.State.IsMatchmaking = false;
-        #if SYNICSUGAR_LOG
-            Debug.Log($"ExitCurrentMatchMake: Finish leaving matchmake. / IsMatchmaking {IsMatchmaking} / IsInSession {SynicSugarManger.Instance.State.IsInSession} / SessionType {p2pInfo.Instance.SessionType}");
-        #endif
+            Logger.Log("ExitCurrentMatchMake", $"Finish leaving matchmake. / IsMatchmaking {IsMatchmaking} / IsInSession {SynicSugarManger.Instance.State.IsInSession} / SessionType {p2pInfo.Instance.SessionType}");
             return Result.Success;
         }
         /// <summary>
@@ -656,14 +622,11 @@ namespace SynicSugar.MatchMake {
         /// <returns></returns>
         public async UniTask<Result> CloseCurrentMatchMake(bool destroyManager = true, CancellationToken token = default(CancellationToken)){
             if(!IsMatchmaking || !isLooking){
-            #if SYNICSUGAR_LOG
-                Debug.Log("CloseCurrentMatchMake: This user is not in matchmaking now.");
-            #endif
+                Logger.LogWarning("CloseCurrentMatchMake", "This user is not in matchmaking now.");
                 return Result.InvalidAPICall;
             }
-        #if SYNICSUGAR_LOG
-            Debug.Log("CloseCurrentMatchMake: Starting to close the Matchmake.");
-        #endif
+            Logger.Log("CloseCurrentMatchMake", "Starting to close the Matchmake.");
+
             isLooking = false;
             MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Cancel);
             Result closeResult = await matchmakingCore.CloseMatchMaking(token);
@@ -675,9 +638,8 @@ namespace SynicSugar.MatchMake {
                 Destroy(gameObject);
             }
             SynicSugarManger.Instance.State.IsMatchmaking = false;
-        #if SYNICSUGAR_LOG
-            Debug.Log($"CloseCurrentMatchMake: Finish closing matchmake. / IsMatchmaking {IsMatchmaking} / IsInSession {SynicSugarManger.Instance.State.IsInSession} / SessionType {p2pInfo.Instance.SessionType}");
-        #endif
+            Logger.Log("CloseCurrentMatchMake", $"Finish closing matchmake. / IsMatchmaking {IsMatchmaking} / IsInSession {SynicSugarManger.Instance.State.IsInSession} / SessionType {p2pInfo.Instance.SessionType}");
+
             return Result.Success;
         }
         
@@ -689,6 +651,8 @@ namespace SynicSugar.MatchMake {
         public async UniTask<Result> KickTargetFromLobby(UserId targetId, CancellationToken token = default(CancellationToken)){
             Result result = await matchmakingCore.KickTargetMember(targetId, token);
 
+            Logger.Log("KickTargetFromLobby", $"Kick {targetId}", result);
+
             return result;
         }
         /// <summary>
@@ -697,9 +661,8 @@ namespace SynicSugar.MatchMake {
         /// <param name="cleanupMemberCountChanged">Need to call MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(id, false) after exit lobby?</param>
         /// <param name="token">Token for this task</param>
         internal async UniTask<Result> ExitCurrentLobby(bool cleanupMemberCountChanged, CancellationToken token){
-        #if SYNICSUGAR_LOG
-            Debug.Log("ExitCurrentLobby: Starting to leave the lobby.");
-        #endif
+            Logger.Log("ExitCurrentLobby", "Starting to leave the lobby.");
+
             Result result = await matchmakingCore.LeaveLobby(token);
 
             if(result == Result.Success && cleanupMemberCountChanged){
@@ -710,9 +673,8 @@ namespace SynicSugar.MatchMake {
             }
 
             p2pInfo.Instance.SessionType = SessionType.None;
-        #if SYNICSUGAR_LOG
-            Debug.Log($"ExitCurrentLobby: Finish destorying the lobby. / IsMatchmaking {IsMatchmaking} / IsInSession {SynicSugarManger.Instance.State.IsInSession} / SessionType {p2pInfo.Instance.SessionType}");
-        #endif
+            Logger.Log("ExitCurrentLobby", $"Finish destorying the lobby. / IsMatchmaking {IsMatchmaking} / IsInSession {SynicSugarManger.Instance.State.IsInSession} / SessionType {p2pInfo.Instance.SessionType}");
+
             return result;
         }
         /// <summary>
@@ -722,9 +684,8 @@ namespace SynicSugar.MatchMake {
         /// <param name="token">Token for this task</param>
         /// <returns>True on success. If user isn't host, return false.</returns>
         internal async UniTask<Result> CloseCurrentLobby(bool cleanupMemberCountChanged, CancellationToken token){
-        #if SYNICSUGAR_LOG
-            Debug.Log("CloseCurrentLobby: Starting to close the lobby.");
-        #endif
+            Logger.Log("CloseCurrentLobby", "CloseCurrentLobby: Starting to close the lobby.");
+
             Result result = await matchmakingCore.DestroyLobby(token);
 
             if(result == Result.Success && cleanupMemberCountChanged){
@@ -735,9 +696,8 @@ namespace SynicSugar.MatchMake {
             }
 
             p2pInfo.Instance.SessionType = SessionType.None;
-        #if SYNICSUGAR_LOG
-            Debug.Log($"CloseCurrentLobby: Finish closing the lobby. / IsMatchmaking {IsMatchmaking} / IsInSession {SynicSugarManger.Instance.State.IsInSession} / SessionType {p2pInfo.Instance.SessionType}");
-        #endif
+            Logger.Log("CloseCurrentLobby", $"Finish closing the lobby. / IsMatchmaking {IsMatchmaking} / IsInSession {SynicSugarManger.Instance.State.IsInSession} / SessionType {p2pInfo.Instance.SessionType}");
+
             return result;
         }
         /// <summary>
@@ -754,9 +714,7 @@ namespace SynicSugar.MatchMake {
             }
 
             p2pInfo.Instance.SessionType = SessionType.None;
-        #if SYNICSUGAR_LOG
-            Debug.Log($"ResetStateOnLobbyClosure: Finish destorying the lobby. / IsMatchmaking {IsMatchmaking} / IsInSession {SynicSugarManger.Instance.State.IsInSession} / SessionType {p2pInfo.Instance.SessionType}");
-        #endif
+            Logger.Log("ResetStateOnLobbyClosure", $"ResetStateOnLobbyClosure: Finish destorying the lobby. / IsMatchmaking {IsMatchmaking} / IsInSession {SynicSugarManger.Instance.State.IsInSession} / SessionType {p2pInfo.Instance.SessionType}");
         }
     #region Offline Mode
         /// <summary>
@@ -775,12 +733,11 @@ namespace SynicSugar.MatchMake {
         /// <returns>Always return true. the LastResultCode becomes Success after return true.</returns>
         public async UniTask<Result> CreateOfflineLobby(Lobby lobbyCondition, OfflineMatchmakingDelay delay, List<AttributeData> userAttributes = null, CancellationToken token = default(CancellationToken)){
             if(IsMatchmaking || SynicSugarManger.Instance.State.IsInSession){        
-            #if SYNICSUGAR_LOG
-                Debug.Log(IsMatchmaking ? "CreateOfflineLobby: Matchmaking is in progress" : "CreateOfflineLobby: Currently in session.");
-            #endif
+                Logger.LogWarning("CreateOfflineLobby", IsMatchmaking ? "Matchmaking is in progress" : "Currently in session.");
                 return Result.InvalidAPICall;
             }
             SynicSugarManger.Instance.State.IsMatchmaking = true;
+            Logger.Log("CreateOfflineLobby", $"Start MatchMaking. Bucket: {lobbyCondition.BucketId} / MaxPlayers: {lobbyCondition.MaxLobbyMembers} / VoiceChat: {lobbyCondition.bEnableRTCRoom}");
             
             try{
                 isLooking = true;
@@ -793,14 +750,12 @@ namespace SynicSugar.MatchMake {
                 SynicSugarManger.Instance.State.IsMatchmaking = false;
                 SynicSugarManger.Instance.State.IsInSession = true;
                 p2pInfo.Instance.SessionType = SessionType.OfflineSession;
-        #if SYNICSUGAR_LOG
-            Debug.Log($"CreateOfflineLobby: Finish creating the lobby. / IsMatchmaking {IsMatchmaking} / IsInSession {SynicSugarManger.Instance.State.IsInSession} / SessionType {p2pInfo.Instance.SessionType}");
-        #endif
+                Logger.Log("CreateOfflineLobby", $"Finish creating the lobby. / IsMatchmaking {IsMatchmaking} / IsInSession {SynicSugarManger.Instance.State.IsInSession} / SessionType {p2pInfo.Instance.SessionType}");
+
                 return result;
             }catch(OperationCanceledException){
-            #if SYNICSUGAR_LOG
-                Debug.Log("MatchMaking is canceled");
-            #endif 
+                Logger.Log("CreateOfflineLobby", "MatchMaking is canceled");
+
                 isLooking = false;
                 SynicSugarManger.Instance.State.IsMatchmaking = false;
                 MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
@@ -814,9 +769,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="cleanupMemberCountChanged">If true, destroy NetworkManager after cancel matchmake.</param>
         /// <returns>Always return true. the LastResultCode becomes Success after return true.</returns>
         internal async UniTask<Result> DestoryOfflineLobby(bool cleanupMemberCountChanged, CancellationToken token){
-        #if SYNICSUGAR_LOG
-            Debug.Log("DestoryOfflineLobby: Starting to destory the lobby.");
-        #endif
+            Logger.Log("DestoryOfflineLobby", "Starting to destory the lobby.");
             await matchmakingCore.DestroyOfflineLobby(token);
 
             if(cleanupMemberCountChanged){
@@ -824,9 +777,8 @@ namespace SynicSugar.MatchMake {
             }
             
             p2pInfo.Instance.SessionType = SessionType.None;
-        #if SYNICSUGAR_LOG
-            Debug.Log($"DestoryOfflineLobby: Finish destorying the lobby. / IsMatchmaking {IsMatchmaking} / IsInSession {SynicSugarManger.Instance.State.IsInSession} / SessionType {p2pInfo.Instance.SessionType}");
-        #endif
+            Logger.Log("DestoryOfflineLobby", $"Finish destorying the lobby. / IsMatchmaking {IsMatchmaking} / IsInSession {SynicSugarManger.Instance.State.IsInSession} / SessionType {p2pInfo.Instance.SessionType}");
+
             return Result.Success;
         }
     #endregion
@@ -843,9 +795,8 @@ namespace SynicSugar.MatchMake {
         /// Save lobby data for player to connect unexpectedly left lobby like power off.
         /// </summary>
         internal async UniTask OnSaveLobbyID(){
-    #if SYNICSUGAR_LOG
-            Debug.Log($"Save LobbyID by {lobbyIdSaveType}");
-    #endif
+            Logger.Log("OnSaveLobbyID", $"Save LobbyID by {lobbyIdSaveType}");
+
             switch(lobbyIdSaveType){
                 case RecconectLobbyIdSaveType.NoReconnection:
                 return;
@@ -864,9 +815,8 @@ namespace SynicSugar.MatchMake {
         /// Delete save data for player not to connect the current lobby after the battle.
         /// </summary>
         internal async UniTask OnDeleteLobbyID(){
-    #if SYNICSUGAR_LOG
-            Debug.Log($"Delete LobbyID by {lobbyIdSaveType}");
-    #endif
+            Logger.Log("OnDeleteLobbyID", $"Delete LobbyID by {lobbyIdSaveType}");
+
             switch(lobbyIdSaveType){
                 case RecconectLobbyIdSaveType.NoReconnection:
                 return;
@@ -902,6 +852,7 @@ namespace SynicSugar.MatchMake {
             lobby.SetBucketID(bucket);
             lobby.MaxLobbyMembers = MaxPlayers;
             lobby.bEnableRTCRoom = useVoiceChat;
+            Logger.Log("OnGenerateLobbyObjecteleteLobbyID", $"Generate Lobby. Bucket: {lobby.BucketId} / MaxPlayers: {MaxPlayers} / VoiceChat: {useVoiceChat}");
 
             return lobby;
         }
@@ -942,7 +893,7 @@ namespace SynicSugar.MatchMake {
         [Obsolete("This is old. Can use new one that pass the CancellationToken instead of CancellationTokenSource.")]
         public async UniTask<Result> SearchAndCreateLobby(Lobby lobbyCondition, CancellationTokenSource token){
             if(isLooking){
-                Debug.Log("Matchmaking is in progress");
+                Logger.Log("SearchAndCreateLobby", "Matchmaking is in progress");
                 return Result.InvalidAPICall;
             }
             Result matchmakingResult = await SearchAndCreateLobbyEntity(lobbyCondition, 0, new List<AttributeData>(), matchmakeTokenSource.Token);
@@ -970,7 +921,7 @@ namespace SynicSugar.MatchMake {
         [Obsolete("This is old. Can use new one that pass the CancellationToken instead of CancellationTokenSource.")]
         public async UniTask<Result> SearchAndCreateLobby(Lobby lobbyCondition, uint minLobbyMember, List<AttributeData> userAttributes, CancellationTokenSource token){    
             if(isLooking){
-                Debug.Log("Matchmaking is in progress");
+                Logger.Log("SearchAndCreateLobby", "Matchmaking is in progress");
                 return Result.InvalidAPICall;
             }
             Result matchmakingResult = await SearchAndCreateLobbyEntity(lobbyCondition, minLobbyMember, userAttributes, matchmakeTokenSource.Token);
@@ -994,7 +945,7 @@ namespace SynicSugar.MatchMake {
         [Obsolete("This is old. Can use new one that pass the CancellationToken instead of CancellationTokenSource.")]
         public async UniTask<Result> SearchLobby(Lobby lobbyCondition, CancellationTokenSource token){
             if(isLooking){
-                Debug.Log("Matchmaking is in progress");
+                Logger.Log("SearchLobby", "Matchmaking is in progress");
                 return Result.InvalidAPICall;
             }
             
@@ -1024,7 +975,7 @@ namespace SynicSugar.MatchMake {
         [Obsolete("This is old. Can use new one that pass the CancellationToken instead of CancellationTokenSource.")]
         public async UniTask<Result> SearchLobby(Lobby lobbyCondition, uint minLobbyMember, List<AttributeData> userAttributes, CancellationTokenSource token){
             if(isLooking){
-                Debug.Log("Matchmaking is in progress");
+                Logger.Log("SearchLobby", "Matchmaking is in progress");
                 return Result.InvalidAPICall;
             }
             
@@ -1049,7 +1000,7 @@ namespace SynicSugar.MatchMake {
         [Obsolete("This is old. Can use new one that pass the CancellationToken instead of CancellationTokenSource.")]
         public async UniTask<Result> CreateLobby(Lobby lobbyCondition, CancellationTokenSource token = default(CancellationTokenSource)){
             if(isLooking){
-                Debug.Log("Matchmaking is in progress");
+                Logger.Log("CreateLobby", "Matchmaking is in progress");
                 return Result.InvalidAPICall;
             }
             
@@ -1078,7 +1029,7 @@ namespace SynicSugar.MatchMake {
         [Obsolete("This is old. Can use new one that pass the CancellationToken instead of CancellationTokenSource.")]
         public async UniTask<Result> CreateLobby(Lobby lobbyCondition, uint minLobbyMember, List<AttributeData> userAttributes, CancellationTokenSource token){
             if(isLooking){
-                Debug.Log("Matchmaking is in progress");
+                Logger.Log("CreateLobby", "Matchmaking is in progress");
                 return Result.InvalidAPICall;
             }
             
@@ -1104,9 +1055,8 @@ namespace SynicSugar.MatchMake {
             if(string.IsNullOrEmpty(LobbyID)){
                 return Result.InvalidParameters;
             }
-    #if SYNICSUGAR_LOG
-            Debug.Log($"Try Recconect with {LobbyID}");
-    #endif
+            Logger.Log("ReconnectLobby", $"Try Recconect with {LobbyID}");
+
             matchmakeTokenSource = new CancellationTokenSource();
             MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Reconnect);
             
@@ -1138,9 +1088,8 @@ namespace SynicSugar.MatchMake {
             try{
                 await matchmakingCore.CreateOfflineLobby(lobbyCondition, delay, userAttributes ?? new(), token.Token);
             }catch(OperationCanceledException){
-            #if SYNICSUGAR_LOG
-                Debug.Log("MatchMaking is canceled");
-            #endif
+                Logger.Log("CreateOfflineLobby", "MatchMaking is canceled");
+
                 MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Standby);
                 return Result.Canceled;
             }
@@ -1157,9 +1106,7 @@ namespace SynicSugar.MatchMake {
         [Obsolete("This is old. ConnectHub.Instance.DestoryOfflineLobby is new one")]
         public async UniTask<Result> DestoryOfflineLobby(bool destroyManager = true){
             if(!SynicSugarManger.Instance.State.IsInSession || p2pInfo.Instance.userIds.AllUserIds.Count != 1){
-            #if SYNICSUGAR_LOG
-                Debug.Log("DestoryOfflineLobby: This user dosen't have OfflineLobby.");
-            #endif
+                Logger.Log("DestoryOfflineLobby", "This user dosen't have OfflineLobby.");
                 return Result.InvalidAPICall;
             }
             p2pConfig.Instance.sessionCore.CancelRTTToken();

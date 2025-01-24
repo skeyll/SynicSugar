@@ -19,9 +19,8 @@ namespace SynicSugar.MatchMake {
         internal static async UniTask<Result> WaitConnectPreparation(CancellationToken token, int timeoutMS){
             await UniTask.WhenAny(UniTask.WaitUntil(() => p2pInfo.Instance.ConnectionNotifier.completeConnectPreparetion, cancellationToken: token), UniTask.Delay(timeoutMS, cancellationToken: token));
 
-            #if SYNICSUGAR_LOG
-                Debug.Log("WaitConnectPreparation: All connections is ready. Go to the user list syncing.");
-            #endif
+            Logger.Log("WaitConnectPreparation", "All connections is ready. Go to the user list syncing.");
+
             if(!p2pConfig.Instance.UseDisconnectedEarlyNotify){
                 ((EOSSessionManager)p2pConfig.Instance.sessionCore).RemoveNotifyPeerConnectionnEstablished();
             }
@@ -79,9 +78,7 @@ namespace SynicSugar.MatchMake {
                 if(count <= 0){
                 await UniTask.Yield(cancellationToken: token);
                     if(token.IsCancellationRequested){
-                #if SYNICSUGAR_LOG
-                        Debug.Log("SendUserListToAll: get out of the loop by Cancel");
-                #endif
+                        Logger.LogWarning("SendUserListToAll", "Get out of the loop by Cancel");
                         break;
                     }
                     count = SendBatchSize;
@@ -104,7 +101,7 @@ namespace SynicSugar.MatchMake {
             ResultE result = P2PHandle.SendPacket(ref options);
 
             if(result != ResultE.Success){
-                Debug.LogErrorFormat("SendUserLists: can't send packet, code: {0}", result);
+                Logger.LogError("SendUserLists", "Can't send packet.", (Result)result);
                 return;
             }
         }

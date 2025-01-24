@@ -48,6 +48,8 @@ namespace SynicSugar.P2P {
         /// </summary>
         /// <param name="data">Contains All UserIds and Disconnected user indexes</param>
         internal void OverwriteAllUserIdsWithOrdered(BasicInfo data){
+            Logger.Log("OverwriteAllUserIdsWithOrdered", $"Overwrite AllUserIds with {data.userIds.Count} users. , isReconencter: {isJustReconnected}");
+
             AllUserIds.Clear();
             //Change order　to same in host local.
             foreach(var id in data.userIds){
@@ -74,6 +76,7 @@ namespace SynicSugar.P2P {
         /// </summary>
         /// <param name="targetId"></param>
         internal void RemoveUserId(ProductUserId targetId){
+            Logger.Log("RemoveUserId", $"Remove {targetId}");
             UserId userId = UserId.GetUserId(targetId);
             RemoteUserIds.Remove(userId);
             CurrentAllUserIds.Remove(userId);
@@ -85,6 +88,7 @@ namespace SynicSugar.P2P {
         /// </summary>
         /// <param name="targetId"></param>
         internal void MoveTargetUserIdToLefts(ProductUserId targetId){
+            Logger.Log("MoveTargetUserIdToLefts", $"Move {targetId}");
             UserId userId = UserId.GetUserId(targetId);
             RemoteUserIds.Remove(userId);
             CurrentConnectedUserIds.Remove(userId);
@@ -97,6 +101,7 @@ namespace SynicSugar.P2P {
         /// <param name="targetId"></param>
         /// <returns></returns>
         internal void MoveTargetUserIdToRemoteUsersFromLeft(ProductUserId targetId){
+            Logger.Log("MoveTargetUserIdToRemoteUsersFromLeft", $"Move {targetId}");
             UserId userId = UserId.GetUserId(targetId);
             DisconnectedUserIds.Remove(userId);
             CurrentConnectedUserIds.Add(userId);

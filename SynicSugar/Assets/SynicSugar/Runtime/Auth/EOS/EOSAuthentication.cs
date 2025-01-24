@@ -31,12 +31,12 @@ namespace SynicSugar.Auth {
             try{
                 await UniTask.WaitUntil(() => finishCallback, cancellationToken: token);
             }catch(OperationCanceledException){  
-                Debug.Log("LoginWithDeviceID: CreateDeviceId is canceled.");
+                Logger.LogError("Login", "CreateDeviceId is canceled.", Result.Canceled);
                 return Result.Canceled;
             }
 
             if(result != Result.Success){
-                Debug.Log("LoginWithDeviceID: can't get device id");
+                Logger.LogError("Login", "can't get device id", result);
                 return result;
             }
             //Login
@@ -51,7 +51,7 @@ namespace SynicSugar.Auth {
             try{
                 await UniTask.WaitUntil(() => finishCallback, cancellationToken: token);
             }catch(OperationCanceledException){
-                Debug.Log("LoginWithDeviceID: Cancel StartConnectLoginWithDeviceToken.");
+                Logger.LogError("Login", "StartConnectLoginWithDeviceToken is canceled.", Result.Canceled);
                 return result;
             }
 
@@ -68,9 +68,8 @@ namespace SynicSugar.Auth {
             void OnCreateDeviceIdCallback(ref CreateDeviceIdCallbackInfo data){
                 result = (Result)data.ResultCode;
                 if (result is Result.Success or Result.DuplicateNotAllowed) {
-                #if SYNICSUGAR_LOG
-                    Debug.Log(result is Result.Success  ? "EOSAuthentication: Create new DeviceId" : "EOSAuthentication: Already have DeviceID in local");
-                #endif
+                    Logger.Log("Login", result is Result.Success ? "Create new DeviceId" : "Already have DeviceID in local", result);
+
                     result = Result.Success;
                 }
                 finishCallback = true;
@@ -83,7 +82,7 @@ namespace SynicSugar.Auth {
         private void AddNotifyAuthExpiration(string userName){
             if (ExpirationNotifyId != 0)
             {
-                Debug.LogError("AddNotifyAuthExpiration: AuthExpirationNotify is already registered.");
+                Logger.LogWarning("AddNotifyAuthExpiration", "AuthExpirationNotify is already registered.");
                 return;
             }
             var connectInterface = EOSManager.Instance.GetEOSConnectInterface();
@@ -92,9 +91,7 @@ namespace SynicSugar.Auth {
             ExpirationNotifyId = connectInterface.AddNotifyAuthExpiration(ref addNotifyAuthExpirationOptions, null, OnAuthExpirationCallback);
 
             if(ExpirationNotifyId != 0){
-            #if SYNICSUGAR_LOG
-                Debug.Log("AddNotifyAuthExpiration: Register success!");
-            #endif
+                Logger.Log("AddNotifyAuthExpiration", "AuthExpiration notification registration succeeded.");
             
             #if UNITY_EDITOR
                 SynicSugarManger.Instance.CleanupForEditor += RemoveNotifyAuthExpiration;
@@ -103,7 +100,7 @@ namespace SynicSugar.Auth {
 
             void OnAuthExpirationCallback(ref AuthExpirationCallbackInfo data){
                 if(data.LocalUserId != SynicSugarManger.Instance.LocalUserId.AsEpic){
-                    Debug.LogError("AuthExpirationCallback: AuthExpiration notify has something problem. This notify is not for this local user.");
+                    Logger.LogError("AuthExpirationCallback", "This notify is not for this local user.");
                     return;
                 }
                 ReLoginWithDeviceToken(userName);
@@ -132,12 +129,10 @@ namespace SynicSugar.Auth {
             void OnLogin(ref LoginCallbackInfo info){
                 Result result = (Result)info.ResultCode;
                 if(result != Result.Success){
-                    Debug.LogError("ReLoginWithDeviceToken: Re-login failed. This user access credentials will become invalid after 10 minutes.");
+                    Logger.LogError("ReLoginWithDeviceToken", "Login failed. This user access credentials will become invalid in 10 minutes.");
                     return;
                 }
-            #if SYNICSUGAR_LOG
-                Debug.Log("ReLoginWithDeviceToken: Re-login success!. The access credential has refreshed.");
-            #endif
+                Logger.Log("ReLoginWithDeviceToken", "Login success!. The access credential has refreshed.");
             }
         }
         /// <summary>
@@ -169,7 +164,7 @@ namespace SynicSugar.Auth {
             try{
                 await UniTask.WaitUntil(() => finishCallback, cancellationToken: token);
             }catch(OperationCanceledException){
-                Debug.Log("DeleteAccount: Canceled.");
+                Logger.Log("DeleteAccount", "The delete process was canceled using a cancellation token. ");
                 return Result.Canceled;
             }
             
@@ -177,9 +172,6 @@ namespace SynicSugar.Auth {
 
             void OnDeleteDeviceId(ref DeleteDeviceIdCallbackInfo data){
                 result = (Result)data.ResultCode;
-                if(result != Result.Success){
-                    Debug.Log("DeleteAccount: Failure " + data.ResultCode);
-                }
                 finishCallback = true;
             }
         }

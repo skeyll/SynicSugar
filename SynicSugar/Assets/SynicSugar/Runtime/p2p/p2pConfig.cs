@@ -9,8 +9,10 @@ namespace SynicSugar.P2P {
 #region Singleton
         public static p2pConfig Instance { get; private set; }
         void Awake() {
+            Logger.Log("p2pConfig", "Start initialization of p2pConfig.");
             if( Instance != null ) {
                 Destroy( this );
+                Logger.Log("p2pConfig", "Discard this instance since p2pConfig already exists.");
                 return;
             }
             Instance = this;

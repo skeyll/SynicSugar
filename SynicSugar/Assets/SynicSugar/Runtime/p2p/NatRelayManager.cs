@@ -1,7 +1,6 @@
 using PlayEveryWare.EpicOnlineServices;
 using Epic.OnlineServices.P2P;
 using Cysharp.Threading.Tasks;
-using UnityEngine;
 using ResultE = Epic.OnlineServices.Result;
 using NATTypeE = Epic.OnlineServices.P2P.NATType;
 namespace SynicSugar.P2P {
@@ -22,13 +21,11 @@ namespace SynicSugar.P2P {
             SetRelayControlOptions options = new SetRelayControlOptions() { RelayControl = (Epic.OnlineServices.P2P.RelayControl)relay };
             var result = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface().SetRelayControl(ref options);
             if (result != ResultE.Success) {
-                Debug.LogErrorFormat("SetRelayControl: Set Relay Control is failed. error: {0}", result);
+                Logger.LogError("SetRelayControl", "Set Relay Control is failed", (Result)result);
                 return;
             }
             p2pConfig.Instance.relayControl = relay;
-            #if SYNICSUGAR_LOG
-                Debug.Log($"SetRelayControl: SetRelayControl is Success. {result}");
-            #endif
+            Logger.Log("SetRelayControl", "SetRelayControl is Success.", (Result)result);
         }
         bool gettingNATType;
         /// <summary>
@@ -47,7 +44,7 @@ namespace SynicSugar.P2P {
         void OnQueryNATTypeCompleteCallback (ref OnQueryNATTypeCompleteInfo data){
             gettingNATType = false;
             if (data.ResultCode != ResultE.Success){
-                Debug.LogErrorFormat("OnQueryNATTypeCompleteCallback: QueryNATType is failed. error: {0}", data.ResultCode);
+                Logger.LogError("OnQueryNATTypeCompleteCallback", "QueryNATType is failed.", (Result)data.ResultCode);
                 return;
             }
         }
@@ -59,11 +56,11 @@ namespace SynicSugar.P2P {
             ResultE result = P2PHandle.GetNATType(ref options, out NATTypeE natType);
 
             if (result != ResultE.Success){
-                Debug.LogErrorFormat("GetNatType: error while retrieving NAT Type: {0}", result);
+                Logger.LogError("GetNatType", "error while retrieving NAT Type.", (Result)result);
                 return NATType.Unknown;
             }
 
-            return result is ResultE.NotFound ?  NATType.Unknown : (NATType)natType;
+            return result is ResultE.NotFound ? NATType.Unknown : (NATType)natType;
         }
     }   
 }

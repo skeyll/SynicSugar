@@ -1,6 +1,5 @@
 #if SYNICSUGAR_ADDRESSABLE
 using System.Collections.Generic;
-using UnityEngine;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceLocations;
 using UnityEngine.AddressableAssets;
@@ -13,7 +12,7 @@ namespace SynicSugar {
                 local.Locate(target, typeof(T), out IList<IResourceLocation> resourceLocations);
                 if (resourceLocations != null){
                     if (resourceLocations.Count > 1) {
-                        Debug.Log($"{target} is duplicated: {resourceLocations.Count}.");
+                        Logger.Log("AddressableHelper", $"{target} is duplicated: {resourceLocations.Count}.");
                     }
                     return true;
                 }
