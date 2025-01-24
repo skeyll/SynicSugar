@@ -47,6 +47,7 @@ namespace SynicSugar.P2P {
                 Logger.LogError("OnQueryNATTypeCompleteCallback", "QueryNATType is failed.", (Result)data.ResultCode);
                 return;
             }
+            Logger.Log("OnQueryNATTypeCompleteCallback", "QueryNATType is Success.");
         }
         /// <summary>
         /// Get our last-queried NAT-type, if it has been successfully queried.
@@ -60,7 +61,9 @@ namespace SynicSugar.P2P {
                 return NATType.Unknown;
             }
 
-            return result is ResultE.NotFound ? NATType.Unknown : (NATType)natType;
+            Logger.Log("GetNATType", $"NAT Type: {natType}");
+
+            return (NATType)natType;
         }
     }   
 }

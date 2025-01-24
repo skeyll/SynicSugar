@@ -61,11 +61,7 @@ namespace SynicSugar.P2P {
         public static List<GameObject> AllSpawnForCurrent(GameObject original){
             Logger.Log("AllSpawnForCurrent", $"Start AllSpawnForCurrent for {original.name}");
             List<GameObject> objcs = new List<GameObject>();
-            //Local User
-            objcs.Add(Instantiate(p2pInfo.Instance.userIds.LocalUserId, original));
-
-            //Remote Users
-            foreach(UserId id in p2pInfo.Instance.userIds.RemoteUserIds){
+            foreach(UserId id in p2pInfo.Instance.userIds.CurrentAllUserIds){
                 objcs.Add(Instantiate(id, original));
             }
             return objcs; 
@@ -73,11 +69,7 @@ namespace SynicSugar.P2P {
         public static List<GameObject> AllSpawnForCurrent(GameObject original, Transform parent){
             Logger.Log("AllSpawnForCurrent", $"Start AllSpawnForCurrent for {original.name}");
             List<GameObject> objcs = new List<GameObject>();
-            //Local User
-            objcs.Add(Instantiate(p2pInfo.Instance.userIds.LocalUserId, original, parent));
-
-            //Remote Users
-            foreach(UserId id in p2pInfo.Instance.userIds.RemoteUserIds){
+            foreach(UserId id in p2pInfo.Instance.userIds.CurrentAllUserIds){
                 objcs.Add(Instantiate(id, original, parent));
             }
             return objcs;
@@ -85,11 +77,7 @@ namespace SynicSugar.P2P {
         public static List<GameObject> AllSpawnForCurrent(GameObject original, Transform parent, bool instantiateInWorldSpace){
             Logger.Log("AllSpawnForCurrent", $"Start AllSpawnForCurrent for {original.name}");
             List<GameObject> objcs = new List<GameObject>();
-            //Local User
-            objcs.Add(Instantiate(p2pInfo.Instance.userIds.LocalUserId, original, parent, instantiateInWorldSpace));
-
-            //Remote Users
-            foreach(UserId id in p2pInfo.Instance.userIds.RemoteUserIds){
+            foreach(UserId id in p2pInfo.Instance.userIds.CurrentAllUserIds){
                 objcs.Add(Instantiate(id, original, parent, instantiateInWorldSpace));
             }
             return objcs;
@@ -97,11 +85,7 @@ namespace SynicSugar.P2P {
         public static List<GameObject> AllSpawnForCurrent(GameObject original, Vector3 position, Quaternion rotation){
             Logger.Log("AllSpawnForCurrent", $"Start AllSpawnForCurrent for {original.name}");
             List<GameObject> objcs = new List<GameObject>();
-            //Local User
-            objcs.Add(Instantiate(p2pInfo.Instance.userIds.LocalUserId, original, position, rotation));
-
-            //Remote Users
-            foreach(UserId id in p2pInfo.Instance.userIds.RemoteUserIds){
+            foreach(UserId id in p2pInfo.Instance.userIds.CurrentAllUserIds){
                 objcs.Add(Instantiate(id, original, position, rotation));
             }
             return objcs;
@@ -109,11 +93,7 @@ namespace SynicSugar.P2P {
         public static List<GameObject> AllSpawnForCurrent(GameObject original, Vector3 position, Quaternion rotation, Transform parent){
             Logger.Log("AllSpawnForCurrent", $"Start AllSpawnForCurrent for {original.name}");
             List<GameObject> objcs = new List<GameObject>();
-            //Local User
-            objcs.Add(Instantiate(p2pInfo.Instance.userIds.LocalUserId, original, position, rotation, parent));
-            
-            //Remote Users
-            foreach(UserId id in p2pInfo.Instance.userIds.RemoteUserIds){
+            foreach(UserId id in p2pInfo.Instance.userIds.CurrentAllUserIds){
                 objcs.Add(Instantiate(id, original, position, rotation, parent));
             }
             return objcs;
