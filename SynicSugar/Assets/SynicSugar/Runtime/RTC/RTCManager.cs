@@ -420,6 +420,19 @@ namespace SynicSugar.RTC {
             return CurrentLobby.Members[target.ToString()].RTCState.LocalOutputedVolume;
         }
         /// <summary>
+        /// This is outputed volume on this local. We don't know target local setting.
+        /// </summary>
+        /// <param name="target"></param>
+        /// <returns>0-100. 50 means source volume.</returns>
+        public bool TryGetTargetOutputedVolumeOnLocal(UserId target, out float volume){
+            if (CurrentLobby.Members.TryGetValue(target.ToString(), out var member)){
+                volume = member.RTCState.LocalOutputedVolume;
+                return true;
+            }
+            volume = 0f;
+            return false;
+        }
+        /// <summary>
         /// Has this local muted target user?
         /// </summary>
         /// <param name="target"></param>
@@ -428,6 +441,20 @@ namespace SynicSugar.RTC {
             return CurrentLobby.Members[target.ToString()].RTCState.IsLocalMute;
         }
         /// <summary>
+        /// Has this local muted target user?
+        /// </summary>
+        /// <param name="target"></param>
+        /// <returns></returns>
+        public bool TryGetIsTargetMutedOnLocal(UserId target, out bool isMuted){
+            if (CurrentLobby.Members.TryGetValue(target.ToString(), out var member)){
+                isMuted = member.RTCState.IsLocalMute;
+                return true;
+            }
+            isMuted = false;
+            return false;
+        }
+
+        /// <summary>
         /// Has this hard muted target user by this local Host?<br />
         /// This is valid only for Lobby Host.
         /// </summary>
@@ -435,6 +462,20 @@ namespace SynicSugar.RTC {
         /// <returns></returns>
         public bool IsTargetHardMuted(UserId target) { 
             return CurrentLobby.Members[target.ToString()].RTCState.IsHardMuted;
+        }
+        /// <summary>
+        /// Has this hard muted target user by this local Host?<br />
+        /// This is valid only for Lobby Host.
+        /// </summary>
+        /// <param name="target"></param>
+        /// <returns></returns>
+        public bool TryGetIsTargetHardMuted(UserId target, out bool isMuted){
+            if (CurrentLobby.Members.TryGetValue(target.ToString(), out var member)){
+                isMuted = member.RTCState.IsHardMuted;
+                return true;
+            }
+            isMuted = false;
+            return false;
         }
     }
 }
