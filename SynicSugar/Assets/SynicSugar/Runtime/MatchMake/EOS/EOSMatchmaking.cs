@@ -12,7 +12,7 @@ using ResultE = Epic.OnlineServices.Result;
 
 namespace SynicSugar.MatchMake {
     internal class EOSMatchmaking : MatchmakingCore {
-        readonly Lobby CurrentLobby;
+        readonly Lobby CurrentLobby = new Lobby();
         //User config
         bool useManualFinishMatchMake;
         uint requiredMembers;
@@ -50,7 +50,6 @@ namespace SynicSugar.MatchMake {
         public EOSMatchmaking(uint maxSearch) : base(maxSearch) {
             localUserId = SynicSugarManger.Instance.LocalUserId;
             RTCManager.Instance.SetLobbyReference(CurrentLobby);
-            Logger.Log("EOSMatchmaking", $"GetHash {GetHashCode()}");
         }
 
         /// <summary>
