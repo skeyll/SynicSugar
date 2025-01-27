@@ -8,12 +8,11 @@ using Cysharp.Threading.Tasks;
 using SynicSugar.P2P;
 using SynicSugar.RTC;
 using SynicSugar.Base;
-using UnityEngine;
 using ResultE = Epic.OnlineServices.Result;
 
 namespace SynicSugar.MatchMake {
     internal class EOSMatchmaking : MatchmakingCore {
-        Lobby CurrentLobby { get; set; } = new Lobby();
+        readonly Lobby CurrentLobby;
         //User config
         bool useManualFinishMatchMake;
         uint requiredMembers;
@@ -51,6 +50,7 @@ namespace SynicSugar.MatchMake {
         public EOSMatchmaking(uint maxSearch) : base(maxSearch) {
             localUserId = SynicSugarManger.Instance.LocalUserId;
             RTCManager.Instance.SetLobbyReference(CurrentLobby);
+            Logger.Log("EOSMatchmaking", $"GetHash {GetHashCode()}");
         }
 
         /// <summary>
@@ -197,7 +197,6 @@ namespace SynicSugar.MatchMake {
 
             LobbyInterface lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();
             //Set lobby data
-            CurrentLobby = lobbyCondition;
             CurrentLobby._BeingCreated = true;
             CurrentLobby.LobbyOwner = EOSManager.Instance.GetProductUserId();
 
@@ -219,6 +218,7 @@ namespace SynicSugar.MatchMake {
             return modifyAttribute;
 
             void OnCreateLobbyCompleted(ref CreateLobbyCallbackInfo info){
+                Logger.LogWarning("OnCreateLobbyCompleted", $"lobbyCondition {lobbyCondition.bEnableRTCRoom} / CurrentLobby.bEnableRTCRoom: {CurrentLobby.bEnableRTCRoom}");
                 result = (Result)info.ResultCode;
                 if (info.ResultCode != ResultE.Success){
                     Logger.LogError("Created Lobby", "Request failed.", (Result)info.ResultCode);
@@ -232,7 +232,7 @@ namespace SynicSugar.MatchMake {
                     finishCreated = true;
                     return;
                 }
-                CurrentLobby.LobbyId = info.LobbyId;
+                CurrentLobby.InitFromLobbyHandle(info.LobbyId);
 
                 // For the host migration
                 AddNotifyLobbyMemberStatusReceived();
@@ -1327,12 +1327,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="token"></param>
         /// <returns></returns>
         public override async UniTask<Result> CreateOfflineLobby(Lobby lobbyCondition, OfflineMatchmakingDelay delay, List<AttributeData> userAttributes, CancellationToken token){
-            //Create Lobby
-            CurrentLobby = lobbyCondition;
-            CurrentLobby.LobbyId = "OFFLINEMODE";
-            CurrentLobby.LobbyOwner = EOSManager.Instance.GetProductUserId();
-            CurrentLobby.Members.Add(localUserId.ToString(), new MemberState() { Attributes = userAttributes });
-            CurrentLobby.hasConnectedRTCRoom = false;
+            CurrentLobby.InitializeOfflineLobby(lobbyCondition, userAttributes);
 
             MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(localUserId, true);
             MatchMakeManager.Instance.MemberUpdatedNotifier.MemberAttributesUpdated(localUserId);
