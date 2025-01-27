@@ -8,12 +8,11 @@ using Cysharp.Threading.Tasks;
 using SynicSugar.P2P;
 using SynicSugar.RTC;
 using SynicSugar.Base;
-using UnityEngine;
 using ResultE = Epic.OnlineServices.Result;
 
 namespace SynicSugar.MatchMake {
     internal class EOSMatchmaking : MatchmakingCore {
-        Lobby CurrentLobby { get; set; } = new Lobby();
+        readonly Lobby CurrentLobby = new Lobby();
         //User config
         bool useManualFinishMatchMake;
         uint requiredMembers;
@@ -197,7 +196,6 @@ namespace SynicSugar.MatchMake {
 
             LobbyInterface lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();
             //Set lobby data
-            CurrentLobby = lobbyCondition;
             CurrentLobby._BeingCreated = true;
             CurrentLobby.LobbyOwner = EOSManager.Instance.GetProductUserId();
 
@@ -232,7 +230,7 @@ namespace SynicSugar.MatchMake {
                     finishCreated = true;
                     return;
                 }
-                CurrentLobby.LobbyId = info.LobbyId;
+                CurrentLobby.InitFromLobbyHandle(info.LobbyId);
 
                 // For the host migration
                 AddNotifyLobbyMemberStatusReceived();
@@ -1327,12 +1325,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="token"></param>
         /// <returns></returns>
         public override async UniTask<Result> CreateOfflineLobby(Lobby lobbyCondition, OfflineMatchmakingDelay delay, List<AttributeData> userAttributes, CancellationToken token){
-            //Create Lobby
-            CurrentLobby = lobbyCondition;
-            CurrentLobby.LobbyId = "OFFLINEMODE";
-            CurrentLobby.LobbyOwner = EOSManager.Instance.GetProductUserId();
-            CurrentLobby.Members.Add(localUserId.ToString(), new MemberState() { Attributes = userAttributes });
-            CurrentLobby.hasConnectedRTCRoom = false;
+            CurrentLobby.InitializeOfflineLobby(lobbyCondition, userAttributes);
 
             MatchMakeManager.Instance.MatchMakingGUIEvents.LobbyMemberCountChanged(localUserId, true);
             MatchMakeManager.Instance.MemberUpdatedNotifier.MemberAttributesUpdated(localUserId);

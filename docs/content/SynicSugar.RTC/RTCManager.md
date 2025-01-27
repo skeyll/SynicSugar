@@ -20,10 +20,6 @@ NetworkManager has DontDestroy, so NetworkManager will not be destroyed by scene
 | [UseOpenVC](../RTCManager/useopenvc) | OpenVC or PushToTalk |
 | [KeyToPushToTalk](../RTCManager/keytopushtotalk) | the key or keycode for PushToTalk |
 | LastStateUpdatedUserId | ID of the user whose status was last updated |
-| [TargetOutputedVolumeOnLocal](../RTCManager/targetoutputedvolumeonlocal) | Outputed volume on this local of target |
-| [IsTargetMutedOnLocal](../RTCManager/istargetmutedonlocal) | Target state is mute or not  |
-| [IsTargetHardMuted](../RTCManager/istargethardmuted) | Target state is hard mute or not |
-
 
 ### Function
 | API | description |
@@ -34,7 +30,12 @@ NetworkManager has DontDestroy, so NetworkManager will not be destroyed by scene
 | [ToggleReceiveingFromTarget](../RTCManager/togglereceiveingfromtarget) | Switch Output setting(Enable or Mute) of receiving from target |
 | [UpdateReceiveingVolumeFromTarget](../RTCManager/updatereceiveingvolumefromtarget) | Change the receiving volume on this Session |
 | [HardMuteTargetUser](../RTCManager/hardmutetargetuser) | Host mutes target user('s input) |
-
+| [TargetOutputedVolumeOnLocal](../RTCManager/targetoutputedvolumeonlocal) | Outputed volume on this local of target |
+| [TryGetTargetOutputedVolumeOnLocal](../RTCManager/targetoutputedvolumeonlocal) | Outputed volume on this local of target |
+| [IsTargetMutedOnLocal](../RTCManager/istargetmutedonlocal) | Target state is mute or not  |
+| [TryGetIsTargetMutedOnLocal](../RTCManager/istargetmutedonlocal) | Target state is mute or not  |
+| [IsTargetHardMuted](../RTCManager/istargethardmuted) | Target state is hard mute or not |
+| [TryGetIsTargetHardMuted](../RTCManager/istargethardmuted) | Target state is hard mute or not |
 
 
 ```cs
