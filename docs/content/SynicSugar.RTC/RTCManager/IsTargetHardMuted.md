@@ -5,7 +5,8 @@ weight = 5
 ## IsTargetHardMuted
 <small>*Namespace: SynicSugar.RTC*</small>
 
-public bool IsTargetHardMuted(UserId target) 
+public bool IsTargetHardMuted(UserId target) <br>
+public bool TryGetIsTargetHardMuted(UserId target, out bool isMuted)
 
 
 ### Description

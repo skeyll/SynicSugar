@@ -5,7 +5,8 @@ weight = 3
 ## TargetOutputedVolumeOnLocal
 <small>*Namespace: SynicSugar.RTC*</small>
 
-public float TargetOutputedVolumeOnLocal(UserId target)
+public float TargetOutputedVolumeOnLocal(UserId target)<br>
+public bool TryGetTargetOutputedVolumeOnLocal(UserId target, out float volume)
 
 
 ### Description
