@@ -7,6 +7,7 @@ using ResultE = Epic.OnlineServices.Result;
 
 namespace SynicSugar.MatchMake {
     public class Lobby {
+        public Lobby (){}
         internal string LobbyId;
         internal ProductUserId LobbyOwner = new ProductUserId();
         //Basis
@@ -57,6 +58,42 @@ namespace SynicSugar.MatchMake {
         //for speaking or non-speaking
         internal NotifyEventHandle RTCParticipantUpdated;
         #endregion
+
+        /// <summary>
+        /// Copies the Lobby's permission and settings attributes.
+        /// </summary>
+        public void CopySettings(Lobby otherLobby) {
+            MaxLobbyMembers = otherLobby.MaxLobbyMembers;
+            PermissionLevel = otherLobby.PermissionLevel;
+            BucketId = otherLobby.BucketId;
+            bAllowInvites = otherLobby.bAllowInvites;
+            bDisableHostMigration = otherLobby.bDisableHostMigration;
+            bEnableRTCRoom = otherLobby.bEnableRTCRoom;
+            RejoinAfterKickRequiresInvite = otherLobby.RejoinAfterKickRequiresInvite;
+            Attributes = new List<AttributeData>(otherLobby.Attributes);
+        }
+        /// <summary>
+        /// Copies the Lobby's permission and settings attributes from LobbyCondition for OfflineMode.
+        /// </summary>
+        /// <param name="otherLobby"></param>
+        /// <param name="userAttributes"></param>
+        internal void InitializeOfflineLobby(Lobby otherLobby, List<AttributeData> userAttributes){
+            BucketId = otherLobby.BucketId;
+            Attributes = new List<AttributeData>(otherLobby.Attributes);
+            
+            LobbyId = "OFFLINEMODE";
+            LobbyOwner = EOSManager.Instance.GetProductUserId();
+
+            MaxLobbyMembers = 1;
+            PermissionLevel = LobbyPermissionLevel.Inviteonly;
+            bAllowInvites = false;
+            bDisableHostMigration = false;
+            bEnableRTCRoom = false;
+            RejoinAfterKickRequiresInvite = false;
+            hasConnectedRTCRoom = false;
+
+            Members.Add(SynicSugarManger.Instance.LocalUserId.ToString(), new MemberState() { Attributes = userAttributes });
+        }
 
         /// <summary>
         /// Checks if Lobby Id is valid
