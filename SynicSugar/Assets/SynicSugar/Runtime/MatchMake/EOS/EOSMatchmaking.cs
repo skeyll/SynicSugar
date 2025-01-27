@@ -217,7 +217,6 @@ namespace SynicSugar.MatchMake {
             return modifyAttribute;
 
             void OnCreateLobbyCompleted(ref CreateLobbyCallbackInfo info){
-                Logger.LogWarning("OnCreateLobbyCompleted", $"lobbyCondition {lobbyCondition.bEnableRTCRoom} / CurrentLobby.bEnableRTCRoom: {CurrentLobby.bEnableRTCRoom}");
                 result = (Result)info.ResultCode;
                 if (info.ResultCode != ResultE.Success){
                     Logger.LogError("Created Lobby", "Request failed.", (Result)info.ResultCode);
