@@ -63,7 +63,7 @@ namespace SynicSugar.RTC {
             if(!CurrentLobby.bEnableRTCRoom){
                 return;
             }
-            Logger.LogError("AddNotifyParticipantStatusChanged", "Add Notify for RTC Room.");
+            Logger.Log("AddNotifyParticipantStatusChanged", "Add Notify for RTC Room.");
             
             rtcInterface = EOSManager.Instance.GetEOSRTCInterface();
             audioInterface = rtcInterface.GetAudioInterface();
@@ -154,7 +154,7 @@ namespace SynicSugar.RTC {
                 return;
             }
             
-            Logger.LogError("AddNotifyParticipantUpdated", "Add Notifiy for RTC Room.");
+            Logger.Log("AddNotifyParticipantUpdated", "Add Notifiy for RTC Room.");
             //Notify to get user Speaking status
             if(ParticipantUpdatedId == 0){
                 AddNotifyParticipantUpdatedOptions addNotifyParticipantUpdatedOptions = new AddNotifyParticipantUpdatedOptions(){
