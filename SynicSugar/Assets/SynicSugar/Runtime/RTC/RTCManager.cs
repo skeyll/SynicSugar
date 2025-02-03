@@ -332,12 +332,7 @@ namespace SynicSugar.RTC {
                 Logger.LogWarning("ToggleReceiveingFromTargetUser", "the room is invalid.");
                 return;
             }
-            if(volume < 0){
-                volume = 0f;
-            }
-            if(volume > 100){
-                volume = 100f;
-            }
+            volume = System.Math.Clamp(volume, 0f, 100f);
             var receiveOptions = new UpdateParticipantVolumeOptions(){
                 LocalUserId = EOSManager.Instance.GetProductUserId(),
                 RoomName = CurrentLobby.RTCRoomName,
