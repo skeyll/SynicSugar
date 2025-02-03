@@ -214,7 +214,7 @@ namespace SynicSugar.RTC {
                 rtcInterface.GetAudioInterface().RemoveNotifyParticipantUpdated(ParticipantUpdatedId);
             }
 
-            CurrentLobby.RTCRoomName = System.String.Empty;
+            CurrentLobby.RTCRoomName = string.Empty;
             CurrentLobby.hasConnectedRTCRoom = false;
         }
     #region Audio Send and Receive
@@ -228,10 +228,8 @@ namespace SynicSugar.RTC {
                 return;
             }
             Logger.Log("StartVoiceSending", "Start VoiceChat.");
-            if(VCMode == VCMode.OpenVC){
-                ToggleLocalUserSending(true);
-            }else{
-                ToggleLocalUserSending(false);
+            ToggleLocalUserSending(true);
+            if(VCMode != VCMode.OpenVC){
                 StartAcceptingToPushToTalk();
             }
         }
