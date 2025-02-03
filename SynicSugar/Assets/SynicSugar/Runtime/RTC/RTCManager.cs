@@ -229,7 +229,7 @@ namespace SynicSugar.RTC {
             }
             Logger.Log("StartVoiceSending", "Start VoiceChat.");
             ToggleLocalUserSending(true);
-            if(VCMode != VCMode.OpenVC){
+            if(VCMode == VCMode.PushToTalk){
                 StartAcceptingToPushToTalk();
             }
         }
@@ -281,7 +281,7 @@ namespace SynicSugar.RTC {
         /// <param name="targetId">If null, effect to all remote users</param>
         /// <param name="isEnable">If true, receive vc from target. If false, mute target.</param>
         public void ToggleReceiveingFromTarget(UserId targetId, bool isEnable){
-            if(!CurrentLobby.isValid() || System.String.IsNullOrEmpty(CurrentLobby.RTCRoomName)){
+            if(!CurrentLobby.isValid() || string.IsNullOrEmpty(CurrentLobby.RTCRoomName)){
                 Logger.LogWarning("ToggleReceiveingFromTargetUser", "the room is invalid.");
                 return;
             }
@@ -314,7 +314,7 @@ namespace SynicSugar.RTC {
         /// <param name="targetId">If null, effect to all remote users</param>
         /// <param name="volume">Range 0.0 - 100. 50 means that the audio volume is not modified and stays in its source value.</param>
         public void UpdateReceiveingVolumeFromTarget(UserId targetId, float volume){
-            if(!CurrentLobby.isValid() || System.String.IsNullOrEmpty(CurrentLobby.RTCRoomName)){
+            if(!CurrentLobby.isValid() || string.IsNullOrEmpty(CurrentLobby.RTCRoomName)){
                 Logger.LogWarning("ToggleReceiveingFromTargetUser", "the room is invalid.");
                 return;
             }
@@ -399,20 +399,16 @@ namespace SynicSugar.RTC {
         /// <param name="token"></param>
         /// <returns></returns>
         async UniTask PushToTalkLoop(CancellationToken token){
-            while(!token.IsCancellationRequested && VCMode == VCMode.PushToTalk){
+            while(!token.IsCancellationRequested){
 #if ENABLE_INPUT_SYSTEM
                 await UniTask.WaitUntil(() => Keyboard.current[KeyToPushToTalk].wasPressedThisFrame, cancellationToken: token);
-                if(VCMode == VCMode.OpenVC){ break; }
                 ToggleLocalUserSending(true);
                 await UniTask.WaitUntil(() => Keyboard.current[KeyToPushToTalk].wasReleasedThisFrame, cancellationToken: token);
-                if(VCMode == VCMode.OpenVC){ break; }
                 ToggleLocalUserSending(false);
 #else
                 await UniTask.WaitUntil(() => Input.GetKeyDown(KeyToPushToTalk), cancellationToken: token);
-                if(UseOpenVC){ break; }
                 ToggleLocalUserSending(true);
                 await UniTask.WaitUntil(() => Input.GetKeyUp(KeyToPushToTalk), cancellationToken: token);
-                if(UseOpenVC){ break; }
                 ToggleLocalUserSending(false);
 #endif
             }
