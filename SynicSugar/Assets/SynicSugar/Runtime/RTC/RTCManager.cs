@@ -49,8 +49,18 @@ namespace SynicSugar.RTC {
         /// <summary>
         /// This is valid only before matching. If we want to switch OpenVC and PTT after matching, call ToggleLocalUserSending() ourself.
         /// </summary>
-        [Header("If true, all audio is transmitted. If false, push to take.")]
+        [Header("*This is old. VCMode is new. <br>If true, all audio is transmitted. If false, push to take."), System.Obsolete("This is old. VCMode is new one.")]
         public bool UseOpenVC;
+
+        [SerializeField] VCMode _vcMode;
+        /// <summary>
+        /// Change VC mode of this Manager.
+        /// </summary>
+        //Implemented as a property in case internal processing needs to be adjusted ｗhen changed via script in the future.
+        public VCMode VCMode { 
+            get { return _vcMode; } 
+            set { _vcMode = value; }
+        }
 #if ENABLE_INPUT_SYSTEM
         public Key KeyToPushToTalk = Key.Space;
 #else
@@ -218,7 +228,7 @@ namespace SynicSugar.RTC {
                 return;
             }
             Logger.Log("StartVoiceSending", "Start VoiceChat.");
-            if(UseOpenVC){
+            if(VCMode == VCMode.OpenVC){
                 ToggleLocalUserSending(true);
             }else{
                 ToggleLocalUserSending(false);
@@ -234,7 +244,7 @@ namespace SynicSugar.RTC {
                 return;
             }
             Logger.Log("StopVoiceSending", "Stop VoiceChat.");
-            if(UseOpenVC){
+            if(VCMode == VCMode.OpenVC){
                 ToggleLocalUserSending(false);
             }else{
                 StopAcceptingToPushToTalk();
@@ -391,13 +401,13 @@ namespace SynicSugar.RTC {
         /// <param name="token"></param>
         /// <returns></returns>
         async UniTask PushToTalkLoop(CancellationToken token){
-            while(!token.IsCancellationRequested && !UseOpenVC){
+            while(!token.IsCancellationRequested && VCMode == VCMode.PushToTalk){
 #if ENABLE_INPUT_SYSTEM
                 await UniTask.WaitUntil(() => Keyboard.current[KeyToPushToTalk].wasPressedThisFrame, cancellationToken: token);
-                if(UseOpenVC){ break; }
+                if(VCMode == VCMode.OpenVC){ break; }
                 ToggleLocalUserSending(true);
                 await UniTask.WaitUntil(() => Keyboard.current[KeyToPushToTalk].wasReleasedThisFrame, cancellationToken: token);
-                if(UseOpenVC){ break; }
+                if(VCMode == VCMode.OpenVC){ break; }
                 ToggleLocalUserSending(false);
 #else
                 await UniTask.WaitUntil(() => Input.GetKeyDown(KeyToPushToTalk), cancellationToken: token);
