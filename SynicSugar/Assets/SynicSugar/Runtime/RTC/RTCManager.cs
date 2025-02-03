@@ -255,9 +255,8 @@ namespace SynicSugar.RTC {
                 return;
             }
             Logger.Log("StopVoiceSending", "Stop VoiceChat.");
-            if(VCMode == VCMode.OpenVC){
-                ToggleLocalUserSending(false);
-            }else{
+            ToggleLocalUserSending(false);
+            if(VCMode == VCMode.PushToTalk){
                 StopAcceptingToPushToTalk();
             }
         }
