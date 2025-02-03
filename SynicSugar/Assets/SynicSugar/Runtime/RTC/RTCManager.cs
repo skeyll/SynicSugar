@@ -47,6 +47,18 @@ namespace SynicSugar.RTC {
         ulong ParticipantStatusId, ParticipantUpdatedId = 0;
         public ParticipantUpdatedNotifier ParticipantUpdatedNotifier;
         /// <summary>
+        /// Indicates whether the current Lobby has VC enabled.
+        /// </summary>
+        public bool IsVCEnabled { get { return CurrentLobby != null && CurrentLobby.bEnableRTCRoom; } }
+        /// <summary>
+        /// Indicates whether local sending is enabled.
+        /// </summary>
+        public bool IsLocalSendingEnabled { get; private set; }
+        /// <summary>
+        /// Indicates whether local receiving is enabled.
+        /// </summary>
+        public bool IsLocalReceivingEnabled { get; private set; }
+        /// <summary>
         /// This is valid only before matching. If we want to switch OpenVC and PTT after matching, call ToggleLocalUserSending() ourself.
         /// </summary>
         [Header("*This is old. VCMode is new. <br>If true, all audio is transmitted. If false, push to take."), System.Obsolete("This is old. VCMode is new one.")]
@@ -216,11 +228,12 @@ namespace SynicSugar.RTC {
 
             CurrentLobby.RTCRoomName = string.Empty;
             CurrentLobby.hasConnectedRTCRoom = false;
+            IsLocalSendingEnabled = false;
+            IsLocalSendingEnabled = false;
         }
     #region Audio Send and Receive
         /// <summary>
-        /// Starts local user sending voice chat. <br />
-        /// This is enabled after a MatchMaking method returns true(= finish matchmaking). The receiving starts on StartPacketReceiver().
+        /// Starts local user sending voice chat. 
         /// </summary>
         public void StartVoiceSending(){
             if(!CurrentLobby.bEnableRTCRoom){
@@ -254,7 +267,7 @@ namespace SynicSugar.RTC {
         /// </summary>
         /// <param name="isEnable">If true, send VC. If false, stop VC.</param>
         public void ToggleLocalUserSending(bool isEnable){
-            if(!CurrentLobby.isValid() || System.String.IsNullOrEmpty(CurrentLobby.RTCRoomName)){
+            if(!CurrentLobby.isValid() || string.IsNullOrEmpty(CurrentLobby.RTCRoomName)){
                 Logger.LogWarning("ToggleLocalUserSending", "the room is invalid.");
                 return;
             }
@@ -273,6 +286,8 @@ namespace SynicSugar.RTC {
             if(info.AudioStatus != RTCAudioStatus.Enabled){
                 ParticipantUpdatedNotifier.StopSpeaking(p2pInfo.Instance.userIds.LocalUserId);
             }
+
+            IsLocalSendingEnabled = info.AudioStatus == RTCAudioStatus.Enabled;
             Logger.Log("OnUpdateSending", $"the toggle is successful. Status: {info.AudioStatus}");
         }
         /// <summary>
@@ -302,11 +317,11 @@ namespace SynicSugar.RTC {
                 foreach(var member in CurrentLobby.Members){
                     member.Value.RTCState.IsLocalMute = !info.AudioEnabled;
                 }
+                IsLocalReceivingEnabled = info.AudioEnabled;
             }else{
                 CurrentLobby.Members[UserId.GetUserId(info.ParticipantId).ToString()].RTCState.IsLocalMute = !info.AudioEnabled;
             }
-            
-            Logger.Log("OnUpdateReceiving", $"the toggle is successful. CurrentStatus: {info.AudioEnabled}");
+            Logger.Log("OnUpdateReceiving", $"the toggle is successful. CurrentStatus: {info.AudioEnabled} / Target: {info.ParticipantId}");
         }
         /// <summary>
         /// Change the receiving volume on this Session.
