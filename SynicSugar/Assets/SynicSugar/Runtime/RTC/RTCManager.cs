@@ -387,9 +387,7 @@ namespace SynicSugar.RTC {
         /// This switches the sending state with ToggleLocalUserSending() on user's input automatically.
         /// </summary>
         void StartAcceptingToPushToTalk(){
-            if(pttToken != null && pttToken.Token.CanBeCanceled){
-                pttToken.Cancel();
-            }
+            CancelPTTToken();
             pttToken = new();
             PushToTalkLoop(pttToken.Token).Forget();
         }
@@ -397,10 +395,12 @@ namespace SynicSugar.RTC {
         /// Stop to accept PushToTalk key.
         /// </summary>
         void StopAcceptingToPushToTalk(){
-            if(pttToken == null){
-                return;
+            CancelPTTToken();
+            DisposePTTToken();
+            //If PushToTalk itself is stopped in pushing, the Sending is stopped once.
+            if(IsLocalSendingEnabled){
+                ToggleLocalUserSending(false);
             }
-            pttToken.Cancel();
         }
         /// <summary>
         /// Switch sending state by UniTask. 
@@ -490,6 +490,18 @@ namespace SynicSugar.RTC {
             isMuted = false;
             return false;
         }
+
+    #region PTTToken
+        void DisposePTTToken(){
+            if (pttToken == null) { return; }
+            pttToken.Dispose();
+            pttToken = null;
+        }
+        void CancelPTTToken(){
+            if (pttToken == null) { return; }
+            pttToken.Cancel();
+        }
+    #endregion
     }
 }
 
