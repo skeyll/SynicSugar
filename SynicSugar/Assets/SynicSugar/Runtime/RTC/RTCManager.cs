@@ -8,7 +8,6 @@ using SynicSugar.P2P;
 using SynicSugar.MatchMake;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using System.Threading.Tasks;
 
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
@@ -104,8 +103,8 @@ namespace SynicSugar.RTC {
                 Logger.LogError("AddNotifyParticipantStatusChanged", "This user is not participating in the RTC room.", result);
                 return;
             }
-
-            CurrentLobby.hasConnectedRTCRoom = isConnected;
+            //IsRTCRoomConnected maybe have bug. isConnected is not true.
+            CurrentLobby.hasConnectedRTCRoom = true;
             CurrentLobby.RTCRoomName = GetRTCRoomName();
 
             //Check audio devices
