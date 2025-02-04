@@ -8,6 +8,8 @@ using SynicSugar.P2P;
 using SynicSugar.MatchMake;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using System.Threading.Tasks;
+
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
 #endif
@@ -113,7 +115,7 @@ namespace SynicSugar.RTC {
             var audioOutputOptions = new GetAudioOutputDevicesCountOptions();
             audioInterface.GetAudioOutputDevicesCount(ref audioOutputOptions);
             //Stop sending VC
-            ToggleLocalUserSending(false);
+            ToggleLocalUserSending(false).Forget();
 
             if(ParticipantStatusId == 0){
                 // Notify to get a user's joining and leaving
@@ -235,69 +237,79 @@ namespace SynicSugar.RTC {
         /// <summary>
         /// Starts local user sending voice chat. 
         /// </summary>
-        public void StartVoiceSending(){
-            if(!CurrentLobby.bEnableRTCRoom){
+        public async UniTask<Result> StartVoiceSending(){
+            if(!IsVCEnabled){
                 Logger.LogWarning("StartVoiceSending", "This lobby doesn't have RTC room.");
-                return;
+                return Result.InvalidAPICall;
             }
-            Logger.Log("StartVoiceSending", "Start VoiceChat.");
-            ToggleLocalUserSending(true);
+            Logger.Log("StartVoiceSending", $"Start VoiceChat. VCMode: {VCMode}");
+            //When PushToTalk is enabled, the VC is not turned on unless the button is pressed.
             if(VCMode == VCMode.PushToTalk){
                 StartAcceptingToPushToTalk();
+                return Result.Success;
             }
+            return await ToggleLocalUserSending(true);
         }
         /// <summary>
         /// Stop local user sending voice chat. (= Mute) <br />
         /// </summary>
-        public void StopVoiceSending(){
-            if(!CurrentLobby.bEnableRTCRoom){
+        public async UniTask<Result> StopVoiceSending(){
+            if(!IsVCEnabled){
                 Logger.LogWarning("StopVoiceSending", "This lobby doesn't have RTC room.");
-                return;
+                return Result.InvalidAPICall;
             }
             Logger.Log("StopVoiceSending", "Stop VoiceChat.");
-            ToggleLocalUserSending(false);
             if(VCMode == VCMode.PushToTalk){
                 StopAcceptingToPushToTalk();
             }
+            return await ToggleLocalUserSending(false);
         }
         /// <summary>
         /// Switch Input setting of Local user sending on this Session.<br />
         /// We should StartVoiceSending() and StopVoiceSending() instead of this. This is Low API. 
         /// </summary>
         /// <param name="isEnable">If true, send VC. If false, stop VC.</param>
-        public void ToggleLocalUserSending(bool isEnable){
+        public async UniTask<Result> ToggleLocalUserSending(bool isEnable){
             if(!IsVCEnabled){
                 Logger.LogWarning("ToggleLocalUserSending", "This local does not currently have an RTCRoom.");
-                return;
+                return Result.InvalidAPICall;
             }
             var sendingOptions = new UpdateSendingOptions(){
                 LocalUserId = EOSManager.Instance.GetProductUserId(),
                 RoomName = CurrentLobby.RTCRoomName,
                 AudioStatus = isEnable ? RTCAudioStatus.Enabled : RTCAudioStatus.Disabled
             };
-            audioInterface.UpdateSending(ref sendingOptions, null, OnUpdateSending);
-        }
-        void OnUpdateSending(ref UpdateSendingCallbackInfo info){
-            if((Result)info.ResultCode != Result.Success){
-                Logger.LogError("OnUpdateSending", "could not toggle mute setting of local user sending.", (Result)info.ResultCode);
-                return;
-            }
-            if(info.AudioStatus != RTCAudioStatus.Enabled){
-                ParticipantUpdatedNotifier.StopSpeaking(p2pInfo.Instance.userIds.LocalUserId);
-            }
 
-            IsLocalSendingEnabled = info.AudioStatus == RTCAudioStatus.Enabled;
-            Logger.Log("OnUpdateSending", $"the toggle is successful. Status: {info.AudioStatus}");
+            Result result = Result.None;
+            audioInterface.UpdateSending(ref sendingOptions, null, OnUpdateSending);
+
+            await UniTask.WaitUntil(() => result != Result.None, cancellationToken: this.GetCancellationTokenOnDestroy());
+            return result;
+
+            void OnUpdateSending(ref UpdateSendingCallbackInfo info){
+                if((Result)info.ResultCode != Result.Success){
+                    Logger.LogError("OnUpdateSending", "could not toggle mute setting of local user sending.", (Result)info.ResultCode);
+                    result = (Result)info.ResultCode;
+                    return;
+                }
+                if(info.AudioStatus != RTCAudioStatus.Enabled){
+                    ParticipantUpdatedNotifier.StopSpeaking(p2pInfo.Instance.userIds.LocalUserId);
+                }
+
+                IsLocalSendingEnabled = info.AudioStatus == RTCAudioStatus.Enabled;
+                Logger.Log("OnUpdateSending", $"the toggle is successful. Status: {info.AudioStatus}");
+                result = (Result)info.ResultCode;
+            }
         }
         /// <summary>
         /// Switch Output setting(Enable or Mute) of receiving from target user on this Session.
         /// </summary>
         /// <param name="targetId">If null, effect to all remote users</param>
         /// <param name="isEnable">If true, receive vc from target. If false, mute target.</param>
-        public void ToggleReceiveingFromTarget(UserId targetId, bool isEnable){
+        public async UniTask<Result> ToggleReceiveingFromTarget(UserId targetId, bool isEnable){
             if(!IsVCEnabled){
                 Logger.LogWarning("ToggleReceiveingFromTargetUser", "This local does not currently have an RTCRoom.");
-                return;
+                return Result.InvalidAPICall;
             }
             var receiveOptions = new UpdateReceivingOptions(){
                 LocalUserId = EOSManager.Instance.GetProductUserId(),
@@ -305,32 +317,40 @@ namespace SynicSugar.RTC {
                 ParticipantId = targetId == null ? null : targetId.AsEpic,
                 AudioEnabled = isEnable
             };
+
+            Result result = Result.None;
             audioInterface.UpdateReceiving(ref receiveOptions, null, OnUpdateReceiving);
-        }
-        void OnUpdateReceiving(ref UpdateReceivingCallbackInfo info){
-            if((Result)info.ResultCode != Result.Success){
-                Logger.LogError("OnUpdateReceiving" ,"could not toggle setting.", (Result)info.ResultCode);
-                return;
-            }
-            if(info.ParticipantId == null){
-                foreach(var member in CurrentLobby.Members){
-                    member.Value.RTCState.IsLocalMute = !info.AudioEnabled;
+
+            await UniTask.WaitUntil(() => result != Result.None, cancellationToken: this.GetCancellationTokenOnDestroy());
+            return result;
+
+            void OnUpdateReceiving(ref UpdateReceivingCallbackInfo info){
+                if((Result)info.ResultCode != Result.Success){
+                    Logger.LogError("OnUpdateReceiving" ,"could not toggle setting.", (Result)info.ResultCode);
+                    result = (Result)info.ResultCode;
+                    return;
                 }
-                IsLocalReceivingEnabled = info.AudioEnabled;
-            }else{
-                CurrentLobby.Members[UserId.GetUserId(info.ParticipantId).ToString()].RTCState.IsLocalMute = !info.AudioEnabled;
+                if(info.ParticipantId == null){
+                    foreach(var member in CurrentLobby.Members){
+                        member.Value.RTCState.IsLocalMute = !info.AudioEnabled;
+                    }
+                    IsLocalReceivingEnabled = info.AudioEnabled;
+                }else{
+                    CurrentLobby.Members[UserId.GetUserId(info.ParticipantId).ToString()].RTCState.IsLocalMute = !info.AudioEnabled;
+                }
+                Logger.Log("OnUpdateReceiving", $"the toggle is successful. CurrentStatus: {info.AudioEnabled} / Target: {info.ParticipantId}");
+                result = (Result)info.ResultCode;
             }
-            Logger.Log("OnUpdateReceiving", $"the toggle is successful. CurrentStatus: {info.AudioEnabled} / Target: {info.ParticipantId}");
         }
         /// <summary>
         /// Change the receiving volume on this Session.
         /// </summary>
         /// <param name="targetId">If null, effect to all remote users</param>
         /// <param name="volume">Range 0.0 - 100. 50 means that the audio volume is not modified and stays in its source value.</param>
-        public void UpdateReceiveingVolumeFromTarget(UserId targetId, float volume){
+        public async UniTask<Result> UpdateReceiveingVolumeFromTarget(UserId targetId, float volume){
             if(!IsVCEnabled){
                 Logger.LogWarning("ToggleReceiveingFromTargetUser", "This local does not currently have an RTCRoom.");
-                return;
+                return Result.InvalidAPICall;
             }
             volume = System.Math.Clamp(volume, 0f, 100f);
             var receiveOptions = new UpdateParticipantVolumeOptions(){
@@ -339,35 +359,43 @@ namespace SynicSugar.RTC {
                 ParticipantId = targetId == null ? null : targetId.AsEpic,
                 Volume = volume
             };
+            
+            Result result = Result.None;
             audioInterface.UpdateParticipantVolume(ref receiveOptions, null, OnUpdateParticipantVolume);
-        }
-        void OnUpdateParticipantVolume(ref UpdateParticipantVolumeCallbackInfo info){
-            if((Result)info.ResultCode != Result.Success){
-                Logger.LogError("OnUpdateParticipantVolume", "could not toggle setting.", (Result)info.ResultCode);
-                return;
-            }
-            if(info.ParticipantId == null){
-                foreach(var member in CurrentLobby.Members){
-                    member.Value.RTCState.LocalOutputedVolume = info.Volume;
-                }
-            }else{
-                CurrentLobby.Members[UserId.GetUserId(info.ParticipantId).ToString()].RTCState.LocalOutputedVolume =  info.Volume;
-            }
 
-            Logger.Log("OnUpdateParticipantVolume", $"volume change is successful. target: {info.ParticipantId} / Volume:{info.Volume}");
+            await UniTask.WaitUntil(() => result != Result.None, cancellationToken: this.GetCancellationTokenOnDestroy());
+            return result;
+
+            void OnUpdateParticipantVolume(ref UpdateParticipantVolumeCallbackInfo info){
+                if((Result)info.ResultCode != Result.Success){
+                    Logger.LogError("OnUpdateParticipantVolume", "could not toggle setting.", (Result)info.ResultCode);
+                    result = (Result)info.ResultCode;
+                    return;
+                }
+                if(info.ParticipantId == null){
+                    foreach(var member in CurrentLobby.Members){
+                        member.Value.RTCState.LocalOutputedVolume = info.Volume;
+                    }
+                }else{
+                    CurrentLobby.Members[UserId.GetUserId(info.ParticipantId).ToString()].RTCState.LocalOutputedVolume =  info.Volume;
+                }
+
+                Logger.Log("OnUpdateParticipantVolume", $"volume change is successful. target: {info.ParticipantId} / Volume:{info.Volume}");
+                result = (Result)info.ResultCode;
+            }
         }
         /// <summary>
         /// Host user mutes target user('s input). The target can't speak but can hear other members of the lobby.
         /// </summary>
         /// <param name="target">Muted Target</param>
-        public void HardMuteTargetUser(UserId target, bool isMuted){
+        public async UniTask<Result> HardMuteTargetUser(UserId target, bool isMuted){
             if(!IsVCEnabled){
                 Logger.LogWarning("HardMuteTargetUser", "This local does not currently have an RTCRoom.");
-                return;
+                return Result.InvalidAPICall;
             }
             if(!CurrentLobby.isHost()){
                 Logger.LogWarning("HardMuteTargetUser", "This user is not Host and cannot hard-mute other users.");
-                return;
+                return Result.InvalidAPICall;
             }
             LobbyInterface lobbyInterface = EOSManager.Instance.GetEOSLobbyInterface();
             var muteOptions = new HardMuteMemberOptions(){
@@ -376,15 +404,24 @@ namespace SynicSugar.RTC {
                 TargetUserId = target.AsEpic,
                 HardMute = isMuted
             };
-            CurrentLobby.Members[target.ToString()].RTCState.IsHardMuted = isMuted;
+
+            Result result = Result.None;
             lobbyInterface.HardMuteMember(ref muteOptions, null, OnHardMuteMember);
-        }
-        void OnHardMuteMember(ref HardMuteMemberCallbackInfo info){         
-            if(info.LobbyId != CurrentLobby.LobbyId || (Result)info.ResultCode != Result.Success){
-                Logger.LogError("OnHardMuteMember", "could not mute target.", (Result)info.ResultCode);
-                return;
+
+            await UniTask.WaitUntil(() => result != Result.None, cancellationToken: this.GetCancellationTokenOnDestroy());
+            return result;
+
+            void OnHardMuteMember(ref HardMuteMemberCallbackInfo info){         
+                if((Result)info.ResultCode != Result.Success){
+                    Logger.LogError("OnHardMuteMember", "could not mute target.", (Result)info.ResultCode);
+                    result = (Result)info.ResultCode;
+                    return;
+                }
+
+                CurrentLobby.Members[target.ToString()].RTCState.IsHardMuted = isMuted;
+                Logger.Log("OnHardMuteMember", $"hard mute is successful. target: {info.TargetUserId}");
+                result = (Result)info.ResultCode;
             }
-            Logger.Log("OnHardMuteMember", $"hard mute is successful. target: {info.TargetUserId}");
         }
         /// <summary>
         /// Start to accept PushToTalk key. <br />
@@ -401,10 +438,6 @@ namespace SynicSugar.RTC {
         void StopAcceptingToPushToTalk(){
             CancelPTTToken();
             DisposePTTToken();
-            //If PushToTalk itself is stopped in pushing, the Sending is stopped once.
-            if(IsLocalSendingEnabled){
-                ToggleLocalUserSending(false);
-            }
         }
         /// <summary>
         /// Switch sending state by UniTask. 
@@ -415,14 +448,14 @@ namespace SynicSugar.RTC {
             while(!token.IsCancellationRequested){
 #if ENABLE_INPUT_SYSTEM
                 await UniTask.WaitUntil(() => Keyboard.current[KeyToPushToTalk].wasPressedThisFrame, cancellationToken: token);
-                ToggleLocalUserSending(true);
+                await ToggleLocalUserSending(true);
                 await UniTask.WaitUntil(() => Keyboard.current[KeyToPushToTalk].wasReleasedThisFrame, cancellationToken: token);
-                ToggleLocalUserSending(false);
+                await ToggleLocalUserSending(false);
 #else
                 await UniTask.WaitUntil(() => Input.GetKeyDown(KeyToPushToTalk), cancellationToken: token);
-                ToggleLocalUserSending(true);
+                await ToggleLocalUserSending(true);
                 await UniTask.WaitUntil(() => Input.GetKeyUp(KeyToPushToTalk), cancellationToken: token);
-                ToggleLocalUserSending(false);
+                await ToggleLocalUserSending(false);
 #endif
             }
         }
