@@ -141,7 +141,7 @@ namespace SynicSugar.MatchMake {
         }
         
         internal void ChangeState(State state){
-            Logger.Log("ChangeState", $"Matchmaking state has changed. Current state is {state}.");
+            Logger.Log("ChangeState", $"Matchmaking state has changed. Current state: {state}.");
             switch(state){
                 case State.Standby:
                     canKick = false;
