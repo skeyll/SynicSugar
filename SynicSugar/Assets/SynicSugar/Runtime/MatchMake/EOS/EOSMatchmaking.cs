@@ -1155,7 +1155,7 @@ namespace SynicSugar.MatchMake {
     /// <returns></returns>
     public override async UniTask<Result> CloseMatchMaking(CancellationToken token = default(CancellationToken)){
         if(!CurrentLobby.isValid()){
-            Logger.LogError($"Cancel MatchMaking", "this user has not participated a lobby.");
+            Logger.LogError($"CloseMatchMaking", "This user has not participated a lobby.");
             return Result.InvalidAPICall;
         }
         //Destroy or Leave the current lobby.
@@ -1163,7 +1163,7 @@ namespace SynicSugar.MatchMake {
             Result destroyResult = await DestroyLobby(token);
             
             if(destroyResult != Result.Success){
-                Logger.LogError($"Cancel MatchMaking", "has something problem when destroying the lobby.");
+                Logger.LogError($"CloseMatchMaking", "There was a problem when destroying the lobby.");
             }
 
             return destroyResult;
@@ -1172,7 +1172,7 @@ namespace SynicSugar.MatchMake {
         Result leaveResult = await LeaveLobby(token);
         
         if(leaveResult != Result.Success){
-            Logger.LogError($"Cancel MatchMaking", "has something problem when leave from the lobby.");
+            Logger.LogError($"CloseMatchMaking", "There was a problem when leaving the lobby.");
         }
         return leaveResult;
     }
@@ -1183,7 +1183,7 @@ namespace SynicSugar.MatchMake {
     /// <returns>If true, user can leave or destroy the lobby. </returns>
     public override async UniTask<Result> CancelMatchMaking(CancellationToken token = default(CancellationToken)){
         if(!CurrentLobby.isValid()){
-            Logger.LogError($"Cancel MatchMaking", "this user has not participated a lobby.");
+            Logger.LogError($"CancelMatchMaking", "This local user has not participated a lobby.");
             return Result.InvalidAPICall;
         }
         //Destroy or Leave the current lobby.
@@ -1192,7 +1192,7 @@ namespace SynicSugar.MatchMake {
                 Result destroyResult = await DestroyLobby(token);
                 
                 if(destroyResult != Result.Success){
-                    Logger.LogError($"Cancel MatchMaking", "has something problem when destroying the lobby");
+                    Logger.LogError($"CancelMatchMaking", "There was a problem when destroying the lobby.");
                 }
 
                 return destroyResult;
@@ -1202,7 +1202,7 @@ namespace SynicSugar.MatchMake {
         Result leaveResult = await LeaveLobby(token);
         
         if(leaveResult != Result.Success){
-            Logger.LogError($"Cancel MatchMaking", "has something problem when leave from the lobby");
+            Logger.LogError($"CancelMatchMaking", "There was a problem when leaving the lobby.");
         }
         return leaveResult;
     }
@@ -1219,7 +1219,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="token"></param>
         public override async UniTask<Result> LeaveLobby(CancellationToken token){
             if (CurrentLobby == null || string.IsNullOrEmpty(CurrentLobby.LobbyId) || !EOSManager.Instance.GetProductUserId().IsValid()){
-                Logger.LogWarning("Leave Lobby", "user is not in a lobby.");
+                Logger.LogWarning("LeaveLobby", "This local user is not in an online lobby.");
                 return Result.InvalidAPICall;
             }
 
@@ -1237,7 +1237,6 @@ namespace SynicSugar.MatchMake {
             await UniTask.WaitUntil(() => finishLeave, cancellationToken: token);
 
             if(result != Result.Success){
-                Logger.LogWarning("Leave Lobby", "Failed to leave lobby. {0}", result);
                 return result;
             }
 
@@ -1254,7 +1253,7 @@ namespace SynicSugar.MatchMake {
             void OnLeaveLobbyCompleted(ref LeaveLobbyCallbackInfo info){
                 result = (Result)info.ResultCode;
                 if (info.ResultCode != ResultE.Success){
-                    Logger.LogError("Leave Lobby", "Failed to leave lobby.", (Result)info.ResultCode);
+                    Logger.LogError("LeaveLobby", "Failed to leave lobby.", (Result)info.ResultCode);
                     finishLeave = true;
                     return;
                 }
@@ -1271,7 +1270,7 @@ namespace SynicSugar.MatchMake {
         /// <returns>On destroy success, return true.</returns>
         public override async UniTask<Result> DestroyLobby(CancellationToken token){
             if(!CurrentLobby.isHost()){
-                Logger.LogError("Destroy Lobby", "This user is not Host.");
+                Logger.LogError("Destroy Lobby", "This user is not the Host.");
                 return Result.InvalidAPICall;
             }
             DestroyLobbyOptions options = new DestroyLobbyOptions(){
@@ -1288,7 +1287,6 @@ namespace SynicSugar.MatchMake {
             await UniTask.WaitUntil(() => finishDestory, cancellationToken: token);
 
             if(result != Result.Success){
-                Logger.LogError("Destroy Lobby", "Failed to destroy lobby. {0}", result);
                 return result;
             }
             RemoveAllNotifyEvents();

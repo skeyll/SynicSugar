@@ -212,7 +212,7 @@ namespace SynicSugar.MatchMake {
                 SynicSugarManger.Instance.State.IsMatchmaking = false;
                 return matchmakingResult;
             }
-            Logger.Log("SearchAndCreateLobby", "Lobby matched successfully. Transitioning to P2P setup.");
+            Logger.Log("SearchAndCreateLobby", "Lobby closed. Preparing for P2P setup now.");
             //p2p setup
             return await SetupP2P(false, token);
         }
@@ -241,7 +241,7 @@ namespace SynicSugar.MatchMake {
                 SynicSugarManger.Instance.State.IsMatchmaking = false;
                 return matchmakingResult;
             }
-            Logger.Log("SearchAndCreateLobby", "Lobby matched successfully. Transitioning to P2P setup.");
+            Logger.Log("SearchAndCreateLobby", "Lobby closed. Preparing for P2P setup now.");
             //p2p setup
             return await SetupP2P(false, token);
         }
@@ -290,7 +290,7 @@ namespace SynicSugar.MatchMake {
                 SynicSugarManger.Instance.State.IsMatchmaking = false;
                 return matchmakingResult;
             }
-            Logger.Log("SearchLobby", "Lobby matched successfully. Transitioning to P2P setup.");
+            Logger.Log("SearchLobby", "Lobby closed. Preparing for P2P setup now.");
             //p2p setup
             return await SetupP2P(false, token);
         }
@@ -319,7 +319,7 @@ namespace SynicSugar.MatchMake {
                 SynicSugarManger.Instance.State.IsMatchmaking = false;
                 return matchmakingResult;
             }
-            Logger.Log("SearchLobby", "Lobby matched successfully. Transitioning to P2P setup.");
+            Logger.Log("SearchLobby", "Lobby closed. Preparing for P2P setup now.");
             //p2p setup
             return await SetupP2P(false, token);
         }
@@ -369,7 +369,7 @@ namespace SynicSugar.MatchMake {
                 SynicSugarManger.Instance.State.IsMatchmaking = false;
                 return matchmakingResult;
             }
-            Logger.Log("CreateLobby", "Lobby matched successfully. Transitioning to P2P setup.");
+            Logger.Log("CreateLobby", "Lobby closed. Preparing for P2P setup now.");
             //p2p setup
             return await SetupP2P(false, token);
         }
@@ -398,7 +398,7 @@ namespace SynicSugar.MatchMake {
                 SynicSugarManger.Instance.State.IsMatchmaking = false;
                 return matchmakingResult;
             }
-            Logger.Log("CreateLobby", "Lobby matched successfully. Transitioning to P2P setup.");
+            Logger.Log("CreateLobby", "Lobby closed. Preparing for P2P setup now.");
             //p2p setup
             return await SetupP2P(false, token);
         }
@@ -464,7 +464,7 @@ namespace SynicSugar.MatchMake {
                 SynicSugarManger.Instance.State.IsMatchmaking = false;
                 return Result.Canceled;
             }
-            Logger.Log("ReconnectLobby", "Lobby matched successfully. Transitioning to P2P setup.");
+            Logger.Log("ReconnectLobby", "Reconnected to the Lobby. Preparing for P2P setup now.");
             return await SetupP2P(true, token);
         }
 
