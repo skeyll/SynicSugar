@@ -1437,7 +1437,7 @@ namespace SynicSugar.MatchMake {
             await p2pConfig.Instance.natRelayManager.Init();
             RemoveNotifyLobbyMemberUpdateReceived();
             p2pConfig.Instance.sessionCore.OpenConnection(true);
-            Logger.Log("OpenConnection", "Send connect request.");
+            Logger.Log("OpenConnection", "Sending a connection request to other peers.");
 
             Result canConnect = await ConnectionSetupHandler.WaitConnectPreparation(token, setupTimeoutSec * 1000); //Pass time as ms.
             if(canConnect != Result.Success){
@@ -1445,10 +1445,10 @@ namespace SynicSugar.MatchMake {
             }
             //Host sends AllUserIds list, Guest Receives AllUserIds.
             if(p2pInfo.Instance.IsHost()){
-                Logger.Log("OpenConnection", "Sends UserList as Host.");
+                Logger.Log("OpenConnection", "Sending UserList to other peers as the Host.");
                 await ConnectionSetupHandler.SendUserListToAll(token);
             }else{
-                Logger.Log("OpenConnection", "Wait for UserList as Guest.");
+                Logger.Log("OpenConnection", "Waiting for UserList from the Host.");
                 ConnectionSetupHandler basicInfo = new();
                 await basicInfo.ReciveUserIdsPacket(token);
             }

@@ -502,14 +502,14 @@ namespace SynicSugar.MatchMake {
             #endif
                 timeUntilTimeout = 0f;
             }
-            Logger.Log("TimeoutTimer", "Stop timeout timer for looking opponents.");
+            Logger.Log("TimeoutTimer", "Stopped the timeout timer for logging for opponents.");
         }
 
         void DisposeMatchmakingTokenSource(){
             matchmakeTokenSource?.Cancel();
             matchmakeTokenSource?.Dispose();
             matchmakeTokenSource = null;
-            Logger.Log("DisposeMatchmakingTokenSource", "Dispose current cancel token source for Matchmaking.");
+            Logger.Log("DisposeMatchmakingTokenSource", "Disposed the current cancel token source for the matchmaking.");
         }
         /// <summary>
         /// Call this after matchmaking to prepare for p2p connection.
@@ -795,7 +795,7 @@ namespace SynicSugar.MatchMake {
         /// Save lobby data for player to connect unexpectedly left lobby like power off.
         /// </summary>
         internal async UniTask OnSaveLobbyID(){
-            Logger.Log("OnSaveLobbyID", $"Save LobbyID by {lobbyIdSaveType}");
+            Logger.Log("OnSaveLobbyID", $"Save the LobbyID by {lobbyIdSaveType}");
 
             switch(lobbyIdSaveType){
                 case RecconectLobbyIdSaveType.NoReconnection:
