@@ -442,7 +442,7 @@ namespace SynicSugar.MatchMake {
                 Logger.Log("ReconnectLobby", "LobbyId is empty.");
                 return Result.InvalidParameters;
             }
-            Logger.Log("ReconnectLobby", $"Try to join lobby. LobbyId: {LobbyID}");
+            Logger.Log("ReconnectLobby", $"Try to join lobby. LobbyId: {LobbyID.ToMaskedString()}");
             isLooking = true;
             SynicSugarManger.Instance.State.IsMatchmaking = true;
             MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Reconnect);
@@ -1055,7 +1055,7 @@ namespace SynicSugar.MatchMake {
             if(string.IsNullOrEmpty(LobbyID)){
                 return Result.InvalidParameters;
             }
-            Logger.Log("ReconnectLobby", $"Try Recconect with {LobbyID}");
+            Logger.Log("ReconnectLobby", $"Try Recconect with {LobbyID.ToMaskedString()}");
 
             matchmakeTokenSource = new CancellationTokenSource();
             MatchMakingGUIEvents.ChangeState(MatchMakingGUIEvents.State.Reconnect);

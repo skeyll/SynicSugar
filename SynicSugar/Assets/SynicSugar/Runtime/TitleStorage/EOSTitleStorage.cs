@@ -170,7 +170,7 @@ namespace SynicSugar.TitleStorage {
             void OnReadFileComplete(ref ReadFileCallbackInfo data){
                 getFile = data.ResultCode == ResultE.Success;
                 if (!getFile){
-                    Logger.LogError("ReadFile", "OnFileReceived is Failure. ", (Result)data.ResultCode);
+                    Logger.LogError("ReadFile", "OnFileReceived is Failure.", (Result)data.ResultCode);
                 }
                 FinishFileDownload(data.Filename, getFile);
                 finishRead = true;
@@ -463,7 +463,7 @@ namespace SynicSugar.TitleStorage {
             void OnReadFileComplete(ref ReadFileCallbackInfo data){
                 getFile = data.ResultCode == ResultE.Success;
                 if (!getFile){
-                    Logger.LogError("LoadFile", "OnFileReceived is Failure. ", (Result)data.ResultCode);
+                    Logger.LogError("LoadFile", "OnFileReceived is Failure.", (Result)data.ResultCode);
                 }
                 FinishFileDownload(data.Filename, getFile, out result);
                 finishRead = true;

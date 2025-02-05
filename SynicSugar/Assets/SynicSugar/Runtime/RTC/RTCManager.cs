@@ -200,7 +200,7 @@ namespace SynicSugar.RTC {
                 Logger.LogError("OnParticipantUpdate", "This data is not current RTC room data.");
                 return;
             }
-            Logger.Log("OnParticipantUpdate", $"Change Paticipant State. UserId: {info.ParticipantId} IsSpeaking: {info.Speaking}");
+            Logger.Log("OnParticipantUpdate", $"Change Paticipant State. UserId: {UserId.GetUserId(info.ParticipantId).ToMaskedString()} IsSpeaking: {info.Speaking}");
 
             MemberState member = CurrentLobby.Members[UserId.GetUserId(info.ParticipantId).ToString()];
             member.RTCState.IsSpeakinging = info.Speaking;
@@ -337,7 +337,7 @@ namespace SynicSugar.RTC {
                 }else{
                     CurrentLobby.Members[UserId.GetUserId(info.ParticipantId).ToString()].RTCState.IsLocalMute = !info.AudioEnabled;
                 }
-                Logger.Log("OnUpdateReceiving", $"the toggle is successful. CurrentStatus: {info.AudioEnabled} / Target: {info.ParticipantId}");
+                Logger.Log("OnUpdateReceiving", $"the toggle is successful. CurrentStatus: {info.AudioEnabled} / Target: {UserId.GetUserId(info.ParticipantId).ToMaskedString()}");
                 result = (Result)info.ResultCode;
             }
         }
@@ -379,7 +379,7 @@ namespace SynicSugar.RTC {
                     CurrentLobby.Members[UserId.GetUserId(info.ParticipantId).ToString()].RTCState.LocalOutputedVolume =  info.Volume;
                 }
 
-                Logger.Log("OnUpdateParticipantVolume", $"volume change is successful. target: {info.ParticipantId} / Volume:{info.Volume}");
+                Logger.Log("OnUpdateParticipantVolume", $"volume change is successful. target: {UserId.GetUserId(info.ParticipantId).ToMaskedString()} / Volume:{info.Volume}");
                 result = (Result)info.ResultCode;
             }
         }
@@ -418,7 +418,7 @@ namespace SynicSugar.RTC {
                 }
 
                 CurrentLobby.Members[target.ToString()].RTCState.IsHardMuted = isMuted;
-                Logger.Log("OnHardMuteMember", $"hard mute is successful. target: {info.TargetUserId}");
+                Logger.Log("OnHardMuteMember", $"hard mute is successful. target: {UserId.GetUserId(info.TargetUserId).ToMaskedString()}");
                 result = (Result)info.ResultCode;
             }
         }

@@ -255,7 +255,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="target"></param>
         /// <param name="isParticipated"></param>
         internal void LobbyMemberCountChanged(UserId target, bool isParticipated){
-            Logger.Log("LobbyMemberCountChanged", $"UserId({target}) is participated: {isParticipated}");
+            Logger.Log("LobbyMemberCountChanged", $"UserId({target.ToMaskedString()}) is participated: {isParticipated}");
             OnLobbyMemberCountChanged?.Invoke(target, isParticipated);
         }
     }

@@ -284,7 +284,7 @@ namespace SynicSugar.P2P {
             result = P2PHandle.AcceptConnection(ref options);
 
             if (result != ResultE.Success){
-                Logger.LogError("AcceptAllConenctions", $"error while accepting connection for {id}.", (Result)result);
+                Logger.LogError("AcceptAllConenctions", $"error while accepting connection for {id.ToMaskedString()}.", (Result)result);
                 break;
             }
         }
@@ -318,7 +318,7 @@ namespace SynicSugar.P2P {
         }
 
         p2pInfo.Instance.ConnectionNotifier.EarlyDisconnected(UserId.GetUserId(data.RemoteUserId), Reason.Interrupted);
-        Logger.Log("PeerConnectionInterrupted", $"Connection lost now. UserId: {data.RemoteUserId} / Reason: {Reason.Interrupted}");
+        Logger.Log("PeerConnectionInterrupted", $"Connection lost now. UserId: {UserId.GetUserId(data.RemoteUserId).ToMaskedString()} / Reason: {Reason.Interrupted}");
     }
     void RemoveNotifyPeerConnectionInterrupted(){
         P2PHandle.RemoveNotifyPeerConnectionInterrupted(InterruptedNotify);
@@ -387,7 +387,7 @@ namespace SynicSugar.P2P {
                 int disconnectedUserIndex = 100 + p2pInfo.Instance.GetUserIndex(UserId.GetUserId(data.RemoteUserId));
                 HeartBeatToLobby(disconnectedUserIndex);
             }
-            Logger.Log("OnPeerConnectionClosedCallback", $"Connection lost now. UserId {data.RemoteUserId} / Reason {data.Reason}");
+            Logger.Log("OnPeerConnectionClosedCallback", $"Connection lost now. UserId {UserId.GetUserId(data.RemoteUserId).ToMaskedString()} / Reason {data.Reason}");
         }
     }
     internal void RemoveNotifyPeerConnectionnClosed(){

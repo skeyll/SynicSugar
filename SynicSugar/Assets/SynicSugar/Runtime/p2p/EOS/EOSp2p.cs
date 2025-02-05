@@ -241,7 +241,7 @@ namespace SynicSugar.P2P {
             ResultE result = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface().SendPacket(ref options);
 
             if(result != ResultE.Success){
-                Logger.LogError("SendPacket", "can't send packet, code: {0}", (Result)result);
+                Logger.LogError("SendPacket", "can't send packet.", (Result)result);
                 return;
             }
         }
@@ -276,7 +276,7 @@ namespace SynicSugar.P2P {
                 }
 
             }
-            Logger.Log($"SendLargePackets", $"Finish to Send to {targetId}!");
+            Logger.Log($"SendLargePackets", $"Finish to Send to {targetId.ToMaskedString()}!");
         }
         
         /// <summary>
@@ -315,7 +315,7 @@ namespace SynicSugar.P2P {
                 }
 
             }
-            Logger.Log($"SendLargePackets", $"Finish to Send to {targetId}!");
+            Logger.Log($"SendLargePackets", $"Finish to Send to {targetId.ToMaskedString()}!");
         }
         //To use Span. However, this process generates Garbage by each loop.
         static void SendPacket(byte[] value, int startIndex, int length, byte[] header, UserId targetId, byte ch){
@@ -446,7 +446,7 @@ namespace SynicSugar.P2P {
                 //add index
                 header[0]++;
             }
-            Logger.Log("SendSynicPackets", $"Success to {targetId}!");
+            Logger.Log("SendSynicPackets", $"Success to {targetId.ToMaskedString()}!");
         }
     #endregion
     #region Large-packet header
