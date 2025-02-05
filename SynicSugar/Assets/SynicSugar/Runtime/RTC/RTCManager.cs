@@ -65,14 +65,14 @@ namespace SynicSugar.RTC {
         [Header("*This is old. VCMode is new. <br>If true, all audio is transmitted. If false, push to take."), System.Obsolete("This is old. VCMode is new one.")]
         public bool UseOpenVC;
 
-        [SerializeField] VCMode _vcMode;
+        [SerializeField] VoiceChatMode _voiceChatMode;
         /// <summary>
         /// Change VC mode of this Manager.
         /// </summary>
         //Implemented as a property in case internal processing needs to be adjusted ｗhen changed via script in the future.
-        public VCMode VCMode { 
-            get { return _vcMode; } 
-            set { _vcMode = value; }
+        public VoiceChatMode VoiceChatMode { 
+            get { return _voiceChatMode; } 
+            set { _voiceChatMode = value; }
         }
 #if ENABLE_INPUT_SYSTEM
         public Key KeyToPushToTalk = Key.Space;
@@ -241,9 +241,9 @@ namespace SynicSugar.RTC {
                 Logger.LogWarning("StartVoiceSending", "This lobby doesn't have RTC room.");
                 return Result.InvalidAPICall;
             }
-            Logger.Log("StartVoiceSending", $"Start VoiceChat. VCMode: {VCMode}");
+            Logger.Log("StartVoiceSending", $"Start VoiceChat. VCMode: {VoiceChatMode}");
             //When PushToTalk is enabled, the VC is not turned on unless the button is pressed.
-            if(VCMode == VCMode.PushToTalk){
+            if(VoiceChatMode == VoiceChatMode.PushToTalk){
                 StartAcceptingToPushToTalk();
                 return Result.Success;
             }
@@ -258,7 +258,7 @@ namespace SynicSugar.RTC {
                 return Result.InvalidAPICall;
             }
             Logger.Log("StopVoiceSending", "Stop VoiceChat.");
-            if(VCMode == VCMode.PushToTalk){
+            if(VoiceChatMode == VoiceChatMode.PushToTalk){
                 StopAcceptingToPushToTalk();
             }
             return await ToggleLocalUserSending(false);
