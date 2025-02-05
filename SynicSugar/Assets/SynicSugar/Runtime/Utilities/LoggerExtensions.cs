@@ -13,9 +13,22 @@ namespace SynicSugar
             string idStr = userId.ToString();
             int length = idStr.Length;
 
-            if (length <= 6) return idStr;
+            if (length <= 7) return idStr;
 
             return $"[{idStr[..3]}...{idStr[^3..]}]";
+        }
+        
+        /// <summary>
+        /// Partially masks id like as LobbyID for secure logging.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>[***...***]</returns>
+        internal static string ToMaskedString(this string id) 
+        {
+
+            if (string.IsNullOrEmpty(id) || id.Length <= 7) return id;
+
+            return $"[{id[..3]}...{id[^3..]}]";
         }
 
     #if SYNICSUGAR_PACKETINFO
