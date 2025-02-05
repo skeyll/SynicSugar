@@ -27,7 +27,7 @@ namespace SynicSugar.P2P {
             int count = p2pConfig.Instance.RPCBatchSize;
             
         #if SYNICSUGAR_PACKETINFO
-            Debug.Log($"SendPacket(All): ch {ch} / payload {ByteArrayToHexString(value)}");
+            Debug.Log($"SendPacket(All): ch {ch} / payload {value.ToHexString()}");
         #endif
             foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
                 SendPacketOptions options = new SendPacketOptions(){
@@ -84,7 +84,7 @@ namespace SynicSugar.P2P {
             int count = p2pConfig.Instance.RPCBatchSize;
 
         #if SYNICSUGAR_PACKETINFO
-            Debug.Log($"SendPacket(All): ch {ch} / payload {ByteArrayToHexString(value)}");
+            Debug.Log($"SendPacket(All): ch {ch} / payload {value.ToHexString()}");
         #endif
             foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
                 SendPacketOptions options = new SendPacketOptions(){
@@ -127,7 +127,7 @@ namespace SynicSugar.P2P {
             int count = p2pConfig.Instance.RPCBatchSize;
 
         #if SYNICSUGAR_PACKETINFO
-            Debug.Log($"SendPacket(ToAll): ch {ch} / payload {ByteArrayToHexString(value)}");
+            Debug.Log($"SendPacket(ToAll): ch {ch} / payload {value.ToHexString()}");
         #endif
             foreach(var id in p2pInfo.Instance.userIds.RemoteUserIds){
                 SendPacketOptions options = new SendPacketOptions(){
@@ -174,7 +174,7 @@ namespace SynicSugar.P2P {
                 Data = new ArraySegment<byte>(value != null ? value : Array.Empty<byte>())
             };
         #if SYNICSUGAR_PACKETINFO
-            Debug.Log($"SendPacket: ch {ch} / payload {ByteArrayToHexString(value)}");
+            Debug.Log($"SendPacket: ch {ch} / payload {value.ToHexString()}");
         #endif
             ResultE result = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface().SendPacket(ref options);
 
@@ -208,7 +208,7 @@ namespace SynicSugar.P2P {
                 Data = new ArraySegment<byte>(value != null ? value : Array.Empty<byte>())
             };
         #if SYNICSUGAR_PACKETINFO
-            Debug.Log($"SendPacket: ch {ch} / payload {ByteArrayToHexString(value)}");
+            Debug.Log($"SendPacket: ch {ch} / payload {value.ToHexString()}");
         #endif
             ResultE result = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface().SendPacket(ref options);
 
@@ -236,7 +236,7 @@ namespace SynicSugar.P2P {
                 Data = value
             };
         #if SYNICSUGAR_PACKETINFO
-            Debug.Log($"SendPacket: ch {ch} / payload {ByteArrayToHexString(value)}");
+            Debug.Log($"SendPacket: ch {ch} / payload {value.ToHexString()}");
         #endif
             ResultE result = EOSManager.Instance.GetEOSPlatformInterface().GetP2PInterface().SendPacket(ref options);
 
@@ -491,37 +491,5 @@ namespace SynicSugar.P2P {
             return header;
         }
     #endregion
-#if SYNICSUGAR_PACKETINFO
-    /// <summary>
-    /// Convert byte to String.
-    /// </summary>
-    /// <param name="byteArray"></param>
-    /// <returns></returns>
-    internal static string ByteArrayToHexString(byte[] byteArray) {
-        if(byteArray == null){
-            return string.Empty;
-        }
-        System.Text.StringBuilder hex = new System.Text.StringBuilder(byteArray.Length * 2);
-        foreach (byte b in byteArray) {
-            hex.AppendFormat("{0:x2}", b);
-        }
-        return hex.ToString();
-    }
-    /// <summary>
-    /// Convert byte to String.
-    /// </summary>
-    /// <param name="byteArray"></param>
-    /// <returns></returns>
-    internal static string ByteArrayToHexString(ArraySegment<byte> byteArray){
-        if(byteArray.Count == 0){
-            return string.Empty;
-        }
-        System.Text.StringBuilder hex = new System.Text.StringBuilder(byteArray.Count * 2);
-        for (int i = byteArray.Offset; i < byteArray.Offset + byteArray.Count; i++){
-            hex.AppendFormat("{0:x2}", byteArray.Array[i]);
-        }
-        return hex.ToString();
-    }
-#endif
     }
 }

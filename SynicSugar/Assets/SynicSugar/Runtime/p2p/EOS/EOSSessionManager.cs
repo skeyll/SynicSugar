@@ -110,7 +110,7 @@ namespace SynicSugar.P2P {
                 return false; //No packet
             }
         #if SYNICSUGAR_PACKETINFO
-            Debug.Log($"ReceivePacket: ch: {ch} from {id} / packet size {bytesWritten} / payload {EOSp2p.ByteArrayToHexString(payload)}");
+            Debug.Log($"ReceivePacket: ch: {ch} from {id} / packet size {bytesWritten} / payload {payload.ToHexString()}");
         #endif
             id = UserId.GetUserId(productUserId);
             return true;
@@ -147,7 +147,7 @@ namespace SynicSugar.P2P {
                 return false; //No packet
             }
         #if SYNICSUGAR_PACKETINFO
-            Debug.Log($"ReceivePacket(Synic): ch: {ch}  from {id} / packet size {bytesWritten} / payload {EOSp2p.ByteArrayToHexString(payload)}");
+            Debug.Log($"ReceivePacket(Synic): ch: {ch}  from {id} / packet size {bytesWritten} / payload {payload.ToHexString()}");
         #endif
             id = UserId.GetUserId(productUserId);
             return true;
