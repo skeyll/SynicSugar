@@ -5,7 +5,7 @@ weight = 7
 ## StopVoiceSending
 <small>*Namespace: SynicSugar.RTC*</small>
 
-public void StopVoiceSending()
+public async UniTask&lt;Result&gt; StopVoiceSending()
 
 
 ### Description
@@ -15,11 +15,12 @@ If UseOpenVC is true, toggles setting state to send vc. If false, a thread for P
 
 ```cs
 using SynicSugar.RTC;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 public class VCSample : MonoBehaviour {
-    public void StopVC(){
-        RTCManager.Instance.StopVoiceSending();
+    public async UniTask StopVC(){
+       await RTCManager.Instance.StopVoiceSending();
     }
 }
 ```

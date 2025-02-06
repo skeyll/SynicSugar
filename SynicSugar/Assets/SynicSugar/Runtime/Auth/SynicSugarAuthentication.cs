@@ -15,9 +15,9 @@ namespace SynicSugar.Auth {
             SynicSugarManger.Instance.State.IsLoggedIn = result == Result.Success;
 
             if(result == Result.Success){
-                Logger.Log("Login", $"Login succeeded. UserId: {SynicSugarManger.Instance.LocalUserId}");
+                Logger.Log("Login", $"Login succeeded. UserId: {SynicSugarManger.Instance.LocalUserId.ToMaskedString()}");
             }else{
-                Logger.LogError("Login", $"Login failed.", result);
+                Logger.LogError("Login", "Login failed.", result);
             }
             return result;
         }
@@ -34,11 +34,10 @@ namespace SynicSugar.Auth {
 
             Result result = await SynicSugarManger.Instance.CoreFactory.GetAuthenticationCore().Login(displayName, token);
             SynicSugarManger.Instance.State.IsLoggedIn = result == Result.Success;
-
             if(result == Result.Success){
-                Logger.Log("Login", $"Login succeeded. UserId: {SynicSugarManger.Instance.LocalUserId} displayName: {displayName}");
+                Logger.Log("Login", $"Login succeeded. UserId: {SynicSugarManger.Instance.LocalUserId.ToMaskedString()} displayName: {displayName}");
             }else{
-                Logger.LogError("Login", $"Login failed.", result);
+                Logger.LogError("Login", "Login failed.", result);
             }
             return result;
         }

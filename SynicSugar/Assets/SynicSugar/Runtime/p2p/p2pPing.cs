@@ -84,7 +84,7 @@ namespace SynicSugar.P2P {
 
             TimeSpan delta = current - MemoryPackSerializer.Deserialize<DateTime>(utc);
             pingInfo[id].tmpPings.Add(delta.TotalMilliseconds);
-            Logger.Log("GetPong", $"{id} sent pong at {MemoryPackSerializer.Deserialize<DateTime>(utc)}");
+            Logger.Log("GetPong", $"{id.ToMaskedString()} sent pong at {MemoryPackSerializer.Deserialize<DateTime>(utc)}");
 
             if(pingInfo[id].tmpPings.Count == p2pConfig.Instance.SamplesPerPing){
                 pingInfo[id].Ping = (int)(pingInfo[id].tmpPings.Sum() / pingInfo[id].tmpPings.Count);

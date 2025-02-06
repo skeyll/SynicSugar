@@ -108,7 +108,7 @@ namespace SynicSugar.P2P {
         /// <param name="original"></param>
         /// <returns></returns>
         public static GameObject Instantiate(UserId id, GameObject original){
-            Logger.Log("SynicObject.Instantiate", $"Instantiate object for {id}");
+            Logger.Log("SynicObject.Instantiate", $"Instantiate object for {id.ToMaskedString()}");
             GameObject obj = UnityEngine.Object.Instantiate (original);
             var nos = obj.GetComponents<INetworkOwner>();
 
@@ -118,7 +118,7 @@ namespace SynicSugar.P2P {
             return obj; 
         }
         public static GameObject Instantiate(UserId id, GameObject original, Transform parent){
-            Logger.Log("SynicObject.Instantiate", $"Instantiate object for {id}");
+            Logger.Log("SynicObject.Instantiate", $"Instantiate object for {id.ToMaskedString()}");
             GameObject obj = UnityEngine.Object.Instantiate (original, parent);
             var nos = obj.GetComponents<INetworkOwner>();
             foreach(var i in nos){
@@ -127,7 +127,7 @@ namespace SynicSugar.P2P {
             return obj; 
         }
         public static GameObject Instantiate(UserId id, GameObject original, Transform parent, bool instantiateInWorldSpace){
-            Logger.Log("SynicObject.Instantiate", $"Instantiate object for {id}");
+            Logger.Log("SynicObject.Instantiate", $"Instantiate object for {id.ToMaskedString()}");
             GameObject obj = UnityEngine.Object.Instantiate (original, parent, instantiateInWorldSpace);
             var nos = obj.GetComponents<INetworkOwner>();
             foreach(var i in nos){
@@ -136,7 +136,7 @@ namespace SynicSugar.P2P {
             return obj; 
         }
         public static GameObject Instantiate(UserId id, GameObject original, Vector3 position, Quaternion rotation){
-            Logger.Log("SynicObject.Instantiate", $"Instantiate object for {id}");
+            Logger.Log("SynicObject.Instantiate", $"Instantiate object for {id.ToMaskedString()}");
             GameObject obj = UnityEngine.Object.Instantiate (original, position, rotation);
             var nos = obj.GetComponents<INetworkOwner>();
             foreach(var i in nos){
@@ -145,7 +145,7 @@ namespace SynicSugar.P2P {
             return obj; 
         }
         public static GameObject Instantiate(UserId id, GameObject original, Vector3 position, Quaternion rotation, Transform parent){
-            Logger.Log("SynicObject.Instantiate", $"Instantiate object for {id}");
+            Logger.Log("SynicObject.Instantiate", $"Instantiate object for {id.ToMaskedString()}");
             GameObject obj = UnityEngine.Object.Instantiate (original, position, rotation, parent);
             var nos = obj.GetComponents<INetworkOwner>();
             foreach(var i in nos){

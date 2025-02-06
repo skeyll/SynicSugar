@@ -5,7 +5,7 @@ weight = 6
 ## StartVoiceSending
 <small>*Namespace: SynicSugar.RTC*</small>
 
-public void StartVoiceSending()
+public async UniTask&lt;Result&gt; StartVoiceSending()
 
 
 ### Description
@@ -18,11 +18,12 @@ The receiving starts on StartPacketReceiver().
 ```cs
 using SynicSugar.P2P;
 using SynicSugar.RTC;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 public class VCSample : MonoBehaviour {
     public void StartVC(){
-        RTCManager.Instance.StartVoiceSending();
+        RTCManager.Instance.StartVoiceSending().Forget();
     }
 }
 ```

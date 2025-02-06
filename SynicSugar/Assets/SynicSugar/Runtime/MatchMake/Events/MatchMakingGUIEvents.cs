@@ -141,7 +141,7 @@ namespace SynicSugar.MatchMake {
         }
         
         internal void ChangeState(State state){
-            Logger.Log("ChangeState", $"Matchmaking state has changed. Current state is {state}.");
+            Logger.Log("ChangeState", $"Matchmaking state has changed. Current state: {state}.");
             switch(state){
                 case State.Standby:
                     canKick = false;
@@ -255,7 +255,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="target"></param>
         /// <param name="isParticipated"></param>
         internal void LobbyMemberCountChanged(UserId target, bool isParticipated){
-            Logger.Log("LobbyMemberCountChanged", $"UserId({target}) is participated: {isParticipated}");
+            Logger.Log("LobbyMemberCountChanged", $"UserId({target.ToMaskedString()}) is participated: {isParticipated}");
             OnLobbyMemberCountChanged?.Invoke(target, isParticipated);
         }
     }

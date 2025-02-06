@@ -5,7 +5,7 @@ weight = 10
 ## UpdateReceiveingVolumeFromTarget
 <small>*Namespace: SynicSugar.RTC*</small>
 
-public void UpdateReceiveingVolumeFromTarget(UserId targetId, float volume)
+public async UniTask&lt;Result&gt; UpdateReceiveingVolumeFromTarget(UserId targetId, float volume)
 
 
 ### Description
@@ -16,14 +16,15 @@ Range 0.0 - 100. 50 means that the audio volume is not modified its source value
 
 ```cs
 using SynicSugar.RTC;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 public class VCSample : MonoBehaviour {
-    public void Start(){
+    public async UniTaskVoid Start(){
         //Mute
-        RTCManager.Instance.UpdateReceiveingVolumeFromTarget(null, 0f);
+        await RTCManager.Instance.UpdateReceiveingVolumeFromTarget(null, 0f);
         //Double
-        RTCManager.Instance.UpdateReceiveingVolumeFromTarget(null, 100f);
+        RTCManager.Instance.UpdateReceiveingVolumeFromTarget(null, 100f).Forget();
     }
 }
 ```

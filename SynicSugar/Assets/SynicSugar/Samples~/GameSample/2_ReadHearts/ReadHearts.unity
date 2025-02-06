@@ -2695,6 +2695,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: NetworkManager
       objectReference: {fileID: 0}
+    - target: {fileID: 4569237702368255570, guid: e18422c96d27f49489abe8b774c3a6b9, type: 3}
+      propertyPath: UseOpenVC
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

@@ -70,7 +70,7 @@ namespace SynicSugar.MatchMake {
 
                 if(lobbyId != data.LobbyID)
                 {
-                    Logger.Log("LoadSessionData", $"Failed to load SessionData. This data is not for {lobbyId}.");
+                    Logger.Log("LoadSessionData", $"Failed to load SessionData. This data is not for {lobbyId.ToMaskedString()}.");
                     return null;
                 }
                 Logger.Log("LoadSessionData", $"Success in loading SessionData.");

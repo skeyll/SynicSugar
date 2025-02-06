@@ -173,7 +173,7 @@ namespace SynicSugar.MatchMake {
         async UniTask<Result> CreateLobby(Lobby lobbyCondition, List<AttributeData> userAttributes, CancellationToken token){
             // Check if there is current session. Leave it.
             if (CurrentLobby.isValid()){
-                Logger.Log("Create Lobby", $"Leaving Current Lobby. LobbyId: {CurrentLobby.LobbyId}");
+                Logger.Log("Create Lobby", $"Leaving Current Lobby. LobbyId: {CurrentLobby.LobbyId.ToMaskedString()}");
                 await LeaveLobby(token);
             }
 
@@ -738,7 +738,7 @@ namespace SynicSugar.MatchMake {
             void OnKickMember(ref KickMemberCallbackInfo info){
                 result = (Result)info.ResultCode;
                 if(result != Result.Success){
-                    Logger.LogError("KickTarget", "Can't kick target. :{0}", result);
+                    Logger.LogError("KickTarget", "Can't kick target.", result);
                 }
                 finishKicked = true;
             }
@@ -845,14 +845,14 @@ namespace SynicSugar.MatchMake {
             // Hosts changed?
             if (info.CurrentStatus == LobbyMemberStatus.Promoted){
                 p2pInfo.Instance.userIds.HostUserId = UserId.GetUserId(info.TargetUserId);
-                Logger.Log($"MemberStatusNotyfy", $"{info.TargetUserId} is promoted to host.");
+                Logger.Log($"MemberStatusNotyfy", $"{UserId.GetUserId(info.TargetUserId).ToMaskedString()} is promoted to host.");
 
             }else if(info.CurrentStatus == LobbyMemberStatus.Left) {
-                Logger.Log($"MemberStatusNotyfy", $"{info.TargetUserId} left from lobby.");
+                Logger.Log($"MemberStatusNotyfy", $"{UserId.GetUserId(info.TargetUserId).ToMaskedString()} left from lobby.");
                 p2pInfo.Instance.userIds.RemoveUserId(info.TargetUserId);
                 p2pInfo.Instance.ConnectionNotifier.Leaved(UserId.GetUserId(info.TargetUserId), Reason.Left);
             }else if(info.CurrentStatus == LobbyMemberStatus.Disconnected){
-                Logger.Log($"MemberStatusNotyfy", $"{info.TargetUserId} diconnect from lobby.");
+                Logger.Log($"MemberStatusNotyfy", $"{UserId.GetUserId(info.TargetUserId).ToMaskedString()} diconnect from lobby.");
                 p2pInfo.Instance.userIds.MoveTargetUserIdToLefts(info.TargetUserId);
                 p2pInfo.Instance.ConnectionNotifier.Disconnected(UserId.GetUserId(info.TargetUserId), Reason.Disconnected);
             }else if(info.CurrentStatus == LobbyMemberStatus.Joined){
@@ -861,7 +861,7 @@ namespace SynicSugar.MatchMake {
                 // Send Id list.
                 if(p2pInfo.Instance.IsHost()){
                     ConnectionSetupHandler.SendUserList(UserId.GetUserId(info.TargetUserId));
-                    Logger.Log($"MemberStatusNotyfy", $"Send user list to {info.TargetUserId}.");
+                    Logger.Log($"MemberStatusNotyfy", $"Send user list to {UserId.GetUserId(info.TargetUserId).ToMaskedString()}.");
                 }
             }
         }
@@ -1155,7 +1155,7 @@ namespace SynicSugar.MatchMake {
     /// <returns></returns>
     public override async UniTask<Result> CloseMatchMaking(CancellationToken token = default(CancellationToken)){
         if(!CurrentLobby.isValid()){
-            Logger.LogError($"Cancel MatchMaking", "this user has not participated a lobby.");
+            Logger.LogError($"CloseMatchMaking", "This user has not participated a lobby.");
             return Result.InvalidAPICall;
         }
         //Destroy or Leave the current lobby.
@@ -1163,7 +1163,7 @@ namespace SynicSugar.MatchMake {
             Result destroyResult = await DestroyLobby(token);
             
             if(destroyResult != Result.Success){
-                Logger.LogError($"Cancel MatchMaking", "has something problem when destroying the lobby.");
+                Logger.LogError($"CloseMatchMaking", "There was a problem when destroying the lobby.");
             }
 
             return destroyResult;
@@ -1172,7 +1172,7 @@ namespace SynicSugar.MatchMake {
         Result leaveResult = await LeaveLobby(token);
         
         if(leaveResult != Result.Success){
-            Logger.LogError($"Cancel MatchMaking", "has something problem when leave from the lobby.");
+            Logger.LogError($"CloseMatchMaking", "There was a problem when leaving the lobby.");
         }
         return leaveResult;
     }
@@ -1183,7 +1183,7 @@ namespace SynicSugar.MatchMake {
     /// <returns>If true, user can leave or destroy the lobby. </returns>
     public override async UniTask<Result> CancelMatchMaking(CancellationToken token = default(CancellationToken)){
         if(!CurrentLobby.isValid()){
-            Logger.LogError($"Cancel MatchMaking", "this user has not participated a lobby.");
+            Logger.LogError($"CancelMatchMaking", "This local user has not participated a lobby.");
             return Result.InvalidAPICall;
         }
         //Destroy or Leave the current lobby.
@@ -1192,7 +1192,7 @@ namespace SynicSugar.MatchMake {
                 Result destroyResult = await DestroyLobby(token);
                 
                 if(destroyResult != Result.Success){
-                    Logger.LogError($"Cancel MatchMaking", "has something problem when destroying the lobby");
+                    Logger.LogError($"CancelMatchMaking", "There was a problem when destroying the lobby.");
                 }
 
                 return destroyResult;
@@ -1202,7 +1202,7 @@ namespace SynicSugar.MatchMake {
         Result leaveResult = await LeaveLobby(token);
         
         if(leaveResult != Result.Success){
-            Logger.LogError($"Cancel MatchMaking", "has something problem when leave from the lobby");
+            Logger.LogError($"CancelMatchMaking", "There was a problem when leaving the lobby.");
         }
         return leaveResult;
     }
@@ -1219,7 +1219,7 @@ namespace SynicSugar.MatchMake {
         /// <param name="token"></param>
         public override async UniTask<Result> LeaveLobby(CancellationToken token){
             if (CurrentLobby == null || string.IsNullOrEmpty(CurrentLobby.LobbyId) || !EOSManager.Instance.GetProductUserId().IsValid()){
-                Logger.LogWarning("Leave Lobby", "user is not in a lobby.");
+                Logger.LogWarning("LeaveLobby", "This local user is not in an online lobby.");
                 return Result.InvalidAPICall;
             }
 
@@ -1237,7 +1237,6 @@ namespace SynicSugar.MatchMake {
             await UniTask.WaitUntil(() => finishLeave, cancellationToken: token);
 
             if(result != Result.Success){
-                Logger.LogWarning("Leave Lobby", "Failed to leave lobby. {0}", result);
                 return result;
             }
 
@@ -1254,7 +1253,7 @@ namespace SynicSugar.MatchMake {
             void OnLeaveLobbyCompleted(ref LeaveLobbyCallbackInfo info){
                 result = (Result)info.ResultCode;
                 if (info.ResultCode != ResultE.Success){
-                    Logger.LogError("Leave Lobby", "Failed to leave lobby.", (Result)info.ResultCode);
+                    Logger.LogError("LeaveLobby", "Failed to leave lobby.", (Result)info.ResultCode);
                     finishLeave = true;
                     return;
                 }
@@ -1271,7 +1270,7 @@ namespace SynicSugar.MatchMake {
         /// <returns>On destroy success, return true.</returns>
         public override async UniTask<Result> DestroyLobby(CancellationToken token){
             if(!CurrentLobby.isHost()){
-                Logger.LogError("Destroy Lobby", "This user is not Host.");
+                Logger.LogError("Destroy Lobby", "This user is not the Host.");
                 return Result.InvalidAPICall;
             }
             DestroyLobbyOptions options = new DestroyLobbyOptions(){
@@ -1288,7 +1287,6 @@ namespace SynicSugar.MatchMake {
             await UniTask.WaitUntil(() => finishDestory, cancellationToken: token);
 
             if(result != Result.Success){
-                Logger.LogError("Destroy Lobby", "Failed to destroy lobby. {0}", result);
                 return result;
             }
             RemoveAllNotifyEvents();
@@ -1437,7 +1435,7 @@ namespace SynicSugar.MatchMake {
             await p2pConfig.Instance.natRelayManager.Init();
             RemoveNotifyLobbyMemberUpdateReceived();
             p2pConfig.Instance.sessionCore.OpenConnection(true);
-            Logger.Log("OpenConnection", "Send connect request.");
+            Logger.Log("OpenConnection", "Sending a connection request to other peers.");
 
             Result canConnect = await ConnectionSetupHandler.WaitConnectPreparation(token, setupTimeoutSec * 1000); //Pass time as ms.
             if(canConnect != Result.Success){
@@ -1445,10 +1443,10 @@ namespace SynicSugar.MatchMake {
             }
             //Host sends AllUserIds list, Guest Receives AllUserIds.
             if(p2pInfo.Instance.IsHost()){
-                Logger.Log("OpenConnection", "Sends UserList as Host.");
+                Logger.Log("OpenConnection", "Sending UserList to other peers as the Host.");
                 await ConnectionSetupHandler.SendUserListToAll(token);
             }else{
-                Logger.Log("OpenConnection", "Wait for UserList as Guest.");
+                Logger.Log("OpenConnection", "Waiting for UserList from the Host.");
                 ConnectionSetupHandler basicInfo = new();
                 await basicInfo.ReciveUserIdsPacket(token);
             }

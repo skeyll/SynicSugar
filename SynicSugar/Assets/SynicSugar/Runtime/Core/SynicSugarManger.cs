@@ -34,7 +34,7 @@ namespace SynicSugar {
         }
         void Start(){
             LocalUserId = UserId.GenerateOfflineUserId();
-            Logger.Log("SynicSugarManger", $"Set OllineUserId. UserId: {LocalUserId}");
+            Logger.Log("SynicSugarManger", $"Set OllineUserId. UserId: {LocalUserId.ToMaskedString()}");
         }
     #if UNITY_EDITOR
         /// <summary>
@@ -75,7 +75,7 @@ namespace SynicSugar {
         /// </summary>
         /// <param name="userId"></param>
         internal void SetLocalUserId(UserId userId){
-            Logger.Log("SetLocalUserId", $"The LocalUserId has changed. Previous UserId: {LocalUserId}, New UserId: {userId}");
+            Logger.Log("SetLocalUserId", $"The LocalUserId has changed. Previous UserId: {LocalUserId.ToMaskedString()}, New UserId: {userId}");
             LocalUserId = userId;
         }
     }

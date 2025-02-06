@@ -39,7 +39,7 @@ namespace SynicSugar.P2P {
         /// <param name="id"></param>
         /// <param name="phase"></param>
         internal void UpdateSynicStatus(string id, byte phase){
-            Logger.Log("UpdateSynicStatus", $"Received Synic packet from {id}.");
+            Logger.Log("UpdateSynicStatus", $"Received Synic packet from {id.ToMaskedString()}.");
             if (!ReceivedUsers.Contains(id)){
                 ReceivedUsers.Add(id);
                 LastSyncedUserId = UserId.GetUserId(id);
