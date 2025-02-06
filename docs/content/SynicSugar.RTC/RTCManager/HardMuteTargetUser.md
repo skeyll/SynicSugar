@@ -5,7 +5,7 @@ weight = 11
 ## HardMuteTargetUser
 <small>*Namespace: SynicSugar.RTC*</small>
 
-public void HardMuteTargetUser(UserId target, bool isMuted)
+public async UniTask&lt;Result&gt; HardMuteTargetUser(UserId target, bool isMuted)
 
 
 ### Description

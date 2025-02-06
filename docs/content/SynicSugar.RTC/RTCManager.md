@@ -17,7 +17,10 @@ NetworkManager has DontDestroy, so NetworkManager will not be destroyed by scene
 | API | description |
 |---|---|
 | [ParticipantUpdatedNotifier](../RTCManager/participantupdatednotifier) | Notification whether a member is speaking |
-| [UseOpenVC](../RTCManager/useopenvc) | OpenVC or PushToTalk |
+| IsVoiceChatEnabled | Indicates whether the current Lobby has VC enabled |
+| IsLocalSendingEnabled | Indicates whether local sending is enabled |
+| IsLocalReceivingEnabled | Indicates whether local receiving is enabled |
+| [VoiceChatMode](../RTCManager/voicechatmode) | Voice chat mode of this Manager |
 | [KeyToPushToTalk](../RTCManager/keytopushtotalk) | the key or keycode for PushToTalk |
 | LastStateUpdatedUserId | ID of the user whose status was last updated |
 

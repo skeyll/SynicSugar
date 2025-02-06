@@ -5,7 +5,7 @@ weight = 8
 ## ToggleLocalUserSending
 <small>*Namespace: SynicSugar.RTC*</small>
 
-public void ToggleLocalUserSending(bool isEnable)
+public async UniTask&lt;Result&gt; ToggleLocalUserSending(bool isEnable)
 
 
 ### Description
