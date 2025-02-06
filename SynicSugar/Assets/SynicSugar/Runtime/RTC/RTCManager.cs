@@ -50,7 +50,7 @@ namespace SynicSugar.RTC {
         /// <summary>
         /// Indicates whether the current Lobby has VC enabled.
         /// </summary>
-        public bool IsVCEnabled { get { return CurrentLobby != null && CurrentLobby.bEnableRTCRoom; } }
+        public bool IsVoiceChatEnabled { get { return CurrentLobby != null && CurrentLobby.bEnableRTCRoom; } }
         /// <summary>
         /// Indicates whether local sending is enabled.
         /// </summary>
@@ -83,7 +83,7 @@ namespace SynicSugar.RTC {
         /// When using RTC, call OnComplete of Create and Join.
         /// </summary>
         internal void AddNotifyParticipantStatusChanged(){      
-            if(!IsVCEnabled){
+            if(!IsVoiceChatEnabled){
                 return;
             }
             Logger.Log("AddNotifyParticipantStatusChanged", "Add Notify for RTC Room.");
@@ -169,7 +169,7 @@ namespace SynicSugar.RTC {
         /// Must call this to use after Created ot Join Lobby.
         /// </summary>
         internal void AddNotifyParticipantUpdated(){
-            if(!IsVCEnabled){
+            if(!IsVoiceChatEnabled){
                 return;
             }
             if(!CurrentLobby.hasConnectedRTCRoom){
@@ -200,7 +200,7 @@ namespace SynicSugar.RTC {
                 Logger.LogError("OnParticipantUpdate", "This data is not current RTC room data.");
                 return;
             }
-            Logger.Log("OnParticipantUpdate", $"Change Paticipant State. UserId: {info.ParticipantId} IsSpeaking: {info.Speaking}");
+            Logger.Log("OnParticipantUpdate", $"Change Paticipant State. UserId: {UserId.GetUserId(info.ParticipantId).ToMaskedString()} IsSpeaking: {info.Speaking}");
 
             MemberState member = CurrentLobby.Members[UserId.GetUserId(info.ParticipantId).ToString()];
             member.RTCState.IsSpeakinging = info.Speaking;
@@ -237,7 +237,7 @@ namespace SynicSugar.RTC {
         /// Starts local user sending voice chat. 
         /// </summary>
         public async UniTask<Result> StartVoiceSending(){
-            if(!IsVCEnabled){
+            if(!IsVoiceChatEnabled){
                 Logger.LogWarning("StartVoiceSending", "This lobby doesn't have RTC room.");
                 return Result.InvalidAPICall;
             }
@@ -253,7 +253,7 @@ namespace SynicSugar.RTC {
         /// Stop local user sending voice chat. (= Mute) <br />
         /// </summary>
         public async UniTask<Result> StopVoiceSending(){
-            if(!IsVCEnabled){
+            if(!IsVoiceChatEnabled){
                 Logger.LogWarning("StopVoiceSending", "This lobby doesn't have RTC room.");
                 return Result.InvalidAPICall;
             }
@@ -269,7 +269,7 @@ namespace SynicSugar.RTC {
         /// </summary>
         /// <param name="isEnable">If true, send VC. If false, stop VC.</param>
         public async UniTask<Result> ToggleLocalUserSending(bool isEnable){
-            if(!IsVCEnabled){
+            if(!IsVoiceChatEnabled){
                 Logger.LogWarning("ToggleLocalUserSending", "This local does not currently have an RTCRoom.");
                 return Result.InvalidAPICall;
             }
@@ -306,7 +306,7 @@ namespace SynicSugar.RTC {
         /// <param name="targetId">If null, effect to all remote users</param>
         /// <param name="isEnable">If true, receive vc from target. If false, mute target.</param>
         public async UniTask<Result> ToggleReceiveingFromTarget(UserId targetId, bool isEnable){
-            if(!IsVCEnabled){
+            if(!IsVoiceChatEnabled){
                 Logger.LogWarning("ToggleReceiveingFromTargetUser", "This local does not currently have an RTCRoom.");
                 return Result.InvalidAPICall;
             }
@@ -337,7 +337,7 @@ namespace SynicSugar.RTC {
                 }else{
                     CurrentLobby.Members[UserId.GetUserId(info.ParticipantId).ToString()].RTCState.IsLocalMute = !info.AudioEnabled;
                 }
-                Logger.Log("OnUpdateReceiving", $"the toggle is successful. CurrentStatus: {info.AudioEnabled} / Target: {info.ParticipantId}");
+                Logger.Log("OnUpdateReceiving", $"the toggle is successful. CurrentStatus: {info.AudioEnabled} / Target: {UserId.GetUserId(info.ParticipantId).ToMaskedString()}");
                 result = (Result)info.ResultCode;
             }
         }
@@ -347,7 +347,7 @@ namespace SynicSugar.RTC {
         /// <param name="targetId">If null, effect to all remote users</param>
         /// <param name="volume">Range 0.0 - 100. 50 means that the audio volume is not modified and stays in its source value.</param>
         public async UniTask<Result> UpdateReceiveingVolumeFromTarget(UserId targetId, float volume){
-            if(!IsVCEnabled){
+            if(!IsVoiceChatEnabled){
                 Logger.LogWarning("ToggleReceiveingFromTargetUser", "This local does not currently have an RTCRoom.");
                 return Result.InvalidAPICall;
             }
@@ -379,7 +379,7 @@ namespace SynicSugar.RTC {
                     CurrentLobby.Members[UserId.GetUserId(info.ParticipantId).ToString()].RTCState.LocalOutputedVolume =  info.Volume;
                 }
 
-                Logger.Log("OnUpdateParticipantVolume", $"volume change is successful. target: {info.ParticipantId} / Volume:{info.Volume}");
+                Logger.Log("OnUpdateParticipantVolume", $"volume change is successful. target: {UserId.GetUserId(info.ParticipantId).ToMaskedString()} / Volume:{info.Volume}");
                 result = (Result)info.ResultCode;
             }
         }
@@ -388,7 +388,7 @@ namespace SynicSugar.RTC {
         /// </summary>
         /// <param name="target">Muted Target</param>
         public async UniTask<Result> HardMuteTargetUser(UserId target, bool isMuted){
-            if(!IsVCEnabled){
+            if(!IsVoiceChatEnabled){
                 Logger.LogWarning("HardMuteTargetUser", "This local does not currently have an RTCRoom.");
                 return Result.InvalidAPICall;
             }
@@ -418,7 +418,7 @@ namespace SynicSugar.RTC {
                 }
 
                 CurrentLobby.Members[target.ToString()].RTCState.IsHardMuted = isMuted;
-                Logger.Log("OnHardMuteMember", $"hard mute is successful. target: {info.TargetUserId}");
+                Logger.Log("OnHardMuteMember", $"hard mute is successful. target: {UserId.GetUserId(info.TargetUserId).ToMaskedString()}");
                 result = (Result)info.ResultCode;
             }
         }

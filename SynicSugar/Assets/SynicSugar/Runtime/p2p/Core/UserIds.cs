@@ -76,7 +76,7 @@ namespace SynicSugar.P2P {
         /// </summary>
         /// <param name="targetId"></param>
         internal void RemoveUserId(ProductUserId targetId){
-            Logger.Log("RemoveUserId", $"Remove {targetId}");
+            Logger.Log("RemoveUserId", $"Remove {UserId.GetUserId(targetId).ToMaskedString()}");
             UserId userId = UserId.GetUserId(targetId);
             RemoteUserIds.Remove(userId);
             CurrentAllUserIds.Remove(userId);
@@ -88,7 +88,7 @@ namespace SynicSugar.P2P {
         /// </summary>
         /// <param name="targetId"></param>
         internal void MoveTargetUserIdToLefts(ProductUserId targetId){
-            Logger.Log("MoveTargetUserIdToLefts", $"Move {targetId}");
+            Logger.Log("MoveTargetUserIdToLefts", $"Move {UserId.GetUserId(targetId).ToMaskedString()}");
             UserId userId = UserId.GetUserId(targetId);
             RemoteUserIds.Remove(userId);
             CurrentConnectedUserIds.Remove(userId);
@@ -101,7 +101,7 @@ namespace SynicSugar.P2P {
         /// <param name="targetId"></param>
         /// <returns></returns>
         internal void MoveTargetUserIdToRemoteUsersFromLeft(ProductUserId targetId){
-            Logger.Log("MoveTargetUserIdToRemoteUsersFromLeft", $"Move {targetId}");
+            Logger.Log("MoveTargetUserIdToRemoteUsersFromLeft", $"Move {UserId.GetUserId(targetId).ToMaskedString()}");
             UserId userId = UserId.GetUserId(targetId);
             DisconnectedUserIds.Remove(userId);
             CurrentConnectedUserIds.Add(userId);

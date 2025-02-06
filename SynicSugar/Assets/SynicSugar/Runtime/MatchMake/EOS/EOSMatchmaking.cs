@@ -173,7 +173,7 @@ namespace SynicSugar.MatchMake {
         async UniTask<Result> CreateLobby(Lobby lobbyCondition, List<AttributeData> userAttributes, CancellationToken token){
             // Check if there is current session. Leave it.
             if (CurrentLobby.isValid()){
-                Logger.Log("Create Lobby", $"Leaving Current Lobby. LobbyId: {CurrentLobby.LobbyId}");
+                Logger.Log("Create Lobby", $"Leaving Current Lobby. LobbyId: {CurrentLobby.LobbyId.ToMaskedString()}");
                 await LeaveLobby(token);
             }
 
@@ -738,7 +738,7 @@ namespace SynicSugar.MatchMake {
             void OnKickMember(ref KickMemberCallbackInfo info){
                 result = (Result)info.ResultCode;
                 if(result != Result.Success){
-                    Logger.LogError("KickTarget", "Can't kick target. :{0}", result);
+                    Logger.LogError("KickTarget", "Can't kick target.", result);
                 }
                 finishKicked = true;
             }
@@ -845,14 +845,14 @@ namespace SynicSugar.MatchMake {
             // Hosts changed?
             if (info.CurrentStatus == LobbyMemberStatus.Promoted){
                 p2pInfo.Instance.userIds.HostUserId = UserId.GetUserId(info.TargetUserId);
-                Logger.Log($"MemberStatusNotyfy", $"{info.TargetUserId} is promoted to host.");
+                Logger.Log($"MemberStatusNotyfy", $"{UserId.GetUserId(info.TargetUserId).ToMaskedString()} is promoted to host.");
 
             }else if(info.CurrentStatus == LobbyMemberStatus.Left) {
-                Logger.Log($"MemberStatusNotyfy", $"{info.TargetUserId} left from lobby.");
+                Logger.Log($"MemberStatusNotyfy", $"{UserId.GetUserId(info.TargetUserId).ToMaskedString()} left from lobby.");
                 p2pInfo.Instance.userIds.RemoveUserId(info.TargetUserId);
                 p2pInfo.Instance.ConnectionNotifier.Leaved(UserId.GetUserId(info.TargetUserId), Reason.Left);
             }else if(info.CurrentStatus == LobbyMemberStatus.Disconnected){
-                Logger.Log($"MemberStatusNotyfy", $"{info.TargetUserId} diconnect from lobby.");
+                Logger.Log($"MemberStatusNotyfy", $"{UserId.GetUserId(info.TargetUserId).ToMaskedString()} diconnect from lobby.");
                 p2pInfo.Instance.userIds.MoveTargetUserIdToLefts(info.TargetUserId);
                 p2pInfo.Instance.ConnectionNotifier.Disconnected(UserId.GetUserId(info.TargetUserId), Reason.Disconnected);
             }else if(info.CurrentStatus == LobbyMemberStatus.Joined){
@@ -861,7 +861,7 @@ namespace SynicSugar.MatchMake {
                 // Send Id list.
                 if(p2pInfo.Instance.IsHost()){
                     ConnectionSetupHandler.SendUserList(UserId.GetUserId(info.TargetUserId));
-                    Logger.Log($"MemberStatusNotyfy", $"Send user list to {info.TargetUserId}.");
+                    Logger.Log($"MemberStatusNotyfy", $"Send user list to {UserId.GetUserId(info.TargetUserId).ToMaskedString()}.");
                 }
             }
         }
