@@ -219,16 +219,15 @@ namespace SynicSugar.RTC {
             if(!CurrentLobby.bEnableRTCRoom){
                 return;
             }
-            Logger.Log("RemoveRTCEvents", "Remove Rtc Notify Events.");
             if(ParticipantStatusId != 0){
                 rtcInterface.RemoveNotifyParticipantStatusChanged(ParticipantStatusId);
+                Logger.Log("RemoveRTCEvents", "Remove ParticipantStatusChanged.");
             }
             if(ParticipantUpdatedId != 0){
                 rtcInterface.GetAudioInterface().RemoveNotifyParticipantUpdated(ParticipantUpdatedId);
+                Logger.Log("RemoveRTCEvents", "Remove NotifyParticipantUpdated");
             }
 
-            CurrentLobby.RTCRoomName = string.Empty;
-            CurrentLobby.hasConnectedRTCRoom = false;
             IsLocalSendingEnabled = false;
             IsLocalSendingEnabled = false;
         }
