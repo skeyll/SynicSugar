@@ -228,8 +228,6 @@ namespace SynicSugar.RTC {
                 Logger.Log("RemoveRTCEvents", "Remove NotifyParticipantUpdated");
             }
 
-            CurrentLobby.RTCRoomName = string.Empty;
-            CurrentLobby.hasConnectedRTCRoom = false;
             IsLocalSendingEnabled = false;
             IsLocalSendingEnabled = false;
         }
