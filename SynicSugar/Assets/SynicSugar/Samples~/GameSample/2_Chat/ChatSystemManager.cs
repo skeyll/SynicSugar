@@ -48,7 +48,7 @@ namespace SynicSugar.Samples.Chat
             ConnectHub.Instance.StartPacketReceiver(PacketReceiveTiming.FixedUpdate, 5);
             if(p2pInfo.Instance.AllUserIds.Count > 1)//VC setting for Online mode.
             { 
-                RTCManager.Instance.StartVoiceSending();
+                await RTCManager.Instance.StartVoiceSending();
                 // VC actions with No args
                 // RTCManager.Instance.ParticipantUpdatedNotifier.Register(() => OnStartSpeaking(), t => OnStopSpeaking());
                 RTCManager.Instance.ParticipantUpdatedNotifier.Register(t => OnStartSpeaking(t), t => OnStopSpeaking(t));
