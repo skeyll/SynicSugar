@@ -115,6 +115,9 @@ namespace SynicSugar.MatchMake {
         /// Clears local cache of Lobby Id, owner, attributes and members
         /// </summary>
         internal void Clear(){
+            //Need to remove RTC events before reset bEnableRTCRoom.
+            RTCManager.Instance.RemoveRTCEvents();
+
             LobbyId = string.Empty;
             LobbyOwner = new ProductUserId();
             Members.Clear();
@@ -129,7 +132,6 @@ namespace SynicSugar.MatchMake {
             RejoinAfterKickRequiresInvite = false;
             
             Attributes.Clear();
-            RTCManager.Instance.RemoveRTCEvents();
         }
 
         /// <summary>
